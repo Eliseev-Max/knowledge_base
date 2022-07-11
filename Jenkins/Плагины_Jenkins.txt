@@ -1,0 +1,9 @@
+	Plugins
+		• Copy Artifact - копирование артефактов из другой сборки
+		• Test Results Analyzer - анализ результатов тестов
+		• Build Pipeline - удобное отображение upstream/downstream сборок
+		• Git Changelog - отображение информации о коммите
+		• Docker - Docker-контейнеры в качестве executors
+		• Docker slaves - Docker-контейнеры для установки build-агентов
+		• Email Extension - гибкая настройка отправки email
+		• Job Configuration History - изменения в настройках сборок

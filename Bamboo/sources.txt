@@ -1,0 +1,24 @@
+Getting started with Bamboo:
+	https://confluence.atlassian.com/bamboo0605/getting-started-with-bamboo
+
+Configuring the Docker task in Bamboo
+	https://confluence.atlassian.com/bamboo0605/using-bamboo/jobs-and-tasks/configuring-tasks/configuring-the-docker-task-in-bamboo
+
+Bamboo remote agent installation guide
+	https://confluence.atlassian.com/bamboo0607/bamboo-remote-agent-installation-guide-966044850.html
+
+Viewing a capability's agents and jobs
+	https://confluence.atlassian.com/bamboo0607/viewing-a-capability-s-agents-and-jobs-966045693.html
+
+Defining a new executable capability.
+	https://confluence.atlassian.com/bamboo0607/defining-a-new-executable-capability-966045697.html
+
+Defining a new version control capability
+	https://confluence.atlassian.com/bamboo0607/defining-a-new-version-control-capability-966045718.html
+
+Defining a new Docker capability
+	https://confluence.atlassian.com/bamboo0607/defining-a-new-docker-capability-966045721.html
+
+Modifying and deleting capabilities
+	https://confluence.atlassian.com/bamboo0607/modifying-and-deleting-capabilities-966045690.html
+	

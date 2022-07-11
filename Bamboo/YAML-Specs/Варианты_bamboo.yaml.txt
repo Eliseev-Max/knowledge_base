@@ -1,0 +1,87 @@
+
+---
+project:
+  key: DRAGON
+  plan:
+    key: SLAYER
+    name: Dragon Slayer Quest
+stages:
+  - jobs:
+      - scripts:
+          - ${bamboo_capability_system_builder_pip} install -r requirements.txt
+          - ${bamboo_capability_system_builder_python} script.py
+        requirements:
+            - python
+            - linux
+        artifacts:
+          - name: csv_report
+            path: output/*.csv
+			
+
+# Комплексный план
+[https://docs.atlassian.com/bamboo-specs-docs/6.3.0/specs-yaml.html#complex-plan]	
+---
+project:
+  key: DRAGON
+  plan:
+    key: SLAYER
+    name: Dragon Slayer Quest
+stages:
+  - jobs:
+      - scripts:
+          - echo 'Going to slay the red dragon, watch me'
+          - sleep 1
+          - echo 'Victory!'
+        requirements:
+          - isDragonLazy
+        artifacts:
+          - name: Red dragon's head
+            path: dragon/red/head
+      - scripts:
+          - echo 'Going to slay the blue dragon, you just watch'
+          - sleep 1
+          - echo 'Piece of cake'
+        requirements:
+          - isDragonAsleep
+          - isCaveDeep
+        artifacts:
+          - name: Blue dragon's head
+            path: dragon/blue/head
+          - name: Blue dragon's claw
+            path: dragon/blue/claw
+  - jobs:
+      - scripts:
+          - echo 'I am here to claim my reward'
+          - sleep 1
+          - echo 'Thank you, your highness'
+        requirements:
+          - isKingPresent
+        artifacts:
+          - name: Gold coins
+            path: pocket/money
+          - name: Medal of courage
+            path: pocket/medal
+...
+
+
+project:
+  key: O2A2LS
+  plan:
+    key: O2A2LSDOCKERNODE
+    name: o2a2ls-docker-node
+
+stages:
+  - jobs:
+      - scripts:
+          - '#!/bin/bash'
+          - echo 'Jetpack scan'
+          - make jetpack_scan
+        requirements:
+          - os
+  - jobs:
+      - scripts:
+          - '#!/bin/bash'
+          - echo 'build image asq/node:7'
+          - VERSION="7.10.1" make release
+        requirements:
+          - os

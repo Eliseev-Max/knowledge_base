@@ -1,0 +1,33 @@
+Установка Docker на Debian
+(способ установки из официального репозитория Docker):
+
+I) Добавление репозитория Docker
+	1.  $ sudo apt update
+
+	2. Установить дополнительные пакеты, которые необходимы для работы с удалёнными репозиториями:
+		$ sudo apt -y install ca-certificates curl gnupg lsb-release
+		
+	3. Скачать и добавить PGP ключ от репозитория Docker:
+		$ curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+	4. Добавить репозиторий Docker
+		$ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+II) Установка пакетов Docker
+	1. $ sudo apt update
+	
+	2. Установка Docker и дополнительных пакетов
+		$ sudo apt -y install docker-ce docker-ce-cli containerd.io
+	
+III) Запуск и автозагрузка Docker
+	1. Запуск Docker после установки
+		$ sudo systemctl start docker
+		
+	2. Добавить Docker в автозагрузку
+		$ sudo systemctl enable docker
+	
+	3. Добавить пользователя в группу Docker
+		$ sudo usermod -aG docker $USER
+	
+	4. Не забыть добавить пользователя bamboo в группу docker
+		$ sudo usermod -aG docker bamboo

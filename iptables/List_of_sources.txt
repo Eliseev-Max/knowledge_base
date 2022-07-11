@@ -1,0 +1,27 @@
+
+1. Docker breaks libvirt bridge network
+[ https://serverfault.com/questions/963759/docker-breaks-libvirt-bridge-network ]
+
+2. Настройка UFW Ubuntu
+[ https://losst.ru/nastrojka-ufw-ubuntu ]
+
+3. Использование утилиты UFW на Ubuntu 18.04 LTS
+[ https://tokmakov.msk.ru/blog/item/465 ]
+
+4. Настройка iptables, разбираемся вместе. (Часть 1)
+[ https://линуксблог.рф/nastrojka-iptables-razbiraemsya-vmeste-chast-1/ ]
+
+5. Разбирамся с iptables (Часть 2)
+[ https://линуксблог.рф/razbiramsya-s-iptableschast-2/ ]
+
+6. Настройка правил iptables в Linux
+[ https://itproffi.ru/nastrojka-pravil-iptables-v-linux/ ]
+
+7. ebtables(8) - Linux man page
+[ https://linux.die.net/man/8/ebtables ]
+ 
+8. ebtables/iptables interaction on a Linux-based bridge
+[ http://ebtables.netfilter.org/br_fw_ia/br_fw_ia.html ]
+
+9. Manage iptables firewall for Docker/Kubernetes
+[ https://medium.com/swlh/manage-iptables-firewall-for-docker-kubernetes-daa5870aca4d ]

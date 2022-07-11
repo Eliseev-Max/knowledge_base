@@ -1,0 +1,19 @@
+
+Пример написания docker-compose.yml файла
+
+version: "3.5"
+
+services:
+
+	jenkins:
+	  image:jenkins/jenkins:lts
+	  volumes:
+	  - ./jenkins:/var/jenkins_home
+	  ports:
+	  - 8080:8080
+	  - 50000:50000
+
+Порты для работы Jenkins:
+8080 - Web-интерфейс
+50000 - Web Hooks
+

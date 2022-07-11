@@ -1,0 +1,35 @@
+1. Устанавливаем jenkins-job-builder:
+	~# pip install jenkins-job-builder
+	
+2. Создаём ini-файл:
+	~# mkdir /etc/jenkins_jobs
+	~# vim /etc/jenkins_jobs/jenkins_jobs.ini
+	
+	# Содержимое jenkins_jobs.ini #
+	[jenkins]
+	user=admin
+	password=8afd6d2e2d3b2ae767e067ee07a21b37
+	url=http://127.0.0.1:8080
+	
+	query_plugins_info=False
+	
+	Необходимо сменить пароль в уч.записи администратора jenkins:
+	  •  http://[URL-JENKINS-UI]/me/configure
+	  •  Нажать на кнопку: Show API Token...
+	  •  Скопировать пароль из поля API Token
+	  •  Вставить пароль в ini-файл
+	  
+3. Для удобства создадим отдельную директорию для yaml-файлов с джобами:
+
+Пример джобы (test.yaml):
+	
+- job:
+	name: test_job
+	description: 'Automatically generated test'
+	project-type: freestyle
+	builders:
+	  - shell: 'ls'
+
+4. test_job.yaml → Jenkins Job:
+	~# jenkins-jobs update jobs			# джоба создана в Jenkins
+

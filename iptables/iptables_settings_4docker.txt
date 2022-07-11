@@ -1,0 +1,54 @@
+
+Настройка iptables для Docker
+
+Путь сетевого пакета до ядра Linux:
+	Пакет → [PREROUTING.nat] → [INPUT.filter] → Kernel
+
+Путь сетевого пакета до Docker:
+	Пакет → [PREROUTING.nat] → [DOCKER.nat] → [FORWARD.filter] → *[DOCKER-USER.filter]* → [DOCKER-ISOLATION-STAGE-1.filter] → Docker
+	
+Для фильтрации трафика из внешней сети в Docker ► модифицировать таблицу DOCKER-USER
+
+Настройки по умолчанию: таблица не задерживает пакеты, просто пропускает их дальше
+	$ iptables -S DOCKER-USER
+	-N DOCKER-USER					# создать цепочку
+	-A DOCKER-USER -j RETURN		# добавить в цепочку правило: RETURN (прервать проверку по текущей цепочке)
+
+Непосредственно настройка	
+	$ sudo iptables -F DOCKER-USER					# очищаем таблицу
+	$ sudo iptables -I DOCKER-USER -j REJECT		# запрещаем всё
+
+Добавим ПЕРЕД запрещающими правилом разрешающие: 
+	дадим доступ к [local-srv] из внутренней сети
+		$ sudo iptables -I DOCKER-USER -o docker0 -s [ip_network/mask] -p tcp --dport 8123 -j RETURN
+	
+	дадим неограниченный доступ к процессу (сервису) на TCP-порту 6379:
+		$ sudo iptables -I DOCKER-USER -o docker0 -p tcp --dport 6379 -j RETURN
+
+<Разбор команд>:
+	-I DOCKER-USER = вставить правило с нужным номером в цепочку DOCKER-USER
+	-o docker0 = трафик, направленный на интерфейс docker0 (внутрь контейнера)
+	-s [ip_network/mask] = (source) указываем IP-адрес устройства, на котором открываем доступ
+	-p tcp = выбираем протокол транспортного уровня
+	--dport = порт, прослушиваемый сервисом на хосте [ip_network/mask]
+
+# пакеты из внешнего мира к контейнерам:  -i eno1 → FORWARD → -o docker0
+# пояснение: <входной сетевой интерфейс eno1> → [Цепочка FORWARD для пересылаемых пакетов] → <'исходящий' сетевой интерфейс> 
+
+# пакеты от докера в интернет:  -i docker0 → FORWARD → -o eno1
+
+Настройка трафика из контейнера наружу
+	$ iptables -A DOCKER-USER -i docker0 -j RETURN
+	# "добавить правило в цепочку DOCKER-USER: к входящему сетевому интерфейсу docker0 применить действие RETURN"
+
+Разрешаем ответы в соединениях, которые инициированы изнутри контейнера:
+	$ iptables -A DOCKER-USER -o docker0 -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+	# пояснение:
+Сопоставление conntrack — это расширенная версия сопоставления состояний, которая позволяет сопоставлять пакеты гораздо более детально.
+Это позволяет вам просматривать информацию, непосредственно доступную в системе отслеживания соединений, без каких-либо «интерфейсных» систем,
+("frontend" systems) таких как сопоставление состояний (state match).
+Дополнительные сведения о системе отслеживания соединений см. в главе:
+	https://www.frozentux.net/iptables-tutorial/iptables-tutorial.html#STATEMACHINE
+
+В conntrack matches собрано несколько разных совпадений для нескольких разных полей в системе отслеживания соединений.
+(см. Table 10-12. Conntrack match options)

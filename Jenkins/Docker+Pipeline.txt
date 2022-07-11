@@ -1,0 +1,183 @@
+Использование Docker с Pipeline
+
+Начиная с Pipeline версии 2.5 и выше, Pipeline имеет ВСТРОЕННУЮ поддержку взаимодействия с Docker из Jenkinsfile.
+
+Pipeline позволяет легко использовать образы Docker в качестве среды выполнения 
+	* для одного этапа (stage),
+	* для всего Pipeline.
+	
+Можно определить инструменты, необходимые для своего Pipeline, без необходимости вручную настраивать агенты.
+Практически любой инструмент, который можно упаковать в контейнер Docker, можно легко использовать, внеся лишь незначительные изменения в файл Jenkinsfile.
+
+Синхронизация рабочего пространства
+
+Коротко: если важно синхронизировать рабочее пространство с другими этапами, используйте
+	reuseNode true 
+
+В противном случае докеризованный этап можно запустить на любом другом агенте или на том же агенте, но во временном рабочем пространстве.
+
+По умолчанию для контейнерной стадии Jenkins выполняет следующие действия:
+
+    • выбрать любого агента,
+	• создать новое пустое рабочее пространство (workspace),
+	• клонировать в него код pipeline,
+	• смонтировать это новое рабочее пространство в контейнер.
+
+Если у вас есть несколько агентов Jenkins, ваш контейнерный этап можно запустить на любом из них.
+
+Когда для reuseNode установлено значение true:
+	► новое рабочее пространство не будет создано,
+	► текущее рабочее пространство из текущего агента будет смонтировано в контейнер,
+	► контейнер будет запущен на том же узле
+	→ поэтому все данные будут синхронизированы
+
+
+Jenkinsfile (Declarative Pipeline)
+
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'gradle:6.7-jdk11'
+                    // Run the container on the node specified at the top-level of the Pipeline, in the same workspace,
+					// rather than on a new node entirely:
+                    reuseNode true
+                }
+            }
+            steps {
+                sh 'gradle --version'
+            }
+        }
+    }
+}
+
+Кэширование данных для контейнеров
+
+	Многие инструменты сборки загружают внешние зависимости и кэшируют их локально для повторного использования в будущем.
+	Поскольку контейнеры изначально создаются с «чистыми» файловыми системами, это может привести к замедлению работы конвейеров,
+	поскольку они могут не использовать кэш на диске между последующими запусками pipeline.
+
+	Pipeline поддерживает добавление настраиваемых аргументов, которые передаются в Docker, позволяя пользователям указывать настраиваемые тома Docker для подключения, которые можно использовать для кэширования данных в агенте между запусками Pipeline.
+	В следующем примере будет кэшироваться ~/.m2 между запусками pipeline с использованием контейнера maven,
+	что позволяет избежать повторной загрузки зависимостей для последующих запусков pipeline. 
+
+
+Jenkinsfile (Declarative Pipeline)
+
+pipeline {
+    agent {
+        docker {
+            image 'maven:3.8.1-adoptopenjdk-11'
+            args '-v $HOME/.m2:/root/.m2'			# Bind mounts
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -B'
+            }
+        }
+    }
+}
+
+
+Использование нескольких контейнеров
+	Объединение Docker и Pipeline позволяет Jenkinsfile использовать несколько типов технологий,
+	комбинируя директиву agent {} с разными этапами:
+
+
+Jenkinsfile (Declarative Pipeline)
+
+pipeline {
+    agent none
+    stages {
+        stage('Back-end') {
+            agent {
+                docker { image 'maven:3.8.1-adoptopenjdk-11' }
+            }
+            steps {
+                sh 'mvn --version'
+            }
+        }
+        stage('Front-end') {
+            agent {
+                docker { image 'node:16.13.1-alpine' }
+            }
+            steps {
+                sh 'node --version'
+            }
+        }
+    }
+}
+
+Использование Dockerfile
+
+__(Ещё больше возможностей настройки для проекта)__
+Pipeline также поддерживает создание и запуск контейнера из Dockerfile в исходном репозитории.
+!!! В отличие от предыдущего подхода с использованием «готового» контейнера, использование синтаксиса агента:
+	agent { dockerfile true } 
+	создаст новый образ из Dockerfile, а не извлечет его из Docker Hub.
+
+	Пример Jenkinsfile с использованием Dockerfile в корне репозитория:
+		pipeline {
+			agent { dockerfile true }
+			stages {
+				stage('Test') {
+					steps {
+						sh 'node --version'
+						sh 'svn --version'
+					}
+				}
+			}
+		}
+	
+Указание метки Docker
+
+	По умолчанию Pipeline предполагает, что любой настроенный агент может запускать конвейеры на основе Docker.
+	Pipeline предоставляет глобальный параметр на странице «Управление Jenkins»
+	и на уровне папки для указания агентов (по меткам), которые следует использовать для запуска конвейеров на основе Docker.
+
+###################################################################################
+
++ Стоит ли предпочесть Declarative Pipeline?
+  Или же лучше Scripted Pipeline
+  
+https://www.jenkins.io/doc/book/pipeline/jenkinsfile/
+Раздел  Deploy
+
+
+Jenkinsfile (Declarative Pipeline)
+
+pipeline {
+    agent any
+
+    stages {
+        stage('Deploy') {
+            when {
+              expression {
+                currentBuild.result == null || currentBuild.result == 'SUCCESS' 
+              }
+            }
+            steps {
+                sh 'make publish'
+            }
+        }
+    }
+}
+
+После stage('Deploy') и перед steps {...} есть логический оператор.
+
+https://habr.com/ru/company/selectel/blog/339390/	- Управление задачами в Jenkins
+
+https://itnan.ru/post.php?c=1&p=339390				- Управление задачами в Jenkins
+
+https://docs.openstack.org/infra/jenkins-job-builder/	- Документация по Jenkins Job Builder (JJB)
+
+Нужен ли нам JJB?
+Какие преимущества нам даёт использование JJB?
+
+Ознакомиться:
+Дженкинс — Краткое руководство
+	(https://coderlessons.com/tutorials/kachestvo-programmnogo-obespecheniia/uznaite-dzhenkins/dzhenkins-kratkoe-rukovodstvo)

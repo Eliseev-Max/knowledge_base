@@ -1,0 +1,127 @@
+{ Docker Runner
+    https://confluence.atlassian.com/bamboo0607/docker-runner-966044994.html
+}
+С помощью Docker Runner мы можем запускать сборки и развёртывания (деплойменты) в контейнере Docker,
+чтобы изолировать процесс сборки от окружения, в котором он запущен.
+Bamboo предоставляет поддержку для Docker для Ubuntu версии 17 и выше (новее)
+Если вы хотите использовать образ Docker в ваших сборках Bamboo, вы можете сделать это с помощью Docker tasks.  
+
+Docker Runner можно включить для джоб и сред развертывания в момент:
+	• создания или редактирования джоб;
+	• создания или редактирования сред развертывания
+
+(* Docker Runner также полностью поддерживается (инструментом) Bamboo Specs)
+
+	Требования (Requirements)
+Включение Docker для джобы
+ или среды развертывания отключает стандартные требования, исходящие от задач.
+Все требования, исходящие из задач, будут заменены одним требованием для Docker.
+Пользовательские требования, настроенные пользователями вручную, не будут удалены 
+и по-прежнему будут использоваться для сопоставления агентов.
+
+***
+
+Configuring the Docker task in Bamboo
+(https://confluence.atlassian.com/bamboo0605/using-bamboo/jobs-and-tasks/configuring-tasks/configuring-the-docker-task-in-bamboo)
+
+Задача Docker (Docker task) в Bamboo позволяет использовать образы и контейнеры Docker
+в сборках (builds) и развёртывниях (deployments) Bamboo.
+
+‼ Если мы используем Windows Bamboo server, мы не можем запускать команды Docker непосредственно из командной строки Windows.
+  Чтобы использовать Docker task на Windows Bamboo server, запустите Docker Machine.
+
+Задача Docker поддерживает следующие действия Docker:
+	• создание образа Docker (Build a Docker image);
+	• запуск контейнера Docker (Run a Docker container);
+	• перенос репозитория Docker в реестр Docker.
+	
+Не забудьте определить возможность Docker (Docker capability) для агента перед настройкой задачи Docker.
+{
+(
+  перевод статьи:
+  https://confluence.atlassian.com/bamboo0605/administering-bamboo/agents-and-capabilities/configuring-capabilities/defining-a-new-docker-capability
+)
+Определение возможности Docker (Docker capability) на elastic image (== Amazon Machine Image (AMI))
+	1. Щёлкнуть на иконку [*▼] в хэдере Bamboo и выбрать "Обзор" (Overview)
+	2. Щёлкнуть "Конфигурация образа" (Image configurations) в левой панели навигации (под 'Elastic Bamboo')
+	3. Щёлкнуть "Возможности" (Capabilities) (под 'Операции') для соответствующего elastic image
+	4. Использовать панель "Добавить возможность" в конце страницы, чтобы добавить в образ новую способность Docker
+		• в типе возможности выберите Docker.
+		• в поле «Путь» введите путь к исполняемому файлу Docker, например, /usr/bin/docker
+	5. Щёлкнуть "Добавить"
+
+Определение возможности Docker (Docker capability) на Агенте
+	1. Нажать на иконку [*▼] в хэдере Bamboo и выбрать "Обзор" (Overview)
+	2. Нажать "Агенты" (Agents) на левой панели
+	3. Нажать на имя требуемого агента
+	4. Нажать на "Таблице возможностей" (Capabilities tab) и далее "Добавить возможность" (справа от «Специфические для агента возможности»)
+	5. На панели «Добавить возможность» (Add Capabilitiy):
+	       • в типе возможности выбрать Docker;
+		   • в поле "Path" введите путь к исполняемому файлу Docker, например, /usr/bin/docker
+	6. Щёлкнуть "Добавить"
+	
+Определение возможности Docker (Docker capability) на сервере Bamboo
+	1. Нажать на иконку [*▼] в хэдере Bamboo и выбрать "Обзор" (Overview)
+	2. Щёлкнуть "Server capabilities" в левой панели навигации
+	3. Использовать панель "Добавить возможность" в конце страницы, чтобы добавить в образ новую способность Docker
+		• в типе возможности выберите Docker.
+		• в поле «Путь» введите путь к исполняемому файлу Docker, например, /usr/bin/docker
+	4. Щёлкнуть "Добавить"
+}
+
+о том, как управлять удалёнными агентами Bamboo, используя Docker, и запускать их:
+{ Getting started with Docker and Bamboo
+  https://confluence.atlassian.com/bamboo0605/getting-started-with-bamboo/getting-started-with-docker-and-bamboo
+	
+	Сервер Bamboo использует один или более удалённых агентов сборки (билд-агентов).
+	Удалённые агенты выполняют джобы из нашего плана сборки.
+	Поскольку джобы могут иметь различные требования, полезно иметь агенты с различными возможностями.
+	Docker - это отличный способ управлять Вашими агентами.
+	Он обеспечивает:
+		• простоту использования;
+		• очень быстрое дублирование и распространение изменений на удаленных агентах;
+		• возможность запустить несколько удалённых агентов на одном и том же хосте без
+		  противоречащих требований.
+	
+	У Atlassian опубликовано 2 образа на Docker Hub:
+	atlassian/bamboo-java-agent
+	(подходит для разработки стека Java)
+		• Bamboo agent .jar (5.6.0)
+		• OpenJDK 7
+		• GIT, Mercurial, CVS and SVN
+		• Maven 2, 3 and Ant
+
+	atlassian/bamboo-base-agent
+	(подходит для глубокой настройки)
+		• Bamboo agent .jar (5.6.0)
+		• OpenJDK 7
+	
+	Для новой установки Bamboo удаленных агентов ещё не будет.
+	Запуск удалённого агента → Агент подключается к Серверу Bamboo → Агент готов выполнять задания.
+	‼ Если требуется посмотреть запущенные удаленные агенты:
+		1) убедиться, что сервер Bamboo запущен;
+		2) Administration > Agents (Администрирование → Агенты)
+	
+}
+
+---
+{ Docker in Bamboo | Build Docker Image | Push Docker image to Docker Hub & AWS ECR
+https://youtu.be/XFdoOT6Q_l0
+}
+[02:35] Settings (*) → Overview → (Левое мменю): Server capabilities → Add capabilitiy ▼
+	Capabilitiy type: Docker
+				Path: (путь до исполняемого файла Docker) /usr/bin/docker
+
+Не забыть добавить пользователя bamboo в группу docker:
+	$ sudo usermod -aG docker bamboo
+
+
+Настройка tasks:
+{
+	https://confluence.atlassian.com/bamboo0605/using-bamboo/jobs-and-tasks/configuring-tasks
+}
+
+{ Example:
+Bamboo, Docker, and building web apps
+https://www.atlassian.com/blog/2015/09/bamboo-docker-building-web-apps?utm_source=twitter&utm_medium=social&utm_campaign=atlassian_bamboo-docker-addteq
+}

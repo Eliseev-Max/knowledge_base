@@ -1,0 +1,41 @@
+Dockerfile
+
+FROM jenkins/jenkins:lts				# За основу взят образ, содержащий Jenkins
+
+ARG DOCKER_COMPOSE_VERSION=3.9		# https://docs.docker.com/engine/reference/builder/l
+
+USER root
+RUN apt-get update && \
+   apt-get upgrade -y && \
+   apt-get -y install apt-transport-https \			# *
+      ca-certificates \								# Устанавливаем пакет сертификатов распространённых центров сертификации (Certificate Authority (CA))
+													# Данные по центрам сертификации, которые распространяются с браузером Mozilla, позволяющие приложениям
+													# проверять достоверность соединений SSL. 
+      curl \
+      gnupg2 \										# В официальной инструкции по установке docker устанавливается gnupg 
+      git \
+      software-properties-common && \
+   curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \	# Добавляем официальный GPG-ключ Docker 
+   add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y install docker-ce && \
+   apt-get clean autoclean && apt-get autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose 
+
+RUN usermod -aG docker jenkins && gpasswd -a jenkins docker
+
+USER jenkins
+
+## * Этот пакет позволяет использовать строки «deb https://foo distro main» в /etc/apt/sources.list,
+##   чтобы все менеджеры пакетов, использующие библиотеку libapt-pkg, могли получить доступ к метаданным и пакетам,
+##   доступным в источниках, доступных через https
+##   gnupg2 (2.2.27-3): GNU Privacy Guard — свободная замена PGP (пустой переходный пакет)
+##   	GnuPG — инструмент GNU для безопасной коммуникации и хранения данных.
+##	 	Он может использоваться для зашифровки данных и создания цифровых подписей.
+##   	Пакет включает продвинутое средство для управления ключами и соответствует предложенному OpenPGP стандарту, описанному в RFC4880.
+##   	Пустой переходный пакет, предоставляющий символьные ссылки с gpg2 на gpg.
+
