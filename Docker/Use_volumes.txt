@@ -122,3 +122,8 @@ $ docker service create \
 		--name devtest \
 		--mount source=myvol2,target=/app \
 		nginx:latest
+
+---
+{  Guide to Docker Volumes
+   https://www.baeldung.com/ops/docker-volumes
+}
