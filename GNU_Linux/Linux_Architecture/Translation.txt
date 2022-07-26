@@ -1,0 +1,31 @@
+This chapter discussed [обсуждалось] the Linux system and the basics [основы] of how it works.
+The Linux kernel is the core of the system, controlling how memory, programs, and hardware all interact [взаимодействует] with one another.
+The GNU utilities are also an important piece in the Linux system.
+The Linux shell, which is the main focus of this book, is part of the GNU core utilities.
+The chapter also discussed the ﬁnal piece of a Linux system, the Linux desktop environment.
+Things have changed over the years, and Linux now supports several graphical desktop environments.
+The chapter also discussed the various Linux distributions.
+A Linux distribution bundles [объединяет] the various parts of a Linux system into a simple package that you can easily install on your PC.
+The Linux distribution world consists of full-blown [полномасштабный] Linux distributions that include just about every application imaginable, as well as specialized Linux distributions that include applications focused only on a special function.
+The Linux LiveCD craze has created another group of Linux distributions that allow you to easily test-drive Linux without even having to install it on your hard drive.
+In the next chapter, you look at what you need to start your command line and shell scripting experience.
+You’ll see what you need to do to get to the Linux shell utility from your fancy graphical desktop environment.
+These days, that’s not always an easy thing.
+
+***
+
+Although the bash shell program is automatically started at login, whether a shell command line interface (CLI) is presented depends on which login method is used.
+(..., наличие интерфейса командной строки оболочки (CLI) зависит от используемого метода входа в систему.)
+If a virtual console terminal is used to log in, the CLI prompt is automatically presented, and you can begin to type shell commands.
+(Если для входа в систему используется терминал виртуальной консоли, автоматически отображается приглашение CLI, и вы можете начать вводить команды оболочки.)
+However, if you log into the Linux system via a graphical desktop environment, you need to start a graphical terminal emulator to access the shell CLI prompt.
+(Однако, если вы входите в систему Linux через графическую среду рабочего стола, вам необходимо запустить эмулятор графического терминала, чтобы получить доступ к приглашению оболочки CLI)
+
+p.84 Using the Shell Prompt
+
+
+
+
+https://habr.com/ru/post/170581/
+https://docs.atlassian.com/bamboo-specs-docs/6.9.0/specs.html?yaml#job
+https://valiantys.com/en/blog/atlassian-administration/jenkins-vs-bamboo/
