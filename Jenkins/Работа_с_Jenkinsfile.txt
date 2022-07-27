@@ -1,9 +1,12 @@
 Работа с Jenkinsfile
 
-Использование переменных среды
+{ Использование переменных среды
+	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
+}
 
 Jenkins Pipeline предоставляет переменные среды через глобальную переменную env, которая доступна из ЛЮБОГО МЕСТА в Jenkinsfile.
-Полный список переменных среды, доступных из Jenkins Pipeline: ${YOUR_JENKINS_URL}/pipeline-syntax/globals#env
+Полный список переменных среды, доступных из Jenkins Pipeline:
+	${YOUR_JENKINS_URL}/pipeline-syntax/globals#env
 Список переменных среды:
 	BUILD_ID
 		- текущий ID сборки, идентичный BUILD_NUMBER для сборок, созданных в версиях Jenkins 1.597+
@@ -50,22 +53,40 @@ pipeline {
 	}
 }
 
+Jenkinsfile (Scripted Pipeline)
+
+	node {
+		echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+	}
+
 Установка переменных окружения
-Установка переменной среды в Jenkins Pipeline выполняется по-разному для декларативного и скриптового pipeline
-Declarative конвейер поддерживает директиву среды; 
-пользователи Scripted конвейера должны использовать шаг withEnv.
+	Установка переменной среды в Jenkins Pipeline выполняется по-разному для декларативного и скриптового pipeline.
+	Declarative Pipeline поддерживает директиву среды; 
+	пользователи Scripted Pipeline должны использовать шаг withEnv.
 
 Jenkinsfile (Declarative Pipeline)
 
-pipeline {
-	agent any
-	environment { 
-		CC = 'clang'		# Задали переменную в блоке верхнего уровня → будет применима ко всем steps в Pipeline
-	...
+	pipeline {
+		agent any
+		environment { 
+			CC = 'clang'		# Задали переменную в блоке верхнего уровня → будет применима ко всем steps в Pipeline
+		...
+		}
 	}
-}
 
 	Если директиву environment определить внутри stage, переменные окружения, заданные в ней,
 	будут распространяться только на шаги (steps) внутри данного stage
-	
+
+Jenkinsfile (Scripted Pipeline)
+
+
+Jenkinsfile (Scripted Pipeline)
+
+	node {
+		/* .. snip .. */
+		withEnv(["PATH+MAVEN=${tool 'M3'}/bin"]) {
+			sh 'mvn -B verify'
+		}
+	}
+
 Динамическая установка переменных окружения
