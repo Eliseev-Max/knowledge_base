@@ -1,7 +1,6 @@
 [
 	https://www.jenkins.io/doc/book/pipeline/ ,
 	https://www.jenkins.io/doc/book/pipeline/getting-started/ ,
-	https://www.jenkins.io/doc/book/pipeline/syntax/ ,
 	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/ ,
 	https://coderlessons.com/tutorials/kachestvo-programmnogo-obespecheniia/uznaite-dzhenkins/dzhenkins-kratkoe-rukovodstvo, 
 	https://habr.com/ru/company/selectel/blog/339390/ ,
@@ -43,4 +42,13 @@ Step (шаг)
 Для использования Пайплайна потребуются:
 	• Jenkins версии 2.Х или новее
 	• Плагин Pipeline, который установлен, как часть "предлагаемых плагинов" (мастером настройки после установки Jenkins)
-l
+
+Синтаксис Pipeline
+{ https://www.jenkins.io/doc/book/pipeline/syntax/
+	Основная статья → {Getting started with Pipeline:"https://www.jenkins.io/doc/book/pipeline/getting-started/"}
+	Применение на практике → {Using a Jenkinsfile:"https://www.jenkins.io/doc/book/pipeline/jenkinsfile/"}
+	Сравнение синтаксисов → {Syntax Comparison:"https://www.jenkins.io/doc/book/pipeline/syntax/#compare"}
+	Полный список шагов (steps) → {Pipeline Steps Reference:"https://www.jenkins.io/doc/pipeline/steps/"}
+}
+	
+
