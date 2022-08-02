@@ -77,8 +77,6 @@ Jenkinsfile (Declarative Pipeline)
 	Если директиву environment определить внутри stage, переменные окружения, заданные в ней,
 	будут распространяться только на шаги (steps) внутри данного stage
 
-Jenkinsfile (Scripted Pipeline)
-
 
 Jenkinsfile (Scripted Pipeline)
 
@@ -89,4 +87,23 @@ Jenkinsfile (Scripted Pipeline)
 		}
 	}
 
+	Пример:
+	( Источник:
+		https://stackoverflow.com/questions/55123079/how-to-set-environment-variables-in-a-jenkins-scripted-pipeline
+	)
+	Необходимо определить для всего Pipeline переменную value = World
+		node('my-label') {
+		withEnv(['value=World']) {
+			stage('Test') {
+				sh 'echo Hello, ${value}'
+				}
+			}
+		}
+	
+
 Динамическая установка переменных окружения
+	Пример для Scripted Pipeline:
+	node {
+		def envVarName = 'MY_VAR' 
+		env.setProperty(envVarName, 'my-value2')
+	}

@@ -354,7 +354,8 @@ ________________________________________________________________________________
 {	Инструкция ARG определяет переменную, которую пользователи могут передать во время сборки сборщику
 	с помощью команды docker build, используя флаг --build-arg <имя_переменной>=<значение>.
 	ARG <name>[=<default value>]
-	docker build -t example --build-arg test_set custom_set . → [Dockerfile]: FROM ...\n ARG test_set default_set
+	[shell] 	  $ docker build -t example --build-arg test_set custom_set . → 
+	[Dockerfile]: FROM ...\n ARG test_set=default_set
 	
 	Если пользователь указывает аргумент сборки, который не был определен в Dockerfile, сборка выводит предупреждение.
 	{ Возможно, устарело:
