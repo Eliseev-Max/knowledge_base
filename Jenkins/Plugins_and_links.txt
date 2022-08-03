@@ -1,0 +1,31 @@
+Plugins
+	Multiselect parameter  -  работа с взаимосвязанными параметрами
+	Git parameter  -  выбор ветки репозиторий для сборки
+	Copy Artifact  -  копирование артефактов из другой сборки
+	Test Result Analyzer  -  анализ результатов тестов
+	Build Pipeline  -  удобное отображение upstream/downstream сборок
+	Git Changelog  -  отображение информации о коммите
+	Docker  -  Docker-контейнеры в качестве executors
+	Email Extension  -  гибкая настройка отправки email
+	Job Configuration History  -  изменения в настройках сборок
+
+Sources:
+
+	1. Pipeline
+		→ https://www.jenkins.io/doc/book/pipeline/
+	
+	2. Getting started with Pipeline
+		→ https://www.jenkins.io/doc/book/pipeline/getting-started/
+	
+	3. Using a Jenkinsfile
+		→ https://www.jenkins.io/doc/book/pipeline/jenkinsfile/
+	
+	4. Дженкинс – Краткое руководство
+		→ https://coderlessons.com/tutorials/kachestvo-programmnogo-obespecheniia/uznaite-dzhenkins/dzhenkins-kratkoe-rukovodstvo
+	
+	5. Управление задачами в Jenkins
+		→ https://habr.com/ru/company/selectel/blog/339390/
+	
+	6. Разворачиваем Jenkins как код
+		→ https://habr.com/ru/post/490756/
+

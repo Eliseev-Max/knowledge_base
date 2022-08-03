@@ -1,5 +1,6 @@
-(https://www.jenkins.io/doc/book/pipeline/jenkinsfile/)
-Использование Jenkinsfile
+{ Использование Jenkinsfile
+	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/
+}
 
 Наиболее полезные шаги, общие шаблоны и некоторые нетривиальные примеры Jenkinsfile
 

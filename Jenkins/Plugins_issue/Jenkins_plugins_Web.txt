@@ -1,0 +1,185 @@
+Jenkins plugins
+
+Git Версия 4.10.3
+	This plugin integrates Git with Jenkins.
+ 
+	Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+	Multiple SCM plugins can check out from the controller file system
+
+---	
+	
+Git Changelog Версия 3.13
+	Creates a highly configurable changelog, or relasenotes, from Git.
+	Supports conventional commits and semantic versioning.
+
+---
+
+Git client plugin Версия 3.11.0
+Utility plugin for Git support in Jenkins
+ 
+---
+
+Git Pipeline for Blue Ocean Версия 1.25.2
+BlueOcean Git SCM pipeline creator
+ 
+---	
+		
+GIT server Версия 1.10
+Allows Jenkins to act as a Git server.
+
+---
+	
+GitHub Версия 1.34.1
+This plugin integrates GitHub to Jenkins.
+ 
+---	
+	
+GitHub API Версия 1.133
+This plugin provides GitHub API for other plugins.
+ 
+---	
+
+GitHub Branch Source Версия 2.11.3
+Multibranch projects and organization folders from GitHub. Maintained by CloudBees, Inc.
+ 
+---	
+	
+GitHub Pipeline for Blue Ocean Версия 1.25.2
+BlueOcean GitHub organization pipeline creator
+
+---
+***
+---
+
+ Pipeline Версия 2.6
+A suite of plugins that lets you orchestrate automation, simple or complex. See Pipeline as Code with Jenkins for more details.
+
+---
+
+Pipeline Graph Analysis Версия 1.11
+Provides a REST API to access pipeline and pipeline run data.
+
+---
+
+Pipeline implementation for Blue Ocean Версия 1.25.2
+This plugin is a part of BlueOcean Plugin
+
+---
+ 
+Pipeline SCM API for Blue Ocean Версия 1.25.2
+This plugin is a part of BlueOcean Plugin
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    User-scoped credentials exposed to other users
+
+---
+
+Pipeline: API Версия 2.47
+Plugin that defines Pipeline API.
+
+---
+
+Pipeline: Basic Steps Версия 2.24
+Commonly used steps for Pipelines.
+
+---
+
+Pipeline: Build Step Версия 2.15
+Adds the Pipeline step build to trigger builds of other jobs.
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    Password parameter default values exposed
+
+---
+Pipeline: Declarative Версия 1.9.3
+An opinionated, declarative Pipeline.
+
+---
+Pipeline: Declarative Extension Points API Версия 1.9.3
+APIs for extension points used in Declarative Pipelines.
+
+---
+Pipeline: Deprecated Groovy Libraries Версия 548.v9085a486966a
+Shared libraries for Pipeline scripts.
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    OS command execution vulnerabilities in Pipeline-related plugins
+    Untrusted users can modify some Pipeline libraries
+    Sandbox bypass vulnerability
+    Vulnerabilities in multiple Pipeline-related plugins allow reading arbitrary files on the controller
+    Sandbox bypass vulnerability
+    Sandbox bypass vulnerability
+
+This plugin is deprecated. In general, this means that it is either obsolete, no longer being developed, or may no longer work. Learn more.
+
+---
+Pipeline: GitHub Groovy Libraries Версия 1.0
+Allows Pipeline Grrovy libraries to be loaded on the fly from GitHub.
+
+---
+Pipeline: Groovy Версия 2633.v6baeedc13805
+Pipeline execution engine based on continuation passing style transformation of Groovy scripts.
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    Sandbox bypass vulnerability through implicitly allowlisted platform Groovy files
+    OS command execution vulnerabilities in Pipeline-related plugins
+    Vulnerabilities in multiple Pipeline-related plugins allow reading arbitrary files on the controller
+    Sensitive information disclosure
+
+---
+Pipeline: Input Step Версия 2.12
+Adds the Pipeline step input to wait for human input or approval.
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    Arbitrary file write vulnerability
+
+---	
+Pipeline: Job Версия 2.42
+Defines a new job type for pipelines and provides their generic user interface.
+
+---	
+Pipeline: Milestone Step Версия 1.3.2
+Plugin that provides the milestone step
+
+---	
+Pipeline: Model API Версия 1.9.3
+Model API for Declarative Pipeline.
+
+---	
+Pipeline: Multibranch Версия 2.26
+Enhances Pipeline plugin to handle branches better by automatically grouping builds from different branches.
+ 
+Warning: The currently installed plugin version may not be safe to use. Please review the following security notices:
+
+    OS command execution vulnerabilities in Pipeline-related plugins
+    Vulnerabilities in multiple Pipeline-related plugins allow reading arbitrary files on the controller
+	
+Pipeline: Nodes and Processes Версия 1097.veac1aacfbda8
+Pipeline steps locking agents and workspaces, and running external processes that may survive a Jenkins restart or agent reconnection.
+
+Pipeline: REST API Версия 2.19
+Provides a REST API to access pipeline and pipeline run data.
+
+Pipeline: SCM Step Версия 2.13
+Adds a Pipeline step to check out or update working sources from various SCMs (version control).
+
+Pipeline: Stage Step Версия 2.5
+Adds the Pipeline step stage to delineate portions of a build.
+	
+Pipeline: Stage Tags Metadata Версия 1.9.3
+Library plugin for Pipeline stage tag metadata.
+
+Pipeline: Stage View Версия 2.19
+Pipeline Stage View Plugin.
+ 
+Pipeline: Step API Версия 622.vb_8e7c15b_c95a_
+API for asynchronous build step primitive.
+
+Pipeline: Supporting APIs Версия 3.8
+Common utility implementations to build Pipeline Plugin
+ 

@@ -1,12 +1,3 @@
-[
-	https://www.jenkins.io/doc/book/pipeline/ ,
-	https://www.jenkins.io/doc/book/pipeline/getting-started/ ,
-	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/ ,
-	https://coderlessons.com/tutorials/kachestvo-programmnogo-obespecheniia/uznaite-dzhenkins/dzhenkins-kratkoe-rukovodstvo, 
-	https://habr.com/ru/company/selectel/blog/339390/ ,
-	https://habr.com/ru/post/490756/
-]
-
 Основные определения Pipeline
 # Определение с официального сайта документации по Jenkins: https://www.jenkins.io/doc/book/pipeline/
 	Пайплайн Jenkins (или просто Pipeline с заглавной P) — это набор подключаемых модулей, поддерживающих реализацию и интеграцию конвейеров 

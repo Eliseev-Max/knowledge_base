@@ -1,15 +1,3 @@
-# Плагины:
-Multiselect parameter  -  работа с взаимосвязанными параметрами
-Git parameter  -  выбор ветки репозиторий для сборки
-Copy Artifact  -  копирование артефактов из другой сборки
-Test Result Analyzer  -  анализ результатов тестов
-Build Pipeline  -  удобное отображение upstream/downstream сборок
-Git Changelog  -  отображение информации о коммите
-Docker  -  Docker-контейнеры в качестве executors
-Email Extension  -  гибкая настройка отправки email
-Job Configuration History  -  изменения в настройках сборок
-
-
 # Jenkinsfile (Declarative Pipeline)
 
 # В синтаксисе Declarative Pipeline блок pipeline {} определяет всю работу, выполняемую во всем пайплайне. 
