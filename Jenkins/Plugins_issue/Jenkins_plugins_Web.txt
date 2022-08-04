@@ -7,43 +7,35 @@ Git Версия 4.10.3
 	Multiple SCM plugins can check out from the controller file system
 
 ---	
-	
 Git Changelog Версия 3.13
 	Creates a highly configurable changelog, or relasenotes, from Git.
 	Supports conventional commits and semantic versioning.
 
 ---
-
 Git client plugin Версия 3.11.0
 Utility plugin for Git support in Jenkins
  
 ---
-
 Git Pipeline for Blue Ocean Версия 1.25.2
 BlueOcean Git SCM pipeline creator
  
 ---	
-		
 GIT server Версия 1.10
 Allows Jenkins to act as a Git server.
 
 ---
-	
 GitHub Версия 1.34.1
 This plugin integrates GitHub to Jenkins.
  
 ---	
-	
 GitHub API Версия 1.133
 This plugin provides GitHub API for other plugins.
  
 ---	
-
 GitHub Branch Source Версия 2.11.3
 Multibranch projects and organization folders from GitHub. Maintained by CloudBees, Inc.
  
 ---	
-	
 GitHub Pipeline for Blue Ocean Версия 1.25.2
 BlueOcean GitHub organization pipeline creator
 
@@ -51,7 +43,7 @@ BlueOcean GitHub organization pipeline creator
 ***
 ---
 
- Pipeline Версия 2.6
+Pipeline Версия 2.6
 A suite of plugins that lets you orchestrate automation, simple or complex. See Pipeline as Code with Jenkins for more details.
 
 ---
