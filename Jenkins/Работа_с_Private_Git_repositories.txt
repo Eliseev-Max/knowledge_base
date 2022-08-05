@@ -1,0 +1,29 @@
+Как использовать Private Git repositories в Jenkins:
+
+Чтобы выполнить checkout приватного git-репозитория, нужно пройти процедуру аутентификации.
+Для этого потребуется ssh-ключ.
+
+Установка ssh-ключа в Jenkins:
+
+	1. В терминале (shell) меняем текущего пользователя на пользователя jenkins:
+		$ sudo su jenkins
+	2. Генерируем пару SSH ключей rsa (под пользователем jenkins):
+		$ ssh-keygen
+		# Enter file in which to save the key (/var/lib/jenkins/.ssh/id_rsa):
+		# Created directory '/var/lib/jenkins/.ssh/'.
+		# Enter passphrase (empty for no passphrase): <EMPTY>
+		# Enter same passphrase again: <EMPTY>
+	
+	3. Открыть файл публичного ключа id_rsa.pub для чтения:
+		$ cat /var/lib/jenkins/.ssh/id_rsa.pub
+	
+	4. Скопировать содержимое id_rsa.pub (= публичный rsa-ключ) в 
+	   Bitbucket: Settings → Access keys → Add key
+	   (Указываем Label (произвольный, например jenkins), копируем публичный rsa-ключ в поле Key)
+	   
+Jenkins: Credentials → System → Global credentials (unrestricted) → Add Credentials:
+   Kind:        SSH Username with private key
+   Scope:       Global (Jenkins, nodes, items, all child items, etc)
+   Username:    jenkins
+   Private Key: From the Jenkins master ~/.ssh
+   [OK]
