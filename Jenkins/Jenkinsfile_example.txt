@@ -2,7 +2,7 @@ node {
     stage('checkout') {
         checkout([
         $class: 'GitSCM',
-        branches: [[name: '*/main']],
+        branches: [[name: '*/main']],				# ветка по умолчанию
         userRemoteConfigs: [[
             credentialsId: 'jenkins-github',
             url: 'https://github.com/Eliseev-Max/warehouse_tests.git'
@@ -29,14 +29,43 @@ node {
 }
 
 
-stage('Reports') {
-        steps {
-           allure([
-      	   includeProperties: false,
-      	   jdk: '',
-      	   properties: [],
-      	   reportBuildPolicy: 'ALWAYS',
-      	   results: [[path: 'report']]
-    	   ])
-  	        }
-         }
+* Синтаксис Scripted Pipelines = Pipeline Syntax Snippet Generator
+  step('checkout') - предпочтительный метод проверки SCM.
+  он предоставляет значительно больше функциональных возможностей, чем git step.
+  
+Пример checkout конкретной ветки (не по умолчанию):
+	Параметры:
+		• протокол: https,
+		• учётные данные (credentials): NO
+		• ветка репозитория: non-default
+
+	checkout([$class: 'GitSCM',
+			  branches: [[name: 'stable-2.x']],
+			  userRemoteConfigs: [[url: 'https://github.com/jenkinsci/git-client-plugin.git']]])
+
+Пример checkout с помощью ssh и учетной записи с закрытым ключом
+	Параметры:
+		• протокол: ssh,
+		• учётные данные (credentials): ssh private credentials
+		• ветка репозитория: non-default
+	# Плагин git поддерживает credentials с закрытым ключом, предоставляемые плагином Jenkins credentials.
+	
+	checkout([$class: 'GitSCM',
+          branches: [[name: 'stable-2.x']],
+          userRemoteConfigs: [[credentialsId:  'my-ssh-private-key-id',
+                               url: 'ssh://github.com/jenkinsci/git-plugin.git']]])
+
+Привязка учётных данных с помощью шага  withCredentials:
+	Плагин git обеспечивает привязку имени пользователя и пароля Git, 
+	что позволяет выполнять аутентифицированные операции git по протоколам HTTP и HTTPS 
+	с помощью командной строки git в задании Pipeline.
+
+	Привязка учетных данных git доступна через шаг withCredentials плагина Credentials Binding.
+	Привязка получает учетные данные из плагина Credentials.
+	
+	withCredentials([gitUsernamePassword(credentialsId: 'my-credentials-id',
+                 gitToolName: 'git-tool')]) {
+  sh 'git fetch --all'
+}
+
+{см. https://plugins.jenkins.io/git/#plugin-content-pipeline-examples}
