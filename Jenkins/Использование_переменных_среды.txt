@@ -1,5 +1,3 @@
-Работа с Jenkinsfile
-
 { Использование переменных среды
 	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#using-environment-variables
 }
