@@ -97,3 +97,11 @@ node {
         archiveArtifacts 'target/*.jar'
     }
 }
+
+node {
+	stage('Checkout') {
+		withEnv(['HTTP_PROXY=http://172.25.200.200:3128']) {
+    	sh 'git clone https://bucket.prosyst.ru/scm/~m.eliseev/docker_env.git'
+        }
+	}
+}

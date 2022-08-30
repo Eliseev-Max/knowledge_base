@@ -1,0 +1,8 @@
+1. Мониторинг сети в Linux (ping, traceroute, mtr)
+	https://neoserver.ru/help/network-monitoring-linux-ping-traceroute-mtr
+	
+2. Как запустить Traceroute в Linux
+	https://ip-calculator.ru/blog/ask/traceroute-linux/
+
+3. Команда traceroute Linux
+	https://losst.ru/komanda-traceroute-linux
