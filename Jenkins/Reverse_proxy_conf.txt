@@ -1,6 +1,7 @@
 Настройка обратного прокси (Reverse proxy configuration)
 { https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-with-jenkins/ }
 https://t.me/DosugEktb
+{@vika_hot_girl:4000}
 
 Обратный прокси позволяет альтернативному провайдеру HTTP или HTTPS взаимодействовать с веб-браузерами от имени Jenkins.
 Альтернативный провайдер может предоставлять дополнительные возможности, например, шифрование SSL.
