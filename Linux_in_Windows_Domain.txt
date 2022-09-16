@@ -1,0 +1,61 @@
+Ввод сервера на ОС Linux в домен Windows
+
+Какие компоненты потребуются:
+	• клиент Kerberos
+	• Samba
+	• Winbind
+
+Установка компонентоа (после обновления):
+	$ sudo aptitude install krb5-user samba winbind
+	
+Установка необходимых библиотек:
+	$ sudo aptitude install libpam-krb5 libpam-winbind libnss-winbind
+	
+1. Настройка DNS
+	Пропишем в качестве DNS-сервера контроллер домена,
+	а в качестве домена поиска - домен PROSOFT.URAL.RU
+	1.1 Если IP-адрес статический:
+		→ необходимо изменить содержимое файла /etc/resolv.conf
+		Но НЕ ПРАВИТЬ СОДЕРЖИМОЕ ФАЙЛА ВРУЧНУЮ!
+		Нужно добавить необходимые изменения в файл:
+		/etc/resolvconf/resolv.conf.d/head
+	1.2 Если IP-адрес динамический и присваивается DHCP сервером:
+		‼ после перезагрузки resolv.conf может формироваться «неправильный» resolv.conf' ‼
+		♦ нужно отредактировать /etc/dhcp/dhclient.conf:
+		♦♦ чтобы появились записи domain и search нужно убрать комментарий
+		   перед строкой supersede domain-name, и вписать свой домен:
+		   → supersede domain-name "domain.com";
+		♦♦ чтобы добавить еще один nameserver, нужно убрать комментарий
+		   перед prepend domain-name-servers и указать ip сервера:
+		   → prepend domain-name-servers 192.168.0.2;
+
+		Для применения изменений остается перезапустить службу:
+			/etc/init.d/networking restart
+	2. Убедиться, что в файле /etc/hostname задано нудное имя компьютера
+	3. Отредактировать файл /etc/hosts :
+		в нём должна быть запись с полным доменным именем компьютера
+		должна быть обязательно запись с коротким именем хоста, ссылающаяся на один из внутренних IP:
+			127.0.0.1	localhost
+			127.0.1.1	testsrv.prosoft.ural.ru	testsrv
+	
+	4. Проверить, что КД пингуется (по имени)
+	5. Перезагрузить сервер testsrv
+	
+2. Настройка синхронизации времени
+	► единовременная синхронизация времени:
+		$ sudo net time set dc
+	
+	► синхронизация с помощью сервера точного времени:
+		ntpdate ntp.mobatime.ru
+	
+	► автоматическая синхронизация времени с помощью демона ntpd
+		• установить: 
+			sudo aptitude install ntp
+		• внести изменения в файл /etc/ntp.conf
+			# You do need to talk to an NTP server or two (or three).
+			server dc.domain.com		# добавляем имя КД (сервера точного времени в сети)
+		• перезагрузить:
+			sudo /etc/init.d/ntp restart
+	
+3. Настройка авторизации через Kerberos
+	
