@@ -1,0 +1,47 @@
+Настройка Linux для работы с NTLM
+{
+https://itsecforu.ru/2019/05/20/%F0%9F%96%AA-%D0%BA%D0%B0%D0%BA-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B8%D1%82%D1%8C-linux-%D0%B4%D0%BB%D1%8F-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-ntlm/
+}
+
+Исходные данные:
+Host IP: 172.29.24.32
+Proxy IP: 172.25.200.200:3128
+Domain: prosoft.ural.ru
+MS User: m.eliseev
+
+Порядок действий:
+1. После завершения обновления установить CNTLM:
+	$ sudo apt-get install cntlm -y
+
+2. Хешируем свой пароль:
+	$ sudo cntlm -H -d DOMAIN -u USER
+	DOMAIN = prosoft.ural.ru
+	USER = m.eliseev
+	(OUTPUT):> 
+	  PassLM
+	  PassNT
+	  PassNTLMv2
+	(хешированные пароли необходимо скопировать)
+
+3. Конфигурация CNTLM (внесение изменений в конфигурационный файл):
+	$ sudo nano /etc/cntlm.conf
+	Настройка:
+	Username MS_USERNAME
+	Domain DOMAIN
+	Proxy IP:PORT
+	Password PASSWORD
+	где
+	MS_USERNAME = m.eliseev
+	DOMAIN = prosoft.ural.ru
+	IP = 172.25.200.200
+	PORT = 3128
+	PASSWORD = <хешированный пароль>
+
+	‼ Если в сети более одного Proxy:
+	Proxy 192.168.1.10:8080
+	Proxy 192.168.1.11:8080
+
+	После сохранения конфигурации перезагрузить службу:
+		$ sudo systemctl restart cntlm
+
+4. Настроить приложения или службы для подключения через прокси
