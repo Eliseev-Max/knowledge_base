@@ -3,6 +3,10 @@
 https://itsecforu.ru/2019/05/20/%F0%9F%96%AA-%D0%BA%D0%B0%D0%BA-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B8%D1%82%D1%8C-linux-%D0%B4%D0%BB%D1%8F-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-ntlm/
 }
 
+{ cntlm manual
+	http://cntlm.sourceforge.net/cntlm_manual.pdf
+}
+
 Исходные данные:
 Host IP: 172.29.24.32
 Proxy IP: 172.25.200.200:3128
@@ -38,10 +42,44 @@ MS User: m.eliseev
 	PASSWORD = <хешированный пароль>
 
 	‼ Если в сети более одного Proxy:
+	Proxy IP_1:PORT_1
+	Proxy IP_2:PORT_2
+	например,
 	Proxy 192.168.1.10:8080
 	Proxy 192.168.1.11:8080
 
 	После сохранения конфигурации перезагрузить службу:
 		$ sudo systemctl restart cntlm
+	---
+	Итог: компьютер с ОС Linux может подключаться к прокси-серверу MS NTLM
 
 4. Настроить приложения или службы для подключения через прокси
+	Настройка сразу для всех приложений:
+	• $ nano ~/.bashrc
+	> (всавить в конец файла):
+	export http_proxy=http://127.0.0.1:3128
+	export https_proxy=https://127.0.0.1:3128
+	export ftp_proxy=http://127.0.0.1:3128
+	[Сохранить]
+	
+	•• $ . ~/.bashrc
+
+Credentials
+
+PassLM          0E84EEE0BA16D141C7CD36D039EB482E
+PassNT          F13CB66290E46D20BEAC61525FB2FB37
+PassNTLMv2      5045F2414A509004E753B7A59BF44FE1    # Only for user 'm.eliseev', domain 'prosoft.ural.ru'
+
+# For testing jenkins.io
+# 52.167.253.43
+
+Cntlm is an NTLM/NTLMv2 authenticating HTTP proxy. It takes the address of your proxy or proxies (host1..N and port1..N) and opens a listening socket, forwarding each request to the parent proxy (moving in a circular list if the active parent stops working). Along the way, a connection to the parent is created anew and authenticated or, if available, previously cached connection is reused to achieve higher efficiency and faster responses. When the chain is set up, cntlm should be used as a proxy in your applications.
+Cntlm also integrates transparent TCP/IP port forwarding (tunneling) through the parent (incl. authentication). Each tunnel opens a new listening socket on the defined local port and forwards all connections to the given host:port behind the secondary proxy. Manual page explains how to setup cntlm properly using configuration file or command-line arguments.
+Cntlm works similarly to NTLMAPS, plus full NTLM support, a bucket of new features and none of its shortcomings and inefficiencies. It adds support for real keep-alive (on both sides) and it caches all authenticated connections for reuse in subsequent requests. It can be restarted without TIME_WAIT delay, uses just a fraction of memory compared to NTLMAPS and by orders of magnitude less CPU. Each thread is completely independent and one cannot block another. Cntlm has many security/privacy features like NTLMv2 support and password protection - it is possible to substitute password hashes (which can be obtained using -H) for the actual password or to enter the password interactively. If plaintext password is used, it is automatically hashed during the startup and all its traces are removed from the process memory.
+In addition to lower usage of system resources, cntlm achieves higher throughput on a given link. By caching authenticated connections, it acts as an HTTP accelerator; This way, the 5-way auth handshake for each connection is transparently eliminated, providing direct access most of the time. NTLMAPS doesn’t authenticate in parallel with the request - instead, it first connects, sends a probe and disconnects. No sooner than that it connects again and initiates NTLM handshake. Cntlm also doesn’t read the whole request including HTTP body into memory, in fact, no traffic is generated except for the exchange of headers until the client <-> server connection is fully negotiated. Only then are the request and response bodies forwarded, directly between client and server sockets. This way, cntlm avoids most of the TCP/IP overhead of similar proxies. Along with the fact that cntlm is written in optimized C, it achieves up to fifteen times faster responses. The slower the line, the more impact cntlm has on download speeds.
+An example of cntlm compared to NTLMAPS under the same conditions: cntlm gave avg 76 kB/s with peak CPU usage of 0.3% whereas with NTLMAPS it was avg 48 kB/s with peak CPU at 98% (Pentium M 1.8 GHz). The extreme difference in resource usage is one of many important benefits for laptop use. Peak memory consumption (several complex sites, 50 paralell connections/threads; values are in KiB):
+VSZ RSS CMD
+3204 1436 ./cntlm -f -c ./cntlm.conf -P pid
+411604 6264 /usr/share/ntlmaps/main.py -c /etc/ntlmaps/server.cfg
+
+Inherent part of the development is profiling and memory management screening using Valgrind. The source distribution contains a file called valgrind.txt, where you can see the report confirming zero leaks, no access to unallocated memory, no usage of uninitialized data - all tracked down to each CPU instruction emulated in Valgrind’s virtual CPU during a typical production lifetime of the proxy.
