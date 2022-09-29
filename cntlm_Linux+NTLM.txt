@@ -73,13 +73,81 @@ PassNTLMv2      5045F2414A509004E753B7A59BF44FE1    # Only for user 'm.eliseev',
 # For testing jenkins.io
 # 52.167.253.43
 
-Cntlm is an NTLM/NTLMv2 authenticating HTTP proxy. It takes the address of your proxy or proxies (host1..N and port1..N) and opens a listening socket, forwarding each request to the parent proxy (moving in a circular list if the active parent stops working). Along the way, a connection to the parent is created anew and authenticated or, if available, previously cached connection is reused to achieve higher efficiency and faster responses. When the chain is set up, cntlm should be used as a proxy in your applications.
-Cntlm also integrates transparent TCP/IP port forwarding (tunneling) through the parent (incl. authentication). Each tunnel opens a new listening socket on the defined local port and forwards all connections to the given host:port behind the secondary proxy. Manual page explains how to setup cntlm properly using configuration file or command-line arguments.
-Cntlm works similarly to NTLMAPS, plus full NTLM support, a bucket of new features and none of its shortcomings and inefficiencies. It adds support for real keep-alive (on both sides) and it caches all authenticated connections for reuse in subsequent requests. It can be restarted without TIME_WAIT delay, uses just a fraction of memory compared to NTLMAPS and by orders of magnitude less CPU. Each thread is completely independent and one cannot block another. Cntlm has many security/privacy features like NTLMv2 support and password protection - it is possible to substitute password hashes (which can be obtained using -H) for the actual password or to enter the password interactively. If plaintext password is used, it is automatically hashed during the startup and all its traces are removed from the process memory.
-In addition to lower usage of system resources, cntlm achieves higher throughput on a given link. By caching authenticated connections, it acts as an HTTP accelerator; This way, the 5-way auth handshake for each connection is transparently eliminated, providing direct access most of the time. NTLMAPS doesn’t authenticate in parallel with the request - instead, it first connects, sends a probe and disconnects. No sooner than that it connects again and initiates NTLM handshake. Cntlm also doesn’t read the whole request including HTTP body into memory, in fact, no traffic is generated except for the exchange of headers until the client <-> server connection is fully negotiated. Only then are the request and response bodies forwarded, directly between client and server sockets. This way, cntlm avoids most of the TCP/IP overhead of similar proxies. Along with the fact that cntlm is written in optimized C, it achieves up to fifteen times faster responses. The slower the line, the more impact cntlm has on download speeds.
-An example of cntlm compared to NTLMAPS under the same conditions: cntlm gave avg 76 kB/s with peak CPU usage of 0.3% whereas with NTLMAPS it was avg 48 kB/s with peak CPU at 98% (Pentium M 1.8 GHz). The extreme difference in resource usage is one of many important benefits for laptop use. Peak memory consumption (several complex sites, 50 paralell connections/threads; values are in KiB):
+---
+(из мануала по cntlm)
+
+Cntlm - это аутентифицирующий HTTP(S) прокси с туннелированием и ускорением TCP/IP
+Он принимает адрес вашего прокси, одного или нескольких (host1..N и port1..N) и открывает слушающий сокет, пересылая каждый запрос родительскому прокси (перемещаясь по круговому списку, если активный родитель перестает работать).
+По пути соединение с родительским прокси создается заново и аутентифицируется или, если доступно, ранее кэшированное соединение используется повторно для достижения большей эффективности и более быстрых ответов. Когда цепочка настроена, cntlm следует использовать в качестве прокси в ваших приложениях.
+Cntlm также интегрирует прозрачную переадресацию портов TCP/IP (туннелирование) через родителя (включая аутентификацию).
+Каждый туннель открывает новый слушающий сокет на определенном локальном порту и перенаправляет все соединения на заданный хост:порт за вторичным прокси.
+На странице руководства объясняется, как правильно настроить cntlm, используя конфигурационный файл или аргументы командной строки.
+
+Cntlm работает аналогично NTLMAPS
+	+ полная поддержка NTLM,
+	+ куча новых возможностей 
+	+ ни одного из его недостатков и неэффективности.
+Он добавляет поддержку реального keep-alive (с обеих сторон) и кэширует все аутентифицированные соединения для повторного использования в последующих запросах.
+Он может быть перезапущен без задержки TIME_WAIT, использует лишь малую часть памяти по сравнению с NTLMAPS и на порядки меньше CPU.
+Каждый поток полностью независим, и один не может блокировать другой.
+Cntlm имеет множество функций безопасности/приватности, таких как поддержка NTLMv2 и защита паролем - можно заменить хэши паролей (которые можно получить с помощью -H) на реальный пароль или ввести пароль интерактивно.
+Если используется пароль в открытом виде, он автоматически хэшируется при запуске и все его следы удаляются из памяти процесса.
+
+В дополнение к меньшему использованию системных ресурсов, cntlm достигает более высокой пропускной способности на данном канале.
+Кэшируя аутентифицированные соединения, он действует как HTTP-ускоритель; таким образом, прозрачно устраняется 5-стороннее рукопожатие аутентификации для каждого соединения, обеспечивая прямой доступ большую часть времени.
+NTLMAPS не аутентифицирует параллельно с запросом - вместо этого он сначала подключается, посылает зонд и отключается. Не ранее чем после этого он снова подключается и инициирует NTLM handshake.
+Cntlm также не считывает весь запрос, включая тело HTTP, в память, фактически, не генерируется никакого трафика, кроме обмена заголовками, пока соединение "клиент <-> сервер" не будет полностью согласовано.
+Только после этого тела запроса и ответа пересылаются непосредственно между сокетами клиента и сервера.
+Таким образом, cntlm избегает большинства накладных расходов TCP/IP, присущих аналогичным прокси-серверам.
+Наряду с тем, что cntlm написан на оптимизированном языке C, он обеспечивает до 15x более быстрые ответы.
+Чем медленнее линия, тем большее влияние оказывает cntlm на скорость загрузки.
+
+Пример сравнения cntlm и NTLMAPS при идентичных условиях (Pentium M 1,8 ГГц):
+	► cntlm:
+		выдал avg 76 kB/s
+		пиковое использование CPU: 0,3%
+	► NTLMAPS
+		выдал avg 48 kB/s
+		пиковое использование CPU: 98%
+		
+(значения указаны в КиБ):
 VSZ RSS CMD
 3204 1436 ./cntlm -f -c ./cntlm.conf -P pid
 411604 6264 /usr/share/ntlmaps/main.py -c /etc/ntlmaps/server.cfg
 
-Inherent part of the development is profiling and memory management screening using Valgrind. The source distribution contains a file called valgrind.txt, where you can see the report confirming zero leaks, no access to unallocated memory, no usage of uninitialized data - all tracked down to each CPU instruction emulated in Valgrind’s virtual CPU during a typical production lifetime of the proxy.
+Неотъемлемой частью разработки является профилирование и скрининг управления памятью с помощью Valgrind.
+Исходный дистрибутив содержит файл valgrind.txt, где вы можете увидеть отчет, подтверждающий:
+	• нулевые утечки,
+	• отсутствие доступа к нераспределенной памяти,
+	• отсутствие использования неинициализированных данных
+-> все отслежено до каждой инструкции процессора, эмулированной в виртуальном процессоре Valgrind во время типичного времени жизни прокси.
+
+Большинство опций можно предварительно установить в конфигурации.
+Указание опции более одного раза не является ошибкой, но cntlm игнорирует все случаи, кроме последнего.
+Это не относится к опциям типа -L, каждая из которых создаёт  новый экземпляр некоторой функции.
+Cntlm может быть собран с жестко заданной конфигурацией (например. /etc/cntlm.conf), который всегда загружается, если это возможно.
+(См. опцию -c о том, как переопределить некоторые или все его настройки.)
+
+---
+
+Конфигурация
+Конфигурационный файл - это, по сути, INI-файл, за исключением того, что между ключами и значениями нет знака "=".
+Он состоит из ограниченных пробелами пар ключевых слов и пары значений.
+Кроме того, есть секции, они имеют обычный синтаксис "[имя_секции]".
+Комментарий начинается с хэша "#" или точка с запятой ";" и может находиться в любом месте файла. 
+Все, что идет после знака, вплоть до EOL, является комментарием. Значения могут содержать любые символы, включая пробелы.
+Вы можете использовать двойные кавычки вокруг значения, чтобы задать строку, содержащую специальные символы,
+такие как пробелы, знаки фунта и т.д.
+В строках, заключенных в кавычки, не допускается использование экранирующих последовательностей.
+
+Существует два типа ключевых слов: локальные и глобальные.
+Локальные параметры определяют детали аутентификации для каждого домена (или местоположения).
+Глобальные ключевые слова относятся ко всем разделам и прокси-серверам.
+Их следует размещать перед всеми разделами, но это не обязательно.
+К ним относятся: Allow, Deny, Gateway, Listen, SOCKS5Proxy, SOCKS5User, NTLMToBasic, Tunnel
+
+Read More
+https://manpages.ubuntu.com/manpages/xenial/man1/cntlm.1.html
+https://vijiboy.wordpress.com/2018/03/14/configure-cntlm-to-generate-hash-for-your-password-h-and-verify-m/
+https://ruslanmv.com/blog/How-to-install-local-proxy-with-cntlm
+https://ru.wikibooks.org/wiki/%D0%A1%D0%B5%D1%82%D0%B5%D0%B2%D1%8B%D0%B5_%D1%81%D1%80%D0%B5%D0%B4%D1%81%D1%82%D0%B2%D0%B0_Debian/Cntlm
