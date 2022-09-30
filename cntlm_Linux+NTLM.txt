@@ -64,6 +64,18 @@ MS User: m.eliseev
 	
 	•• $ . ~/.bashrc
 
+Проверка работоспособности:
+	$ cntlm -M http://<URL>
+	$ cntlm -M -I http://<URL>
+	-I  - Интерактивный запрос пароля.
+	Любые настройки пароля из командной строки или конфигурационного файла игнорируются, и выдается запрос пароля.
+	Используйте эту опцию только из shell.
+
+Устранение неполадок
+	$ cntlm -v		# вывод отладочной информации. Автоматически включает [-f]
+	-f  - Запуск в консоли в качестве задания переднего плана, без переключения в фоновый режим.
+		В этом режиме все сообщения syslog будут выводиться на консоль (на платформах, поддерживающих опцию syslog LOG_PERROR).
+	
 Credentials
 
 PassLM          0E84EEE0BA16D141C7CD36D039EB482E
@@ -147,6 +159,8 @@ Cntlm может быть собран с жестко заданной конф
 К ним относятся: Allow, Deny, Gateway, Listen, SOCKS5Proxy, SOCKS5User, NTLMToBasic, Tunnel
 
 Read More
+1. How to install a local proxy with cntlm in Windows and Linux
+	https://ruslanmv.com/blog/How-to-install-local-proxy-with-cntlm
 https://manpages.ubuntu.com/manpages/xenial/man1/cntlm.1.html
 https://vijiboy.wordpress.com/2018/03/14/configure-cntlm-to-generate-hash-for-your-password-h-and-verify-m/
 https://ruslanmv.com/blog/How-to-install-local-proxy-with-cntlm
