@@ -1,0 +1,102 @@
+m.eliseev@complextest:~$ cntlm -v
+section: global, Username = 'm.eliseev'
+section: global, Domain = 'prosoft.ural.ru'
+section: global, Password = '5045F2414A509004E753B7A59BF44FE1'
+section: global, Proxy = '172.25.200.200:3128'
+section: global, NoProxy = 'localhost, 127.0.0.*, 10.*, 192.168.*'
+section: global, Listen = '8088'
+Default config file opened successfully
+cntlm: Cannot bind port 8088: Address already in use!
+Adding no-proxy for: 'localhost'
+Adding no-proxy for: '127.0.0.*'
+Adding no-proxy for: '10.*'
+Adding no-proxy for: '192.168.*'
+cntlm: No proxy service ports were successfully opened.
+Exitting with error. Check daemon logs or run with -v.
+m.eliseev@complextest:~$ cntlm -M https://bucket.prosyst.ru/dashboard -v
+section: global, Username = 'm.eliseev'
+section: global, Domain = 'prosoft.ural.ru'
+section: global, Password = '5045F2414A509004E753B7A59BF44FE1'
+section: global, Proxy = '172.25.200.200:3128'
+section: global, NoProxy = 'localhost, 127.0.0.*, 10.*, 192.168.*'
+section: global, Listen = '8088'
+Default config file opened successfully
+cntlm: Cannot bind port 8088: Address already in use!
+Adding no-proxy for: 'localhost'
+Adding no-proxy for: '127.0.0.*'
+Adding no-proxy for: '10.*'
+Adding no-proxy for: '192.168.*'
+cntlm: Workstation name used: complextest
+Password:
+cntlm: Using proxy 172.25.200.200:3128
+cntlm: Resolving proxy 172.25.200.200...
+Config profile  1/4... Resolve 172.25.200.200:
+  -> 172.25.200.200
+NTLM Request:
+           Domain: prosoft.ural.ru
+         Hostname: complextest
+            Flags: 0xA208B205
+
+Sending PROXY auth request...
+Proxy-Connection               => keep-alive
+Host                           => bucket.prosyst.ru
+Proxy-Authorization            => NTLM TlRMTVNTUAABAAAABbIIog8ADwArAAAACwALACAAAABDT01QTEVYVEVTVFBST1NPRlQuVVJBTC5SVQ==
+Content-Length                 => 0
+
+Reading PROXY auth response...
+HEAD: HTTP/1.0 200 OK
+Content-Type                   => text/html
+Refresh                        => 0; URL=https://bucket.prosyst.ru/dashboard
+Auth not required (HTTP code: 200)
+Config profile  2/4... NTLM Request:
+           Domain: prosoft.ural.ru
+         Hostname: complextest
+            Flags: 0xB207
+
+Sending PROXY auth request...
+Proxy-Connection               => keep-alive
+Host                           => bucket.prosyst.ru
+Proxy-Authorization            => NTLM TlRMTVNTUAABAAAAB7IAAA8ADwArAAAACwALACAAAABDT01QTEVYVEVTVFBST1NPRlQuVVJBTC5SVQ==
+Content-Length                 => 0
+
+Reading PROXY auth response...
+HEAD: HTTP/1.0 200 OK
+Content-Type                   => text/html
+Refresh                        => 0; URL=https://bucket.prosyst.ru/dashboard
+Auth not required (HTTP code: 200)
+Config profile  3/4... NTLM Request:
+           Domain: prosoft.ural.ru
+         Hostname: complextest
+            Flags: 0xB206
+
+Sending PROXY auth request...
+Proxy-Connection               => keep-alive
+Host                           => bucket.prosyst.ru
+Proxy-Authorization            => NTLM TlRMTVNTUAABAAAABrIAAA8ADwArAAAACwALACAAAABDT01QTEVYVEVTVFBST1NPRlQuVVJBTC5SVQ==
+Content-Length                 => 0
+
+Reading PROXY auth response...
+HEAD: HTTP/1.0 200 OK
+Content-Type                   => text/html
+Refresh                        => 0; URL=https://bucket.prosyst.ru/dashboard
+Auth not required (HTTP code: 200)
+Config profile  4/4... NTLM Request:
+           Domain: prosoft.ural.ru
+         Hostname: complextest
+            Flags: 0xA208B207
+
+Sending PROXY auth request...
+Proxy-Connection               => keep-alive
+Host                           => bucket.prosyst.ru
+Proxy-Authorization            => NTLM TlRMTVNTUAABAAAAB7IIog8ADwArAAAACwALACAAAABDT01QTEVYVEVTVFBST1NPRlQuVVJBTC5SVQ==
+Content-Length                 => 0
+
+Reading PROXY auth response...
+HEAD: HTTP/1.0 200 OK
+Content-Type                   => text/html
+Refresh                        => 0; URL=https://bucket.prosyst.ru/dashboard
+Auth not required (HTTP code: 200)
+
+Your proxy is open, you don't need another proxy.
+cntlm: Terminating with 0 active threads
+m.eliseev@complextest:~$

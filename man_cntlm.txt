@@ -8,9 +8,8 @@ DESCRIPTION
        Cntlm  is an NTLM/NTLM SR/NTLMv2 authenticating HTTP proxy. It stands between your applications and the corporate proxy, adding NTLM authentication on-the-fly. You can specify several "parent" proxies and Cntlm will try one after another until one works. All auth'd  connections  are cached and reused to achieve high efficiency. Just point your apps proxy settings at Cntlm, fill in cntlm.conf (cntlm.ini) and you're ready to do. This is useful on Windows, but essential for non-Microsoft OS's. Proxy IP addresses can be specified via CLI (host1:port1 to  hostN:portN) or the configuration file.
 
        Another  option  is  to have cntlm authenticate your local web connections without any parent proxies. It can work in a stand-alone mode, just
-       like Squid or ISA. By default, all requests are forwarded to parent proxies, but the user can set a "NoProxy" list, a  list  of  URL  matching
-       wild-card  patterns, that route between direct and forward modes. Cntlm can also recognize when all your corporate proxies are unavailable and
-       switch to stand-alone mode automatically (and then back again). Aside from WWW and PROXY authentication, cntlm provides a useful  feature  enabling  users  migrate  their  laptops between work and home without changing proxy settings in their applications (using cntlm all the time).
+       like Squid or ISA.
+	   By default, all requests are forwarded to parent proxies, but the user can set a "NoProxy" list, a  list  of  URL  matching wild-card  patterns, that route between direct and forward modes. Cntlm can also recognize when all your corporate proxies are unavailable and switch to stand-alone mode automatically (and then back again). Aside from WWW and PROXY authentication, cntlm provides a useful  feature  enabling  users  migrate  their  laptops between work and home without changing proxy settings in their applications (using cntlm all the time).
        Cntlm also integrates transparent TCP/IP port forwarding (tunneling). Each tunnel opens a new listening socket on local machine and  and  for‐
        wards all connections to the target host behind the parent proxy. Instead of these SSH-like tunnels, user can also choose a limited SOCKS5 in‐
        terface.
