@@ -100,3 +100,9 @@ Auth not required (HTTP code: 200)
 Your proxy is open, you don't need another proxy.
 cntlm: Terminating with 0 active threads
 m.eliseev@complextest:~$
+
+########
+
+m.eliseev@complextest:~$ ps aux | grep cntlm
+cntlm        862  0.0  0.0 199692  1992 ?        Ss   Sep30   0:10 /usr/sbin/cntlm -U cntlm -P /var/run/cntlm/cntlm.pid
+m.elise+   15363  0.0  0.0   5192   724 pts/0    S+   12:30   0:00 grep --color=auto cntlm
