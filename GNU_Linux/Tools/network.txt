@@ -7,6 +7,9 @@
 3. Команда traceroute Linux
 	https://losst.ru/komanda-traceroute-linux
 
+4. Команда ping в Linux
+	https://losst.ru/komanda-ping-v-linux
+
 Утилита traceroute
 
 • вся информация в сети передается в виде пакетов (ip-пакеты);
