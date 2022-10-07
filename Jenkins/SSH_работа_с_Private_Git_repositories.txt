@@ -25,5 +25,5 @@ Jenkins: Credentials → System → Global credentials (unrestricted) → Add Cr
    Kind:        SSH Username with private key
    Scope:       Global (Jenkins, nodes, items, all child items, etc)
    Username:    jenkins
-   Private Key: From the Jenkins master ~/.ssh
+   Private Key: From the Jenkins master ~/.ssh (копировать всё содержимое файла с ключом)
    [OK]
