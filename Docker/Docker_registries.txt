@@ -1,7 +1,7 @@
 Частный реестр Docker. Настройка частных реестров на базе Artifactory
 
 Типы реестров Docker по их размещению и доступности:
-	• on-host реестр на хосте (Docker Daemon + Docker Client)
+	• (on-host) локальный реестр на хосте (Docker Daemon + Docker Client)
 	• частный реестр в локальной сети
 	• публичный реестр (в Интернете, например, Docker Hub)
 
