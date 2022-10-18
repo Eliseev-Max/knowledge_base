@@ -25,3 +25,10 @@
 	поскольку он использует префикс пути к репозиторию Docker (<REPOSITORY_KEY/IMAGE>) для доступа к определенному реестру Docker Artifactory из клиента Docker.
 	‼ обратный прокси-сервер для Artifactory может быть настроен по другим причинам,
 	При использовании метода Repository Path запросы к реестрам Docker в Artifactory будут обрабатываться встроенным в Artifactory Tomcat вместо обратного прокси-сервера
+
+sudo apt purge jfrog-artifactory-purge
+sudo rm -rf /opt/jfrog/artifactory
+sudo rm -rf /var/opt/jfrog
+sudo apt update
+sudo apt install jfrog-artifactory-oss=7.12.5
+sudo service artifactory start
