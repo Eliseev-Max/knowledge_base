@@ -1,0 +1,10 @@
+{"What is a Docker Repository?":https://jfrog.com/integration/docker-registry/docker-repository/}
+{"Artifactory Comparison Matrix":https://www.jfrog.com/confluence/display/JFROG/Artifactory+Comparison+Matrix}
+{"Getting Started with Artifactory as a Docker Registry":https://www.jfrog.com/confluence/display/JFROG/Getting+Started+with+Artifactory+as+a+Docker+Registry#GettingStartedwithArtifactoryasaDockerRegistry-ConfiguringArtifactory.1
+}
+{https://telegra.ph/NASHI-CHATY-03-17}
+{"Artifactory One Minute Setup – Docker registry as container install":
+https://jfrog.com/screencast/artifactory-5-one-minute-setup-docker-registry-as-container-install/}
+{"Docker Registry":https://www.jfrog.com/confluence/display/JFROG/Docker+Registry}
+{"How to set up a Private, Remote and Virtual Docker Registry":
+https://jfrog.com/blog/how-to-set-up-a-private-remote-and-virtual-docker-registry/}
