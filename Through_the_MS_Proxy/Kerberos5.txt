@@ -164,7 +164,7 @@ kinit не сообщает вам, что он получил билеты с �
 Ссылки для ознакомления:
 0. kinit
 	https://web.mit.edu/kerberos/krb5-1.12/doc/user/user_commands/kinit.html
-1. https://translated.turbopages.org/proxy_u/en-ru.ru.3c0b6d47-6316da7b-35c09016-74722d776562/https/docs.oracle.com/en/java/javase/18/docs/specs/man/kinit.html
+1. ???
 
 2. https://www.opennet.ru/man.shtml?topic=kinit&category=1&russian=1
 
