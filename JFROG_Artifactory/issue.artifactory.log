@@ -1,0 +1,123 @@
+-- Процесс остановки юнита artifactory.service был завершен.
+окт 19 12:41:51 max-VirtualBox systemd[1]: Starting Artifactory service...
+-- Subject: Начинается запуск юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Начат процесс запуска юнита artifactory.service.
+окт 19 12:41:52 max-VirtualBox artifactoryManage.sh[24992]: 2022-10-19T07:41:52.218Z [shell] [INFO ] [] [artifactoryManage.sh:88       ] [main] - Artifactory Tomcat already started
+окт 19 12:41:52 max-VirtualBox systemd[1]: artifactory.service: Can't open PID file /var/run/artifactory.pid (yet?) after start: No such file or directory
+окт 19 12:41:52 max-VirtualBox systemd[1]: artifactory.service: Failed with result 'protocol'.
+окт 19 12:41:52 max-VirtualBox systemd[1]: Failed to start Artifactory service.
+-- Subject: Ошибка юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Произошел сбой юнита artifactory.service.
+-- 
+-- Результат: RESULT.
+окт 19 12:42:11 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:11.961+0000 [id=357]        INFO        hudson.model.AsyncPeriodicWork#lambda$doRun$1: Started DockerContainerWatchdog Asynchronous Periodic Work
+окт 19 12:42:11 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:11.962+0000 [id=357]        INFO        c.n.j.p.d.DockerContainerWatchdog#execute: Docker Container Watchdog has been triggered
+окт 19 12:42:11 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:11.962+0000 [id=357]        INFO        c.n.j.p.d.DockerContainerWatchdog$Statistics#writeStatisticsToLog: Watchdog Statistics: Number of overall executions: 128, Executions with processing timeout: 0, Conta
+окт 19 12:42:11 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:11.962+0000 [id=357]        INFO        c.n.j.p.d.DockerContainerWatchdog#loadNodeMap: We currently have 0 nodes assigned to this Jenkins instance, which we will check
+окт 19 12:42:11 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:11.963+0000 [id=357]        INFO        c.n.j.p.d.DockerContainerWatchdog#execute: Checking Docker Cloud docker at unix:///var/run/docker.sock
+окт 19 12:42:12 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:12.122+0000 [id=357]        INFO        c.n.j.p.d.DockerContainerWatchdog#execute: Docker Container Watchdog check has been completed
+окт 19 12:42:12 max-VirtualBox jenkins[23267]: 2022-10-19 07:42:12.122+0000 [id=357]        INFO        hudson.model.AsyncPeriodicWork#lambda$doRun$1: Finished DockerContainerWatchdog Asynchronous Periodic Work. 160 ms
+окт 19 12:42:52 max-VirtualBox systemd[1]: artifactory.service: Service hold-off time over, scheduling restart.
+окт 19 12:42:52 max-VirtualBox systemd[1]: artifactory.service: Scheduled restart job, restart counter is at 8.
+-- Subject: Назначен автоматический перезапуск юнита
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Назначен автоматический перезапуск юнита artifactory.service, так как для него был задан 
+-- параметр Restart=.
+окт 19 12:42:52 max-VirtualBox systemd[1]: Stopped Artifactory service.
+-- Subject: Завершена остановка юнита artifactory.service.
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Процесс остановки юнита artifactory.service был завершен.
+окт 19 12:42:52 max-VirtualBox systemd[1]: Starting Artifactory service...
+-- Subject: Начинается запуск юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Начат процесс запуска юнита artifactory.service.
+окт 19 12:42:53 max-VirtualBox artifactoryManage.sh[25299]: 2022-10-19T07:42:53.127Z [shell] [INFO ] [] [artifactoryManage.sh:88       ] [main] - Artifactory Tomcat already started
+окт 19 12:42:53 max-VirtualBox systemd[1]: artifactory.service: Can't open PID file /var/run/artifactory.pid (yet?) after start: No such file or directory
+окт 19 12:42:53 max-VirtualBox systemd[1]: artifactory.service: Failed with result 'protocol'.
+окт 19 12:42:53 max-VirtualBox systemd[1]: Failed to start Artifactory service.
+-- Subject: Ошибка юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Произошел сбой юнита artifactory.service.
+-- 
+-- Результат: RESULT
+
+####
+####
+####
+
+-- Назначен автоматический перезапуск юнита artifactory.service, так как для него был задан 
+-- параметр Restart=.
+ноя 02 19:15:02 max-VirtualBox systemd[1]: Stopped Artifactory service.
+-- Subject: Завершена остановка юнита artifactory.service.
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Процесс остановки юнита artifactory.service был завершен.
+ноя 02 19:15:02 max-VirtualBox systemd[1]: Starting Artifactory service...
+-- Subject: Начинается запуск юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Начат процесс запуска юнита artifactory.service.
+ноя 02 19:15:03 max-VirtualBox artifactoryManage.sh[15684]: 2022-11-02T14:15:03.256Z [shell] [INFO ] [] [artifactoryManage.sh:88       ] [main] - Artifactory Tomcat already started
+ноя 02 19:15:03 max-VirtualBox systemd[1]: artifactory.service: Can't open PID file /var/run/artifactory.pid (yet?) after start: No such file or directory
+ноя 02 19:15:03 max-VirtualBox systemd[1]: artifactory.service: Failed with result 'protocol'.
+ноя 02 19:15:03 max-VirtualBox systemd[1]: Failed to start Artifactory service.
+-- Subject: Ошибка юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Произошел сбой юнита artifactory.service.
+-- 
+-- Результат: RESULT.
+ноя 02 19:16:03 max-VirtualBox systemd[1]: artifactory.service: Service hold-off time over, scheduling restart.
+ноя 02 19:16:03 max-VirtualBox systemd[1]: artifactory.service: Scheduled restart job, restart counter is at 116.
+-- Subject: Назначен автоматический перезапуск юнита
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Назначен автоматический перезапуск юнита artifactory.service, так как для него был задан 
+-- параметр Restart=.
+ноя 02 19:16:03 max-VirtualBox systemd[1]: Stopped Artifactory service.
+-- Subject: Завершена остановка юнита artifactory.service.
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Процесс остановки юнита artifactory.service был завершен.
+ноя 02 19:16:03 max-VirtualBox systemd[1]: Starting Artifactory service...
+-- Subject: Начинается запуск юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Начат процесс запуска юнита artifactory.service.
+ноя 02 19:16:04 max-VirtualBox artifactoryManage.sh[15993]: 2022-11-02T14:16:04.245Z [shell] [INFO ] [] [artifactoryManage.sh:88       ] [main] - Artifactory Tomcat already started
+ноя 02 19:16:04 max-VirtualBox systemd[1]: artifactory.service: Can't open PID file /var/run/artifactory.pid (yet?) after start: No such file or directory
+ноя 02 19:16:04 max-VirtualBox systemd[1]: artifactory.service: Failed with result 'protocol'.
+ноя 02 19:16:04 max-VirtualBox systemd[1]: Failed to start Artifactory service.
+-- Subject: Ошибка юнита artifactory.service
+-- Defined-By: systemd
+-- Support: http://www.ubuntu.com/support
+-- 
+-- Произошел сбой юнита artifactory.service.
+-- 
+-- Результат: RESULT.
+
+[sources: 
+	https://stackoverflow.com/questions/62121223/job-for-artifactory-service-failed
+	https://stackoverflow.com/questions/45297704/problems-with-catalina-pid-and-artifactory-pid-while-upgrading-artifactory-to-th
+]
+
