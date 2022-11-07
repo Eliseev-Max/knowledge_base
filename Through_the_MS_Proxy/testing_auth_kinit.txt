@@ -1,5 +1,5 @@
 m.eliseev@complextest:~$ traceroute 178.248.237.68
-@IrishkaSEX;@vika_Ekb2024;@sladenkia20_20;@arishaa_2021;@anna_wild_berry
+@IrishkaSEX;@vika_Ekb2024;@sladenkia20_20;@anna_wild_berry
 traceroute to 178.248.237.68 (178.248.237.68), 30 hops max, 60 byte packets
  1  _gateway (172.29.24.100)  1.796 ms  2.083 ms  2.438 ms
  2  10.254.21.1 (10.254.21.1)  4.843 ms  5.143 ms  5.415 ms
