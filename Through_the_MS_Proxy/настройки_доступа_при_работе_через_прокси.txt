@@ -1,0 +1,39 @@
+Работа с apt.conf
+
+(?) Для настройки обновления пакетов нужно добавить строки настройки прокси в файлы /etc/apt/apt.conf.d/{20auto-upgrades,02periodic}
+	Бывает так, что файлы отсутствуют в директории ./apt.conf.d
+
+(!) Файл /etc/apt/apt.conf.d/20auto-upgrades может быть создан вручную с запуском команды от имени root:
+	$ dpkg-reconfigure -plow unattended-upgrades
+
+Какие действия помогли в моём случае:
+	Начальные условия:
+	  • отсутствие любого текстового редактора (vi, nano);
+	  • отсутствие возможности скачивать обновления из репозиториев (полное отсутствие доступа в интернет);
+	  • есть информация о прокси-сервере
+	
+	Мои действия:
+	1. Создать файл /etc/apt/apt.conf.d/proxy.conf и заполнить его
+	# создаём файл proxy.conf с помощью перенаправления вывода команды echo в файл proxy.conf
+[root]: # echo "Acquire::http::proxy \"http://m.eliseev:*passwd*@172.25.200.200:3128/\";" > /etc/apt/apt.conf.d/proxy.conf
+	# дозаписываем необходимые настройки для протоколов https и ftp:
+		# echo "Acquire::https::proxy \"http://m.eliseev:*passwd*@172.25.200.200:3128/\";" >> /etc/apt/apt.conf.d/proxy.conf
+		# echo "Acquire::ftp::proxy \"http://m.eliseev:*passwd*@172.25.200.200:3128/\";" >> /etc/apt/apt.conf.d/proxy.conf
+	2. Перезапустить сервер
+# https://kubuntu.ru/node/1003 - материал частично устарел, но в целом актуален. Разобрать, ссылку удалить.
+
+► Внёс изменения в конфигурационный файл утилиты wget (/etc/wgetrc):
+	proxy-user = username
+	proxy-password = password
+	http_proxy = http://xxx.xxx.xxx.xxx:8080/
+	ftp_proxy = http://xxx.xxx.xxx.xxx:8080/
+	use_proxy = on
+
+‼ Замечание: пароль находится в открытом (незашифрованном) виде. Это небезопасно!
+Убрать впоследствие!
+
+#### удалить кеш DNS:
+#### $ sudo systemd-resolve --flush-caches
+
+#### Принудительно использовать IPv4 при обновлении (пакетов) репозитория (apt-get update):
+#### $ sudo apt-get -o Acquire::ForceIPv4=true update

@@ -12,7 +12,7 @@ source: https://losst.ru/gruppy-polzovatelej-linux
 Ознакомиться с перечнем групп можно так:
 	vi /etc/group
 	или
-	subl /etc/group			# Если установлен Sublime Text
+	cat /etc/group
 	
 Описание групп:
 
@@ -139,3 +139,10 @@ ____ Как вывести список всех пользователей Linu
 		$ eval getent passwd {$(awk '/^UID_MIN/ {print $2}' /etc/login.defs)..$(awk '/^UID_MAX/ {print $2}' /etc/login.defs)}
 (https://zalinux.ru/?p=5578)
 
+# {Разграничение прав пользователей в Ubuntu:
+#  https://1cloud.ru/help/linux/nastrojka-prav-polzovatelej-na-ubuntu
+#}
+
+# {
+#
+#}
