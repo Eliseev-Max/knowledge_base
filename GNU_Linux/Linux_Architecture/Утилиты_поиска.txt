@@ -68,8 +68,6 @@ $ - поиск вхождений в конце строки
 Цветной вывод в grep: --color
 	grep --color root /etc/passwd
 
-
-
 find
-locate
 
+locate
