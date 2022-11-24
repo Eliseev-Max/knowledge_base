@@ -205,6 +205,5 @@ APT предоставляет дружественную надстройку �
 	   https://linux.die.net/man/5/apt.conf
 	4. * apt.conf - Ubuntu manuals
 	   https://manpages.ubuntu.com/manpages/focal/man5/apt.conf.5.html
-	5. * apt.conf(5) # Рускоязычный ресурс
-	   https://www.opennet.ru/man.shtml?topic=apt.conf&category=5&russian=0
+
 ]
