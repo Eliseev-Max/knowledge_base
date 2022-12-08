@@ -105,3 +105,8 @@ Kerberos это система сетевой аутентифиации, осн
 	5. Install MIT Kerberos 5 on Debian GNU, Ubuntu, and Devuan GNU+Linux:
 	   http://techpubs.spinlocksolutions.com/dklar/kerberos.html
 }
+
+* https://manpages.ubuntu.com/manpages/bionic/man1/kinit.1.html
+* https://www.ibm.com/docs/en/aix/7.1?topic=k-kinit-command
+* https://andreyex.ru/linux/ustranenie-nepoladok-autentifikatsii-kerberos-v-linux/
+* https://www.tutorialspoint.com/unix_commands/kinit.htm
