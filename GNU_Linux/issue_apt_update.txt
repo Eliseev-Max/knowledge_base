@@ -1,0 +1,38 @@
+eliseev@srv-jfrog:~$ sudo apt-get -y upgrade
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  grub-common grub2-common linux-generic linux-headers-generic
+  linux-image-generic
+The following packages will be upgraded:
+  apport cloud-init containerd.io curl docker-ce docker-ce-cli
+  docker-ce-rootless-extras docker-compose-plugin docker-scan-plugin
+  initramfs-tools initramfs-tools-bin initramfs-tools-core libcurl3-gnutls
+  libcurl4 libksba8 libsasl2-2 libsasl2-modules libsasl2-modules-db
+  linux-firmware python3-apport python3-distupgrade python3-problem-report
+  python3-tz python3-update-manager ubuntu-release-upgrader-core
+  update-manager-core
+26 upgraded, 0 newly installed, 0 to remove and 5 not upgraded.
+Need to get 0 B/353 MB of archives.
+After this operation, 142 kB of additional disk space will be used.
+Preconfiguring packages ...
+
+dpkg: warning: files list file for package 'linux-headers-5.15.0-53-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcurl4:amd64' missing; assuming package has no files currently installed
+dpkg: unrecoverable fatal error, aborting:
+ files list file for package 'libksba8:amd64' is missing final newline
+Error: Timeout was reached
+E: Sub-process /usr/bin/dpkg returned an error code (2)
+
+---
+links
+---
+https://askubuntu.com/questions/909719/dpkg-unrecoverable-fatal-error-aborting-files-list-file-for-package-linux-ge
+
+https://serverfault.com/questions/430682/dpkg-warning-files-list-file-for-package-x-missing
+https://packages.debian.org/ru/buster/libksba8
+
+https://askubuntu.com/questions/949760/dpkg-warning-files-list-file-for-package-missing
+
