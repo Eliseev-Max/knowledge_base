@@ -1,0 +1,48 @@
+Посмотреть список образов ядер в системе:
+	$ ls /boot/
+
+(В меню загрузчика Grub присутствует пункт для каждого ядра)
+
+Рекомендуется иметь в системе две версии ядра: последнюю, используемую на данный момент, и предыдущую.
+
+Пакеты, относящиеся к ядру:
+	• linux-image-<версия> - бинарный образ ядра
+    • linux-image-extra-<версия> - внешние модули ядра
+    • linux-headers-<версия> - файлы заголовков (заголовочные файлы ядра)
+
+Посмотреть, ядро какой версии используется в системе:
+	$ sudo uname -a
+( Пример вывода:
+	Linux complextest 5.4.0-135-generic #152-Ubuntu SMP Wed Nov 23 20:19:22 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
+)
+
+Посмотреть, какие версии ядер были установлены:
+	$ apt list --installed | egrep "linux-image|linux-headers"
+(	Пример вывода:
+	linux-headers-5.4.0-135-generic/focal-updates,focal-security,now 5.4.0-135.152 amd64 [installed,automatic]
+	linux-headers-5.4.0-135/focal-updates,focal-security,now 5.4.0-135.152 all [installed,automatic]
+	linux-headers-5.4.0-137-generic/focal-updates,focal-security,now 5.4.0-137.154 amd64 [installed,automatic]
+	linux-headers-5.4.0-137/focal-updates,focal-security,now 5.4.0-137.154 all [installed,automatic]
+	linux-headers-generic/focal-updates,focal-security,now 5.4.0.137.135 amd64 [installed,automatic]
+	linux-image-5.4.0-135-generic/focal-updates,focal-security,now 5.4.0-135.152 amd64 [installed,automatic]
+	linux-image-5.4.0-137-generic/focal-updates,focal-security,now 5.4.0-137.154 amd64 [installed,automatic]
+	linux-image-generic/focal-updates,focal-security,now 5.4.0.137.135 amd64 [installed,automatic]
+)
+
+Посмотреть список ядер (с помощью dpkg):
+	$ dpkg --list | egrep "linux-image|linux-headers"
+	# rc - означает, что пакет был установлен, но уже удалён;
+	# ii - означает, что пакет установлен сейчас
+
+Удалить версию ядра:
+	$ sudo apt purge <kernel-image-version> <linux-headers-version>
+	# удалить образ ядра, а также связанные с ним заголовочные файлы и файлы модулей
+	пример:
+	$ sudo apt purge linux-image-4.15.0-66-generic linux-headers-4.15.0-91-generic
+
+# ‼ ► при удалении старого ядра будет автоматически инициирован процесс обновления ядра до последней версии, если вы этого еще не сделали;
+	► после удаления будет обновлен конфигурационный файл Grub, чтобы убрать лишнюю запись из меню.
+
+Удаление нескольких ядер:
+	$ sudo apt purge linux-image-4.15.0-{20.21,50.54,51.55} linux-headers-4.15.0-{20.21,50.54,51.55}
+	
