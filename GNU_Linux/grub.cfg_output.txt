@@ -1,0 +1,111 @@
+menuentry 'Ubuntu' --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-simple-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+        recordfail
+        load_video
+        gfxmode $linux_gfx_mode
+        insmod gzio
+        if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+        insmod part_gpt
+        insmod ext2
+        set root='hd0,gpt2'
+        if [ x$feature_platform_search_hint = xy ]; then
+          search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+        else
+          search --no-floppy --fs-uuid --set=root a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+        fi
+        linux   /boot/vmlinuz-5.15.0-57-generic root=UUID=a37c6b49-1b87-4e32-b4ce-0cf322fcedd6 ro
+        initrd  /boot/initrd.img-5.15.0-57-generic
+}
+submenu 'Advanced options for Ubuntu' $menuentry_id_option 'gnulinux-advanced-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+        menuentry 'Ubuntu, with Linux 5.15.0-57-generic' --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-5.15.0-57-generic-advanced-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+                recordfail
+                load_video
+                gfxmode $linux_gfx_mode
+                insmod gzio
+                if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+                insmod part_gpt
+                insmod ext2
+                set root='hd0,gpt2'
+                if [ x$feature_platform_search_hint = xy ]; then
+                  search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                else
+                  search --no-floppy --fs-uuid --set=root a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                fi
+                echo    'Loading Linux 5.15.0-57-generic ...'
+                linux   /boot/vmlinuz-5.15.0-57-generic root=UUID=a37c6b49-1b87-4e32-b4ce-0cf322fcedd6 ro
+                echo    'Loading initial ramdisk ...'
+                initrd  /boot/initrd.img-5.15.0-57-generic
+        }
+        menuentry 'Ubuntu, with Linux 5.15.0-57-generic (recovery mode)' --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-5.15.0-57-generic-recovery-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+                recordfail
+                load_video
+                insmod gzio
+                if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+                insmod part_gpt
+                insmod ext2
+                set root='hd0,gpt2'
+                if [ x$feature_platform_search_hint = xy ]; then
+                  search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                else
+                  search --no-floppy --fs-uuid --set=root a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                fi
+                echo    'Loading Linux 5.15.0-57-generic ...'
+                linux   /boot/vmlinuz-5.15.0-57-generic root=UUID=a37c6b49-1b87-4e32-b4ce-0cf322fcedd6 ro recovery nomodeset dis_ucode_ldr
+                echo    'Loading initial ramdisk ...'
+                initrd  /boot/initrd.img-5.15.0-57-generic
+        }
+        menuentry 'Ubuntu, with Linux 5.15.0-56-generic' --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-5.15.0-56-generic-advanced-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+                recordfail
+                load_video
+                gfxmode $linux_gfx_mode
+                insmod gzio
+                if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+                insmod part_gpt
+                insmod ext2
+                set root='hd0,gpt2'
+                if [ x$feature_platform_search_hint = xy ]; then
+                  search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                else
+                  search --no-floppy --fs-uuid --set=root a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                fi
+                echo    'Loading Linux 5.15.0-56-generic ...'
+                linux   /boot/vmlinuz-5.15.0-56-generic root=UUID=a37c6b49-1b87-4e32-b4ce-0cf322fcedd6 ro
+                echo    'Loading initial ramdisk ...'
+                initrd  /boot/initrd.img-5.15.0-56-generic
+        }
+        menuentry 'Ubuntu, with Linux 5.15.0-56-generic (recovery mode)' --class ubuntu --class gnu-linux --class gnu --class os $menuentry_id_option 'gnulinux-5.15.0-56-generic-recovery-a37c6b49-1b87-4e32-b4ce-0cf322fcedd6' {
+                recordfail
+                load_video
+                insmod gzio
+                if [ x$grub_platform = xxen ]; then insmod xzio; insmod lzopio; fi
+                insmod part_gpt
+                insmod ext2
+                set root='hd0,gpt2'
+                if [ x$feature_platform_search_hint = xy ]; then
+                  search --no-floppy --fs-uuid --set=root --hint-bios=hd0,gpt2 --hint-efi=hd0,gpt2 --hint-baremetal=ahci0,gpt2  a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                else
+                  search --no-floppy --fs-uuid --set=root a37c6b49-1b87-4e32-b4ce-0cf322fcedd6
+                fi
+                echo    'Loading Linux 5.15.0-56-generic ...'
+                linux   /boot/vmlinuz-5.15.0-56-generic root=UUID=a37c6b49-1b87-4e32-b4ce-0cf322fcedd6 ro recovery nomodeset dis_ucode_ldr
+                echo    'Loading initial ramdisk ...'
+                initrd  /boot/initrd.img-5.15.0-56-generic
+        }
+}
+
+### END /etc/grub.d/10_linux ###
+
+### BEGIN /etc/grub.d/10_linux_zfs ###
+### END /etc/grub.d/10_linux_zfs ###
+
+### BEGIN /etc/grub.d/20_linux_xen ###
+
+### END /etc/grub.d/20_linux_xen ###
+
+### BEGIN /etc/grub.d/30_os-prober ###
+### END /etc/grub.d/30_os-prober ###
+
+### BEGIN /etc/grub.d/30_uefi-firmware ###
+menuentry 'UEFI Firmware Settings' $menuentry_id_option 'uefi-firmware' {
+        fwsetup
+}
+### END /etc/grub.d/30_uefi-firmware ###

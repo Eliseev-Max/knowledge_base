@@ -16,6 +16,9 @@
 	Linux complextest 5.4.0-135-generic #152-Ubuntu SMP Wed Nov 23 20:19:22 UTC 2022 x86_64 x86_64 x86_64 GNU/Linux
 )
 
+Посмотреть файл конфигурации grub (с помощью которого вносятся изменения в /boot/grub/grub.cfg):
+	$ cat /etc/default/grub
+
 Посмотреть, какие версии ядер были установлены:
 	$ apt list --installed | egrep "linux-image|linux-headers"
 (	Пример вывода:
@@ -34,8 +37,13 @@
 	# rc - означает, что пакет был установлен, но уже удалён;
 	# ii - означает, что пакет установлен сейчас
 
+Посмотреть порядок отображения пунктов меню загрузки grub:
+	$ less /boot/grub/grub.cfg
+
 Удалить версию ядра:
-	$ sudo apt purge <kernel-image-version> <linux-headers-version>
+	$ sudo apt purge <linux-image-version> <linux-headers-version>
+	или
+	$ sudo apt remove <linux-image-version> <linux-headers-version>
 	# удалить образ ядра, а также связанные с ним заголовочные файлы и файлы модулей
 	пример:
 	$ sudo apt purge linux-image-4.15.0-66-generic linux-headers-4.15.0-91-generic
@@ -46,3 +54,20 @@
 Удаление нескольких ядер:
 	$ sudo apt purge linux-image-4.15.0-{20.21,50.54,51.55} linux-headers-4.15.0-{20.21,50.54,51.55}
 	
+Обновление конфигурации Grub вручную:
+	$ sudo update-grub2
+
+Удаление старых ядер с помощью apt:
+	$ sudo apt --purge autoremove
+
+Удалить все старые ядра, кроме используемого и предпоследнего:
+	$ sudo apt-get purge $(dpkg -l 'linux-*' | sed '/^ii/!d;/'"$(uname -r | sed "s/\(.*\)-\([^0-9]\+\)/\1/")"'/d;s/^[^ ]* [^ ]* \([^ ]*\).*/\1/;/[0-9]/!d' | head -n -1)
+
+Затем нужно выполнить команду очистки системы и вручную обновить конфигурацию grub.
+	$ sudo apt autoremove
+	$ sudo update-grub
+
+# Для работы с GUI читать:
+# https://losst.pro/kak-udalit-starye-versii-yadra-v-ubuntu
+# Editing the default boot item in grub menu:
+    https://askubuntu.com/questions/68547/editing-the-default-boot-item-in-grub-menu-a-definitive-answer

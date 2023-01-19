@@ -1,0 +1,600 @@
+eliseev@srv-jfrog:~$ sudo apt-get update
+[sudo] password for eliseev:
+Hit:1 http://archive.ubuntu.com/ubuntu jammy InRelease
+Get:2 http://archive.ubuntu.com/ubuntu jammy-updates InRelease [114 kB]
+Get:3 https://download.docker.com/linux/ubuntu jammy InRelease [48.9 kB]
+Get:4 http://archive.ubuntu.com/ubuntu jammy-backports InRelease [99.8 kB]
+Get:5 http://archive.ubuntu.com/ubuntu jammy-security InRelease [110 kB]
+Get:6 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 Packages [825 kB]
+Get:7 http://archive.ubuntu.com/ubuntu jammy-updates/main Translation-en [182 kB]
+Get:8 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 c-n-f Metadata [12.1 kB]
+Get:9 http://archive.ubuntu.com/ubuntu jammy-updates/restricted amd64 Packages [556 kB]
+Get:10 http://archive.ubuntu.com/ubuntu jammy-updates/restricted Translation-en [85.5 kB]
+Get:11 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 Packages [783 kB]
+Get:12 http://archive.ubuntu.com/ubuntu jammy-updates/universe Translation-en [135 kB]
+Get:13 http://archive.ubuntu.com/ubuntu jammy-updates/universe amd64 c-n-f Metadata [14.6 kB]
+Get:14 http://archive.ubuntu.com/ubuntu jammy-backports/universe amd64 Packages [7912 B]
+Get:15 http://archive.ubuntu.com/ubuntu jammy-security/main amd64 Packages [574 kB]
+Get:16 http://archive.ubuntu.com/ubuntu jammy-security/main Translation-en [120 kB]
+Get:17 http://archive.ubuntu.com/ubuntu jammy-security/main amd64 c-n-f Metadata [7584 B]
+Get:18 http://archive.ubuntu.com/ubuntu jammy-security/restricted amd64 Packages [511 kB]
+Get:19 http://archive.ubuntu.com/ubuntu jammy-security/restricted Translation-en [78.3 kB]
+Get:20 http://archive.ubuntu.com/ubuntu jammy-security/universe amd64 Packages [627 kB]
+Get:21 http://archive.ubuntu.com/ubuntu jammy-security/universe amd64 c-n-f Metadata [11.0 kB]
+Fetched 4904 kB in 10s (480 kB/s)
+Reading package lists... Done
+eliseev@srv-jfrog:~$ sudo apt-get -y upgrade
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Calculating upgrade... Done
+The following packages have been kept back:
+  grub-common grub2-common linux-generic linux-headers-generic
+  linux-image-generic
+The following packages will be upgraded:
+  linux-image-5.15.0-57-generic openssh-client openssh-server
+  openssh-sftp-server python3-software-properties software-properties-common
+  vim vim-common vim-runtime vim-tiny xxd
+11 upgraded, 0 newly installed, 0 to remove and 5 not upgraded.
+8 not fully installed or removed.
+Need to get 10.8 MB/22.2 MB of archives.
+After this operation, 11.6 MB of additional disk space will be used.
+Get:1 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 openssh-sftp-server amd64 1:8.9p1-3ubuntu0.1 [38.7 kB]
+Get:2 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 openssh-server amd64 1:8.9p1-3ubuntu0.1 [434 kB]
+Get:3 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 openssh-client amd64 1:8.9p1-3ubuntu0.1 [908 kB]
+Get:4 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 vim amd64 2:8.2.3995-1ubuntu2.3 [1727 kB]
+Get:5 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 vim-tiny amd64 2:8.2.3995-1ubuntu2.3 [704 kB]
+Get:6 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 vim-runtime all 2:8.2.3995-1ubuntu2.3 [6825 kB]
+Get:7 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 xxd amd64 2:8.2.3995-1ubuntu2.3 [51.2 kB]
+Get:8 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 vim-common all 2:8.2.3995-1ubuntu2.3 [81.5 kB]
+Get:9 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 software-properties-common all 0.99.22.4 [14.1 kB]
+Get:10 http://archive.ubuntu.com/ubuntu jammy-updates/main amd64 python3-software-properties all 0.99.22.4 [28.8 kB]
+Fetched 10.8 MB in 14s (795 kB/s)
+Preconfiguring packages ...
+dpkg: warning: files list file for package 'libctf0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-pkg-resources' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cryptsetup-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-distutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libip4tc2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pinentry-curses' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'logrotate' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libexpat1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bash' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'media-types' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cpio' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'powermgmt-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpipeline1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'networkd-dispatcher' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblmdb0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtext-iconv-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-more-itertools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtirpc3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'distro-info' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'snapd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'packagekit-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bcache-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtext-charwidth-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-modules-5.15.0-53-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-attr' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'efibootmgr' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'lsb-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libzstd1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'openssh-sftp-server' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'needrestart' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'tcpdump' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpython3.10:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdw1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'systemd-sysv' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxau6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'net-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxdmcp6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'time' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'adduser' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libperl5.34:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-dbus' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkeyutils1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'console-setup' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'eatmydata' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libapparmor1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pci.ids' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpsl5:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-server-minimal' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxcb1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'apt' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnewt0.52:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libhogweed6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnftables1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkdb5-10:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsodium23:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'vim' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'apt-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgpm2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpg-agent' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'nftables' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'irqbalance' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'telnet' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsgutils2-2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mokutil' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mime-support' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-importlib-metadata' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3.10' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bsdextrautils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdevmapper-event1.02.1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-setuptools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam-modules:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-distro' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'wget' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libplist3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bsdutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grub-efi-amd64-signed' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mc' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-drivers-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpg-wks-client' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grep' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblzma5:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'openssh-server' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgpg-error0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'init' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'squashfs-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cryptsetup' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-minimal' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xdg-user-dirs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bind9-libs:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iucode-tool' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'traceroute' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'slirp4netns' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-jwt' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'tar' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmagic-mgc' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-babel' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-colorama' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gawk' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-gdbm:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'psmisc' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'plymouth' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grub2-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libyaml-0-2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iptables' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libip6tc2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libglib2.0-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'distro-info-data' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-headers-5.15.0-53' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'manpages' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-apt' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblz4-1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iproute2' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'openssh-client' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libestr0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfastjson4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libinih1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ssh-import-id' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtirpc-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'intel-microcode' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmaxminddb0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libargon2-1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-launchpadlib' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'firmware-sof-signed' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxmlb2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-headers-5.15.0-56-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'unzip' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-jsonpatch' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'btrfs-progs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcbor0.8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libbrotli1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libedit2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam-modules-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libreadline8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'wireless-regdb' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libc-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsqlite3-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpgsm' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-debconf' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cron' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-modules-extra-5.15.0-56-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ncurses-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dosfstools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'rsyslog' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'netcat-openbsd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libacl1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'binutils-common:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libssl3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'upower' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnghttp2-14:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmagic1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libunistring2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsmartcols1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'less' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxext6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdns-export1110' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libglib2.0-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'isc-dhcp-client' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libctf-nobfd0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnetplan0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gettext-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpackagekit-glib2-18:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pkexec' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgcrypt20:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'parted' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnss-systemd:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xkb-data' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-yaml' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'secureboot-db' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblzo2-2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'debconf-i18n' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnftnl11:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'coreutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'e2fsprogs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libefiboot1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'zlib1g:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnpth0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcrypt1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'hdparm' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ufw' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-lazr.uri' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'systemd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libidn2-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libntfs-3g89' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcom-err2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'binutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'file' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'vim-tiny' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'kmod' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libassuan0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-standard' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-modules-5.15.0-56-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-zipp' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-click' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'diffutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libatm1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'perl-modules-5.34' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'lshw' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bzip2' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'amd64-microcode' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'locales' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3.10-minimal' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libldap-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'man-db' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libappstream4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libunwind8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-markupsafe' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-keyring' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libaudit-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgcc-s1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtext-wrapi18n-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'finalrd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'apport-symptoms' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsemanage-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'shim-signed' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'open-iscsi' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libintl-xs-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'usbutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'lvm2' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-headers-5.15.0-56' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libldap-2.5-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libseccomp2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'software-properties-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xxd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ntfs-3g' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsystemd0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcap2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'fdisk' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'debconf' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'multipath-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python-babel-localedata' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libjansson4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sg3-utils-udev' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'netplan.io' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libopeniscsiusr' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkrb5support0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gcc-12-base:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'fuse3' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-serial' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'tzdata' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcap2-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liberror-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'eject' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-six' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpython3.10-stdlib:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grub-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'apparmor' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gdisk' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'perl-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libselinux1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dirmngr' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ca-certificates' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'hostname' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgssrpc4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gir1.2-packagekitglib-1.0' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dbus-user-session' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libklibc:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpcre3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcap-ng0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'unattended-upgrades' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-jinja2' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libisc-export1105:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ncurses-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'plymouth-theme-ubuntu-text' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libglib2.0-data' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgnutls30:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libext2fs2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-oauthlib' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libuv1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-chardet' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'os-prober' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam0g:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-configobj' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'vim-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pollinate' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libslang2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-secretstorage' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-pyparsing' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'busybox-static' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfreetype6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-software-properties' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnettle8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpcap0.8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libwrap0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-certifi' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mtr-tiny' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libx11-data' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmpfr6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-image-5.15.0-53-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gnupg-l10n' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-jsonschema' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ed' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmodule-find-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'librtmp1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'command-not-found' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libapt-pkg6.0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdbus-glib-1-2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bash-completion' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgmp10:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-cryptography' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'friendly-recovery' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'init-system-helpers' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libncurses6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'krb5-config' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'strace' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-wadllib' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdbus-1-3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dbus' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsigsegv2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xz-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-gi' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfribidi0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sed' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'shared-mime-info' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-requests' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libp11-kit0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-commandnotfound' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libaudit1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'krb5-user' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grub-efi-amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpng16-16:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblvm2cmd2.03:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gzip' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmnl0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'thin-provisioning-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'systemd-timesyncd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgssapi-krb5-2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'udev' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libuuid1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-idna' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'usrmerge' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'patch' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libss2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'usb.ids' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpython3.10-minimal:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ftp' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sudo' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xfsprogs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgdbm-compat4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'util-linux' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsepol2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ucf' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'git' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gir1.2-glib-2.0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpcre2-8-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'usbmuxd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libncursesw6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libk5crypto3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfuse3-3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pciutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'busybox-initramfs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxtables12:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libltdl7:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liburcu8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mc-data' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'logsave' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libssh-4:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-jeepney' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dpkg' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'lsof' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libc6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-urllib3' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfdisk1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'systemd-hwe-hwdb' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpg-wks-server' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-netifaces:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libudev1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'nano' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpci3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libffi8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdevmapper1.02.1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnuma1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libparted2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-pyrsistent:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdrm2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libslirp0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'whiptail' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmd0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libproc-processtable-perl:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python-apt-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'passwd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libisns0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'findutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mount' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dmsetup' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sensible-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'uuid-runtime' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dmeventd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'xauth' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnetfilter-conntrack3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'groff-base' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-json-pointer' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'pigz' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libusbmuxd6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpgv' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmount1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnfnetlink0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-headers-5.15.0-53-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libplymouth5:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxxhash0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libuchardet0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'kpartx' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'procps' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libeatmydata1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libattr1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libnsl2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkadm5srv-mit12:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmpdec3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpgconf' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sysvinit-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gnupg' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libintl-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-keyring' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtasn1-6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-httplib2' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam-systemd:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libupower-glib3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libefivar1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpolkit-agent-1-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'git-man' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libx11-6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libcryptsetup12:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'packagekit' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgirepository-1.0-1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'kbd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libssh2-1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'netbase' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'console-setup-linux' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-minimal' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'isc-dhcp-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'debianutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsemanage2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mawk' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkrb5-3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-modules-extra-5.15.0-53-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ubuntu-advantage-tools' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libusb-1.0-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libstemmer0d:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bind9-dnsutils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'tnftp' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'keyboard-configuration' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dmidecode' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sbsigntool' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'install-info' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdebconfclient0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'base-files' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libterm-readkey-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libbinutils:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'vim-runtime' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'lsb-release' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libfido2-1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libaio1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libbpf0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libbz2-1.0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'grub-efi-amd64-bin' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-xkit' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'klibc-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-lazr.restfulclient' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libimobiledevice6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'bind9-host' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'openssl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libbsd0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-lib2to3' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cloud-guest-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdrm-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mailcap' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libelf1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam-cap:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'thermald' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-distro-info' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'linux-image-5.15.0-56-generic' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'base-passwd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iputils-ping' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libjson-c5:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libevdev2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'readline-common' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpam-runtime' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libdb5.3:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'publicsuffix' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxml2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'policykit-1' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libsort-naturally-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'zstd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libmodule-scandeps-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libblkid1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iso-codes' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libstdc++6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libxmuu1:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'polkitd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'info' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'liblocale-gettext-perl' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'cryptsetup-initramfs' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gpg' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgudev-1.0-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpolkit-gobject-1-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libprocps8:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'dash' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'iputils-tracepath' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgstreamer1.0-0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'mdadm' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'rsync' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-systemd' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-cffi-backend:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkmod2:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpython3-stdlib:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libgdbm6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libtinfo6:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libpopt0:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libicu70:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'libkadm5clnt-mit12:amd64' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'gnupg-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'binutils-x86-64-linux-gnu' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'sg3-utils' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'ncurses-term' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'login' missing; assuming package has no files currently installed
+dpkg: warning: files list file for package 'python3-blinker' missing; assuming package has no files currently installed
+(Reading database ... 39843 files and directories currently installed.)
+Preparing to unpack .../00-linux-image-5.15.0-57-generic_5.15.0-57.63_amd64.deb ...
+Unpacking linux-image-5.15.0-57-generic (5.15.0-57.63) over (5.15.0-57.63) ...
+dpkg: error processing archive /tmp/apt-dpkg-install-9Cjuco/00-linux-image-5.15.0-57-generic_5.15.0-57.63_amd64.deb (--unpack):
+ too-long line or missing newline in '/var/lib/dpkg/triggers/linux-update-5.15.0-57-generic'
+Preparing to unpack .../01-openssh-sftp-server_1%3a8.9p1-3ubuntu0.1_amd64.deb ...
+Unpacking openssh-sftp-server (1:8.9p1-3ubuntu0.1) over (1:8.9p1-3) ...
+Preparing to unpack .../02-openssh-server_1%3a8.9p1-3ubuntu0.1_amd64.deb ...
+Unpacking openssh-server (1:8.9p1-3ubuntu0.1) over (1:8.9p1-3) ...
+Preparing to unpack .../03-openssh-client_1%3a8.9p1-3ubuntu0.1_amd64.deb ...
+Unpacking openssh-client (1:8.9p1-3ubuntu0.1) over (1:8.9p1-3) ...
+Preparing to unpack .../04-vim_2%3a8.2.3995-1ubuntu2.3_amd64.deb ...
+Unpacking vim (2:8.2.3995-1ubuntu2.3) over (2:8.2.3995-1ubuntu2.1) ...
+Preparing to unpack .../05-vim-tiny_2%3a8.2.3995-1ubuntu2.3_amd64.deb ...
+Unpacking vim-tiny (2:8.2.3995-1ubuntu2.3) over (2:8.2.3995-1ubuntu2.1) ...
+Preparing to unpack .../06-vim-runtime_2%3a8.2.3995-1ubuntu2.3_all.deb ...
+Unpacking vim-runtime (2:8.2.3995-1ubuntu2.3) over (2:8.2.3995-1ubuntu2.1) ...
+Preparing to unpack .../07-xxd_2%3a8.2.3995-1ubuntu2.3_amd64.deb ...
+Unpacking xxd (2:8.2.3995-1ubuntu2.3) over (2:8.2.3995-1ubuntu2.1) ...
+Preparing to unpack .../08-vim-common_2%3a8.2.3995-1ubuntu2.3_all.deb ...
+Unpacking vim-common (2:8.2.3995-1ubuntu2.3) over (2:8.2.3995-1ubuntu2.1) ...
+Preparing to unpack .../09-software-properties-common_0.99.22.4_all.deb ...
+Unpacking software-properties-common (0.99.22.4) over (0.99.22.3) ...
+Preparing to unpack .../10-python3-software-properties_0.99.22.4_all.deb ...
+Unpacking python3-software-properties (0.99.22.4) over (0.99.22.3) ...
+Errors were encountered while processing:
+ /tmp/apt-dpkg-install-9Cjuco/00-linux-image-5.15.0-57-generic_5.15.0-57.63_amd64.deb
+needrestart is being skipped since dpkg has failed
+E: Sub-process /usr/bin/dpkg returned an error code (1)
