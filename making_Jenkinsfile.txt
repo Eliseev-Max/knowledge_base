@@ -1,0 +1,89 @@
+checkout scmGit(
+    branches: [[name: 'stable-3.x']],
+    userRemoteConfigs: [[url: 'https://github.com/jenkinsci/git-plugin.git']])
+	
+***
+
+checkout([$class: 'GitSCM',
+          branches: [[name: '*/master']],
+          doGenerateSubmoduleConfigurations: false,
+          extensions: [[$class: 'SubmoduleOption',
+                        disableSubmodules: false,
+                        parentCredentials: false,
+                        recursiveSubmodules: true,
+                        reference: '',
+                        trackingSubmodules: false]], 
+          submoduleCfg: [], 
+          userRemoteConfigs: [[url: 'your-git-server/your-git-repository']]])
+		  
+checkout scm: [
+    $class: 'GitSCM',
+    branches: scm.branches,
+    extensions: [
+        [$class: 'SubmoduleOption',
+        disableSubmodules: false,
+        parentCredentials: false,
+        recursiveSubmodules: true,
+        reference: 'https://github.com/softwareschneiderei/ADS.git',
+        shallow: true,
+        trackingSubmodules: false]
+    ],
+    submoduleCfg: [],
+    userRemoteConfigs: scm.userRemoteConfigs
+]
+
+***
+
+checkout(
+	[$class: 'GitSCM',
+		branches: [[name: '*/master']], 
+		extensions: [[$class: 'SubmoduleOption', 
+			disableSubmodules: false, 
+			parentCredentials: true, 
+			recursiveSubmodules: true, 
+			reference: '',
+			trackingSubmodules: false]],
+		userRemoteConfigs: [[credentialsId: 'project_key_eliseev',
+		url: 'ssh://git@srv-bucket:7999/at/docker_environment.git']]
+	]
+)
+
+---
+---
+---
+
+node {
+    stage('checkout') {
+        checkout([
+        $class: 'GitSCM',
+        branches: [[name: '*/master']],
+		extensions: [[$class: 'SubmoduleOption', 
+			disableSubmodules: false, 
+			parentCredentials: true, 
+			recursiveSubmodules: true, 
+			reference: '',
+			trackingSubmodules: false]],
+        userRemoteConfigs: [[
+            url: 'ssh://git@srv-bucket:7999/at/docker_environment.git',
+            credentialsId: 'project_key_eliseev'
+            ]]
+        ])
+    }
+    stage('build_image') {
+        sh 'docker build -t env_image .'
+    }
+    stage('run_container_with_tests') {
+        sh """
+            docker run --rm -p 222:22 -v $WORKSPACE/allure-results/:/app/allure-results env_image:latest pytest --host ${IP}
+        """
+    }
+    stage('report-allure') {
+        allure([
+            includeProperties: false,
+            jdk: '',
+            properties: [],
+            reportBuildPolicy: 'ALWAYS',
+            results: [[path: '$WORKSPACE/allure-results']]
+        ])
+    }
+}

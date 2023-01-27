@@ -1,0 +1,9 @@
+{"Устранение неполадок аутентификации Kerberos в Linux":https://andreyex.ru/linux/ustranenie-nepoladok-autentifikatsii-kerberos-v-linux/}
+{"Список UNIX/LINUX демонов/служб и их автозагрузка":https://itmag.pro/unix/common/unix-daemons-list}
+{"Процессы и демоны в Linux":http://rus-linux.net/kos.php?name=/papers/proc/proc_lin.html}
+{"Network Configuration":https://ubuntu.com/server/docs/network-configuration}
+{"How to Configure Proxy Settings on Ubuntu 20.04":https://phoenixnap.com/kb/ubuntu-proxy-settings}
+{"Использование прокси":https://help.ubuntu.ru/wiki/%D0%BF%D1%80%D0%BE%D0%BA%D1%81%D0%B8}
+{"Удаление неиспользуемых ядер в Linux":https://itproffi.ru/udalenie-neispolzuemyh-yader-v-linux/}
+{"Как настроить Linux для использования NTLM с CNTLM":https://itsecforu.ru/2019/05/20/%F0%9F%96%AA-%D0%BA%D0%B0%D0%BA-%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B8%D1%82%D1%8C-linux-%D0%B4%D0%BB%D1%8F-%D0%B8%D1%81%D0%BF%D0%BE%D0%BB%D1%8C%D0%B7%D0%BE%D0%B2%D0%B0%D0%BD%D0%B8%D1%8F-ntlm/}
+{"":}

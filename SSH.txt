@@ -33,3 +33,18 @@ Git
 	
 10. Git на сервере - Генерация открытого SSH ключа
 	https://git-scm.com/book/ru/v2/Git-%D0%BD%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE%D1%82%D0%BA%D1%80%D1%8B%D1%82%D0%BE%D0%B3%D0%BE-SSH-%D0%BA%D0%BB%D1%8E%D1%87%D0%B0
+
+‼ Если после добавления SSH private key в директорию ~/.ssh и создания там config файла, не удаётся пройти аутентификацию по ключу:
+	1. Проверить, запущен ли ssh-agent:
+		$ eval "$(ssh-agent -s)"
+		> Agent pid 59566			# если есть подобный вывод, агент запущен
+	
+	2. Добавить свой SSH private key  в ssh-agent.
+		$ ssh-add ~/.ssh/name_of_private_ssh_key
+(подробнее:
+	https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+Troubleshooting: "Error: Permission denied (publickey)"
+	https://docs.github.com/en/authentication/troubleshooting-ssh/error-permission-denied-publickey?platform=linux
+more: "Permission denied (publickey)"
+	https://confluence.atlassian.com/bbkb/permission-denied-publickey-302811860.html
+)

@@ -1,0 +1,17 @@
+Пример создания git submodule:
+
+1. Создадим директорию git-submodule-demo и проинициализируем её как новый репозиторий:
+	$ mkdir git-submodule-demo
+	$ cd git-submodule-demo
+	$ git init
+	> Initialized empty Git repository in /path/to/git-submodule-demo/.git/
+
+2. Добавим подмодуль в созданный репозиторий
+	$ git submodule add https://bitbucket.org/username/repo
+	
+	# Команда git submodule add принимает параметр URL, который указывает на репозиторий git.
+	# Можем просмотреть текущее состояние репозитория: $ git status
+	# В репозитории появилось 2 новых файла:
+	# .gitmodules
+	# директория /repo
+	# Просмотр содержимого .gitmodules показывает новое отображение подмодулей
