@@ -1,0 +1,35 @@
+1. Перейти в консоли в директорию, где будет установлено виртуальное окружение ($ cd ~/virtual)
+2. > pip install virtualenv
+3. Создание виртуального окружения:
+	> virtualenv NameOfEnv
+	NameOfEnv/bin/ 	содержит:
+		• скрипты для активации/деактивации окружения,
+		• интерпретатор Python, используемый в рамках данного окружения,
+		• менеджер pip
+		• ещё несколько инструментов, обеспечивающих работу с пакетами Python
+		
+	NameOfEnv/include/ и NameOfEnv/lib/		каталоги, содержащие библиотечные файлы окружения
+	NameOfEnv/lib/pythonX.X/site-packages/		место установки новых пакетов
+4. Активация виртуального окружения
+	> source NameOfEnv/bin/activate
+	Если команда была выполнена успешно, перед приглашением в командной строке появилась дополнительная надпись, совпадающая с именем виртуального окружения.
+	(NameOfEnv) ubuntu@ubuntu:~$
+Если вы создадите виртуальное окружение с ключем –system-site-packages:
+	> virtualenv --system-site-packages NameOfEnv
+то в рамках окружения NameOfEnv будем иметь доступ к глобальному хранилищу пакетов:
+	/usr/lib/pythonX.X/site-packages
+5. Деактивация виртуального окружения
+	> deactivate
+
+	venv
+Устанавливать не нужно, уже входит в стандартную библиотеку Python.
+работает только в Python3.
+1. Создание виртуального окружения
+	> python -m venv virtualenv1
+2. Активация виртуального окружения
+	> source virtualenv1/bin/activate
+3. Деактивация виртуального окружения
+	> deactivate
+
+Установка и настройка Flask в Ubuntu в виртуальном окружении virtualenv:
+https://techcave.ru/posts/97-ustanovka-i-nastroika-flask-v-ubuntu-v-virtualnom-okruzhenii-virtualenv.html

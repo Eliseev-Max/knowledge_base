@@ -3,6 +3,7 @@
 }
 
 Jenkinsfile from repo: https://github.com/Eliseev-Max/warehouse_tests.git
+#### Scripted pipeline ####
 node {
     stage('checkout') {
         checkout([

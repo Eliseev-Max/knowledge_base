@@ -29,7 +29,7 @@ node {
 }
 
 
-* Синтаксис Scripted Pipelines = Pipeline Syntax Snippet Generator
+* Синтаксис Scripted Pipelines  (получить готовый скрипт можно в Pipeline Syntax Snippet Generator)
   step('checkout') - предпочтительный метод проверки SCM.
   он предоставляет значительно больше функциональных возможностей, чем git step.
   

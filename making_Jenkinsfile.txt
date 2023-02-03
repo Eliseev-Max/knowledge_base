@@ -1,8 +1,3 @@
-checkout scmGit(
-    branches: [[name: 'stable-3.x']],
-    userRemoteConfigs: [[url: 'https://github.com/jenkinsci/git-plugin.git']])
-	
-***
 
 checkout([$class: 'GitSCM',
           branches: [[name: '*/master']],

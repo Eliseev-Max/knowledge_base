@@ -1,0 +1,253 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<meta name="keywords" content=""/>
+<meta name="description" content=""/>
+
+<script type="text/javascript">
+var gettext_map_head = window['gettext_map']; 
+function gettext(input) { 
+	if( gettext_map_head ){
+		var tran = gettext_map_head[input]; 
+		return tran ? tran[1] : input; 
+	}
+	return input;
+};
+</script>
+<link type="text/css" href="/style.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'" rel="stylesheet"/>
+<link type="text/css" href="/css/smoothness/jquery-ui-1.8.1.custom.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'" rel="stylesheet"/>
+<link type="text/css" href="/css/jquery.contextMenu.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'" rel="stylesheet"/>
+<link type="text/css" href="/css/tooltipster.bundle.min.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'" rel="stylesheet"/>
+<link type="text/css" href="/css/tooltipster-sideTip-light.min.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'" rel="stylesheet"/>
+<!--[if IE]>
+    <link rel="stylesheet" type="text/css" href="all-ie-only.css?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"/>
+    <script language="javascript" type="text/javascript" src="js/excanvas.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<![endif]-->
+<script type="text/javascript" src="/js/jquery-1.7.min.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/jquery-ui-1.8.1.custom.min.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/jquery.json-2.2.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/tooltipster.bundle.min.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/date.format.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/jquery.maxlength.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/jquery.single_double_click.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript" src="/js/funcs.js?ver='1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020'"></script>
+<script type="text/javascript">
+var platform         = 'am335x';
+var aris_desc        = 'Джураев (microSD)';
+var is_mobile        = '0';
+var is_master        = ''; // only for devices with reservation
+var wrk_mode         = 'normal';
+var debug_mode       = '0';
+var modules_cfg_mode = '0';
+
+    var device_status_info = [];
+	$(function() {
+        downloadTextDataFun('/get_system_status.json', 5000, update_system_status, undefined, true, 10000);
+    });
+</script>
+
+<!--[if IE 6]>
+<script type="text/javascript">
+    try {document.execCommand("BackgroundImageCache", false, true);}
+    catch(err) {}
+</script>
+<![endif]-->
+
+<title>ARIS - начало работы</title>
+</head>
+<body>
+<table id="page_table" cellpadding="0" cellspacing="0"><tr id="header_row"><td id="left_row"></td><td id="header_td"><div id="header">
+	<div id="logo">
+		<h1><a href="index.html">ARIS</a></h1>
+		<p>начало работы</p>
+	</div>
+</div>
+<!-- end #header --></td><td id="right_row"></td></tr><tr id="menu_row"><td></td><td id="menu_td">
+<div id="menu" >
+    <table style="width: 100%" id="nav" cellpadding="0" cellspacing="0">
+	<tr>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/translation_data_sources.html">Трансляция</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/translation_data_sources.html" class="">Прием данных</a></li>
+			    
+			    <li><a href="/translation_data_dest.html" class="">Передача данных</a></li>
+			    
+			    <li><a href="/translation_tunnels.html" class="menu_separator">Туннели COM-Ethernet</a></li>
+			    
+			    <li><a href="/translation_virtual_com.html" class="">Виртуальные COM порты</a></li>
+			    
+			    <li><a href="/translation_analog_input.html" class="menu_separator">Измерения</a></li>
+			    
+			    <li><a href="/translation_discrete_input.html" class="">Состояние КА</a></li>
+			    
+			    <li><a href="/translation_discrete_output.html" class="">Команды управления</a></li>
+			    
+			    <li><a href="/translation_templates.html" class="menu_separator">Шаблоны источников данных</a></li>
+			    
+			    <li><a href="/translation_trace_config.html" class="menu_separator">Трассировка и отладка</a></li>
+			    
+			    <li><a href="/translation_save.html" class="menu_separator">Сохранить</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/USPD.html">Учет</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/USPD.html" class="">Конфигуратор учета</a></li>
+			    
+			    <li><a href="/JavaAppCRQ/channels.htm" class="">CRQ Java апплет</a></li>
+			    
+			    <li><a href="/crq_proxy_config.html" class="">Настройка CRQ-прокси</a></li>
+			    
+			    <li><a href="/service_reboot_with_uspd_init" class="menu_separator">Инициализация</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/system_time_sync.html">Система</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/system_time_sync.html" class="">Параметры системы</a></li>
+			    
+			    <li><a href="/system_date_and_time.html" class="">Дата и время</a></li>
+			    
+			    <li><a href="/system_reserv2.html" class="">Резервирование</a></li>
+			    
+			    <li><a href="/system_modules.html" class="menu_separator">Настройка модулей</a></li>
+			    
+			    <li><a href="/system_crateext.html" class="">Крейты расширения</a></li>
+			    
+			    <li><a href="/system_metrology.html" class="menu_separator">Метрология</a></li>
+			    
+			    <li><a href="/system_display_list.html" class="menu_separator">Дисплей</a></li>
+			    
+			    <li><a href="/system_scheme_list.html" class="">Мнемосхемы</a></li>
+			    
+			    <li><a href="/system_image_library.html" class="">Компоненты мнемосхем</a></li>
+			    
+			    <li><a href="/system_firmware_update.html" class="menu_separator">Обновление ПО</a></li>
+			    
+			    <li><a href="/system_users_roles.html" class="menu_separator">Пользователи</a></li>
+			    
+			    <li><a href="/system_sysinfo.html" class="">Информация</a></li>
+			    
+			    <li><a href="/translation_conflicts.html" class="">Конфликты</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/events_system_list.html">События</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/events_system_list.html" class="">Последние события</a></li>
+			    
+			    <li><a href="/events_system_list_full.html" class="">Все события</a></li>
+			    
+			    <li><a href="/retroarc_view.html" class="menu_separator">Ретроархив</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/measurements.html">Измерения</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/measurements.html" class="">Показания с модулей </a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/fbd_algorithms.html">Алгоритмы</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/fbd_algorithms.html" class="">Список алгоритмов</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/oscillograms_list.html">Осциллограммы</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/oscillograms_list.html" class="">Просмотр осциллограмм</a></li>
+			    
+			    <li><a href="/oscillograms_params.html" class="">Параметры осциллографирования</a></li>
+			    
+		    </ul>
+		</td>
+		
+		<td style="text-align: center" class="nav_menu">
+			<a class="" href="/service_service">Сервис</a>
+			<ul class="dropDownMenu">
+			    
+			    <li><a href="/service_service" class="">Сервис</a></li>
+			    
+			    <li><a href="/service_reboot" class="">Перезагрузить</a></li>
+			    
+			    <li><a href="/service_debug" class="">Наладка</a></li>
+			    
+			    <li><a href="/network_diagnostics.html" class="">Диагностика</a></li>
+			    
+			    <li><a href="/service_backup" class="menu_separator">Бэкап</a></li>
+			    
+			    <li><a href="/service_report" class="">Отчет</a></li>
+			    
+			    <li><a href="/logout.html" class="menu_separator">Сменить пользователя</a></li>
+			    
+		    </ul>
+		</td>
+		
+	</tr>
+    </table>
+</div>
+
+<!-- end #menu --></td><td></td></tr><tr id="content_row"><td><div id="aris_name" onclick="window.location='index.html'">ARIS 2803</div></td><td id="content_td">
+<div id="page">
+	<div id="content">
+		<div class="post">
+			<h2 class="title"><a>Добро пожаловать в ARIS !</a></h2>
+			<br/>
+			<a id="ask" href="#" onclick="$('#ask').hide();$('#infovis').hide();$('#services').fadeIn()">
+				Хотите увидеть список доступных вам сервисов?
+			</a>
+			<div id="services" style="display: none">
+				<p>Вам доступны следующие сервисы:</p>
+				<ul class="services" id="services_ul">
+				<script type="text/javascript">
+					$(function() {
+						$('#nav td').each( function(){ 
+							$("#services_ul").append('<li/>').append($(this).html().replace(/class/g, ' '));
+						});
+					});
+				</script>
+				</ul>
+			</div>
+		</div>
+    	<div id="infovis"></div>
+	</div>
+	<!-- end #content --></div></td><td><div>
+	<div id="sidebar">
+		<ul>
+			<li>
+				<h2>Подсказка</h2>
+				<p style="text-align:left;">Здесь будут появляться важные для работы подсказки.</p>
+			</li>
+		</ul>
+	</div>
+	<!-- end #sidebar -->
+	<div style="clear: both;">&nbsp;</div>
+	<div id="log"></div>
+</div>
+<!-- end #page --></td></tr><tr id="footer_row"><td></td><td id="footer_td">
+<div id='footer'><p>Контроллер электрического присоединения ARIS&nbsp;&bull;&nbsp;1.9.154.41716-BUC-6786_module-delete-fast_cyc@26.11.2020&nbsp;&bull;&nbsp;ProsoftSystems</p><p id='systime' style='display:none'>1611672200</p><br/><p><a href='#' id='mobile_ver'>Мобильная версия</a></p></div></td><td></td></tr></table>
+</body>
+</html>
