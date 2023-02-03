@@ -1,3 +1,4 @@
+‼‼‼ https://github.com/andviro/pamyatka/blob/master/lab6.md
 { sources:
 https://www.atlassian.com/git/tutorials/git-submodule
 git-scm:docs
@@ -59,6 +60,7 @@ git-scm:docs
 
 ‼ Более простой способ получения данных подмодуля:
 	$ git clone --recurse-submodules
+	$ git clone --recursive <URL_основного_проекта>
 
 Получение изменений подмодуля из удалённого репозитория
 	Проверить наличие изменений в подмодуле:

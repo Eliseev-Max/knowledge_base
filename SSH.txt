@@ -14,6 +14,54 @@ more: "Permission denied (publickey)"
 	https://confluence.atlassian.com/bbkb/permission-denied-publickey-302811860.html
 )
 
+Настройка ssh_config
+(перевод статьи: https://goteleport.com/blog/ssh-config/)
+Наглядная альтернатива набору в командной строке команды на подключение к серверу по SSH:
+Команда:
+	$ ssh -i /users/virag/keys/us-west/ed25519 -p 1024 -l virag \ myserver.aws-west.example.com
+
+~/.ssh/ssh_config:
+	(Общий вид):
+	Host [alias]
+		Option1 [Value]
+		Option2 [Value]
+		Option3 [Value]
+
+# Отступы созданы для удобства чтения config-файла
+
+	(Пример использования):
+	Host myserver
+		Hostname myserver.aws-west.example.com
+		User virag
+		Port 1024
+		IdentityFile /users/virag/keys/us-west/ed25519
+
+(Шифрование ed25519 предпочтительней, чем RSA, DSA, ECDSA → см. статью: https://goteleport.com/blog/comparing-ssh-keys/)
+
+Как работает ssh_config
+	Клиент ssh считывает конфигурацию из трех мест в следующем порядке:
+		1. Общесистемная конфигурация в /etc/ssh/ssh_config
+		2. Специфическая для пользователя в вашем домашнем каталоге ~/.ssh/ssh_config
+		3. Флаги командной строки, передаваемые в ssh напрямую
+
+	Это означает, что
+		параметры командной строки [3] →  могут переопределять пользовательскую конфигурацию [2] →
+		пользовательская конфигурация [2] может переопределять глобальную конфигурацию [1]
+
+	Когда параметры подключения используются многократно, часто проще определить их в ssh_config, которые автоматически применяются при подключении.
+	# Подстановочные знаки также могут быть использованы как часть заголовка хоста:
+	Host myserver*
+		Hostname myserver1.aws-west.example.com
+		User virag
+		Port 1024
+
+	Используя псевдоним myserver1, мы получаем то, что ожидаем от второй строфы.
+	Но myserver2 также имеет аналогичный список опций.
+	‼ Клиент ssh получает эту информацию путем сопоставления шаблонов и фиксации значений по мере последовательного чтения файла.
+	Поскольку myserver2 соответствует и myserver2, и myserver*, он сначала возьмет значение Hostname из myserver2.
+	Затем, когда дело доходит до второго совпадения шаблона, используются значения User и Port, но поле Hostname уже заполнено. 
+	‼ ssh принимает первое значение для каждого параметра.
+
 [
 	1. SSH. Рускоязычная документация.
 		https://help.ubuntu.ru/wiki/ssh
