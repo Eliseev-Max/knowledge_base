@@ -14,7 +14,7 @@ git-scm:docs
 	> Initialized empty Git repository in /path/to/git-submodule-demo/.git/
 
 2. Добавим подмодуль в созданный репозиторий
-	|$ git submodule add <URL репозитория> <директория>|
+	[$ git submodule add <URL репозитория> <директория>]
 	
 	$ git submodule add https://bitbucket.org/username/repo
 	
@@ -80,5 +80,14 @@ git-scm:docs
 	
 	Отображать краткое резюме об изменениях в подмодулях:
 		$ git config status.submodulesummary 1
+
+‼ Псевдонимы для часто используемых команда
+	$ git config alias.sdiff '!'"git diff && git submodule foreach 'git diff'"
+	
+	$ git config alias.spush 'push --recurse-submodules=on-demand'
+		# Теперь команда $ git spush выполняет то же, что и $ git push --recurse-submodules=on-demand
+		
+	$ git config alias.supdate 'submodule update --remote --merge'
+		$ git supdate == $ git submodule update --remote --merge
 
 [https://git-scm.com/book/ru/v2/%D0%98%D0%BD%D1%81%D1%82%D1%80%D1%83%D0%BC%D0%B5%D0%BD%D1%82%D1%8B-Git-%D0%9F%D0%BE%D0%B4%D0%BC%D0%BE%D0%B4%D1%83%D0%BB%D0%B8]
