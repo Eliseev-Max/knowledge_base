@@ -1,3 +1,4 @@
+<https://www.jenkins.io/doc/book/pipeline/syntax/>
 # Jenkinsfile (Declarative Pipeline)
 
 # В синтаксисе Declarative Pipeline блок pipeline {} определяет всю работу, выполняемую во всем пайплайне. 

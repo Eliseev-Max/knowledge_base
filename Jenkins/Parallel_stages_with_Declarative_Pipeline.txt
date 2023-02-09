@@ -1,0 +1,2 @@
+{https://www.jenkins.io/blog/2017/09/25/declarative-1/#parallel-stages}
+

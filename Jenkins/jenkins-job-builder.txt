@@ -1,35 +1,150 @@
-1. Устанавливаем jenkins-job-builder:
-	~# pip install jenkins-job-builder
+Jenkins Job Builder (JJB) - утилита, которая с помощью описаний сборок в форматах YAML или JSON
+							позволяет настраивать сборки на jenkins-сервере
+	Описания сборок можно хранить в репозитории, что позволяет удобно вносить и отслеживать изменения 
+	в настройках сборок
+	В Jenkins Job Builder поддерживаются шаблоны → можно легко создавать описания для нескольких однотипных сборок.
+	Представляет собой обычный пакет python
 	
-2. Создаём ini-файл:
-	~# mkdir /etc/jenkins_jobs
-	~# vim /etc/jenkins_jobs/jenkins_jobs.ini
+	Установка и конфигурирование
+	‼ НЕ УСТАНАВЛИВАТЬ С ПОМОЩЬЮ apt-get install!!!
+	НЕПРАВИЛЬНО: $ sudo apt-get install jenkins-job-builder ---WRONG!
+		
+	ПРАВИЛЬНО:	 $ pip install --user jenkins-job-builder
 	
-	# Содержимое jenkins_jobs.ini #
-	[jenkins]
-	user=admin
-	password=8afd6d2e2d3b2ae767e067ee07a21b37
-	url=http://127.0.0.1:8080
+	(Нужен отдельный пользователь с определёнными правами)
 	
-	query_plugins_info=False
+	+ можно всё это добавить в конфигурационный файл и не вводить
 	
-	Необходимо сменить пароль в уч.записи администратора jenkins:
-	  •  http://[URL-JENKINS-UI]/me/configure
-	  •  Нажать на кнопку: Show API Token...
-	  •  Скопировать пароль из поля API Token
-	  •  Вставить пароль в ini-файл
+	Конфигурационный файл: jenkins_jobs.ini = файл для настройки взаимодействия с Jenkins-сервером
+	
+Создание и конфигурирование jenkins_jobs.ini:
+	1. Создадим директорий jenkins_jobs
+		$ mkdir /etc/jenkins_jobs
+	2. В созданном директории создадим файл: jenkins-jobs.ini
+		$ vim /etc/jenkins_jobs/jenkins-jobs.ini
+	3. заполнить ini-файл:
+		[jenkins]
+		user=eliseev
+		password=<token_from_API>
+		url=http://172.29.24.22:8080
+		query_plugins_info=False
 	  
-3. Для удобства создадим отдельную директорию для yaml-файлов с джобами:
-
-Пример джобы (test.yaml):
+	####  Чтобы найти токен, ввести в адресной строке браузера:
+	//http://172.29.24.22:8080/me/configure
+	Можно создать API Token
+		Token created on 2023-02-07T19:19:47.432063+05:00
+		11b992dec72217c2a8bf3915d80652fac6
 	
+	4. Создадим директорий jobs
+		/etc/jenkins_jobs/jobs/
+	5. В созданом директории создадим yaml-файл
+
+# Пример простейшего yaml-файла с конфигурацией Jenkins Job
+
 - job:
 	name: test_job
 	description: 'Automatically generated test'
 	project-type: freestyle
 	builders:
 	  - shell: 'ls'
+	6. Сохраняем yaml-файл
+	‼ Можно указать:
+		- путь к одному .yaml-файлу;
+		- каталог с .yaml и/или .json файлами
+	* если выбираем каталог, все файлы .yaml/.yml или .json в этом каталоге будут прочитаны, и все задания, которые они определяют, будут созданы или обновлены
+	
+	7. $ jenkins-jobs update jobs
 
-4. test_job.yaml → Jenkins Job:
-	~# jenkins-jobs update jobs			# джоба создана в Jenkins
+Основные типы объектов, которые понимает JJB
+	
+	Пример конфигурацинного файла:
+	
+- job:
+    name: job-name
+    project-type: freestyle
+    defaults: global
+    description: 'Do not edit this job through the web!'
+    disabled: false
+    display-name: 'Fancy job name'
+    concurrent: true
+    workspace: /srv/build-area/job-name
+    quiet-period: 5
+    block-downstream: false
+    block-upstream: false
+    retry-count: 3
+    node: NodeLabel1 || NodeLabel2
+    logrotate:
+      daysToKeep: 3
+      numToKeep: 20
+      artifactDaysToKeep: -1
+      artifactNumToKeep: -1
 
+Пояснение параметров джобы:
+    • name - название джобы
+	
+    • project-type - тип проекта.
+		По умолчанию "freestyle".
+		можно указать:
+		  ♦ maven
+		  ♦ multijob
+		  ♦ flow
+		  ♦ pipeline
+		  ♦ externaljob
+		  
+    • defaults 
+		Определяет набор значений по умолчанию, которые будут использоваться для этого задания.
+		По умолчанию "global".
+		Если у нас есть значения, общие для всех заданий (джоб), можно создать глобальный объект Defaults для их хранения.
+		Дальнейшая настройка отдельных заданий не потребуется.
+		Если некоторые задания не должны использовать глобальные значения по умолчанию,
+		используйте это поле, чтобы указать другой набор значений по умолчанию.
+	
+    • description - описание джобы.
+		По умолчанию устанавливается значение: “!– Managed by Jenkins Job Builder”
+		
+    • disabled - задание выключено
+		disabled: false  (по умолчанию) задание включено
+		disabled: true  = задание выключено
+		
+    • display-name - отображаемое имя
+		Необязательное имя, отображаемое для проекта в Web GUI Jenkins вместо фактического имени задания.
+		‼ Инструмент jenkins_jobs не может полностью удалить этот признак после его установки, поэтому будьте осторожны при его установке.
+		Установка значения в ту же строку, что и имя задания, является эффективным обходным решением для снятия установки.
+		В качестве альтернативы поле можно очистить вручную с помощью веб-интерфейса Jenkins.
+    
+	• concurrent: true
+    • workspace
+    • quiet-period
+    • block-downstream
+    • block-upstream
+    • retry-count
+    • node
+    • logrotate
+https://jenkins-job-builder.readthedocs.io/en/latest/definition.html
+---
+Удаление старых задач
+Создание шаблонов
+	
+	Running
+	
+	• Test Mode
+		jenkins-jobs test ci/foo.yaml		# Проверка на синтаксические ошибки
+		jenkins-jobs test -r ci
+
+	• Updating jobs
+		jenkins-jobs update ci/foo.yaml
+		jenkins-jobs update ci/foo.yaml Foo1 Foo2
+	
+	• Deleting jobs
+		jenkins-jobs delete Foo1 Foo2
+
+	
+	$ jenkins-jobs update <путь до YAML-файла | каталога с .yaml, .yml, .json файлами>
+	В Jenkins появляются описанные сборки
+	
+	Для автоматизации процесса создания сборок и повышения отказоустойчивости:
+		► использовать Pipeline или YAML (JJB)
+
+		↓↓↓
+{ https://youtu.be/SoP05dLe5kA }
+		↑↑↑
