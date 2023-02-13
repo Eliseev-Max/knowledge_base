@@ -105,3 +105,10 @@ Jenkinsfile (Scripted Pipeline)
 		def envVarName = 'MY_VAR' 
 		env.setProperty(envVarName, 'my-value2')
 	}
+
+Пример использования токенов для удалённого запуска задач:
+http://172.29.24.22:8080/job/upload_and_run_tests/build?token=TOKEN_NAME 
+http://172.29.24.22:8080/job/upload_and_run_tests/build?token=example_tests			# Сборка без параметров
+or 
+http://172.29.24.22:8080/job/upload_and_run_tests//buildWithParameters?token=example_tests
+/buildWithParameters?token=TOKEN_NAME

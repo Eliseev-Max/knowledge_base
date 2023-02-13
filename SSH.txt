@@ -1,3 +1,12 @@
+Sources:
+	* https://goteleport.com/blog/ssh-config/
+	** Troubleshooting: "Error: Permission denied (publickey)":
+		https://docs.github.com/en/authentication/troubleshooting-ssh/error-permission-denied-publickey?platform=linux
+	*** Generating a new SSH key and adding it to the ssh-agent
+		https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
+	**** Permission denied (publickey) (Bitbucket Support)
+		https://confluence.atlassian.com/bbkb/permission-denied-publickey-302811860.html
+
 Добавление закрытого SSH-ключа SSH-агенту 
 ‼ Если после добавления SSH private key в директорию ~/.ssh и создания там config файла, не удаётся пройти аутентификацию по ключу:
 	1. Проверить, запущен ли ssh-agent:
@@ -6,13 +15,7 @@
 	
 	2. Добавить свой SSH private key  в ssh-agent.
 		$ ssh-add ~/.ssh/name_of_private_ssh_key
-(подробнее:
-	https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent
-Troubleshooting: "Error: Permission denied (publickey)"
-	https://docs.github.com/en/authentication/troubleshooting-ssh/error-permission-denied-publickey?platform=linux
-more: "Permission denied (publickey)"
-	https://confluence.atlassian.com/bbkb/permission-denied-publickey-302811860.html
-)
+
 
 Настройка ssh_config
 (перевод статьи: https://goteleport.com/blog/ssh-config/)
@@ -36,7 +39,8 @@ more: "Permission denied (publickey)"
 		Port 1024
 		IdentityFile /users/virag/keys/us-west/ed25519
 
-(Шифрование ed25519 предпочтительней, чем RSA, DSA, ECDSA → см. статью: https://goteleport.com/blog/comparing-ssh-keys/)
+‼ Шифрование ed25519 предпочтительней, чем RSA, DSA, ECDSA 
+(→ см. статью: https://goteleport.com/blog/comparing-ssh-keys/)
 
 Как работает ssh_config
 	Клиент ssh считывает конфигурацию из трех мест в следующем порядке:
@@ -61,6 +65,7 @@ more: "Permission denied (publickey)"
 	Поскольку myserver2 соответствует и myserver2, и myserver*, он сначала возьмет значение Hostname из myserver2.
 	Затем, когда дело доходит до второго совпадения шаблона, используются значения User и Port, но поле Hostname уже заполнено. 
 	‼ ssh принимает первое значение для каждого параметра.
+
 
 [
 	1. SSH. Рускоязычная документация.
@@ -97,5 +102,5 @@ more: "Permission denied (publickey)"
 		https://linuxhint.com/ssh-agent-ubuntu/
 		
 	10. Git на сервере - Генерация открытого SSH ключа
-		https://git-scm.com/book/ru/v2/Git-%D0%BD%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE%D1%82%D0%BA%D1%80%D1%8B%D1%82%D0%BE%D0%B3%D0%BE-SSH-%D0%BA%D0%BB%D1%8E%D1%87%D0%B0
+	{https://git-scm.com/book/ru/v2/Git-%D0%BD%D0%B0-%D1%81%D0%B5%D1%80%D0%B2%D0%B5%D1%80%D0%B5-%D0%93%D0%B5%D0%BD%D0%B5%D1%80%D0%B0%D1%86%D0%B8%D1%8F-%D0%BE%D1%82%D0%BA%D1%80%D1%8B%D1%82%D0%BE%D0%B3%D0%BE-SSH-%D0%BA%D0%BB%D1%8E%D1%87%D0%B0}
 ]
