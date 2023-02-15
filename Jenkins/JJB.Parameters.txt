@@ -1,0 +1,90 @@
+JJB. Модуль "Параметры" (Parameters)
+{https://jenkins-job-builder.readthedocs.io/en/latest/parameters.html}
+
+Модуль Parameters позволяет указать параметры сборки для джобы.
+Пример:
+
+job:
+  name: test_job
+
+  parameters:
+    - string:
+        name: FOO
+        default: bar
+        description: "A parameter named FOO, defaults to 'bar'."
+
+active-choices
+	Параметр  Active Choices.
+	Требует установки плагина Jenkins: Active Choices Plug-in
+	Параметры:
+		• name (str) – имя параметра (required).
+		• description (str) – описание параметра
+		• script (list) – использовать скрипт Groovy, чтобы определить параметр
+		  Параметры
+		    •• groovy (str) Groovy DSL Script
+			•• use-groovy-sandbox (bool) ► запустить этот Groovy-скрипт в песочнице
+			    (с ограниченными возможностями)
+			     по умолчанию: True
+			•• script-additional-classpath (list) 
+			   # Дополнительные записи classpath, доступные из сценария (скрипта).
+		• fallback-script (list) - Использовать сценарий обратного хода.
+		    # Если скрипт (указанный выше) не сработает, то в качестве запасного сценария будет использоваться запасной скрипт.
+			Параметры:
+			  •• groovy (str) Groovy DSL Script
+			  •• use-groovy-sandbox (bool)
+			  •• script-additional-classpath (list) 
+		
+		• enable-filters (bool) – If enabled a text box will appear next to this element and will permit the user to filter its entries. The list values never get re-evaluated (default False).
+		• filter-starts-at (int) – How many characters a user must enter before the filter is applied (default 1).
+		• choice-type (str) – тип выбора 
+		    по умолчанию: 'single-select'
+			Разрешенные значения:	
+				○ single-select
+				○ multi-select
+				○ radio-buttons
+				○ checkboxes
+	
+	Примеры использования:
+		Минимальный:
+
+- job:
+    name: active-choices-job
+    parameters:
+      - active-choices:
+          name: lorem
+
+		Полный:
+
+- job:
+    name: active-choices-job
+    parameters:
+      - active-choices:
+          name: lorem
+          description: ipsum
+          script:
+              groovy: |-
+                  return [
+                      'param1',
+                      'param2'
+                  ]
+              use-groovy-sandbox: false
+              script-additional-classpath:
+                  - file:/jar-file-path
+                  - file:/jar-file-path2
+          fallback-script:
+              groovy: |-
+                  return [
+                      'param3',
+                      'param4'
+                  ]
+              use-groovy-sandbox: false
+              script-additional-classpath:
+                  - file:/jar-file-path
+                  - file:/jar-file-path2
+          choice-type: multi-select
+          enable-filters: true
+          filter-starts-at: 1
+
+
+
+

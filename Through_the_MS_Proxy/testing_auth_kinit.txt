@@ -1,31 +1,5 @@
 m.eliseev@complextest:~$ traceroute 178.248.237.68
-{
- {@kirakola:+++};
- @kissgirl021;
- @kitti_kris96;
- @Eva_milka;
- {@oreo_96:++};
- {@IrishkaSEX:salon};
- {@vika_Ekb2024:fake_photo};
- @anna_wild_berry;
- @sofapups;
-}
-{@marymaalysh:Melnikova27}\
-{Express:4000} \
-{Hour:6000}\
-{high:175}
-{age:25};
-{Top
-	@Eva_milka
-	@detkakate
-	@kariii888
-	@sofapups
-	@Lizapodliza7
-	@lero4kam
-	@anna_wild_berry
-	@Aliska77777
-	@AkseniaEkb
-}
+
 traceroute to 178.248.237.68 (178.248.237.68), 30 hops max, 60 byte packets
  1  _gateway (172.29.24.100)  1.796 ms  2.083 ms  2.438 ms
  2  10.254.21.1 (10.254.21.1)  4.843 ms  5.143 ms  5.415 ms
