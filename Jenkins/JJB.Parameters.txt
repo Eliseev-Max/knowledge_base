@@ -13,7 +13,7 @@ job:
         default: bar
         description: "A parameter named FOO, defaults to 'bar'."
 
-active-choices
+► active-choices
 	Параметр  Active Choices.
 	Требует установки плагина Jenkins: Active Choices Plug-in
 	Параметры:
@@ -34,8 +34,11 @@ active-choices
 			  •• use-groovy-sandbox (bool)
 			  •• script-additional-classpath (list) 
 		
-		• enable-filters (bool) – If enabled a text box will appear next to this element and will permit the user to filter its entries. The list values never get re-evaluated (default False).
-		• filter-starts-at (int) – How many characters a user must enter before the filter is applied (default 1).
+		• enable-filters (bool) – если этот элемент включен, рядом с ним появится текстовое поле, позволяющее пользователю отфильтровать его записи.
+		    Значения списка никогда не оцениваются повторно
+		    (default: False).
+		• filter-starts-at (int) – сколько символов должен ввести пользователь, прежде чем будет применён фильтр
+		    (default: 1).
 		• choice-type (str) – тип выбора 
 		    по умолчанию: 'single-select'
 			Разрешенные значения:	
@@ -85,6 +88,224 @@ active-choices
           enable-filters: true
           filter-starts-at: 1
 
+► active-choices-reactive
+	Параметр  Active Choices Reactive.
+	Требует установки плагина Jenkins: Active Choices Plug-in
+
+	Параметры:
+		• name (str) – имя параметра (required).
+		• description (str) – описание параметра
+		• script (list) – использовать скрипт Groovy, чтобы определить параметр
+		  Параметры:	
+            * groovy (str) Groovy DSL Script
+			* use-groovy-sandbox (bool) ► запустить этот Groovy-скрипт в песочнице
+			    (с ограниченными возможностями)
+				по умолчанию: True
+
+			* script-additional-classpath (list)
+			  # Дополнительные записи classpath, доступные из сценария (скрипта).
+			  по умолчанию: True
+
+    • fallback-script (list) – Использовать сценарий обратного хода.
+		    # Если скрипт (указанный выше) не сработает, то в качестве запасного сценария будет использоваться запасной скрипт.
+			Параметры:
+			  •• groovy (str) Groovy DSL Script
+			  •• use-groovy-sandbox (bool)
+			  •• script-additional-classpath (list) 
+
+    • enable-filters (bool) – Если эта опция включена, рядом с этим элементом появится текстовое поле, позволяющее пользователю отфильтровать его записи.
+	    Значения списка никогда не переоцениваются 
+	    (по умолчанию False)
+    • filter-starts-at (int) – How many characters a user must enter before the filter is applied (default 1).
+    • choice-type (str) –
+		type of the choices. (default ‘single-select’)
+		Allowed Values:	
+		  ○ single-select
+		  ○ multi-select
+		  ○ radio-buttons
+		  ○ checkboxes
+    referenced-parameters (str) – Comma separated list of other job parameters referenced in the uno-choice script
+
+Minimal Example:
+
+- job:
+    name: active-choices-job
+    parameters:
+      - active-choices-reactive:
+          name: foo
+
+Full Example:
+
+- job:
+    name: active-choices-job
+    parameters:
+      - active-choices-reactive:
+          name: lorem
+          description: ipsum
+          script:
+              groovy: |-
+                  return [
+                      'param1',
+                      'param2'
+                  ]
+              use-groovy-sandbox: false
+              script-additional-classpath:
+                  - file:/jar-file-path
+                  - file:/jar-file-path2
+          fallback-script:
+              groovy: |-
+                  return [
+                      'param3',
+                      'param4'
+                  ]
+              use-groovy-sandbox: false
+              script-additional-classpath:
+                  - file:/jar-file-path
+                  - file:/jar-file-path2
+          choice-type: multi-select
+          enable-filters: true
+          filter-starts-at: 1
+          referenced-parameters: foo,bar
 
 
+► bool
 
+    A boolean parameter.
+    Parameters:	
+	  • name (str) – имя параметра
+      • default (str) – значение параметра по умолчанию (optional)
+      • description (str) – описание параметра (optional)
+
+    Пример: 
+
+    parameters:
+      - bool:
+          name: FOO
+          default: false
+          description: "A parameter named FOO, defaults to 'false'."
+
+► choice
+
+    Параметр одиночного выбора.
+    Параметры:	
+		• name (str) – имя параметра
+        • choices (list) – доступные варианты выбора, первый по порядку - параметр по умолчанию.
+        • description (str) – описание параметра (optional)
+
+    Пример:
+
+    parameters:
+      - choice:
+          name: project
+          choices:
+            - nova
+            - glance
+          description: "On which project to run?"
+
+► copyartifact-build-selector
+
+    Контроль через параметр сборки, какую сборку плагин copyartifact должен копировать, если он настроен на использование 'build-param'.
+
+    Требуется Jenkins Copy Artifact plugin.
+    Параметры:	
+		• name (str) – имя параметра сборки, в котором будет храниться выборка
+        • description (str) – описание (optional)
+        • which-build (str) – какой использовать в качестве значения по умолчанию в пользовательском интерфейсе.
+		  (См. параметр which-build параметра copyartifact из модуля builders для доступных значений,
+		   а также опции, управляющие дополнительным поведением для выбранного значения.)
+
+    Example:
+
+    parameters:
+      - copyartifact-build-selector:
+          name: BUILD_SELECTOR
+          which-build: workspace-latest
+          description: 'Which build from upstream to copy artifacts from'
+
+► credentials
+
+    Параметр выбора учётных данных (Credentials)
+
+    Требует установки плагина Jenkins: Credentials Plugin.
+    Parameters:	
+		• name (str) – имя параметра
+        • type (str) – тип учётных данных
+		  (optional, default ‘any’)
+          Разрешенные значения:	
+            ○ any - любой тип учётных данных (default)
+            ○ usernamepassword - имя пользователя и пароль
+            ○ sshkey - пользователь SSH + private key
+            ○ secretfile - секретный файл
+            ○ secrettext - секретный текст
+            ○ certificate - сертификат
+			
+        • required (bool) – требуется ли данный параметр (optional, default false)
+        • default (str) – ID учётных данных по умолчанию (optional)
+        • description (str) – описание параметра (optional)
+
+    Пример:
+
+    parameters:
+      - credentials:
+          name: OS_CREDENTIALS
+          type: usernamepassword
+          default: "default-credentials-id"
+          description: "Test credentials"
+
+dynamic-choice
+
+    Dynamic Choice Parameter
+
+    Requires the Jenkins Jenkins Dynamic Parameter Plug-in.
+    Parameters:	
+
+        name (str) – the name of the parameter
+        description (str) – a description of the parameter (optional)
+        script (str) – Groovy expression which generates the potential choices.
+        remote (bool) – the script will be executed on the slave where the build is started (default false)
+        classpath (str) – class path for script (optional)
+        read-only (bool) – user can’t modify parameter once populated (default false)
+
+    Example:
+
+    parameters:
+      - dynamic-choice:
+          name: OPTIONS
+          description: "Available options"
+          script: "['optionA', 'optionB']"
+          remote: false
+          read-only: false
+
+dynamic-choice-scriptler
+
+    Dynamic Choice Parameter (Scriptler)
+
+    Requires the Jenkins Jenkins Dynamic Parameter Plug-in.
+    Parameters:	
+
+        name (str) – the name of the parameter
+        description (str) – a description of the parameter (optional)
+        script-id (str) – Groovy script which generates the default value
+        parameters (list) –
+
+        parameters to corresponding script
+        Parameter:	
+            name (str) Parameter name
+            value (str) Parameter value
+        remote (bool) – the script will be executed on the slave where the build is started (default false)
+        read-only (bool) – user can’t modify parameter once populated (default false)
+
+    Example:
+
+    parameters:
+      - dynamic-choice-scriptler:
+          name: OPTIONS
+          description: "Available options"
+          script-id: "scriptid.groovy"
+          parameters:
+            - name: param1
+              value: value1
+            - name: param2
+              value: value2
+          remote: false
+          read-only: false

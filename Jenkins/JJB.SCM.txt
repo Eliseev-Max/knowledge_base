@@ -1,0 +1,45 @@
+JJB. Модуль SCM
+{https://jenkins-job-builder.readthedocs.io/en/latest/scm.html}
+
+Модуль SCM позволяет указать расположение исходного кода для проекта.
+Он добавляет атрибут scm к определению задания, которое принимает любое количество определений scm.
+Также можно передать [] к атрибуту scm.
+Это полезно, когда набор конфигураций имеет глобальный scm по умолчанию, и вы хотите, чтобы конкретное задание отменяло это значение без SCM.
+
+Component: scm
+    Macro:	scm
+    Entry Point:	jenkins_jobs.scm
+
+Модуль scm позволяет ссылаться на несколько репозиториев в задании Jenkins.
+‼ Примечание: Для добавления более одного определения scm требуется плагин Jenkins Multiple SCMs.
+
+Пример:
+- scm:
+    name: first-scm
+    scm:
+      - git:
+         url: ssh://jenkins@review.openstack.org:29418/first.git
+         branches:
+          - origin/master
+
+- scm:
+    name: second-scm
+    scm:
+      - git:
+         url: ssh://jenkins@review.openstack.org:29418/second.git
+         branches:
+          - origin/master
+
+- scm:
+    name: first-and-second
+    scm:
+      - first-scm
+      - second-scm
+
+- job:
+    name: my-job
+    scm:
+      - first-and-second
+	  
+Пример пустого scm:
+scm: []
