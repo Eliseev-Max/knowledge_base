@@ -43,3 +43,189 @@ Component: scm
 	  
 Пример пустого scm:
 scm: []
+
+git
+Указывает репозиторий git SCM для данной джобы.
+Требует установленного плагина Git Plugin
+
+Параметры:
+
+    • url (str) – URL репозитория git
+    • credentials-id (str) – ID учетной записи для подключения, который является последним полем (32-значный шестнадцатеричный код) пути URL,
+	    видимого после нажатия на учетную запись в разделе "Jenkins Global credentials" (optional=необязательно)
+    • refspec (str) – refspec для выборки (fetch) (default '+refs/heads/*:refs/remotes/remoteName/*')
+    • name (str) – имя выборки 
+	    по умолчанию 'origin'
+    • remotes (list(str)) – список remotes для настройки (необязательно, нужен только в том случае, если необходимо настроить несколько remotes)
+		Remote:	
+          ○ url (string) - url удалённого репозитория;
+          ○ refspec (string) - refspec to fetch (спецификация для поиска) (optional)
+          ○ credentials-id - ID учетной записи, используемой для подключения, который является последним полем пути URL (32-значный шестнадцатеричный код),
+		      видимого после нажатия кнопки credential в разделе Jenkins Global credentials. (optional)
+    • branches (list(str)) – список спецификаторов ветвей для сборки (по умолчанию ‘**’)
+	
+    • skip-tag (bool) – пропустить маркировку
+		по умолчанию: true
+		# Утратило силу с версии 2.0.0..: Пожалуйста, используйте расширение per-build-tag, которое имеет обратное значение
+    
+    • clean (bool) – очистить после checkout
+		по умолчанию: false
+		# Утратил актуальность с версии 1.1.1: Пожалуйста, используйте чистый формат расширения.
+
+    • fastpoll (bool) – использовать быстрый удаленный опрос
+		по умолчанию: false
+		
+    • disable-submodules (bool) – отключить подмодули
+		по умолчанию: false
+		# Утратил силу с версии 1.1.1: Пожалуйста, используйте расширение подмодуля
+
+    • recursive-submodules (bool) – обновить рекурсивно подмодули
+		по умолчанию: false
+        # Утратил актуальность с версии 1.1.1..: Пожалуйста, используйте расширение подмодуля
+
+    • git-tool (str) – Имя установки Git, которую необходимо использовать
+		по умолчанию: 'Default'
+		
+    • reference-repo (str) – Путь к эталонному репозиторию для использования во время клонирования (optional)
+    • browser (str) – какой браузер (просмотрщик) репозитория использовать
+		Поддерживаемые браузеры:
+			○ auto - (default)
+			○ assemblaweb - https://www.assembla.com/home
+			○ bitbucketweb - https://bitbucket.org/
+			○ cgit - https://git.zx2c4.com/cgit/about/
+			○ fisheye - https://www.atlassian.com/software/fisheye
+			○ gitblit - http://gitblit.com/
+			○ githubweb - https://github.com/
+			○ gitiles - https://code.google.com/archive/p/gitiles/
+			○ gitlab - https://about.gitlab.com/
+			○ gitlist - http://gitlist.org/
+			○ gitoriousweb - https://gitorious.org/
+			○ gitweb - https://git-scm.com/docs/gitweb
+			○ kiln - https://www.fogbugz.com/version-control
+			○ microsoft-tfs-2013 - https://azure.microsoft.com/en-us/services/devops/server
+			○ phabricator - https://www.phacility.com/
+			○ redmineweb - https://www.redmine.org/
+			○ rhodecode - https://rhodecode.com/
+			○ stash - https://www.atlassian.com/software/bitbucket/enterprise/data-center
+			○ viewgit
+		
+    • browser-url (str) – url для браузера репозитория (требуется, если значение браузера не ‘auto’, не default)
+    • browser-version (str) – версия браузера репозитория (только для GitLab, default ‘0.0’)
+    • project-name (str) – название проекта в Gitblit и ViewGit репобраузерах (optional)
+    • repo-name (str) – имя репозитория в репобраузере phabricator (optional)
+    • git-config-name (str) – настройка имени для Git clone (optional)
+    • git-config-email (str) – настройка email для Git clone (optional)
+
+Расширения:	
+
+    ♦ basedir (string) - Расположение относительно корня рабочего пространства для клонирования (рабочее пространство по умолчанию, default workspace)
+
+    ♦ changelog-against (dict)
+          ○ remote (string) - название репозитория, содержащего ветку для создания журнала изменений (default ‘origin’)
+          ○ branch (string) - имя ветви для создания журнала изменений (default ‘master’)
+
+    ♦ choosing-strategy: (string) - Класс Jenkins для выбора того, что собирать.
+	    Может быть одним из:
+		  * default
+		  * `inverse` 
+		  * gerrit 
+		(по умолчанию: 'default')
+
+    ♦ clean (dict)
+          ○ after (bool) - очистить workspace после checkout
+          ○ before (bool) - очистить workspace до checkout
+
+    ♦ committer (dict)
+            name (str) - иммя, которое будет использоваться в качестве автора новых коммитов
+            email (str) - адрес электронной почты, который будет использоваться для новых коммитов
+
+    ♦ excluded-users: (list(string)) - list of users to ignore
+        revisions from when polling for changes. (if polling is enabled, optional)
+
+    ♦ included-regions: (list(string)) - list of file/folders to
+        include (optional)
+
+    ♦ excluded-regions: (list(string)) - list of file/folders to
+        exclude (optional)
+
+    ♦ ignore-commits-with-messages (list(str)) - Revisions committed
+        with messages matching these patterns will be ignored. (optional)
+
+    ♦ ignore-notify: (bool) - Ignore notifyCommit URL accesses
+        (default false)
+
+    ♦ force-polling-using-workspace (bool) - Force polling using
+        workspace (default false)
+
+    ♦ local-branch (string) - Checkout/merge to local branch
+        (optional)
+
+    ♦ merge (dict)
+        ○ remote (string) - name of repo that contains branch to merge to (default ‘origin’)
+        ○ branch (string) - name of the branch to merge to
+        ○ strategy (string) - merge strategy. Can be one of ‘default’, ‘resolve’, ‘recursive’, ‘octopus’, ‘ours’, ‘subtree’. (default ‘default’)
+        ○ fast-forward-mode (string) - merge fast-forward mode. Can be one of ‘FF’, ‘FF_ONLY’ or ‘NO_FF’. (default ‘FF’)
+
+    ♦ per-build-tag (bool) - Create a tag in the workspace for every
+        build. (default is inverse of skip-tag if set, otherwise false)
+
+    ♦ prune (bool) - Prune remote branches (default false)
+
+    ♦ scm-name (string) - The unique scm name for this Git SCM
+        (optional)
+
+    ♦ shallow-clone (bool) - Perform shallow clone (default false)
+    ♦ depth (int) - Set shallow clone depth (default 1)
+
+    ♦ do-not-fetch-tags (bool) - Perform a clone without tags
+        (default false)
+
+    honor-refspec (bool) - Perform initial clone using the refspec
+        defined for the repository (default false)
+
+    skip-notifications (bool) - Skip build status notifications
+        (default false). Requires the Jenkins Skip Notifications Trait Plugin.
+
+    sparse-checkout (dict)
+            paths (list) - List of paths to sparse checkout. (optional)
+######################
+    ♦ submodule (dict)
+        ○ disable (bool) - отключив поддержку подмодулей, вы можете продолжать использовать базовую функциональность git-плагина
+						   и просто попросить Jenkins полностью игнорировать подмодули, как будто их не существует.
+						   
+        ○ recursive (bool) - получить все подмодули рекурсивно (использует опцию '-recursive', которая требует git>=1.6.5)
+		
+        ○ tracking (bool) - получение вершины настроенной ветви в .gitmodules (Используется опция '-remote', которая требует git>=1.8.2)
+		
+        ○ parent-credentials (bool) - использовать учетные данные из удаленного по умолчанию родительского хранилища (по умолчанию false).
+		
+        ○ reference-repo (str) - путь к эталонному репозиторию для использования во время клонирования (необязательно)
+		
+        ○ timeout (int) - указать тайм-аут (в минутах) для операций с подмодулями (по умолчанию 10)
+		
+        ○ threads (int) - количество параллельных процессов, которые будут использоваться при обновлении подмодулей.
+		    По умолчанию для обновления подмодулей используется один поток.
+######################
+
+    ♦ timeout (str) - Timeout for git commands in minutes (optional)
+
+    ♦ use-author (bool): Use author rather than committer in Jenkin’s
+        build changeset (default false)
+
+    ♦ wipe-workspace (bool) - Wipe out workspace before build
+        (default true)
+
+    ♦ lfs-pull (bool) - Call git lfs pull after checkout
+        (default false)
+
+Example:
+
+scm:
+  - git:
+      url: https://example.com/project.git
+      branches:
+        - master
+        - stable
+      browser: githubweb
+      browser-url: http://github.com/foo/example.git
+      timeout: 20
