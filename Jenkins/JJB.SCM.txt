@@ -64,7 +64,7 @@ git
 		      видимого после нажатия кнопки credential в разделе Jenkins Global credentials. (optional)
     • branches (list(str)) – список спецификаторов ветвей для сборки (по умолчанию ‘**’)
 	
-    • skip-tag (bool) – пропустить маркировку
+    ◘ skip-tag (bool) – пропустить маркировку
 		по умолчанию: true
 		# Утратило силу с версии 2.0.0..: Пожалуйста, используйте расширение per-build-tag, которое имеет обратное значение
     
@@ -75,11 +75,11 @@ git
     • fastpoll (bool) – использовать быстрый удаленный опрос
 		по умолчанию: false
 		
-    • disable-submodules (bool) – отключить подмодули
+    ◘ disable-submodules (bool) – отключить подмодули
 		по умолчанию: false
 		# Утратил силу с версии 1.1.1: Пожалуйста, используйте расширение подмодуля
 
-    • recursive-submodules (bool) – обновить рекурсивно подмодули
+    ◘ recursive-submodules (bool) – обновить рекурсивно подмодули
 		по умолчанию: false
         # Утратил актуальность с версии 1.1.1..: Пожалуйста, используйте расширение подмодуля
 
@@ -139,23 +139,18 @@ git
             name (str) - иммя, которое будет использоваться в качестве автора новых коммитов
             email (str) - адрес электронной почты, который будет использоваться для новых коммитов
 
-    ♦ excluded-users: (list(string)) - list of users to ignore
-        revisions from when polling for changes. (if polling is enabled, optional)
+    ♦ excluded-users: (list(string)) - список пользователей, от которых следует игнорировать ревизии при (polling) опросе изменений 
+	    (если опрос включен, необязательно)
 
-    ♦ included-regions: (list(string)) - list of file/folders to
-        include (optional)
+    ♦ included-regions: (list(string)) - list of file/folders to include (optional)
 
-    ♦ excluded-regions: (list(string)) - list of file/folders to
-        exclude (optional)
+    ♦ excluded-regions: (list(string)) - list of file/folders to exclude (optional)
 
-    ♦ ignore-commits-with-messages (list(str)) - Revisions committed
-        with messages matching these patterns will be ignored. (optional)
+    ♦ ignore-commits-with-messages (list(str)) - Revisions committed with messages matching these patterns will be ignored. (optional)
 
-    ♦ ignore-notify: (bool) - Ignore notifyCommit URL accesses
-        (default false)
+    ♦ ignore-notify: (bool) - Ignore notifyCommit URL accesses (default false)
 
-    ♦ force-polling-using-workspace (bool) - Force polling using
-        workspace (default false)
+    ♦ force-polling-using-workspace (bool) - Force polling using workspace (default false)
 
     ♦ local-branch (string) - Checkout/merge to local branch
         (optional)
