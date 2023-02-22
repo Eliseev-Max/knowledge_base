@@ -1,0 +1,54 @@
+Builders
+	
+► build-publish-docker-image
+	Предоставляет возможность собирать проекты с помощью Dockerfile и публиковать полученный образ с метками (repo) в реестре docker.
+	Требуется плагин Jenkins CloudBees Docker Build and Publish.
+	Параметры:
+	  • docker-registry-url (str) – URL-адрес используемого вами реестра Docker (по умолчанию '')
+	  • image (str) – имя репозитория, которое будет применено к полученному образу в случае успеха (по умолчанию '')
+      • docker-file-directory (str) – шаг сборки, который отправляет Dockerfile для сборки на docker-хост, используемый для этого запуска сборки (по умолчанию '')
+      • push-on-success (bool) – полученный образ докера будет отправлен в реестр (или реестры), указанный в поле "Image" (по умолчанию false)
+      • push-credentials-id (str) – учетные данные для отправки в частный реестр (по умолчанию '')
+      • clean-images (bool) – опция очистки локальных изображений (по умолчанию false)
+      • jenkins-job-delete (bool) – попытка удалить образ, когда jenkins удаляет выполнение (по умолчанию false)
+      • cloud (str) – облако, используемое для создания образа (по умолчанию '')
+
+	Пример:
+
+builders:
+  - build-publish-docker-image:
+      docker-registry-url: Docker registry URL
+      image: Image string
+      docker-file-directory: Directory for Dockerfile
+      push-on-success: true
+      push-credentials-id: 71e4f29c-162b-40d0-85d9-3ddfba2911a0
+      clean-images: true
+      jenkins-job-delete: true
+      cloud: cloud
+
+
+► docker-build-publish
+	Предоставляет возможность собирать проекты с помощью Dockerfile и публиковать результирующий образ с метками (repo) в реестре docker.
+	
+	
+► conditional-step
+	Условное выполнение некоторых шагов сборки.
+	Требуется плагин Jenkins Conditional BuildStep Plugin.
+	В зависимости от количества объявленных шагов в Jenkins создается условный шаг (одиночный) или условный шаг (множественный).
+
+	Параметры:
+	  • condition-kind (str) – вид условия, которое должно быть проверено перед выполнением шагов.
+			(допустимые значения и их дополнительные атрибуты описаны в таблице условий:
+			https://jenkins-job-builder.readthedocs.io/en/latest/builders.html)
+			
+      • on-evaluation-failure (str) – Что должно быть результатом сборки, если оценка условия не прошла.
+	      Возможные значения:
+		    ○ fail (по умолчанию)
+			○ mark-unstable
+			○ run-and-mark-unstable
+			○ run
+			○ dont-run
+		  
+      • steps (list) – Список шагов, которые необходимо выполнить, если условие проверено.
+	      Элементы в списке могут быть любыми, известными Jenkins Job Builder.
+	
