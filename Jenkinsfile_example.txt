@@ -1,0 +1,191 @@
+pipeline {
+    agent {
+        dockerfile {
+            filename "docker/test/Dockerfile"
+        }
+    }
+
+    parameters {
+        choice(
+            name: "MAKE_JOBS",
+            choices: [ "16", "1", "2", "4", "8", "32" ],
+            description: "Количество ядер, которые будут задействованы при сборке."
+        )
+        choice(
+            name: "UNIT_TESTING_ENABLED",
+            choices: ["ON", "OFF"],
+            description: "Включить сборку и выполнение тестов."
+        )
+        choice(
+            name: "CPPCHECK_ENABLED",
+            choices: ["ON", "OFF"],
+            description: "Включить проверку Cppcheck."
+        )
+        choice(
+            name: "COVERAGE_ENABLED",
+            choices: ["ON", "OFF"],
+            description: "Включить проверку покрытия кода."
+        )
+        choice(
+            name: "DOXYGEN_ENABLED",
+            choices: ["ON", "OFF"],
+            description: "Включить генерацию документации Doxygen."
+        )
+        choice(
+            name: "CLANG_TIDY_ENABLED",
+            choices: ["OFF", "ON"],
+            description: "Включить проверку Clang-Tidy."
+        )
+        choice(
+            name: "CLANG_TIDY_JOBS",
+            choices: [ "4", "1", "2", "8", "16", "32" ],
+            description: "Количество потоков Clang-Tidy."
+        )
+    }
+
+    environment {
+        OUTPUT_JUNIT_FILENAME = "output-junit.xml"
+        TEST_TIMEOUT = 300
+        TEST_OUTPUT_SIZE_PASSED = "1048576"
+        TEST_OUTPUT_SIZE_FAILED = "1048576"
+    }
+
+    stages {
+        stage("Build") {
+            steps {
+                dir("build") {
+                    sh "cmake .. \
+                        -DKPR_PROCESS_SCAN_ENABLED=OFF \
+                        -DKPR_TEST_ENABLED=${params.UNIT_TESTING_ENABLED} \
+                        -DCMAKE_EXPORT_COMPILE_COMMANDS=${params.CPPCHECK_ENABLED} \
+                        -DKPR_COVERAGE_ENABLED=${params.COVERAGE_ENABLED} \
+                        -DKPR_DOXYGEN_ENABLED=${params.DOXYGEN_ENABLED} \
+                        -DKPR_CLANG_TIDY_JOBS=${params.CLANG_TIDY_JOBS}"
+                    sh "make -j${params.MAKE_JOBS}"
+                }
+            }
+        }
+
+        stage("Test") {
+            when {
+                environment name: "UNIT_TESTING_ENABLED", value: "ON"
+            }
+
+            steps {
+                dir("build") {
+                    sh "ctest \
+                        --output-on-failure \
+                        --output-junit ${OUTPUT_JUNIT_FILENAME} \
+                        --test-output-size-passed ${TEST_OUTPUT_SIZE_PASSED} \
+                        --test-output-size-failed ${TEST_OUTPUT_SIZE_FAILED} \
+                        --timeout ${TEST_TIMEOUT}"
+                }
+            }
+
+            post {
+                always {
+                    junit "build/${OUTPUT_JUNIT_FILENAME}"
+                }
+            }
+        }
+
+        stage ("Analyze") {
+            when {
+                anyOf {
+                    environment name: "CPPCHECK_ENABLED", value: "ON"
+                    environment name: "COVERAGE_ENABLED", value: "ON"
+                    environment name: "DOXYGEN_ENABLED", value: "ON"
+                    environment name: "CLANG_TIDY_ENABLED", value: "ON"
+                }
+            }
+
+            parallel {
+                stage("Cppcheck") {
+                    when {
+                        environment name: "CPPCHECK_ENABLED", value: "ON"
+                    }
+
+                    steps {
+                        dir("build") {
+                            catchError(buildResult: "SUCCESS", stageResult: "UNSTABLE") {
+                                sh "make cppcheck"
+                            }
+                        }
+                    }
+                }
+
+                stage("Code Coverage") {
+                    when {
+                        environment name: "COVERAGE_ENABLED", value: "ON"
+                    }
+
+                    steps {
+                        dir("build") {
+                            sh "make coverage-xml"
+                        }
+                    }
+
+                    post {
+                        success {
+                            cobertura(
+                                autoUpdateHealth: false,
+                                autoUpdateStability: false,
+                                coberturaReportFile: "build/coverage.xml",
+                                conditionalCoverageTargets: "70, 0, 0",
+                                failUnhealthy: false,
+                                failUnstable: false,
+                                lineCoverageTargets: "80, 0, 0",
+                                maxNumberOfBuilds: 0,
+                                methodCoverageTargets: "80, 0, 0",
+                                onlyStable: false,
+                                sourceEncoding: "UTF_8",
+                                zoomCoverageChart: false
+                            )
+                        }
+                    }
+                }
+
+                stage("Doxygen") {
+                    when { environment name: "DOXYGEN_ENABLED", value: "ON" }
+
+                    steps {
+                        dir("build") {
+                            sh "make doxygen"
+                        }
+                    }
+
+                    post {
+                        success {
+                            publishHTML(
+                                target: [
+                                    allowMissing: false,
+                                    alwaysLinkToLastBuild: true,
+                                    keepAll: false,
+                                    reportDir: "docs/html",
+                                    reportFiles: "index.html",
+                                    reportName: "Doxygen Documentation"
+                                 ]
+                             )
+                        }
+                    }
+                }
+            }
+        }
+
+        stage("Clang-Tidy") {
+            when {
+                allOf {
+                    environment name: "UNIT_TESTING_ENABLED", value: "ON"
+                    environment name: "CPPCHECK_ENABLED", value: "ON"
+                    environment name: "CLANG_TIDY_ENABLED", value: "ON"
+                }
+            }
+
+            steps {
+                dir("build") {
+                    sh "make clang-tidy"
+                }
+            }
+        }
+    }
+}

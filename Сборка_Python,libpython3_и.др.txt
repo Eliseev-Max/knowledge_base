@@ -1,0 +1,34 @@
+Как получить пакет libpython3.8.so.1.0 (для Debian 11)
+
+	$ git clone https://github.com/python/cpython		# клонируем содержимое репозитория с исходниками Python
+	$ cd cpython/
+	$ git checkout 3.8									# переходим (делаем чекаут) в ветку, соответствующую интересующей нас версии
+	$ ./configure --enable-shared					
+	$ make -j$(nproc)									# запускаем сборку (компиляцию) в $(nproc) потоков
+
+Через некоторое время в текущей директории появится файл libpython3.8.so.1.0
+
+► Список файлов пакета libpython3.8?
+
+	/usr/lib/python3.8/config-3.8-x86_64-linux-gnu/libpython3.8.so
+	/usr/lib/x86_64-linux-gnu/libpython3.8.so.1
+	/usr/lib/x86_64-linux-gnu/libpython3.8.so.1.0
+	/usr/share/doc/libpython3.8
+	/usr/share/lintian/overrides/libpython3.8
+
+Зависимости:
+	libc6 (>= 2.29)
+    Библиотека GNU C: Общие библиотеки
+		также виртуальный пакет, предоставляемый libc6-udeb 
+
+	libexpat1 (>= 2.1~beta3)
+		XML parsing C library - runtime library 
+
+	libpython3.8-stdlib (= 3.8.10-0ubuntu1~20.04.6) [amd64, i386]
+		Интерактивный объектно-ориентированный язык высокого уровня (стандартная библиотека, версия 3.8) 
+
+	libpython3.8-stdlib (= 3.8.2-1ubuntu1) [не amd64, i386]
+
+	zlib1g (>= 1:1.2.0)
+		библиотека сжатия - runtime
+

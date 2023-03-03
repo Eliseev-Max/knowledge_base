@@ -1,0 +1,102 @@
+<https://setiwik.ru/kak-ustanovit-python-3-10-na-debian-11-10/>
+
+1. sudo apt update && sudo apt upgrade
+
+2. sudo apt install wget build-essential libncursesw5-dev libssl-dev \
+libsqlite3-dev tk-dev libgdbm-dev libc6-dev libbz2-dev libffi-dev zlib1g-dev
+
+3. 
+$ wget https://www.python.org/ftp/python/3.10.9/Python-3.10.9.tgz
+	или
+поместить архив Python-3.10.9.tgz в директорий сборки и копировать в docker-образ
+
+4. tar xzf Python-3.10.9.tgz
+
+5. 
+cd Python-3.10.2
+./configure --enable-optimizations
+
+6. make altinstall
+
+:: python3.10 -V
+:: pip3.10 -V
+
+* должны быть установлены:
+	tar
+	make
+	
+---
+<https://linuxfromscratch.org/lfs/view/9.1-systemd/chapter06/Python.html>
+
+1. Подготовить Python к компиляции:
+	(в директории сборки):
+	./configure --prefix=/usr       \
+            --enable-shared     \
+            --with-system-expat \
+            --with-system-ffi   \
+            --with-ensurepip=yes
+	
+# Пояснение к опциям конфигурации:
+	
+	--with-system-expat
+	  → этот переключатель включает связывание с системной версией Expat.
+		
+	--with-system-ffi
+	  → этот ключ разрешает компоновку с системной версией libffi.
+		
+	--with-ensurepip=yes
+	  → Этот ключ разрешает сборку упаковочных программ pip и setuptools.
+
+2. Скомпилировать пакет
+	$ make
+	
+	Чтобы проверить результаты, выполните команду
+		$ make test
+	Некоторые тесты, требующие подключения к сети или дополнительных пакетов, пропускаются.
+	Тест с именем test_normalization не работает, потому что настройка сети еще не завершена.
+	Для получения более полных результатов тест можно повторить, когда Python 3 будет переустановлен в BLFS
+
+3. Установить пакет
+	# make install
+	# chmod -v 755 /usr/lib/libpython3.8.so
+	# chmod -v 755 /usr/lib/libpython3.so
+	# ln -sfv pip3.8 /usr/bin/pip3
+
++ Значение установочных команд:
+	chmod -v 755 /usr/lib/libpython3.{8.,}so  == исправить разрешения для библиотек, чтобы они соответствовали другим библиотекам
+
+Можно установить предварительно отформатированную документацию:
+
+	install -v -dm755 /usr/share/doc/python-3.8.1/html 
+
+	tar --strip-components=1  \
+		--no-same-owner       \
+		--no-same-permissions \
+		-C /usr/share/doc/python-3.8.1/html \
+		-xvf ../python-3.8.1-docs-html.tar.bz2
+	
+	# Пояснение к командам установки документации:
+	  --no-same-owner			и 
+	  --no-same-permissions 
+	= убедитесь, что установленные файлы имеют правильные права собственности и разрешения.
+	Без этих опций использование tar установит файлы пакета со значениями создателя восходящего потока.
+	
+
+Installed Programs:
+2to3, idle3, pip3, pydoc3, python3, and python3-config
+Installed Library:
+libpython3.8.so and libpython3.so
+Installed Directories:
+/usr/include/python3.8, /usr/lib/python3, and /usr/share/doc/python-3.8.1
+
+ Short Descriptions
+
+• 2to3    - is a Python program that reads Python 2.x source code and applies a series of fixes to transform it into valid Python 3.x code.
+
+• idle3    - is a wrapper script that opens a Python aware GUI editor. For this script to run, you must have installed Tk before Python so that the Tkinter Python module is built.
+
+• pip3    - The package installer for Python. You can use pip to install packages from Python Package Index and other indexes.
+
+• pydoc3    - is the Python documentation tool.
+
+• python3    - is an interpreted, interactive, object-oriented programming language. 
