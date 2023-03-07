@@ -1,0 +1,30 @@
+Debian. Параметры загрузки
+<https://www.debian.org/releases/sarge/s390/ch05s02.html.ru>
+
+Параметры загрузки (ПЗ) — это параметры ядра Linux.
+Обычно ПЗ используются для того, чтобы указать присутствующие периферийные устройства.
+В большинстве случаев ядро может определить периферийные устройства автоматически, но иногда требуется вмешательство.
+
+{Информация о параметрах загрузки Linux: https://tldp.org/HOWTO/BootPrompt-HOWTO.html}
+# Здесь можно найти советы и по нераспознанному оборудованию.
+
+{...}
+
+DEBIAN_FRONTEND
+
+    Этот параметр загрузки контролирует тип пользовательского интерфейса, используемого программой установки.
+	Возможные на текущий момент значения параметра:
+
+        DEBIAN_FRONTEND=noninteractive	# удобен для сборки docker-образов на основе debian
+        DEBIAN_FRONTEND=text			# наиболее предпочтителен для установки через последовательную консоль
+        DEBIAN_FRONTEND=newt			# Установлен по умолчанию
+        DEBIAN_FRONTEND=slang
+        DEBIAN_FRONTEND=ncurses
+        DEBIAN_FRONTEND=bogl
+        DEBIAN_FRONTEND=gtk
+        DEBIAN_FRONTEND=corba
+
+Вообще, с носителей установки по умолчанию в данный момент доступен только интерфейс newt.
+
+Пример успешного применения DEBIAN_FRONTEND=noninteractive описан здесь:
+https://stackoverflow.com/questions/43176520/how-to-install-tshark-on-docker

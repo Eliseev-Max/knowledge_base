@@ -1,0 +1,8 @@
+FROM aris_tester_env
+
+RUN apt-get update && apt-get upgrade
+RUN apt-get -y install build-essential checkinstall zlib1g-dev libssl-dev
+
+RUN apt install snapd && snap install core
+
+RUN snap install cmake --classic
