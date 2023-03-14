@@ -1,0 +1,896 @@
+#######################################################################
+Что должно быть установлено:
+	• python3
+	• python3-pip
+	• sqlite3
+	• make
+	• cmake
+	• doxygen
+	• swig
+	• python3-dev
+
+#######################################################################
+root@170b34fac3f4:/app/libiec61850# cmake -DBUILD_PYTHON_BINDINGS=ON .
+#######################################################################
+
+-- The C compiler identification is GNU 10.2.1
+-- The CXX compiler identification is GNU 10.2.1
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- Looking for clock_gettime in rt
+-- Looking for clock_gettime in rt - found
+-- Check if the system is big endian
+-- Searching 16 bit integer
+-- Looking for sys/types.h
+-- Looking for sys/types.h - found
+-- Looking for stdint.h
+-- Looking for stdint.h - found
+-- Looking for stddef.h
+-- Looking for stddef.h - found
+-- Check size of unsigned short
+-- Check size of unsigned short - done
+-- Searching 16 bit integer - Using unsigned short
+-- Check if the system is big endian - little endian
+-- Performing Test SUPPORT_REDUNDANT_DECLS
+-- Performing Test SUPPORT_REDUNDANT_DECLS - Success
+server-example-logging: sqlite not found
+-- Performing Test COMPILER_HAS_HIDDEN_VISIBILITY
+-- Performing Test COMPILER_HAS_HIDDEN_VISIBILITY - Success
+-- Performing Test COMPILER_HAS_HIDDEN_INLINE_VISIBILITY
+-- Performing Test COMPILER_HAS_HIDDEN_INLINE_VISIBILITY - Success
+-- Performing Test COMPILER_HAS_DEPRECATED_ATTR
+-- Performing Test COMPILER_HAS_DEPRECATED_ATTR - Success
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE)
+CMake Error at /usr/share/cmake-3.18/Modules/FindPackageHandleStandardArgs.cmake:165 (message):
+  Could NOT find SWIG (missing: SWIG_EXECUTABLE SWIG_DIR)
+Call Stack (most recent call first):
+  /usr/share/cmake-3.18/Modules/FindPackageHandleStandardArgs.cmake:458 (_FPHSA_FAILURE_MESSAGE)
+  /usr/share/cmake-3.18/Modules/FindSWIG.cmake:105 (find_package_handle_standard_args)
+  pyiec61850/CMakeLists.txt:5 (find_package)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/app/libiec61850/CMakeFiles/CMakeOutput.log".
+root@170b34fac3f4:/app/libiec61850# who
+who     whoami
+root@170b34fac3f4:/app/libiec61850# who
+who     whoami
+root@170b34fac3f4:/app/libiec61850# whoami
+root
+#######################################################################
+root@170b34fac3f4:/app/libiec61850# apt install swig
+#######################################################################
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  swig4.0
+Suggested packages:
+  swig-doc swig-examples swig4.0-examples swig4.0-doc
+The following NEW packages will be installed:
+  swig swig4.0
+0 upgraded, 2 newly installed, 0 to remove and 26 not upgraded.
+Need to get 1707 kB of archives.
+After this operation, 5933 kB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://deb.debian.org/debian bullseye/main amd64 swig4.0 amd64 4.0.2-1 [1377 kB]
+Get:2 http://deb.debian.org/debian bullseye/main amd64 swig all 4.0.2-1 [330 kB]
+Fetched 1707 kB in 2s (934 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package swig4.0.
+(Reading database ... 34417 files and directories currently installed.)
+Preparing to unpack .../swig4.0_4.0.2-1_amd64.deb ...
+Unpacking swig4.0 (4.0.2-1) ...
+Selecting previously unselected package swig.
+Preparing to unpack .../archives/swig_4.0.2-1_all.deb ...
+Unpacking swig (4.0.2-1) ...
+Setting up swig4.0 (4.0.2-1) ...
+Setting up swig (4.0.2-1) ...
+
+root@170b34fac3f4:/app/libiec61850# python --version
+Python 3.10.10
+root@170b34fac3f4:/app/libiec61850# apt install python-dev
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+Note, selecting 'python-dev-is-python2' instead of 'python-dev'
+The following additional packages will be installed:
+  libpython2-dev libpython2-stdlib libpython2.7 libpython2.7-dev libpython2.7-minimal libpython2.7-stdlib mailcap mime-support python-is-python2 python2 python2-dev python2-minimal python2.7 python2.7-dev python2.7-minimal
+Suggested packages:
+  python2-doc python-tk python2.7-doc binfmt-support
+The following NEW packages will be installed:
+  libpython2-dev libpython2-stdlib libpython2.7 libpython2.7-dev libpython2.7-minimal libpython2.7-stdlib mailcap mime-support python-dev-is-python2 python-is-python2 python2 python2-dev python2-minimal python2.7
+  python2.7-dev python2.7-minimal
+0 upgraded, 16 newly installed, 0 to remove and 26 not upgraded.
+Need to get 7712 kB of archives.
+After this operation, 33.4 MB of additional disk space will be used.
+Do you want to continue? [Y/n] n
+Abort.
+
+#######################################################################
+root@170b34fac3f4:/app/libiec61850# apt install python3-dev
+#######################################################################
+Reading package lists... Done
+Building dependency tree... Done
+Reading state information... Done
+The following additional packages will be installed:
+  javascript-common libjs-jquery libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.9 libpython3.9-dev python3.9-dev
+Suggested packages:
+  apache2 | lighttpd | httpd
+The following NEW packages will be installed:
+  javascript-common libjs-jquery libjs-sphinxdoc libjs-underscore libpython3-dev libpython3.9 libpython3.9-dev python3-dev python3.9-dev
+0 upgraded, 9 newly installed, 0 to remove and 26 not upgraded.
+Need to get 6829 kB of archives.
+After this operation, 28.1 MB of additional disk space will be used.
+Do you want to continue? [Y/n] y
+Get:1 http://deb.debian.org/debian bullseye/main amd64 javascript-common all 11+nmu1 [6260 B]
+Get:2 http://deb.debian.org/debian bullseye/main amd64 libjs-jquery all 3.5.1+dfsg+~3.5.5-7 [315 kB]
+Get:3 http://deb.debian.org/debian bullseye/main amd64 libjs-underscore all 1.9.1~dfsg-3 [100 kB]
+Get:4 http://deb.debian.org/debian bullseye/main amd64 libjs-sphinxdoc all 3.4.3-2 [127 kB]
+Get:5 http://deb.debian.org/debian bullseye/main amd64 libpython3.9 amd64 3.9.2-1 [1691 kB]
+Get:6 http://deb.debian.org/debian bullseye/main amd64 libpython3.9-dev amd64 3.9.2-1 [4028 kB]
+Get:7 http://deb.debian.org/debian bullseye/main amd64 libpython3-dev amd64 3.9.2-3 [21.7 kB]
+Get:8 http://deb.debian.org/debian bullseye/main amd64 python3.9-dev amd64 3.9.2-1 [515 kB]
+Get:9 http://deb.debian.org/debian bullseye/main amd64 python3-dev amd64 3.9.2-3 [24.8 kB]
+Fetched 6829 kB in 1s (6078 kB/s)
+debconf: delaying package configuration, since apt-utils is not installed
+Selecting previously unselected package javascript-common.
+(Reading database ... 35172 files and directories currently installed.)
+Preparing to unpack .../0-javascript-common_11+nmu1_all.deb ...
+Unpacking javascript-common (11+nmu1) ...
+Selecting previously unselected package libjs-jquery.
+Preparing to unpack .../1-libjs-jquery_3.5.1+dfsg+~3.5.5-7_all.deb ...
+Unpacking libjs-jquery (3.5.1+dfsg+~3.5.5-7) ...
+Selecting previously unselected package libjs-underscore.
+Preparing to unpack .../2-libjs-underscore_1.9.1~dfsg-3_all.deb ...
+Unpacking libjs-underscore (1.9.1~dfsg-3) ...
+Selecting previously unselected package libjs-sphinxdoc.
+Preparing to unpack .../3-libjs-sphinxdoc_3.4.3-2_all.deb ...
+Unpacking libjs-sphinxdoc (3.4.3-2) ...
+Selecting previously unselected package libpython3.9:amd64.
+Preparing to unpack .../4-libpython3.9_3.9.2-1_amd64.deb ...
+Unpacking libpython3.9:amd64 (3.9.2-1) ...
+Selecting previously unselected package libpython3.9-dev:amd64.
+Preparing to unpack .../5-libpython3.9-dev_3.9.2-1_amd64.deb ...
+Unpacking libpython3.9-dev:amd64 (3.9.2-1) ...
+Selecting previously unselected package libpython3-dev:amd64.
+Preparing to unpack .../6-libpython3-dev_3.9.2-3_amd64.deb ...
+Unpacking libpython3-dev:amd64 (3.9.2-3) ...
+Selecting previously unselected package python3.9-dev.
+Preparing to unpack .../7-python3.9-dev_3.9.2-1_amd64.deb ...
+Unpacking python3.9-dev (3.9.2-1) ...
+Selecting previously unselected package python3-dev.
+Preparing to unpack .../8-python3-dev_3.9.2-3_amd64.deb ...
+Unpacking python3-dev (3.9.2-3) ...
+Setting up javascript-common (11+nmu1) ...
+Setting up libpython3.9:amd64 (3.9.2-1) ...
+Setting up libjs-jquery (3.5.1+dfsg+~3.5.5-7) ...
+Setting up libjs-underscore (1.9.1~dfsg-3) ...
+Setting up libpython3.9-dev:amd64 (3.9.2-1) ...
+Setting up libjs-sphinxdoc (3.4.3-2) ...
+Setting up python3.9-dev (3.9.2-1) ...
+Setting up libpython3-dev:amd64 (3.9.2-3) ...
+Setting up python3-dev (3.9.2-3) ...
+Processing triggers for libc-bin (2.31-13+deb11u5) ...
+root@170b34fac3f4:/app/libiec61850# cmake -DBUILD_PYTHON_BINDINGS=ON .
+server-example-logging: sqlite not found
+-- Could NOT find Doxygen (missing: DOXYGEN_EXECUTABLE)
+-- Found SWIG: /usr/bin/swig4.0 (found version "4.0.2")
+-- Found PythonInterp: /usr/local/bin/python (found version "3.10.10")
+-- Found PythonLibs: /usr/local/lib/libpython3.10.so (found suitable exact version "3.10.10")
+CMake Warning (dev) at /usr/share/cmake-3.18/Modules/UseSWIG.cmake:634 (message):
+  Policy CMP0078 is not set: UseSWIG generates standard target names.  Run
+  "cmake --help-policy CMP0078" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+Call Stack (most recent call first):
+  pyiec61850/CMakeLists.txt:26 (swig_add_library)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+CMake Warning (dev) at /usr/share/cmake-3.18/Modules/UseSWIG.cmake:486 (message):
+  Policy CMP0086 is not set: UseSWIG honors SWIG_MODULE_NAME via -module
+  flag.  Run "cmake --help-policy CMP0086" for policy details.  Use the
+  cmake_policy command to set the policy and suppress this warning.
+
+Call Stack (most recent call first):
+  /usr/share/cmake-3.18/Modules/UseSWIG.cmake:736 (SWIG_ADD_SOURCE_TO_MODULE)
+  pyiec61850/CMakeLists.txt:26 (swig_add_library)
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /app/libiec61850
+root@170b34fac3f4:/app/libiec61850# lscpu
+Architecture:                    x86_64
+CPU op-mode(s):                  32-bit, 64-bit
+Byte Order:                      Little Endian
+Address sizes:                   46 bits physical, 48 bits virtual
+CPU(s):                          4
+On-line CPU(s) list:             0-3
+Thread(s) per core:              1
+Core(s) per socket:              4
+Socket(s):                       1
+NUMA node(s):                    1
+Vendor ID:                       GenuineIntel
+CPU family:                      6
+Model:                           45
+Model name:                      Intel(R) Xeon(R) CPU E5-2609 0 @ 2.40GHz
+Stepping:                        7
+CPU MHz:                         1197.192
+CPU max MHz:                     2400.0000
+CPU min MHz:                     1200.0000
+BogoMIPS:                        4788.83
+Virtualization:                  VT-x
+L1d cache:                       128 KiB
+L1i cache:                       128 KiB
+L2 cache:                        1 MiB
+L3 cache:                        10 MiB
+NUMA node0 CPU(s):               0-3
+Vulnerability Itlb multihit:     KVM: Mitigation: Split huge pages
+Vulnerability L1tf:              Mitigation; PTE Inversion; VMX conditional cache flushes, SMT disabled
+Vulnerability Mds:               Mitigation; Clear CPU buffers; SMT disabled
+Vulnerability Meltdown:          Mitigation; PTI
+Vulnerability Mmio stale data:   Unknown: No mitigations
+Vulnerability Retbleed:          Not affected
+Vulnerability Spec store bypass: Mitigation; Speculative Store Bypass disabled via prctl and seccomp
+Vulnerability Spectre v1:        Mitigation; usercopy/swapgs barriers and __user pointer sanitization
+Vulnerability Spectre v2:        Mitigation; Retpolines, IBPB conditional, IBRS_FW, STIBP disabled, RSB filling, PBRSB-eIBRS Not affected
+Vulnerability Srbds:             Not affected
+Vulnerability Tsx async abort:   Not affected
+Flags:                           fpu vme de pse tsc msr pae mce cx8 apic sep mtrr pge mca cmov pat pse36 clflush dts acpi mmx fxsr sse sse2 ss ht tm pbe syscall nx pdpe1gb rdtscp lm constant_tsc arch_perfmon pebs bts rep_good
+                                  nopl xtopology nonstop_tsc cpuid aperfmperf pni pclmulqdq dtes64 monitor ds_cpl vmx smx est tm2 ssse3 cx16 xtpr pdcm pcid dca sse4_1 sse4_2 x2apic popcnt tsc_deadline_timer aes xsave avx lahf
+                                 _lm epb pti ssbd ibrs ibpb stibp tpr_shadow vnmi flexpriority ept vpid xsaveopt dtherm arat pln pts md_clear flush_l1d
+
+#######################################
+####  Далее сборка с помощью make  ####
+#######################################
+root@170b34fac3f4:/app/libiec61850# make -j4
+Scanning dependencies of target iec61850_swig_compilation
+Scanning dependencies of target hal
+Scanning dependencies of target hal-shared
+[  0%] Building C object hal/CMakeFiles/hal.dir/socket/linux/socket_linux.c.o
+[  0%] Building C object hal/CMakeFiles/hal-shared.dir/socket/linux/socket_linux.c.o
+[  1%] Building C object hal/CMakeFiles/hal.dir/ethernet/linux/ethernet_linux.c.o
+[  1%] Swig compile iec61850.i for python
+[  1%] Building C object hal/CMakeFiles/hal.dir/thread/linux/thread_linux.c.o
+[  1%] Building C object hal/CMakeFiles/hal.dir/filesystem/linux/file_provider_linux.c.o
+[  1%] Building C object hal/CMakeFiles/hal-shared.dir/ethernet/linux/ethernet_linux.c.o
+[  1%] Building C object hal/CMakeFiles/hal.dir/time/unix/time.c.o
+[  2%] Building C object hal/CMakeFiles/hal.dir/serial/linux/serial_port_linux.c.o
+[  2%] Building C object hal/CMakeFiles/hal.dir/memory/lib_memory.c.o
+[  3%] Building C object hal/CMakeFiles/hal-shared.dir/thread/linux/thread_linux.c.o
+[  3%] Building C object hal/CMakeFiles/hal-shared.dir/filesystem/linux/file_provider_linux.c.o
+[  3%] Linking C static library libhal.a
+[  3%] Building C object hal/CMakeFiles/hal-shared.dir/time/unix/time.c.o
+/app/libiec61850/src/mms/inc/iso_connection_parameters.h:78: Warning 312: Nested union not currently supported (ignored).
+[  3%] Built target hal
+[  3%] Building C object hal/CMakeFiles/hal-shared.dir/serial/linux/serial_port_linux.c.o
+[  4%] Building C object hal/CMakeFiles/hal-shared.dir/memory/lib_memory.c.o
+Scanning dependencies of target iec61850
+[  4%] Linking C static library libhal-shared.a
+[  4%] Built target hal-shared
+Scanning dependencies of target iec61850-shared
+[  4%] Building C object src/CMakeFiles/iec61850.dir/common/string_map.c.o
+[  4%] Building C object src/CMakeFiles/iec61850.dir/common/map.c.o
+[  4%] Building C object src/CMakeFiles/iec61850.dir/common/linked_list.c.o
+[  5%] Building C object src/CMakeFiles/iec61850.dir/common/byte_buffer.c.o
+[  5%] Building C object src/CMakeFiles/iec61850-shared.dir/common/string_map.c.o
+[  5%] Building C object src/CMakeFiles/iec61850.dir/common/string_utilities.c.o
+[  5%] Building C object src/CMakeFiles/iec61850.dir/common/buffer_chain.c.o
+[  6%] Building C object src/CMakeFiles/iec61850-shared.dir/common/map.c.o
+[  6%] Building C object src/CMakeFiles/iec61850.dir/common/conversions.c.o
+[  7%] Building C object src/CMakeFiles/iec61850.dir/common/mem_alloc_linked_list.c.o
+[  7%] Building C object src/CMakeFiles/iec61850-shared.dir/common/linked_list.c.o
+[  7%] Building C object src/CMakeFiles/iec61850.dir/common/simple_allocator.c.o
+[  7%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_server/iso_connection.c.o
+[  7%] Building C object src/CMakeFiles/iec61850-shared.dir/common/byte_buffer.c.o
+[  7%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_server/iso_server.c.o
+[  7%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_acse/acse.c.o
+[  7%] Building C object src/CMakeFiles/iec61850-shared.dir/common/string_utilities.c.o
+[  8%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/common/mms_type_spec.c.o
+[  8%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/common/mms_value.c.o
+[  9%] Building C object src/CMakeFiles/iec61850-shared.dir/common/buffer_chain.c.o
+[  9%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/common/mms_common_msg.c.o
+[  9%] Building C object src/CMakeFiles/iec61850-shared.dir/common/conversions.c.o
+[  9%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_initiate.c.o
+[  9%] Building C object src/CMakeFiles/iec61850-shared.dir/common/mem_alloc_linked_list.c.o
+/app/libiec61850/src/mms/inc/iso_connection_parameters.h:145: Warning 451: Setting a const char * variable may leak memory.
+[  9%] Building C object src/CMakeFiles/iec61850-shared.dir/common/simple_allocator.c.o
+[ 10%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_write.c.o
+[ 10%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_identify.c.o
+[ 10%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_server/iso_connection.c.o
+[ 10%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_status.c.o
+[ 10%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_named_variable_list.c.o
+[ 11%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_server/iso_server.c.o
+[ 11%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_connection.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_files.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_acse/acse.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/common/mms_type_spec.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_get_namelist.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/common/mms_value.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_get_var_access.c.o
+[ 12%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_common.c.o
+[ 13%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_read.c.o
+[ 13%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/client/mms_client_journals.c.o
+[ 14%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/common/mms_common_msg.c.o
+[ 14%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_read_service.c.o
+[ 14%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_file_service.c.o
+[ 14%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_initiate.c.o
+[ 14%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_association_service.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_identify_service.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_write.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_status_service.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_named_variable_list_service.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_identify.c.o
+[ 15%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_value_cache.c.o
+[ 16%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_status.c.o
+[ 16%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_get_namelist_service.c.o
+[ 16%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_access_result.c.o
+[ 17%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_named_variable_list.c.o
+[ 17%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_server.c.o
+[ 17%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_server_common.c.o
+[ 17%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_connection.c.o
+[ 17%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_named_variable_list.c.o
+[ 18%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_domain.c.o
+[ 18%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_device.c.o
+[ 18%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_information_report.c.o
+[ 18%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_journal.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_journal_service.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_server_connection.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_files.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_write_service.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/server/mms_get_var_access_service.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_cotp/cotp.c.o
+[ 19%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_get_namelist.c.o
+[ 20%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_presentation/iso_presentation.c.o
+[ 20%] Building C object src/CMakeFiles/iec61850.dir/mms/asn1/ber_decode.c.o
+[ 21%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_get_var_access.c.o
+[ 21%] Building C object src/CMakeFiles/iec61850.dir/mms/asn1/asn1_ber_primitive_value.c.o
+[ 21%] Building C object src/CMakeFiles/iec61850.dir/mms/asn1/ber_encoder.c.o
+[ 21%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_common.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850.dir/mms/asn1/ber_integer.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_client/iso_client_connection.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_common/iso_connection_parameters.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_read.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_session/iso_session.c.o
+[ 22%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/client_control.c.o
+[ 22%] Built target iec61850_swig_compilation
+[ 23%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/client_report_control.c.o
+[ 23%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/client/mms_client_journals.c.o
+[ 23%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/client_goose_control.c.o
+[ 23%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/client_sv_control.c.o
+[ 23%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_read_service.c.o
+[ 23%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/client_report.c.o
+[ 24%] Building C object src/CMakeFiles/iec61850.dir/iec61850/client/ied_connection.c.o
+[ 24%] Building C object src/CMakeFiles/iec61850.dir/iec61850/common/iec61850_common.c.o
+[ 25%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/impl/ied_server.c.o
+[ 25%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_file_service.c.o
+[ 25%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/impl/ied_server_config.c.o
+[ 25%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/impl/client_connection.c.o
+[ 25%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_association_service.c.o
+[ 26%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/model/model.c.o
+[ 26%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/model/dynamic_model.c.o
+[ 26%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/model/cdc.c.o
+[ 26%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_identify_service.c.o
+[ 26%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/model/config_file_parser.c.o
+[ 27%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/control.c.o
+[ 27%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_status_service.c.o
+[ 27%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/mms_mapping.c.o
+[ 27%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/reporting.c.o
+[ 28%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_named_variable_list_service.c.o
+[ 28%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/mms_goose.c.o
+[ 28%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_value_cache.c.o
+[ 28%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_get_namelist_service.c.o
+[ 28%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/mms_sv.c.o
+[ 29%] Building C object src/CMakeFiles/iec61850.dir/iec61850/server/mms_mapping/logging.c.o
+[ 29%] Building C object src/CMakeFiles/iec61850.dir/logging/log_storage.c.o
+[ 29%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_access_result.c.o
+[ 29%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DataAccessError.c.o
+[ 29%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DeleteNamedVariableListRequest.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constr_SET_OF.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/MmsPdu.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetNamedVariableListAttributesResponse.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_server.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/BIT_STRING.c.o
+[ 30%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ber_tlv_tag.c.o
+[ 31%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constr_SEQUENCE_OF.c.o
+[ 31%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/asn_SET_OF.c.o
+[ 31%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ReadResponse.c.o
+[ 32%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_server_common.c.o
+[ 32%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InformationReport.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConfirmedServiceRequest.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DeleteNamedVariableListResponse.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/asn_SEQUENCE_OF.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_named_variable_list.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/VariableAccessSpecification.c.o
+[ 33%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetVariableAccessAttributesRequest.c.o
+[ 34%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/xer_support.c.o
+[ 34%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_domain.c.o
+[ 34%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ObjectName.c.o
+[ 34%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/NativeEnumerated.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/per_encoder.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constr_SEQUENCE.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetNameListResponse.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_device.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/MMSString.c.o
+[ 35%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InitiateErrorPdu.c.o
+[ 36%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_information_report.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/IndexRangeSeq.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConfirmedErrorPDU.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/UnconfirmedService.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/UTF8String.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ServiceError.c.o
+[ 37%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_journal.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/TimeOfDay.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_journal_service.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetNameListRequest.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/asn_codecs_prim.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_server_connection.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Data.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ScatteredAccessDescription.c.o
+[ 38%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_write_service.c.o
+[ 39%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ReadRequest.c.o
+[ 39%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/per_decoder.c.o
+[ 40%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/server/mms_get_var_access_service.c.o
+[ 40%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Identifier.c.o
+[ 40%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_cotp/cotp.c.o
+[ 40%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ServiceSupportOptions.c.o
+[ 40%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_presentation/iso_presentation.c.o
+[ 41%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Integer8.c.o
+[ 41%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConfirmedServiceResponse.c.o
+[ 41%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/asn1/ber_decode.c.o
+[ 41%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ParameterSupportOptions.c.o
+[ 41%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Integer16.c.o
+[ 42%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/asn1/asn1_ber_primitive_value.c.o
+[ 42%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/asn1/ber_encoder.c.o
+[ 42%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ber_tlv_length.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/OCTET_STRING.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/asn1/ber_integer.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_client/iso_client_connection.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DefineNamedVariableListRequest.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_common/iso_connection_parameters.c.o
+[ 43%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/FloatingPoint.c.o
+[ 44%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_session/iso_session.c.o
+[ 44%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/client_control.c.o
+[ 44%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/xer_encoder.c.o
+[ 45%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Unsigned8.c.o
+[ 45%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/client_report_control.c.o
+[ 45%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/client_goose_control.c.o
+[ 45%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/BOOLEAN.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/client_sv_control.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/INTEGER.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/client_report.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/client/ied_connection.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/common/iec61850_common.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/UnconfirmedPDU.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/impl/ied_server.c.o
+[ 46%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DataSequence.c.o
+[ 47%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/impl/ied_server_config.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constraints.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/impl/client_connection.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/der_encoder.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/model/model.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/model/dynamic_model.c.o
+[ 48%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/VisibleString.c.o
+[ 49%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/model/cdc.c.o
+[ 49%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/model/config_file_parser.c.o
+[ 49%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InitiateResponsePdu.c.o
+[ 49%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/control.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/StructComponent.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/mms_mapping.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/reporting.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Address.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Unsigned16.c.o
+[ 50%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ber_decoder.c.o
+[ 51%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/mms_goose.c.o
+[ 51%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/per_support.c.o
+[ 51%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/mms_sv.c.o
+[ 51%] Building C object src/CMakeFiles/iec61850-shared.dir/iec61850/server/mms_mapping/logging.c.o
+[ 52%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/WriteResponse.c.o
+[ 52%] Building C object src/CMakeFiles/iec61850-shared.dir/logging/log_storage.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InitRequestDetail.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DataAccessError.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DeleteNamedVariableListRequest.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InitiateRequestPdu.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constr_SET_OF.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/MmsPdu.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetNamedVariableListAttributesResponse.c.o
+[ 53%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/DefineNamedVariableListResponse.c.o
+[ 54%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/BIT_STRING.c.o
+[ 54%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ber_tlv_tag.c.o
+[ 55%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/NULL.c.o
+[ 55%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constr_SEQUENCE_OF.c.o
+[ 55%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/asn_SET_OF.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ReadResponse.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ListOfVariableSeq.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InformationReport.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConfirmedServiceRequest.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DeleteNamedVariableListResponse.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/UtcTime.c.o
+[ 56%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/asn_SEQUENCE_OF.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/VariableAccessSpecification.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetVariableAccessAttributesRequest.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConcludeResponsePDU.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/xer_support.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/AccessResult.c.o
+[ 57%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ObjectName.c.o
+[ 58%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Integer32.c.o
+[ 58%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetNamedVariableListAttributesRequest.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/NativeEnumerated.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/per_encoder.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/VariableSpecification.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/Unsigned32.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constr_SEQUENCE.c.o
+[ 59%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetNameListResponse.c.o
+[ 60%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constr_CHOICE.c.o
+[ 60%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/MMSString.c.o
+[ 60%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/AlternateAccess.c.o
+[ 60%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ObjectClass.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InitiateErrorPdu.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/IndexRangeSeq.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/InitResponseDetail.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConfirmedResponsePdu.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConfirmedErrorPDU.c.o
+[ 61%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/UnconfirmedService.c.o
+[ 62%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GetVariableAccessAttributesResponse.c.o
+[ 62%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/NativeInteger.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/UTF8String.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ServiceError.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/xer_decoder.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/AlternateAccessSelection.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/TimeOfDay.c.o
+[ 63%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetNameListRequest.c.o
+[ 64%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConcludeRequestPDU.c.o
+[ 64%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/ConfirmedRequestPdu.c.o
+[ 64%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/asn_codecs_prim.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Data.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/WriteRequest.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ScatteredAccessDescription.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/RejectPDU.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ReadRequest.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/TypeSpecification.c.o
+[ 65%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/per_decoder.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Identifier.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/constr_TYPE.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850.dir/mms/iso_mms/asn1c/GeneralizedTime.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ServiceSupportOptions.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850.dir/goose/goose_subscriber.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Integer8.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConfirmedServiceResponse.c.o
+[ 67%] Building C object src/CMakeFiles/iec61850.dir/goose/goose_receiver.c.o
+[ 68%] Building C object src/CMakeFiles/iec61850.dir/goose/goose_publisher.c.o
+[ 68%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ParameterSupportOptions.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Integer16.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ber_tlv_length.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850.dir/sampled_values/sv_subscriber.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850.dir/sampled_values/sv_publisher.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/OCTET_STRING.c.o
+[ 69%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DefineNamedVariableListRequest.c.o
+[ 70%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/FloatingPoint.c.o
+[ 70%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/xer_encoder.c.o
+[ 70%] Linking C static library libiec61850.a
+[ 70%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/INTEGER.c.o
+[ 70%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Unsigned8.c.o
+[ 70%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/BOOLEAN.c.o
+[ 70%] Built target iec61850
+Scanning dependencies of target server_example_simple
+[ 71%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/UnconfirmedPDU.c.o
+[ 71%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constraints.c.o
+[ 71%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DataSequence.c.o
+[ 72%] Building C object examples/server_example_simple/CMakeFiles/server_example_simple.dir/server_example_simple.c.o
+Scanning dependencies of target server_example_basic_io
+[ 72%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/der_encoder.c.o
+Scanning dependencies of target server_example_password_auth
+[ 73%] Building C object examples/server_example_basic_io/CMakeFiles/server_example_basic_io.dir/server_example_basic_io.c.o
+[ 74%] Building C object examples/server_example_password_auth/CMakeFiles/server_example_password_auth.dir/server_example_password_auth.c.o
+[ 74%] Building C object examples/server_example_simple/CMakeFiles/server_example_simple.dir/static_model.c.o
+[ 75%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/VisibleString.c.o
+[ 75%] Linking C executable server_example_simple
+[ 75%] Building C object examples/server_example_password_auth/CMakeFiles/server_example_password_auth.dir/static_model.c.o
+[ 75%] Building C object examples/server_example_basic_io/CMakeFiles/server_example_basic_io.dir/static_model.c.o
+[ 75%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InitiateResponsePdu.c.o
+[ 75%] Linking C executable server_example_password_auth
+[ 75%] Linking C executable server_example_basic_io
+[ 75%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/StructComponent.c.o
+[ 75%] Built target server_example_simple
+[ 75%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Address.c.o
+Scanning dependencies of target server_example_write_handler
+[ 76%] Building C object examples/server_example_write_handler/CMakeFiles/server_example_write_handler.dir/server_example_write_handler.c.o
+[ 76%] Built target server_example_password_auth
+Scanning dependencies of target server_example_control
+[ 76%] Built target server_example_basic_io
+[ 76%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Unsigned16.c.o
+Scanning dependencies of target server_example_dynamic
+[ 76%] Building C object examples/server_example_control/CMakeFiles/server_example_control.dir/server_example_control.c.o
+[ 76%] Building C object examples/server_example_dynamic/CMakeFiles/server_example_dynamic.dir/server_example_dynamic.c.o
+[ 76%] Building C object examples/server_example_write_handler/CMakeFiles/server_example_write_handler.dir/static_model.c.o
+[ 77%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ber_decoder.c.o
+[ 78%] Building C object examples/server_example_control/CMakeFiles/server_example_control.dir/static_model.c.o
+[ 78%] Linking C executable server_example_dynamic
+[ 78%] Linking C executable server_example_write_handler
+[ 78%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/per_support.c.o
+[ 78%] Linking C executable server_example_control
+[ 78%] Built target server_example_dynamic
+[ 78%] Built target server_example_write_handler
+Scanning dependencies of target server_example_config_file
+Scanning dependencies of target server_example_ca
+[ 78%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/WriteResponse.c.o
+[ 78%] Building C object examples/server_example_config_file/CMakeFiles/server_example_config_file.dir/server_example_config_file.c.o
+[ 78%] Building C object examples/server_example_complex_array/CMakeFiles/server_example_ca.dir/server_example_ca.c.o
+[ 78%] Built target server_example_control
+Scanning dependencies of target server_example_threadless
+[ 78%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InitRequestDetail.c.o
+[ 78%] Building C object examples/server_example_threadless/CMakeFiles/server_example_threadless.dir/server_example_threadless.c.o
+[ 78%] Linking C executable server_example_config_file
+[ 79%] Building C object examples/server_example_complex_array/CMakeFiles/server_example_ca.dir/static_model.c.o
+[ 80%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InitiateRequestPdu.c.o
+[ 80%] Building C object examples/server_example_threadless/CMakeFiles/server_example_threadless.dir/static_model.c.o
+[ 80%] Linking C executable server_example_ca
+[ 80%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/DefineNamedVariableListResponse.c.o
+[ 80%] Built target server_example_config_file
+Scanning dependencies of target server_example_61400_25
+[ 80%] Linking C executable server_example_threadless
+[ 80%] Building C object examples/server_example_61400_25/CMakeFiles/server_example_61400_25.dir/server_example_61400_25.c.o
+[ 80%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/NULL.c.o
+[ 80%] Built target server_example_ca
+Scanning dependencies of target server_example_sg
+[ 80%] Building C object examples/server_example_setting_groups/CMakeFiles/server_example_sg.dir/server_example_sg.c.o
+[ 80%] Building C object examples/server_example_61400_25/CMakeFiles/server_example_61400_25.dir/static_model.c.o
+[ 80%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ListOfVariableSeq.c.o
+[ 80%] Built target server_example_threadless
+Scanning dependencies of target server_example_files
+[ 80%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/UtcTime.c.o
+[ 80%] Building C object examples/server_example_files/CMakeFiles/server_example_files.dir/server_example_files.c.o
+[ 80%] Building C object examples/server_example_setting_groups/CMakeFiles/server_example_sg.dir/static_model.c.o
+[ 80%] Linking C executable server_example_61400_25
+[ 81%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConcludeResponsePDU.c.o
+[ 81%] Linking C executable server_example_sg
+[ 81%] Building C object examples/server_example_files/CMakeFiles/server_example_files.dir/static_model.c.o
+[ 81%] Built target server_example_61400_25
+[ 81%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/AccessResult.c.o
+Scanning dependencies of target server_example_substitution
+[ 82%] Linking C executable server_example_files
+[ 82%] Building C object examples/server_example_substitution/CMakeFiles/server_example_substitution.dir/server_example_substitution.c.o
+[ 82%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Integer32.c.o
+[ 82%] Built target server_example_sg
+Scanning dependencies of target server_example_service_tracking
+[ 82%] Building C object examples/server_example_service_tracking/CMakeFiles/server_example_service_tracking.dir/server_example_service_tracking.c.o
+[ 82%] Building C object examples/server_example_substitution/CMakeFiles/server_example_substitution.dir/static_model.c.o
+[ 82%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetNamedVariableListAttributesRequest.c.o
+[ 82%] Built target server_example_files
+Scanning dependencies of target server_example_deadband
+[ 82%] Building C object examples/server_example_deadband/CMakeFiles/server_example_deadband.dir/server_example_deadband.c.o
+[ 83%] Linking C executable server_example_substitution
+[ 84%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/VariableSpecification.c.o
+[ 84%] Building C object examples/server_example_service_tracking/CMakeFiles/server_example_service_tracking.dir/static_model.c.o
+[ 84%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/Unsigned32.c.o
+[ 84%] Building C object examples/server_example_deadband/CMakeFiles/server_example_deadband.dir/static_model.c.o
+[ 85%] Linking C executable server_example_service_tracking
+[ 85%] Built target server_example_substitution
+Scanning dependencies of target iec61850_client_example1
+[ 86%] Building C object examples/iec61850_client_example1/CMakeFiles/iec61850_client_example1.dir/client_example1.c.o
+[ 86%] Linking C executable server_example_deadband
+[ 86%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constr_CHOICE.c.o
+[ 87%] Linking C executable iec61850_client_example1
+[ 87%] Built target server_example_service_tracking
+Scanning dependencies of target iec61850_client_example2
+[ 87%] Built target server_example_deadband
+[ 87%] Building C object examples/iec61850_client_example2/CMakeFiles/iec61850_client_example2.dir/client_example2.c.o
+[ 87%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/AlternateAccess.c.o
+Scanning dependencies of target client_example_control
+[ 87%] Building C object examples/iec61850_client_example_control/CMakeFiles/client_example_control.dir/client_example_control.c.o
+[ 87%] Built target iec61850_client_example1
+[ 87%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ObjectClass.c.o
+Scanning dependencies of target iec61850_client_example4
+[ 87%] Linking C executable iec61850_client_example2
+[ 87%] Building C object examples/iec61850_client_example4/CMakeFiles/iec61850_client_example4.dir/client_example4.c.o
+[ 87%] Linking C executable client_example_control
+[ 88%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/InitResponseDetail.c.o
+[ 88%] Linking C executable iec61850_client_example4
+[ 88%] Built target iec61850_client_example2
+[ 88%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConfirmedResponsePdu.c.o
+Scanning dependencies of target iec61850_client_example5
+[ 88%] Built target client_example_control
+[ 89%] Building C object examples/iec61850_client_example5/CMakeFiles/iec61850_client_example5.dir/client_example5.c.o
+Scanning dependencies of target iec61850_client_example_reporting
+[ 89%] Building C object examples/iec61850_client_example_reporting/CMakeFiles/iec61850_client_example_reporting.dir/client_example_reporting.c.o
+[ 89%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GetVariableAccessAttributesResponse.c.o
+[ 89%] Built target iec61850_client_example4
+Scanning dependencies of target iec61850_client_example_log
+[ 89%] Linking C executable iec61850_client_example5
+[ 90%] Building C object examples/iec61850_client_example_log/CMakeFiles/iec61850_client_example_log.dir/client_example_log.c.o
+[ 90%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/NativeInteger.c.o
+[ 90%] Linking C executable iec61850_client_example_reporting
+[ 90%] Linking C executable iec61850_client_example_log
+[ 91%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/xer_decoder.c.o
+[ 91%] Built target iec61850_client_example5
+Scanning dependencies of target iec61850_client_example_array
+[ 91%] Building C object examples/iec61850_client_example_array/CMakeFiles/iec61850_client_example_array.dir/client_example_array.c.o
+[ 91%] Built target iec61850_client_example_reporting
+Scanning dependencies of target file-tool
+[ 91%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/AlternateAccessSelection.c.o
+[ 92%] Building C object examples/iec61850_client_example_files/CMakeFiles/file-tool.dir/file-tool.c.o
+[ 92%] Built target iec61850_client_example_log
+Scanning dependencies of target iec61850_client_async
+[ 92%] Linking C executable iec61850_client_example_array
+[ 92%] Building C object examples/iec61850_client_example_async/CMakeFiles/iec61850_client_async.dir/client_example_async.c.o
+[ 92%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConfirmedRequestPdu.c.o
+[ 92%] Linking C executable file-tool
+[ 92%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/ConcludeRequestPDU.c.o
+[ 92%] Built target iec61850_client_example_array
+[ 92%] Linking C executable iec61850_client_async
+Scanning dependencies of target iec61850_client_file_async
+[ 92%] Building C object examples/iec61850_client_file_async/CMakeFiles/iec61850_client_file_async.dir/client_example_async.c.o
+[ 92%] Built target file-tool
+[ 92%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/WriteRequest.c.o
+Scanning dependencies of target mms_utility
+[ 93%] Building C object examples/mms_utility/CMakeFiles/mms_utility.dir/mms_utility.c.o
+[ 94%] Linking C executable iec61850_client_file_async
+[ 94%] Built target iec61850_client_async
+[ 95%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/RejectPDU.c.o
+Scanning dependencies of target server_example_goose
+[ 95%] Building C object examples/server_example_goose/CMakeFiles/server_example_goose.dir/server_example_goose.c.o
+[ 95%] Linking C executable mms_utility
+[ 95%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/TypeSpecification.c.o
+[ 95%] Built target iec61850_client_file_async
+[ 95%] Building C object examples/server_example_goose/CMakeFiles/server_example_goose.dir/static_model.c.o
+Scanning dependencies of target goose_observer
+[ 95%] Building C object examples/goose_observer/CMakeFiles/goose_observer.dir/goose_observer.c.o
+[ 95%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/constr_TYPE.c.o
+[ 95%] Linking C executable server_example_goose
+[ 95%] Built target mms_utility
+Scanning dependencies of target goose_subscriber_example
+[ 95%] Building C object src/CMakeFiles/iec61850-shared.dir/mms/iso_mms/asn1c/GeneralizedTime.c.o
+[ 95%] Building C object examples/goose_subscriber/CMakeFiles/goose_subscriber_example.dir/goose_subscriber_example.c.o
+[ 95%] Linking C executable goose_observer
+[ 95%] Linking C executable goose_subscriber_example
+[ 95%] Built target server_example_goose
+[ 95%] Built target goose_observer
+Scanning dependencies of target goose_publisher_example
+[ 96%] Building C object src/CMakeFiles/iec61850-shared.dir/goose/goose_subscriber.c.o
+Scanning dependencies of target sv_subscriber_example
+[ 97%] Building C object examples/goose_publisher/CMakeFiles/goose_publisher_example.dir/goose_publisher_example.c.o
+[ 97%] Building C object examples/sv_subscriber/CMakeFiles/sv_subscriber_example.dir/sv_subscriber_example.c.o
+[ 97%] Built target goose_subscriber_example
+Scanning dependencies of target sv_9_2_LE_example
+[ 97%] Building C object src/CMakeFiles/iec61850-shared.dir/goose/goose_receiver.c.o
+[ 97%] Building C object examples/iec61850_9_2_LE_example/CMakeFiles/sv_9_2_LE_example.dir/iec61850_9_2_LE_example.c.o
+[ 97%] Linking C executable goose_publisher_example
+[ 98%] Linking C executable sv_subscriber_example
+[ 98%] Built target goose_publisher_example
+Scanning dependencies of target iec61850_sv_client_example
+[ 98%] Built target sv_subscriber_example
+[ 98%] Building C object examples/iec61850_9_2_LE_example/CMakeFiles/sv_9_2_LE_example.dir/static_model.c.o
+[ 98%] Building C object examples/iec61850_sv_client_example/CMakeFiles/iec61850_sv_client_example.dir/sv_client_example.c.o
+Scanning dependencies of target sv_publisher_example
+[ 98%] Building C object src/CMakeFiles/iec61850-shared.dir/goose/goose_publisher.c.o
+[ 98%] Building C object examples/sv_publisher/CMakeFiles/sv_publisher_example.dir/sv_publisher_example.c.o
+[ 99%] Linking C executable sv_9_2_LE_example
+[ 99%] Linking C executable iec61850_sv_client_example
+[ 99%] Linking C executable sv_publisher_example
+[ 99%] Building C object src/CMakeFiles/iec61850-shared.dir/sampled_values/sv_subscriber.c.o
+[ 99%] Built target sv_publisher_example
+[ 99%] Built target sv_9_2_LE_example
+[ 99%] Built target iec61850_sv_client_example
+[ 99%] Building C object src/CMakeFiles/iec61850-shared.dir/sampled_values/sv_publisher.c.o
+[100%] Linking C shared library libiec61850.so
+[100%] Built target iec61850-shared
+Scanning dependencies of target _iec61850
+[100%] Building CXX object pyiec61850/CMakeFiles/_iec61850.dir/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx.o
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:4089:
+/app/libiec61850/pyiec61850/eventHandlers/eventHandler.hpp: In constructor ‘EventSubscriber::EventSubscriber()’:
+/app/libiec61850/pyiec61850/eventHandlers/eventHandler.hpp:43:32: warning: ‘void PyEval_InitThreads()’ is deprecated [-Wdeprecated-declarations]
+   43 |             PyEval_InitThreads();
+      |                                ^
+In file included from /usr/local/include/python3.10/Python.h:130,
+                 from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:179:
+/usr/local/include/python3.10/ceval.h:122:37: note: declared here
+  122 | Py_DEPRECATED(3.9) PyAPI_FUNC(void) PyEval_InitThreads(void);
+      |                                     ^~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_getDstAddress_addr(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6116:71: warning: ‘MmsValue* ClientGooseControlBlock_getDstAddress_addr(ClientGooseControlBlock)’ is deprecated [-Wdeprecated-declarations]
+ 6116 |   result = (MmsValue *)ClientGooseControlBlock_getDstAddress_addr(arg1);
+      |                                                                       ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:737:1: note: declared here
+  737 | ClientGooseControlBlock_getDstAddress_addr(ClientGooseControlBlock self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_setDstAddress_addr(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6145:55: warning: ‘void ClientGooseControlBlock_setDstAddress_addr(ClientGooseControlBlock, MmsValue*)’ is deprecated [-Wdeprecated-declarations]
+ 6145 |   ClientGooseControlBlock_setDstAddress_addr(arg1,arg2);
+      |                                                       ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:740:1: note: declared here
+  740 | ClientGooseControlBlock_setDstAddress_addr(ClientGooseControlBlock self, MmsValue* macAddr);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_getDstAddress_priority(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6168:72: warning: ‘uint8_t ClientGooseControlBlock_getDstAddress_priority(ClientGooseControlBlock)’ is deprecated [-Wdeprecated-declarations]
+ 6168 |   result = (uint8_t)ClientGooseControlBlock_getDstAddress_priority(arg1);
+      |                                                                        ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:743:1: note: declared here
+  743 | ClientGooseControlBlock_getDstAddress_priority(ClientGooseControlBlock self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_setDstAddress_priority(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6197:59: warning: ‘void ClientGooseControlBlock_setDstAddress_priority(ClientGooseControlBlock, uint8_t)’ is deprecated [-Wdeprecated-declarations]
+ 6197 |   ClientGooseControlBlock_setDstAddress_priority(arg1,arg2);
+      |                                                           ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:746:1: note: declared here
+  746 | ClientGooseControlBlock_setDstAddress_priority(ClientGooseControlBlock self, uint8_t priorityValue);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_getDstAddress_vid(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6220:68: warning: ‘uint16_t ClientGooseControlBlock_getDstAddress_vid(ClientGooseControlBlock)’ is deprecated [-Wdeprecated-declarations]
+ 6220 |   result = (uint16_t)ClientGooseControlBlock_getDstAddress_vid(arg1);
+      |                                                                    ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:749:1: note: declared here
+  749 | ClientGooseControlBlock_getDstAddress_vid(ClientGooseControlBlock self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_setDstAddress_vid(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6249:54: warning: ‘void ClientGooseControlBlock_setDstAddress_vid(ClientGooseControlBlock, uint16_t)’ is deprecated [-Wdeprecated-declarations]
+ 6249 |   ClientGooseControlBlock_setDstAddress_vid(arg1,arg2);
+      |                                                      ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:752:1: note: declared here
+  752 | ClientGooseControlBlock_setDstAddress_vid(ClientGooseControlBlock self, uint16_t vidValue);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_getDstAddress_appid(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6272:70: warning: ‘uint16_t ClientGooseControlBlock_getDstAddress_appid(ClientGooseControlBlock)’ is deprecated [-Wdeprecated-declarations]
+ 6272 |   result = (uint16_t)ClientGooseControlBlock_getDstAddress_appid(arg1);
+      |                                                                      ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:755:1: note: declared here
+  755 | ClientGooseControlBlock_getDstAddress_appid(ClientGooseControlBlock self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ClientGooseControlBlock_setDstAddress_appid(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:6301:56: warning: ‘void ClientGooseControlBlock_setDstAddress_appid(ClientGooseControlBlock, uint16_t)’ is deprecated [-Wdeprecated-declarations]
+ 6301 |   ClientGooseControlBlock_setDstAddress_appid(arg1,arg2);
+      |                                                        ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:758:1: note: declared here
+  758 | ClientGooseControlBlock_setDstAddress_appid(ClientGooseControlBlock self, uint16_t appidValue);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ControlObjectClient_enableInterlockCheck(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:10510:48: warning: ‘void ControlObjectClient_enableInterlockCheck(ControlObjectClient)’ is deprecated [-Wdeprecated-declarations]
+10510 |   ControlObjectClient_enableInterlockCheck(arg1);
+      |                                                ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:2311:1: note: declared here
+ 2311 | ControlObjectClient_enableInterlockCheck(ControlObjectClient self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ControlObjectClient_enableSynchroCheck(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:10532:46: warning: ‘void ControlObjectClient_enableSynchroCheck(ControlObjectClient)’ is deprecated [-Wdeprecated-declarations]
+10532 |   ControlObjectClient_enableSynchroCheck(arg1);
+      |                                              ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:2317:1: note: declared here
+ 2317 | ControlObjectClient_enableSynchroCheck(ControlObjectClient self);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx: In function ‘PyObject* _wrap_ControlObjectClient_setCtlNum(PyObject*, PyObject*)’:
+/app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:10561:42: warning: ‘void ControlObjectClient_setCtlNum(ControlObjectClient, uint8_t)’ is deprecated [-Wdeprecated-declarations]
+10561 |   ControlObjectClient_setCtlNum(arg1,arg2);
+      |                                          ^
+In file included from /app/libiec61850/pyiec61850/CMakeFiles/_iec61850.dir/iec61850PYTHON_wrap.cxx:3360:
+/app/libiec61850/src/iec61850/inc/iec61850_client.h:2323:1: note: declared here
+ 2323 | ControlObjectClient_setCtlNum(ControlObjectClient self, uint8_t ctlNum);
+      | ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[100%] Linking CXX shared module _iec61850.so
+[100%] Built target _iec61850
+root@170b34fac3f4:/app/libiec61850# ls pyiec61850/
+CMakeFiles  CMakeLists.txt  CTestTestfile.cmake  Makefile  _iec61850.so  cmake_install.cmake  eventHandlers  examples  iec61850.i  iec61850.py  servicePythonWrapper.hpp  test_pyiec61850.py  tutorial.md
+root@170b34fac3f4:/app/libiec61850# python ./pyiec61850/test_pyiec61850.py
+[0.0, 0]
+[10.0, 0]
+client ok
+root@170b34fac3f4:/app/libiec61850# docker pause
+bash: docker: command not found
+root@170b34fac3f4:/app/libiec61850#

@@ -1,0 +1,13 @@
+Python ищет модули в 3 шага:-
+	1. Сначала Python выполняет поиск в текущем каталоге;
+    2. Если он не найден, он выполняет поиск в каталогах, которые находятся в переменной оболочки PYTHONPATH
+    3. Если это также не удается, python проверяет зависящий от установки список каталогов, настроенных во время установки Python
+
+print(sys.path)
+['', '/usr/lib/python310.zip',
+	'/usr/lib/python3.10',
+	'/usr/lib/python3.10/lib-dynload',
+	'/usr/local/lib/python3.10/dist-packages',
+	'/usr/local/lib/python3.10/dist-packages/aristester-0.2.4-py3.10.egg',
+	'/usr/lib/python3/dist-packages'
+]
