@@ -1,0 +1,33 @@
+Opened pages:
+
+1. Job DSL (https://plugins.jenkins.io/job-dsl/)
+
+2. Как запускать/вызывать тесты pytest в Python (https://docs-python.ru/packages/frejmvork-pytest/zapuskat-vyzyvat-testy-pytest/#test-run-folder)
+
+3. Опции командной строки и настройки конфигурационного файла (https://pytest-docs-ru.readthedocs.io/ru/latest/customize.html)
+
+4. Система управления Ansible (https://habr.com/ru/company/selectel/blog/196620/)
+
+5. pip. User Guide (https://pip.pypa.io/en/latest/user_guide/)
+
+6. Установка Python 3 в Ubuntu [*+update-alternatives] (https://losst.pro/ustanovka-python-3-ubuntu)
+
+7. PEP 668 – Marking Python base environments as “externally managed” (https://peps.python.org/pep-0668/)
+
+8. How to Install Python 3.8 on Debian 10 (https://linuxize.com/post/how-to-install-python-3-8-on-debian-10/)
+
+9. libstdc++.so.6: version `GLIBCXX_3.4.20' not found (https://stackoverflow.com/questions/44773296/libstdc-so-6-version-glibcxx-3-4-20-not-found)
+
+10. Проблема с libstdc++.so.6? (https://qna.habr.com/q/565577)
+
+11. Installing CMake (https://cmake.org/install/)
+
+12. Как установить CMake на Debian 11 | Debian 10 (https://infoit.com.ua/linux/debian/kak-ustanovit-cmake-na-debian-11-debian-10/)
+
+13. How To Install CMake On Ubuntu And Debian (https://blog.eldernode.com/install-cmake-on-ubuntu-and-debian/)
+
+14. Пакет: cmake (3.18.4-2+deb11u1) (https://packages.debian.org/stable/cmake)
+
+15. Как работают snap, flatpak, appimage (https://habr.com/ru/post/673488/)
+
+16. https://habr.com/ru/post/713666/

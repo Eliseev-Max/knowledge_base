@@ -191,8 +191,8 @@ Docker - это открытая платформа для разработки,
 			или
 		$ docker ps -aq -f ancestor=hello-world:latest | xargs docker rm 
 			# xargs выводит по одной строке из stdout предыдущей (|) команды
-			
-	docker cp <container-ID>:src_path dest_path		- скопировать файл из контейнера на хост
+	♦ Копирование файлов из контейнера на хост:	
+		$ docker cp <container-ID>:src_path dest_path		- скопировать файл из контейнера на хост
 	
 	docker inspect [-f, --format] <container-ID>	- 	информация о контейнере
 	docker inspect --format='{{.Config.Image}}' <container-ID>
