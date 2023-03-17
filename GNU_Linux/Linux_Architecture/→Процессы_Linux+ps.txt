@@ -198,3 +198,5 @@ lsof (List of Open Files) - утилита, используемая для вы
 		свапнуто или не используется: 					 100 кБ
 	RSS = 400 + 1000 + 100 = 1500 кБ
 	VSZ = 500 + 2500 + 200 = 3200 кБ
+
+{https://losst.pro/upravlenie-protsessami-v-linux}

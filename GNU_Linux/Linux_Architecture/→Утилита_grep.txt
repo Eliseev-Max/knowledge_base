@@ -1,0 +1,4 @@
+GNU Grep 3.8: {https://www.gnu.org/software/grep/manual/grep.html}
+Поиск текста в файлах Linux: {https://losst.pro/gerp-poisk-vnutri-fajlov-v-linux}
+Команда grep: опции, регулярные выражения и примеры использования: {https://zalinux.ru/?p=1270}
+Regular expressions in grep ( regex ) with examples {https://www.cyberciti.biz/faq/grep-regular-expressions/}

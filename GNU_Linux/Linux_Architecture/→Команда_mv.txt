@@ -1,0 +1,5 @@
+{https://pingvinus.ru/note/cmd-mv}
+
+{https://linux.die.net/man/1/mv}
+
+{https://www.opennet.ru/man.shtml?topic=mv&category=1&russian=0}

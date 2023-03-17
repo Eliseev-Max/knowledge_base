@@ -1,4 +1,4 @@
-1. {}
+1. {https://translated.turbopages.org/proxy_u/en-ru.ru.382818df-6410185a-05a22852-74722d776562/https/www.geeksforgeeks.org/where-does-python-look-for-modules/}
 Python ищет модули в 3 шага:-
 	1. Сначала Python выполняет поиск в текущем каталоге;
     2. Если он не найден, он выполняет поиск в каталогах, которые находятся в переменной оболочки PYTHONPATH
@@ -12,3 +12,12 @@ print(sys.path)
 	'/usr/local/lib/python3.10/dist-packages/aristester-0.2.4-py3.10.egg',
 	'/usr/lib/python3/dist-packages'
 ]
+
+Learn more:
+
+1. Где хранятся модули в Python? {https://otus.ru/nest/post/951/}
+
+2. Где установлены пакеты Python в Linux {https://ciksiti.com/ru/chapters/12317-where-are-python-packages-installed-in-linux}
+
+3. Python in Debian {https://wiki.debian.org/Python#Deviations_from_upstream}
+

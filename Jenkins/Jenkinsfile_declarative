@@ -1,0 +1,55 @@
+pipeline {
+	agent any
+	parameters{
+		string(defaultValue: "10.1.21.116",
+		description: 'Testing ARIS controller IP address',
+		name: 'IP')
+		
+		string(defaultValue: "IEC61850_BE",
+		description: 'Value of pytest's test mark',
+		name: 'mark')
+		
+		string(defaultValue: "IEC61850",
+		description: 'The branch of SCM repository',
+		name: 'BRANCH')
+		
+		string(defaultValue: "aris_regress/protocols/iec61850s",
+		description: 'Path to the tests directory',
+		name: 'TESTSET')
+
+		string(defaultValue: "iec61850s",
+		description: 'Directory which contains tests',
+		name: 'TESTS_DIR')
+	}
+	stages {
+		stage('Git checkout') {
+			steps {
+				checkout changelog: false,
+				scm: scmGit(branches: [[name: '${BRANCH}']],
+				extensions: [[$class: 'SubmoduleOption', 
+					disableSubmodules: false, 
+					parentCredentials: true, 
+					recursiveSubmodules: true, 
+					reference: '',
+					trackingSubmodules: false]],
+
+						userRemoteConfigs: [
+                        [ credentialsId: 'complextest_key',
+						  url: 'git@localhost:complextest/tests.git' ]
+                    ])
+			}
+		}
+		stage('Prepare workspace') {
+			steps {
+				sh "mv -f $WORKSPACE/${TESTSET} $WORKSPACE"
+				sh "ls -R|grep -v ${TESTS_DIR}|xargs rm -rf"
+				sh "mv $WORKSPACE/${TESTS_DIR}/* $WORKSPACE && rm -rf ${TESTS_DIR}"
+			}
+		}
+		stage('Run tests in docker') {
+			steps {
+				sh "docker run --rm -v $WORKSPACE:/tests -p 222:22 iec61850_tester pytest -m ${mark} --IP ${IP}"
+			}
+		}
+	}
+}

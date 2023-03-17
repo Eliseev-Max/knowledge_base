@@ -2,7 +2,7 @@
 	https://www.jenkins.io/doc/book/pipeline/jenkinsfile/
 }
 
-Наиболее полезные шаги, общие шаблоны и некоторые нетривиальные примеры Jenkinsfile
+:: Наиболее полезные шаги, общие шаблоны и некоторые нетривиальные примеры Jenkinsfile
 
 Преимущества Jenkinsfile, располагающегося в системе контроля версий:
 	• возможность проверки кода и итераций в Pipeline
@@ -173,7 +173,117 @@ pipeline {
 Тестирование	[stage ('Test')]
 
 Развёртывание	[stage ('Deploy')]
+
+##################################
+## Этап checkout. Плагин scmGit ##
+##################################
+{https://www.jenkins.io/doc/pipeline/steps/params/scmgit/}
+
+	Этот плагин предоставляет функциональность, доступную через совместимые с Pipeline шаги.
+	Плагин git предоставляет реализацию SCM для использования с шагом проверки Pipeline SCM.
 	
+	Шаг (step) {checkout} является предпочтительным методом проверки SCM.
+	Для более простых случаев - шаг {git}.
+	checkout поддерживает:
+	  • SHA-1 checkout					# проверка/выгрузка SHA-1
+      • Tag checkout					# проверка/выгрузка тегов
+      • Submodule checkout				# проверка/выгрузка подмодуля
+      • Sparse checkout					# разреженная проверка/выгрузка
+      • Large file checkout (LFS)		# проверка/выгрузка больших файлов
+      • Reference repositories			# справочные репозитории
+      • Branch merges					# слияние веток
+      • Repository tagging				# 
+      • Custom refspecs					# пользовательские спецификации
+      • Timeout configuration			# 
+      • Changelog calculation 
+	    against a non-default reference	# Расчет журнала изменений для ссылки не по умолчанию
+      • Stale branch pruning			# Обрезка устаревших ветвей
+	
+	Примеры использования checkout step (CS), приведённые в источнике:
+		1. CS with defaults
+		2. CS with https and a specific branch
+		3. CS with ssh and a private key credential
+		4. CS with https and changelog disabled
+		5. CS with git protocol and polling disabled
+	
+	1. Шаг checkout с параметрами по умолчанию
+		 Используются:
+		   → протокол https
+		   → no credentials (без учётных данных)
+		   → ветка master
+
+#######################################
+####  Pipeline Snippet Generator:  ####
+#######################################
+
+checkout scmGit(userRemoteConfigs: [
+                    [ url: 'https://github.com/jenkinsci/git-plugin' ]
+                ])
+#######################################
+	
+	2. Шаг checkout с https и определенной веткой
+	   Используются:
+		  → протокол https
+		  → no credentials (без учётных данных)
+		  → определённая ветка stable-2.289
+
+#######################################
+####  Pipeline Snippet Generator:  ####
+#######################################
+
+checkout scmGit(branches: [[name: 'stable-2.289']],
+                userRemoteConfigs: [
+                    [ url: 'https://github.com/jenkinsci/jenkins.git' ]
+                ])
+#######################################
+	
+	3. Шаг checkout с ssh и private key credential
+	   Используются:
+		  → протокол ssh / (https)
+		  → private key credential (закрытый ключ) /(username:password)
+		  → ветка master
+
+#######################################
+####  Pipeline Snippet Generator:  ####
+#######################################
+
+checkout changelog: false,
+         scm: scmGit(userRemoteConfigs: [
+                         [ credentialsId: 'my-private-key-credential-id',
+                           url: 'git@github.com:jenkinsci/git-client-plugin.git' ]
+                         ])
+#######################################
+
+
+    
+	4. Шаг checkout с https и отключенным журналом изменений
+	   Используются:
+		  → протокол https
+		  → no credentials (без учётных данных)
+		  → ветка master
+		  → расчёт журнала изменений ОТКЛЮЧЕН
+		* [ changelog: false == журнал изменений для этого задания вычисляться не будет
+			changelog: true || (параметр не установлен) == журнал изменений будет вычислен
+		]
+		
+#######################################
+####  Pipeline Snippet Generator:  ####
+#######################################
+
+checkout changelog: false,
+         scmGit(userRemoteConfigs: [
+                    [ url: 'https://github.com/jenkinsci/credentials-plugin' ]
+                ])
+#######################################
+		  
+    5. Шаг checkout с протоколом git и отключенным опросом
+
+checkout poll: false,
+         scmGit(userRemoteConfigs: [
+                    [ url: 'git://github.com/jenkinsci/platformlabeler-plugin' ]
+                ])
+
+
 
 	also:
 https://www.jenkins.io/doc/book/pipeline/jenkinsfile/	-	Using a Jenkinsfile
