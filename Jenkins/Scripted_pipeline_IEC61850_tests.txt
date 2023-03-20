@@ -1,0 +1,56 @@
+node{
+    properties([
+	buildDiscarder(
+		logRotator(
+			artifactDaysToKeepStr: '',
+			artifactNumToKeepStr: '',
+			daysToKeepStr: '',
+			numToKeepStr: '3'
+		)
+	),
+	parameters([
+		string(defaultValue: '10.1.21.116',
+			description: 'IP-address of testing controller',
+			name: 'IP'
+		),
+		string(defaultValue: 'IEC61850_BE',
+		description: '-m parameter for pytest tests',
+		name: 'mark'
+		),
+		string(defaultValue: 'IEC61850',
+		description: 'The name of SCM branch',
+		name: 'BRANCH'
+		),
+		string(defaultValue: 'aris_regress/protocols/iec61850s',
+		description: 'Path to the tests directory',
+		name: 'TESTSET'
+		),
+		string(defaultValue: 'iec61850s',
+		description: 'The name of test directory',
+		name: 'TESTS_DIRECTORY'
+		),
+	])
+])
+	
+	stage ('checkout') {
+		checkout([
+			$class: 'GitSCM',
+			branches: [[name: 'IEC61850']],
+			userRemoteConfigs: [[
+				credentialsId: 'complextest_key',
+				url: 'git@localhost:complextest/tests.git'
+				]]
+		])
+	
+	}
+	stage ('Prepare workspace') {
+		sh '''mv -f $WORKSPACE/$TESTSET $WORKSPACE
+			  ls -R|grep -v ${TESTS_DIRECTORY}|xargs rm -rf
+			  mv $WORKSPACE/${TESTS_DIRECTORY}/* $WORKSPACE && rm -rf ${TESTS_DIRECTORY}'''
+	}
+	
+	stage('Run tests in docker') {
+		sh 'docker run --rm -v $WORKSPACE:/tests -p 222:22 iec61850_tester pytest -m ${mark} --IP ${IP}'
+	}
+	
+}
