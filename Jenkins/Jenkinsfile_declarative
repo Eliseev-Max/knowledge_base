@@ -53,3 +53,30 @@ pipeline {
 		}
 	}
 }
+
+###################################################################################################################
+
+properties([
+	buildDiscarder(
+		logRotator(
+			artifactDaysToKeepStr: '',
+			artifactNumToKeepStr: '',
+			daysToKeepStr: '',
+			numToKeepStr: '3'
+		)
+	),
+	parameters([
+		string(defaultValue: '10.1.21.116',
+			description: 'IP-address of testing controller',
+			name: 'IP'
+		),
+		string(defaultValue: 'IEC61850_BE',
+		description: '-m parameter for pytest tests',
+		name: 'mark'
+		),
+		string(defaultValue: 'IEC61850',
+		description: 'The name of SCM branch',
+		name: 'BRANCH'
+		)
+	])
+])
