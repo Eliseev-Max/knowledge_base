@@ -1,0 +1,37 @@
+pipeline {
+	agent any
+	parameters{
+		string(defaultValue: "IEC61850",
+		description: 'The branch of SCM repository',
+		name: 'BRANCH')
+	}
+	stages {
+		stage('Git checkout') {
+			steps {
+				checkout([
+					$class: 'GitSCM',
+					branches: [[name: '${BRANCH}']],
+					extensions: [[
+						$class: 'SubmoduleOption',
+						disableSubmodules: false,
+						parentCredentials: true,
+						recursiveSubmodules: true,
+						reference: '',
+						trackingSubmodules: false
+						]],
+					userRemoteConfigs: [[
+						credentialsId: 'complextest_key',
+						url: 'git@localhost:eliseev/iec61850_tests.git'
+					]]
+				])
+			}
+		}
+		stage('Actions') {
+			steps {
+				sh "ls -lahi"
+			}
+		
+		}
+	}
+}
+
