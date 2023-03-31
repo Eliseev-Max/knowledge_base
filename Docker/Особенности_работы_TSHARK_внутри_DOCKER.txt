@@ -1,0 +1,41 @@
+sources:
+{https://anandapsiva.wordpress.com/2020/04/14/capture-network-packets-in-docker-using-tshark/}
+
+1. Установка tshark в docker-образ посредством Dockerfile
+	В процессе выполнения директивы "RUN apt -y install tshark" возникает необходимость ввода пользователем "yes"
+	(интерактивная командная строка/оболочка установщика).
+	При этом опция "-y" команды apt install (\apt-get install) не обрабатывает это поведение.
+	
+	Способ продолжить установку без интерактивного вмешательства пользователя:
+	Использовать параметр загрузки Debian: DEBIAN_FRONTEND=noninteractive
+	
+		RUN DEBIAN_FRONTEND=nointeractive apt-get -y install tshark
+
+2. Установка:
+	$ apt -y install wireshark				# for apt package system (debian-like)
+	$ yum install wireshark					# for RHEL based Linux
+	$ apt install tshark
+	
+	Если для yum требуется прокси, необходимо отредактировать /etc/yum.conf перед выполнением вышеуказанной команды.
+	Добавьте "proxy=proxyHost:proxyPort" в yum.conf. При необходимости в yum.conf также можно добавить proxy_username и proxy_password.
+
+3.  Когда мы пытаемся запустить tshark после установки (от имени пользователя root), происходит сбой с ошибкой ниже:
+'''
+/usr/sbin/tshark 
+tshark: Couldn't run /usr/sbin/dumpcap in child process: Operation not permitted
+Are you a member of the 'wireshark' group? Try running
+'usermod -a -G wireshark _your_username_' as root.
+'''
+
+Вышеуказанная ошибка наблюдается, даже если пользователь root/admin, выполняющий команду, входит в группу wireshark.
+
+Чтобы преодолеть вышеуказанную ошибку, контейнер должен быть запущен с указанными ниже опциями.
+Опция "-cap-add" команды "docker run" позволяет добавить Linux Capabilities в контейнер docker.
+	# --cap-add  - Add Linux capabilities
+	
+	–cap-add=NET_RAW –-cap-add=NET_ADMIN
+	# docker run --name LinuxContainer1 --cap-add=NET_RAW --cap-add=NET_ADMIN linuximage1
+
+Пример команды для перехвата http-трафика на порт 8080 внутри контейнера и перенаправления в файл для последующего анализа:
+	
+	/usr/sbin/tshark -V -i any tcp port 8080 -d "tcp.port==8080,http" > /tmp/packet.out

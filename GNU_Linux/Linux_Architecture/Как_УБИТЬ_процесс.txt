@@ -1,0 +1,5 @@
+1. Убиваем процессы в Linux — команды ps, kill и killall
+{ https://pingvinus.ru/note/ps-kill-killall }
+
+2. Как убить процесс Linux
+{ https://losst.pro/kak-ubit-protsess-linux }

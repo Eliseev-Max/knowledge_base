@@ -1,0 +1,26 @@
+1. Использование SSH для подключения к удаленному серверу
+	{https://www.digitalocean.com/community/tutorials/how-to-use-ssh-to-connect-to-a-remote-server-ru}
+
+2. Как распаковать (разархивировать) файл tar.gz
+	{https://routerus.com/how-to-extract-unzip-tar-gz-file/}
+
+3. Как подключиться по SSH
+	{https://losst.pro/kak-podklyuchitsya-po-ssh}
+
+4. 4 способа узнать, какие порты прослушиваются в Linux
+	{https://zalinux.ru/?p=2365}
+
+5. Просмотр и анализ логов сайта на Linux сервере
+	{https://eternalhost.net/base/vps-vds/prosmotr-analiz-logov-linux}
+
+6. Как посмотреть логи в Linux
+	{https://losst.pro/kak-posmotret-logi-v-linux}
+
+7. Запуск скрипта sh в Linux
+	{https://losst.pro/zapusk-skripta-sh-v-linux}
+
+8. Материалы по извлечению рекурсивно заархивированных архивов (архив-в-архиве)
+	https://stackoverflow.com/questions/2778153/how-to-extract-nested-tar-gz-files-easily
+	https://www.cyberciti.biz/faq/how-to-extract-multiple-tar-ball-tar-gz-files-in-directory-on-linux-or-unix/
+	https://translated.turbopages.org/proxy_u/en-ru.ru.251be8c3-64244075-c2710895-74722d776562/https/unix.stackexchange.com/questions/655155/how-to-repeatedly-unpack-tar-gz-files-that-are-within-the-tar-gz-itself
+	https://translated.turbopages.org/proxy_u/en-ru.ru.eea16742-6424405c-90559b2b-74722d776562/https/unix.stackexchange.com/questions/4367/extracting-nested-zip-files
