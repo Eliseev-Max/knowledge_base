@@ -1,0 +1,30 @@
+Как определить родителя merge-коммита?
+(https://stackoverflow.com/questions/9059335/how-can-i-get-the-parents-of-a-merge-commit-in-git)
+Идентификаторы родителей веток указываются в виде хеша (SHA-1).
+
+	$ git log <hash>,
+	где <hash> - хэш коммита слияния веток.
+	Показывает сокращённые хэши родителей.
+	
+Существует два эквивалентных способа узнать хеши:
+	$ git log --pretty=%P -n 1 <commit>
+	# --pretty[=<format>], --format[=<format>] - красивая печать содержимого commit-логов в заданном формате,
+	# где <format> может быть одним из 
+	#    • oneline,
+	#	 • short,
+	# 	 • medium,
+	#    • full,
+	#    • fuller,
+	#    • email,
+	#    • raw    и
+	#    • format:<string>.
+	# Если значение опущено, то по умолчанию используется формат medium.
+	### -n <number>, --max-count=<number>  - ограничить количество выводимых коммитов
+	
+	$ git show -s --pretty=%P <commit>
+	
+	$ git rev-list --parents -n 1 <commit>		- покажет хеш коммита и хеши родителей;
+
+Если требуется рассмотреть родителей, можно обратиться к ним напрямую:
+	<commit>^1 и <commit>^2, т.е.
+	$ git show <commit>^1
