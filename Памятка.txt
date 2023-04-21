@@ -1,0 +1,23 @@
+Памятка от 21.04.2023
+
+Открытые вкладки:
+  1. Работа с GitLab:
+    {".gitlab-ci.yml keyword reference (FREE)":https://gitlab.praktikum-services.ru/help/ci/yaml/index}
+	{"GitLab Token overview":https://docs.gitlab.com/ee/security/token_overview.html#gitlab-token-overview}
+	{"Personal access tokens":https://docs.gitlab.com/ee/user/profile/personal_access_tokens.html}
+	{"Job artifacts":https://docs.gitlab.com/ee/ci/jobs/job_artifacts.html#browse-the-contents-of-the-artifacts-archive}
+	{"Job Artifacts API":https://docs.gitlab.com/ee/api/job_artifacts.html#get-job-artifacts}
+  
+  2. Статьи на Habr:
+    {"Jenkins Pipeline. Что это и как использовать в тестировании":https://habr.com/ru/companies/yoomoney/articles/538664/}
+	{"Битва Jenkins и GitLab CI/CD":https://habr.com/ru/companies/ruvds/articles/522334/}
+	{"Руководство по CI/CD в GitLab для (почти) абсолютного новичка":https://habr.com/ru/articles/498436/}
+	
+  3. Материал по YAML:
+    {"YAML Ain’t Markup Language (YAML™) version 1.2":https://yaml.org/spec/1.2.2/}
+	{"YAML":https://ru.wikipedia.org/wiki/YAML}
+	{"YAML за 5 минут: синтаксис и основные возможности":https://tproger.ru/translations/yaml-za-5-minut-sintaksis-i-osnovnye-vozmozhnosti/}
+
+  4. Прочее:
+    https://www.bitslovers.com/gitlab-ci-artifacts/
+	https://www.pult.ru/articles/hi-fi-komponenty/pro-audio-dlya-doma-khoroshiy-zvuk-po-razumnoy-tsene/?utm_source=Subscribeinfo&utm_medium=email&utm_campaign=ekspert254_060423%26ref%3Demail&rr_mailid_proxy=642f0e4a6a48607aef2ff800
