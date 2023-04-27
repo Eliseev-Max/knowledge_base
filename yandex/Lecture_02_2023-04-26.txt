@@ -1,0 +1,22 @@
+До артефактов можно достучаться через dependencies
+
+spotbugs-sast:
+  dependencies:
+    - build_backend
+
+
+Ускорение сборки. Кеш.
+cache:
+  key: $CI_COMMIT_REF_SLUG
+  paths:
+    - npm/
+
+before_script:
+  - npm ci --cache .npm --prefer-offline
+
+test_async:
+  script:
+  - node ./specs/start.js ./specs/async.spec.js
+
+
+yamllint - инструмент для проверки синтаксиса YAML
