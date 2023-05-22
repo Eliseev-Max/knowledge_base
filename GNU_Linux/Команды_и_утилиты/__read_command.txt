@@ -1,0 +1,7 @@
+Bash read Command with Examples:
+https://linuxopsys.com/topics/bash-read-examples
+
+Команда read в Bash
+https://routerus.com/bash-read/
+
+

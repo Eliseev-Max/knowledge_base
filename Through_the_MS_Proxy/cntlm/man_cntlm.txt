@@ -5,7 +5,12 @@ SYNOPSIS
        cntlm [ -AaBcDdFfgHhILlMPprSsTUuvw ] [ host1 port1 | host1:port1 ] ... hostN portN
 
 DESCRIPTION
-       Cntlm  is an NTLM/NTLM SR/NTLMv2 authenticating HTTP proxy. It stands between your applications and the corporate proxy, adding NTLM authentication on-the-fly. You can specify several "parent" proxies and Cntlm will try one after another until one works. All auth'd  connections  are cached and reused to achieve high efficiency. Just point your apps proxy settings at Cntlm, fill in cntlm.conf (cntlm.ini) and you're ready to do. This is useful on Windows, but essential for non-Microsoft OS's. Proxy IP addresses can be specified via CLI (host1:port1 to  hostN:portN) or the configuration file.
+       Cntlm  is an NTLM/NTLM SR/NTLMv2 authenticating HTTP proxy.
+	   It stands between your applications and the corporate proxy, adding NTLM authentication on-the-fly.
+	   You can specify several "parent" proxies and Cntlm will try one after another until one works.
+	   All auth'd  connections  are cached and reused to achieve high efficiency.
+	   Just point your apps proxy settings at Cntlm, fill in cntlm.conf (cntlm.ini) and you're ready to do.
+	   This is useful on Windows, but essential for non-Microsoft OS's. Proxy IP addresses can be specified via CLI (host1:port1 to  hostN:portN) or the configuration file.
 
        Another  option  is  to have cntlm authenticate your local web connections without any parent proxies. It can work in a stand-alone mode, just
        like Squid or ISA.
