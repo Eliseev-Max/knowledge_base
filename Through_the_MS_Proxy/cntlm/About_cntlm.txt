@@ -1,0 +1,39 @@
+Translated from:
+https://manpages.ubuntu.com/manpages/jammy/man1/cntlm.1.html
+
+more:
+https://gahcep.github.io/blog/2012/08/14/using-cntlm-http-proxy/
+https://linux.die.net/man/1/cntlm
+
+Cntlm  is  an  NTLM/NTLM  SR/NTLMv2  authenticating  HTTP  proxy.
+It  stands between your applications and the corporate proxy,  adding  NTLM  authentication  on-the-fly.
+You  can specify several "parent" proxies and Cntlm will try one after another until one works.
+All auth'd connections are cached and reused to achieve high efficiency.
+Just point your apps proxy  settings  at  Cntlm, fill in cntlm.conf (cntlm.ini) and you're ready to do.
+This is useful on Windows, but essential  for  non-Microsoft  OS's.
+Proxy  IP  addresses  can  be specified via CLI (host1:port1 to hostN:portN) or the configuration file.
+
+Another option is to have cntlm authenticate your local web connections without any parent proxies.
+It can work in a stand-alone mode, just  like  Squid  or  ISA.
+By  default,  all requests are forwarded to parent proxies, but the user can set a "NoProxy" list, a list of URL matching wild-card patterns, that route between direct and forward  modes.
+Cntlm  can also  recognize  when all your corporate proxies are unavailable and switch to stand-alone mode automatically (and then back again). Aside from WWW and PROXY  authentication,  cntlm provides  a  useful  feature  enabling  users  migrate their laptops between work and home without changing proxy settings in their applications (using cntlm all  the  time).  Cntlm also  integrates  transparent  TCP/IP port forwarding (tunneling). Each tunnel opens a new listening socket on local machine and and forwards all  connections  to  the  target  host behind the parent proxy. Instead of these SSH-like tunnels, user can also choose a limited SOCKS5 interface.
+
+Core cntlm function had been similar to the late NTLMAPS, but today, cntlm has evolved way beyond  anything  any  other  application  of  this type can offer.
+The feature list below speaks for itself. Cntlm has  many  security/privacy  features  like  NTLMv2  support  and password  protection - it is possible to substitute password hashes (which can be obtained using -H) in place of the actual password or  to  enter  the  password  interactively  (on start-up  or  via  "basic"  HTTP  auth  translation). If plaintext password is used, it is automatically hashed during the startup and all traces of it are removed from the  process memory.
+---
+---
+Cntlm - это HTTP-прокси с аутентификацией NTLM/NTLM SR/NTLMv2.
+Он стоит между вашими приложениями и корпоративным прокси, добавляя NTLM-аутентификацию "на лету".
+Вы можете указать несколько "родительских" прокси, и Cntlm будет пробовать один за другим, пока один не сработает.
+Все аутентифицированные соединения кэшируются и используются повторно для достижения высокой эффективности.
+Просто направьте настройки прокси вашего приложения на Cntlm, заполните cntlm.conf (cntlm.ini) и все готово.
+Это полезно для Windows, но необходимо для не-Microsoft OS.
+IP-адреса прокси могут быть указаны через CLI (host1:port1 to hostN:portN) или в конфигурационном файле.
+
+Другой вариант - заставить cntlm аутентифицировать ваши локальные веб-соединения без каких-либо родительских прокси.
+Он может работать в автономном режиме, как Squid или ISA.
+По умолчанию все запросы направляются на родительские прокси, но пользователь может задать список "NoProxy" - список URL-адресов, соответствующих шаблонам с дикими символами, которые позволяют переключаться между прямым и прямым режимами.
+Cntlm также может распознавать, когда все ваши корпоративные прокси недоступны, и автоматически переключаться в автономный режим (а затем обратно). Помимо WWW и PROXY аутентификации, cntlm предоставляет полезную функцию, позволяющую пользователям перемещать свои ноутбуки между работой и домом без изменения настроек прокси в своих приложениях (постоянно используя cntlm).  Cntlm также интегрирует прозрачное перенаправление портов TCP/IP (туннелирование). Каждый туннель открывает новый прослушивающий сокет на локальной машине и перенаправляет все соединения на целевой хост за родительским прокси. Вместо этих SSH-подобных туннелей пользователь также может выбрать ограниченный интерфейс SOCKS5.
+
+Основная функция cntlm была похожа на поздний NTLMAPS, но сегодня cntlm развился намного больше, чем может предложить любое другое приложение такого типа.
+Приведенный ниже список функций говорит сам за себя. Cntlm имеет множество функций безопасности/приватности, таких как поддержка NTLMv2 и защита паролем - можно подставлять хэши паролей (которые можно получить с помощью -H) вместо фактического пароля или вводить пароль интерактивно (при запуске или через "базовую" трансляцию HTTP-аута). Если используется пароль в открытом виде, он автоматически хэшируется при запуске и все его следы удаляются из памяти процесса.
