@@ -84,7 +84,7 @@ https://curl.se/docs/manual.html
 Proxy:
 172.25.200.200:3128
 user: m.eliseev
-password: mE***w
+password: domain_user_password
 
 Jenkins (web):
 172.29.24.32:8080

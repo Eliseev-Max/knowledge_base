@@ -72,9 +72,13 @@ MS User: m.eliseev
 	Настройка сразу для всех приложений:
 	• $ nano ~/.bashrc
 	> (всавить в конец файла):
-	export http_proxy=http://127.0.0.1:3128
-	export https_proxy=https://127.0.0.1:3128
-	export ftp_proxy=http://127.0.0.1:3128
+export http_proxy=http://127.0.0.1:3128
+export https_proxy=https://127.0.0.1:3128
+export ftp_proxy=http://127.0.0.1:3128
+#### port :8888
+export http_proxy=http://127.0.0.1:8888
+export https_proxy=https://127.0.0.1:8888
+export ftp_proxy=http://127.0.0.1:8888
 	[Сохранить]
 	
 	•• $ . ~/.bashrc
