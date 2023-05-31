@@ -1,0 +1,24 @@
+Typically, clients find Kerberos servers for their default realm in the domain-name system.
+Servers for your realm were found in DNS.
+For most configurations it is best to use DNS to find these servers so that if the set of servers for your realm changes, you need not reconfigure each machine in the realm.
+However, in special situations, you can locally configure the set of servers for your Kerberos realm.
+Add locations of default Kerberos servers to /etc/krb5.conf?
+===
+Обычно клиенты находят серверы Kerberos для своего пространства по умолчанию в системе доменных имен.
+Серверы для вашего царства были найдены в DNS.
+Для большинства конфигураций лучше всего использовать DNS для поиска этих серверов, чтобы, если набор серверов для вашего царства изменится, вам не нужно было заново настраивать каждую машину в царстве.
+Однако в особых ситуациях вы можете локально настроить набор серверов для вашего царства Kerberos.
+Добавить расположение серверов Kerberos по умолчанию в файл /etc/krb5.conf?
+---
+
+1. https://itsecforu.ru/2022/07/07/%D0%BD%D0%B0%D1%81%D1%82%D1%80%D0%BE%D0%B9%D0%BA%D0%B0-%D0%B0%D1%83%D1%82%D0%B5%D0%BD%D1%82%D0%B8%D1%84%D0%B8%D0%BA%D0%B0%D1%86%D0%B8%D0%B8-kerberos-%D0%B4%D0%BB%D1%8F-linux/
+
+2. https://dev.rutoken.ru/pages/viewpage.action?pageId=3440679
+
+3. https://help.ubuntu.com/community/UbuntuTime
+
+4. https://habr.com/ru/companies/aktiv-company/articles/170829/
+
+5. https://tmgblog.richardhicks.com/2011/08/29/access-to-the-web-proxy-filter-on-forefront-tmg-2010-is-denied/
+
+6. https://help.ubuntu.com/community/Kerberos
