@@ -1,0 +1,7 @@
+1. Синхронизация времени по NTP - 
+https://help.ubuntu.ru/wiki/%D1%80%D1%83%D0%BA%D0%BE%D0%B2%D0%BE%D0%B4%D1%81%D1%82%D0%B2%D0%BE_%D0%BF%D0%BE_ubuntu_server/%D1%81%D0%B5%D1%82%D1%8C/ntp
+
+2. Настройки аппаратного времени — hwclock: https://www.ekzorchik.ru/2012/04/hardware-time-settings-hwclock/
+3. NTP сервер на Linux Ubuntu:  https://www.dmosk.ru/miniinstruktions.php?mini=ntp-server-ubuntu
+4. Как установить, изменить время и часовой пояс в Ubuntu: https://ubuntu-admin.ru/kak-ustanovit-izmenit-vremya-i-chasovoj-poyas-v-ubuntu/
+

@@ -33,7 +33,8 @@
 Убрать впоследствие!
 
 #### удалить кеш DNS:
-#### $ sudo systemd-resolve --flush-caches
+#### $ sudo resolvectl flush-caches
+#### systemd-resolve --flush-caches # -> был переименован в resolvectl 
 
 #### Принудительно использовать IPv4 при обновлении (пакетов) репозитория (apt-get update):
 #### $ sudo apt-get -o Acquire::ForceIPv4=true update
