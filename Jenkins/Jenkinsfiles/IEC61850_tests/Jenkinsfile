@@ -1,0 +1,83 @@
+pipeline {
+	agent any
+	parameters{
+		string(
+		    defaultValue: "IEC61850",
+		    description: 'The branch of SCM repository',
+		    name: 'BRANCH'
+		)
+		string(
+		    defaultValue: "10.1.21.17",
+		    description: 'ARIS controller IP address',
+		    name: 'IP'
+		)
+		choice(
+		    name: "TEST_NAME",
+            choices: [ "Basic_Exchange", "Enhanced_SBO_control", "Substitution", "Data_Set", "Setting_Group_Selection", "Buffered_Reporting", "GOOSE_publish", "Unbuffered_Reporting", "Bindings_check" ],
+            description: "Test set choice"
+		)
+		booleanParam(
+		    name: 'BACKUP',
+			defaultValue: true,
+			description: 'Загрузка и установка backup на контроллер перед выполнением теста'
+		)
+		booleanParam(
+		    name: 'DUMPCAP',
+			defaultValue: true,
+			description: 'Включить захват сетевых пакетов'
+		)
+		choice(
+		    name: "KEY",
+            choices: ["None", "00000042B2FD", "000001094B95"],
+            description: "SSH key to connect to controller. If value is 'None', key is not required"
+		)
+	}
+	stages {
+	    stage ('Clean workspace') {
+		    steps {
+			    cleanWs()
+			}
+		}
+		stage('Git checkout') {
+			steps {
+				checkout([
+					$class: 'GitSCM',
+					branches: [[name: '${BRANCH}']],
+					userRemoteConfigs: [[
+						credentialsId: 'complextest_key',
+						url: 'git@localhost:complextest/tests.git'
+					]]
+				])
+			}
+		}
+		stage('Preparation') {
+			steps {
+				sh "mv -f $WORKSPACE/aris_regress/protocols/iec61850s $WORKSPACE"
+				sh "ls -R|grep -v iec61850s |xargs rm -rf"
+				sh "mv $WORKSPACE/iec61850s/* $WORKSPACE && rm -rf iec61850s"
+			}
+		}
+		stage('Copy SSH key') {
+		    steps {
+			    script {
+				    if (params.KEY == 'None') {
+					    echo "SSH key is not required"
+					} else {
+					    sh "cp /tmp/keys/${params.KEY} $WORKSPACE/${params.KEY}"
+					}
+				}
+			}
+		}
+		stage('Testing') {
+		    steps {
+			    script {
+				    if (params.KEY == 'None') {
+					    sh "docker run --rm -v $WORKSPACE:/tests --network host --cap-add=NET_RAW --cap-add=NET_ADMIN iec61850_testing pytest -v --NameGroup Server --NameTest ${TEST_NAME} --IP ${IP} --TShark ${DUMPCAP} --installBackup ${BACKUP} --INT_WS eno2 --BitBlocked true"
+					} else {
+					    sh "docker run --rm -v $WORKSPACE:/tests --network host --cap-add=NET_RAW --cap-add=NET_ADMIN iec61850_testing pytest -v --NameGroup Server --NameTest ${TEST_NAME} --IP ${IP} --TShark ${DUMPCAP} --installBackup ${BACKUP} --INT_WS eno2 --path_key ${KEY} --BitBlocked true"
+					}
+				}
+			}
+		}
+	}
+}
