@@ -20,7 +20,12 @@
 (1) $ docker run -d -p 5000:5000 -v $HOME/registry:/var/lib/registry registry:2
   или
 (2) $ docker run -d -p 5000:5000 --restart=always --name registry registry:2
-	
+
+# Разъяснение:
+# registry:2 - имя:версия образа.
+# По состоянию на 20.06.2023 последней версией является 2.8.2
+# Вместо registry:2 можно (наверно) написать registry:latest 
+
   -p {HOST_PORT}:{CONTAINER_PORT} - открыть доступ к реестру на порту 5000
   -v {HOST_DIR}:{CONTAINER_DIR} - примонтировать директорий хоста var/lib/registry
 								    к директорию контейнера: $HOME/registry 
@@ -60,5 +65,35 @@
 
 Поместить образ с присвоенным тэгом в репозиторий на сервере HOSTNAME:
 	docker push HOSTNAME:5000/ image:tag
+
+Копирование образа из Docker Hub в свой (локальный) реестр
+(https://docs.docker.com/registry/deploying/)
+
+  Пример: извлечём образ ubuntu:16.04 из Docker Hub и поместим его в локальный реестр
+  Последовательность действий:
+    1. Извлекаем образ ubuntu:16.04 из Docker Hub
+	2. Перемаркировываем образ в my-ubuntu
+	3. Помещаем образ my-ubuntu в локальный реестр
 	
+  Подробное описание действий
+    1. docker pull ubuntu:16.04
+	2. Помечаем образ как localhost:5000/my-ubuntu.
+	   Это создаёт тег для существующего образа.
+	   Если первой частью тега является имя хоста и порт, Docker интерпретирует это как расположение реестра в момент push
+	   
+	   $ docker tag ubuntu:16.04 localhost:5000/my-ubuntu
 	
+	3. Вносим (пушим) образ в локальный реестр, запущенный на localhost:5000
+	   
+	   $ docker push localhost:5000/my-ubuntu
+	   
+	4. Удаляем локально кэшированные образы ubuntu:16.04 и localhost:5000/my-ubuntu,
+	   с целью тестирования извлечения образа из реестра.
+	   Это не удаляет образ localhost:5000/my-ubuntu из реестра.
+	  
+       $ docker image remove ubuntu:16.04
+       $ docker image remove localhost:5000/my-ubuntu
+	
+	5. Извлекаем образ localhost:5000/my-ubuntu из локального реестра
+	  
+	   $ docker pull localhost:5000/my-ubuntu
