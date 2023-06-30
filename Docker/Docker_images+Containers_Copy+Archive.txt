@@ -1,0 +1,8 @@
+1. docker save - сохраняет один или несколько ОБРАЗОВ в tar-архив (по умолчанию передается в STDOUT)
+{https://docs.docker.com/engine/reference/commandline/save/}
+
+2. docker export - экспортирует файловую систему КОНТЕЙНЕРА в виде tar-архива
+{https://docs.docker.com/engine/reference/commandline/export/}
+
+3. docker commit - создаёт новый образ из изменений контейнера
+{https://docs.docker.com/engine/reference/commandline/commit/}
