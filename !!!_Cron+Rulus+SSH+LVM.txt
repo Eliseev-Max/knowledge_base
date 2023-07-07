@@ -1,0 +1,23 @@
+Ссылки на источники
+
+1. Права в Linux (chown, chmod, SUID, GUID, sticky bit, ACL, umask):
+  https://habr.com/ru/articles/469667/
+  
+2. "Cron: что это такое и как его правильно использовать":
+  https://timeweb.com/ru/community/articles/chto-takoe-cron
+
+3. CronHowto
+  https://help.ubuntu.com/community/CronHowto
+
+4.  SSH/OpenSSH/Keys
+  https://help.ubuntu.com/community/SSH/OpenSSH/Keys
+
+---
+
+Расширение диска. Работа с томами и файловыми системами. LVM
+
+{"Как работать с LVM":https://www.dmosk.ru/instruktions.php?object=lvm},
+{"Как расширить существующий диск в Linux?":https://help.icdc.io/compute/ru/FAQ/extenddisk.html},
+{"Расширение диска с LVM в ОС Ubuntu":https://neoserver.ru/help/disk_expansion_lvm_ubuntu},
+{"Расширение LVM диска внутри OS Linux (на примере Debian)":https://www.sim-networks.com/ru/kb/add-disk-space-linux-server-lvm-debian},
+{"Logical Volume Manager (LVM)":https://help.ubuntu.ru/wiki/lvm},

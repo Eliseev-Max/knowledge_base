@@ -1,0 +1,9 @@
+1. 8 примеров команды date на Linux
+  https://itisgood.ru/2021/05/11/8-primerov-komandy-date-na-linux/
+
+2. Команда date в Linux
+  https://losst.pro/komanda-date-v-linux
+
+3. Ubuntu manpages: date
+  https://manpages.ubuntu.com/manpages/trusty/man1/date.1posix.html
+
