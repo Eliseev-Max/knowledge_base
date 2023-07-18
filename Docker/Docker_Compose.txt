@@ -245,3 +245,9 @@
 
 https://docs.docker.com/network/
 https://karthi-net.medium.com/docker-tutorial-build-docker-images-using-jenkins-d2880e65b74
+
+Способы создания переменных окружения в Compose:
+https://docs.docker.com/compose/environment-variables/set-environment-variables/
+
+Использование строчных комментариев в команде docker-compose (inline comments in docker-compose command:)
+https://stackoverflow.com/questions/58116906/use-inline-comments-in-docker-compose-command

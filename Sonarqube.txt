@@ -1,0 +1,125 @@
+SonarQube
+Installing SonarQube from the Docker image
+(https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/#installing-sonarqube-from-the-docker-image)
+{more: https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/}
+
+
+Docker image SonarQube поддерживают работу 
+  • на архитектуре amd64, 
+  • на Apple Silicon на базе arm64.
+
+Рекомендуется использовать: Docker Engine v. 20.10 и выше.
+
+Шаги для первой установки:
+  1. Создание следующих томов позволяет предотвратить потерю информации при обновлении до новой версии или переходе на более высокую редакцию:
+       • sonarqube_data: содержит файлы данных, такие как встроенная база данных H2 и индексы Elasticsearch
+       • sonarqube_logs: содержит журналы SonarQube о доступе, веб-процессе, CE-процессе и Elasticsearch
+       • sonarqube_extensions: содержит все установленные вами плагины и, при необходимости, драйвер Oracle JDBC.
+
+    Создать тома с помощью следующих команд:
+      $ docker volume create --name sonarqube_data
+      $ docker volume create --name sonarqube_logs
+      $ docker volume create --name sonarqube_extensions
+
+#‼ Убедиться, что мы используем именно volumes (созданные в приведённом выше примере),
+#‼ а не bind mounts
+#‼ Использование bind mounts не позволяет плагинам корректно заполняться.
+
+  Пример для запуска с помощью docker-composr.yaml:
+  # не факт, что правильный
+sonarqube:
+  ...
+  volumes:
+    - ${COMPOSE_BUILD_DIR}/sonarqube/data:/opt/sonarqube/data
+    - ${COMPOSE_BUILD_DIR}/sonarqube/logs:/opt/sonarqube/logs
+    - ${COMPOSE_BUILD_DIR}/sonarqube/extensions:/opt/sonarqube/extensions
+
+    Драйверы для поддерживаемых баз данных (кроме Oracle) уже предоставлены.
+    Если вы используете базу данных Oracle, то вам необходимо добавить драйвер JDBC в том sonar_extensions.
+    (Если вдруг БД = Oracle, читать источник, п. 1a, b, c )
+
+  3. Запустить образ со свойствами базы данных, заданными с помощью флага переменной окружения -e:
+# Для справки:
+# --env, -e  = установить переменные окружения
+# --env-file = считать файл с переменными окружения
+# Флаги -e, --env и --env-file используются для установки простых (не являющихся массивами) переменных окружения в запускаемом контейнере
+# или для перезаписи переменных, определенных в Dockerfile запускаемого образа.
+# Вы можете задать переменную и ее значение при запуске контейнера
+# $ docker run --env VAR1=value1 --env VAR2=value2 ubuntu env | grep VAR
+# VAR1=value1
+# VAR2=value2
+  
+  docker run -d --name sonarqube \
+    -p 9000:9000 \
+    -e SONAR_JDBC_URL=... \
+    -e SONAR_JDBC_USERNAME=... \
+    -e SONAR_JDBC_PASSWORD=... \
+    -v sonarqube_data:/opt/sonarqube/data \                # примонтировали ранее созданный volume
+    -v sonarqube_extensions:/opt/sonarqube/extensions \    # к директории внутри контейнера
+    -v sonarqube_logs:/opt/sonarqube/logs \
+    <image_name>
+
+# Громоздко и убого...
+# То же самое, но через docker-compose.yml
+
+  sonarqube:
+    restart: always
+    image: 'sonarqube:latest'
+    depends_on:
+      - master_service
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://database:5432/sonar
+      SONAR_JDBC_USERNAME: ${SONARQUBE_DB_USER}
+      SONAR_JDBC_PASSWORD: ${SONARQUBE_DB_PASSWORD}
+    ports:
+      - 9000:9000
+    volumes:
+      - 'sonarqube_data:/opt/sonarqube/data'
+      - 'sonarqube_logs:/opt/sonarqube/logs'
+      - 'sonarqube_extensions:/opt/sonarqube/extensions'
+
+Для установок на базе docker переменные окружения заменяют все параметры, которые были заданы в свойствах.
+Более подробную информацию см.:
+https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/configure-and-operate-a-server/environment-variables/
+
+Дополнительную информацию об установке и обновлении плагинов SonarQube внутри тома Docker можно найти на странице Install a plugin:
+https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-a-plugin/
+
+# ‼ Важно!
+  Если вы не собираетесь удалять БД и запускать новую при запуске образа, будьте осторожны, 
+  [!] НЕ ИСПОЛЬЗУЙТЕ -v для docker-compose down, 
+  [!] и будьте осторожны при выполнении таких команд, как docker system prune или docker volume prune; независимо от использования параметра external: true, тома вашей базы данных не сохранятся после первоначального запуска и выключения SonarQube
+Пример файла Docker Compose .yml
+
+version: "3"
+
+services:
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      - db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
