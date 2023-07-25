@@ -71,7 +71,7 @@ $ - поиск вхождений в конце строки
 find
 https://man7.org/linux/man-pages/man1/find.1.html
 https://linux.die.net/man/1/find
-https://rus-linux.net/MyLDP/consol/hdrguide/rusman/find.htm
-https://habr.com/ru/companies/first/articles/593669/
+"Библиотека сайта rus-linux.net. Команда find": https://rus-linux.net/MyLDP/consol/hdrguide/rusman/find.htm
+"15 супер полезных примеров команды find в Linux": https://habr.com/ru/companies/first/articles/593669/
 
 locate

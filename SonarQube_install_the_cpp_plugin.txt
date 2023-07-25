@@ -1,0 +1,63 @@
+• Use the cxx plugin Compatibility Matrix to select the correct plugin version for the SonarQube version you are using.
+SonarQube versions are based on different Java versions and also have different APIs and UIs.
+
+  Hint: The cxx plugin competes with the SonarCFamily plugin and is therefore not supported by SonarSource in the Marketplace.
+
+• Before upgrading an existing version, be sure to read Upgrade-the-Plugin.
+
+• Download one of the released JAR packages and copy it into the SONARQUBE_HOME/extensions/plugins directory.
+Details can be found under Install a Plugin, Manual Installation.
+        sonar-cxx-plugin-x.y.z.jar: is the cxx plugin
+
+• Restart the SonarQube Server to load and activate the cxx plugin.
+
+• Navigate to the Marketplace inside of SonarQube (Administration > Marketplace). The Marketplace should list CXX (Community) on the Installed tab.
+
+• Discover and update the CXX-specific properties in: Administration > General Settings > CXX and Administration > General Settings > CXX External Analyzers.
+
+• If you use the sonar.cxx.other.reportPaths sensor, you should configure the rules before scanning for the first time. Otherwise, any existing issues will be closed and displayed later in New Code.
+
+• Also remember to check the Quality Profile on a new SonarQube Server. Are the rules you are using enabled?
+
+Additional tools:
+
+  cxx-sslr-toolkit-x.y.z.jar: is an additional tool to create an AST from parsed source code. The tool is useful to create XPath checks and to verify if the plugin can parse the source code.
+
+  Hint: cxx-sslr-toolkit-x.y.z.jar is not a plugin. Do not copy it to the plugins folder. If the JAR file does not contain a SonarQube plugin, the following error message appears in the LOG file when the server is started: ERROR Web server startup failed java.lang.NullPointerException: Plugin key is missing from manifest.
+---
+
+  1. Используйте матрицу совместимости плагинов cxx, чтобы выбрать правильную версию плагина для используемой версии SonarQube.
+Версии SonarQube основаны на различных версиях Java, а также имеют различные API и пользовательские интерфейсы.
+(https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Compatibility-Matrix)
+
+  * Подсказка: Плагин cxx конкурирует с плагином SonarCFamily и поэтому не поддерживается SonarSource в Marketplace
+
+  2. Перед обновлением существующей версии обязательно прочитайте Upgrade-the-Plugin.
+  (https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Upgrade-the-Plugin)
+
+  3. Скачайте один из выпущенных JAR-пакетов и скопируйте его в каталог SONARQUBE_HOME/extensions/plugins.
+Подробности можно найти в разделе Установка плагина, Ручная установка.
+    sonar-cxx-plugin-x.y.z.jar: это плагин cxx.
+
+  4. Перезапустите SonarQube Server, чтобы загрузить и активировать плагин cxx.
+  
+  5. Перейдите в Marketplace внутри SonarQube (Administration > Marketplace).
+    В Marketplace на вкладке Installed должен появиться список CXX (Community).
+
+  6. Найдите и обновите свойства, специфичные для CXX, в разделе:
+     Administration > General Settings > CXX и Administration > General Settings > CXX External Analyzers.
+
+  7. Если используется датчик sonar.cxx.other.reportPaths, то перед первым сканированием необходимо настроить правила.
+    В противном случае все существующие проблемы будут закрыты и отображены позже в New Code.
+
+  8. Не забудьте также проверить профиль качества на новом сервере SonarQube Server.
+    Включены ли используемые правила?
+
+Дополнительные инструменты:
+  cxx-sslr-toolkit-x.y.z.jar:
+    - дополнительный инструмент для создания AST из разобранного исходного кода.
+	Инструмент полезен для создания проверок XPath и проверки того, может ли плагин разобрать исходный код.
+
+  Подсказка: cxx-sslr-toolkit-x.y.z.jar не является плагином.
+  Не копируйте его в папку plugins.
+  Если JAR-файл не содержит подключаемого модуля SonarQube, то при запуске сервера в LOG-файле появляется следующее сообщение об ошибке: ERROR Web server startup failed java.lang.NullPointerException: Plugin key is missing from manifest.
