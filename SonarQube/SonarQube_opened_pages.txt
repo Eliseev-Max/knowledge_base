@@ -1,0 +1,23 @@
+SonarQube. Opened pages
+
+1. Installing SonarQube from the Docker image
+  https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/#installing-sonarqube-from-the-docker-image
+
+2. Install plugins under Docker
+  https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-a-plugin/#install-plugins-under-docker
+
+3. Marketplace
+  https://docs.sonarsource.com/sonarqube/latest/instance-administration/marketplace/
+
+4. SonarQube Plugins Index
+  https://www.sonarplugins.com/search.html?query=c%2B%2B
+
+5. SonarQube C++ Community plugin (cxx plugin)
+  https://github.com/SonarOpenCommunity/sonar-cxx/blob/master/README.md
+
+6. Install the Plugin
+  https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Install-the-Plugin
+
+7. sonar-cxx releases
+  https://github.com/SonarOpenCommunity/sonar-cxx/releases
+
