@@ -1,0 +1,128 @@
+Действия над таблицами БД (Действия, изменяющие структуру):
+CREATE
+ALTER
+RENAME
+DROP
+
+/* -= Data definition statements =- */
+-- Команды, определяющие структуру базы данных:
+CREATE
+ALTER
+DROP
+
+/* -= Data manipulation statements =- */
+-- Команды, позволяющие управлять данными в таблицах
+SELECT
+UPDATE
+DELETE
+
+/* Запрос на создание новой Базы данных */
+CREATE SCHEMA `shop` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin ;
+CREATE DATABASE `db_name` DEFAULT CHARACTER SET utf8 COLLATE utf8_bin ;
+
+/* Создать таблицу */
+CREATE TABLE `shop`.`category` (
+  `id` INT NOT NULL,
+  `name` VARCHAR(128) NOT NULL,
+  `discount` TINYINT(100) NOT NULL,
+  PRIMARY KEY (`id`));
+/* Команда: Вывести всю таблицу */  
+  SELECT * FROM shop.category;
+
+-- ALTER TABLE Изменяет структуру таблицы. Например, вы можете добавить или удалить столбцы,
+создать или удалить индексы, изменить тип существующих столбцов или же переименовать столбцы или таблицу целиком.
+Также вы можете изменить такие свойства, как движок хранилища (storage engine), используемый для таблицы
+или комментарий к таблице. --
+ 
+/* Команда: Добавить новое поле (столбец) */ 
+ALTER TABLE `Название таблицы` 			-- Изменить таблицу
+ADD COLUMN `Имя_новой_колонки` VARCHAR(128) NULL [ FIRST | AFTER ] `Имя_колонки`;
+/* Добавить в параметры поля автоинкремент */
+ALTER TABLE `Название таблицы` 
+CHANGE COLUMN `id` `id` INT(11) NOT NULL AUTO_INCREMENT ;		-- CHANGE COLUMN <Поле> - сбрасывает все параметры выбранного поля.
+#########################################
+/* Сброс счётчика AUTO_INCREMENT */
+ALTER TABLE name_table AUTO_INCREMENT=0;
+	--работает, даже когда поля уже заполнены!!!
+#########################################
+/* Ввод данных в таблицу */
+INSERT INTO `shop`.`category` (`id`, `name`, `discount`) VALUES ('1', 'Женская одежда', '5');
+
+/* Внесение изменений в поля таблицы */
+UPDATE `shop`.`category` SET `name` = 'Женская обувь',
+`discount` = '10', `alias_name` = '' WHERE (`id` = '3');
+
+
+/* Команды через CLI-клиента */
+SHOW databases;    --Отобразить список баз данных;
+use <DB_name>;    --Выбрать базу данных;
+show tables;
+SHOW COLUMNS FROM <table>;    --Отобразить информацию о полях в таблице;
+
+/* Выбор данных из таблицы */
+SELECT <Названия полей через запятую | * > FROM <Название таблицы> WHERE <Критерии выбора>;
+При фильтрации с помощью WHERE:
+	используются логические выражения с операторами =, <, <=, >, >=, <>
+	если выполняется сравнение значений с NULL, используются операторы IS | IS NOT
+DISTINCT - используется для удаления дубликатов из набора результатов.
+		-- Оператор DISTINCT может использоваться только с операторами SELECT
+SELECT DISTINCT <Название поля> FROM <Название таблицы>
+
+/* Сортировка таблиц */
+ORDER BY <Название поля> ASC | DESK
+	--ASC (по умолчанию) - прямой порядок (по возрастанию)
+	--DESK - обратный порядок (по убыванию)
+/* Вывод определённого количества записей */
+LIMIT <Число записей>		-- Позволяет без привязки к идентификатору вывести необходимое количество записей по порядку
+
+/* Указание значений в критерии выбора */
+UPDATE <Название таблицы> SET <Название поля> = <'значение'> WHERE <Название поля> = (принимает значение) <Значение>;
+UPDATE <Название таблицы> SET <Название поля> = <'значение'> WHERE <Название поля> IN (<Значение1>,<Значение2>,...<ЗначениеN>);
+
+/* Удаление записей из таблицы */
+DELETE FROM <Название таблицы> WHERE <Название поля (чаще всего id)> = <Значение>;
+
+Согласованность (консистентность) данных - внутренняя непротиворечивость, целостность данных.
+Внешние ключи
+/* Создание связи между таблицами */
+ALTER TABLE <`Название_родительской_таблицы`> 
+ADD INDEX <`Название_индекса`> (<Название поля - внешнего ключа> ASC) VISIBLE;	--автоматически к имени добавляется _idx
+;
+ALTER TABLE <`Название_родительской_таблицы`> 
+  ADD CONSTRAINT <`Название_индекса`>		-- Добавляем ограничение для поля - внешнего ключа
+  FOREIGN KEY (<`Поле_-_внешний ключ`>)
+  REFERENCES <Название_дочерней_таблицы> (<`Поле_дочерней_таблицы`>)
+  ON DELETE NO ACTION  -- | RESTRICT | CASCADE | SET NULL
+  ON UPDATE NO ACTION; -- | RESTRICT | CASCADE | SET NULL
+NO ACTION - 
+RESTRICT - 
+CASCADE - 
+SET NULL -   
+  
+/*Если требуется изменить значение параметра для ON DELETE | ON UPDATE */
+ALTER TABLE `shop`.`product` 			-- Изменить таблицу
+DROP FOREIGN KEY `fk_brand_product`;		-- Сбросить Внешний ключ;
+ALTER TABLE `shop`.`product` 			-- Изменить таблицу
+ADD CONSTRAINT `fk_brand_product`			-- Добавить ограничение
+  FOREIGN KEY (`brand_id`)					-- Задать Внешний ключ
+  REFERENCES `shop`.`brands` (`id`)			-- Создать ссылку на поле с id
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+
+ALTER TABLE `shop`.`product` 
+ADD INDEX `fk_category_product_idx` (`category_id` ASC) VISIBLE;
+;
+ALTER TABLE `shop`.`product` 
+ADD CONSTRAINT `fk_category_product`
+  FOREIGN KEY (`category_id`)
+  REFERENCES `shop`.`category` (`id`)
+  ON DELETE CASCADE
+  ON UPDATE CASCADE;
+  
+/*Составной первичный ключ*/
+Составной первичный ключ - это Первичный ключ, состоящий из двух и более полей
+
+/*Алиасы (псевдонимы) */
+Названиям полей или таблиц для удобства обращения к ним (если названия полей/таблиц длинные)
+можно задавать алиасы (псевдонимы) с помощью оператора AS
+SELECT Structured_query_language AS SQL FROM table;
