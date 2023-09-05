@@ -81,6 +81,13 @@ sonarqube:
       - 'sonarqube_logs:/opt/sonarqube/logs'
       - 'sonarqube_extensions:/opt/sonarqube/extensions'
 
+## SonarQube and PostgreSQL database ##
+# /opt/sonarqube/conf/sonar.properties
+#----- PostgreSQL 11 or greater
+# By default the schema named "public" is used. It can be overridden with the parameter "currentSchema".
+#sonar.jdbc.url=jdbc:postgresql://localhost/sonarqube?currentSchema=my_schema
+
+
 Для установок на базе docker переменные окружения заменяют все параметры, которые были заданы в свойствах.
 Более подробную информацию см.:
 https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/configure-and-operate-a-server/environment-variables/
