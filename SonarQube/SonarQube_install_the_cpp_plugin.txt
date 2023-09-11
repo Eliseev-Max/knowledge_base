@@ -8,7 +8,7 @@
   2. Перед обновлением существующей версии обязательно прочитайте Upgrade-the-Plugin.
   (https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Upgrade-the-Plugin)
 
-  3. Скачайте один из выпущенных JAR-пакетов и скопируйте его в каталог SONARQUBE_HOME/extensions/plugins.
+  3. Скачайте один из выпущенных JAR-пакетов и скопируйте его в каталог $SONARQUBE_HOME/extensions/plugins.
 ## SONARQUBE_HOME==/opt/sonarqube
 Подробности можно найти в разделе Установка плагина, Ручная установка.
     sonar-cxx-plugin-x.y.z.jar: это плагин cxx.
