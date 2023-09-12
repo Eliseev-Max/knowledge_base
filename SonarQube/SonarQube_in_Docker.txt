@@ -1,0 +1,74 @@
+SonarQube in Docker
+
+  SonarQube - это ведущий инструмент для непрерывной проверки качества и безопасности кодовых баз,
+    а также для руководства работой команд разработчиков в процессе проверки кода.
+  Охватывая 27 языков программирования и сопрягаясь с существующим программным конвейером,
+  SonarQube предоставляет разработчикам четкие рекомендации по устранению проблем, а командам в целом - более качественное и безопасное программное обеспечение.
+  Имея более 225 000 деплоев (deployments), помогающих как небольшим командам разработчиков, так и глобальным организациям,
+  SonarQube предоставляет всем командам и компаниям по всему миру возможность контролировать качество и безопасность кода.
+
+
+Docker Host Requirements
+
+Поскольку SonarQube использует встроенный Elasticsearch, убедитесь,
+что конфигурация вашего хоста Docker соответствует требованиям к рабочему режиму Elasticsearch и настройке дескрипторов файлов.
+
+Например, в Linux можно установить рекомендуемые значения для текущей сессии, выполнив следующие команды от имени root на хосте:
+sysctl -w vm.max_map_count=524288
+sysctl -w fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
+
+
+Installation
+  Мульти-платформенная поддержка:
+    - начиная с версии 9.9 LTS, образ docker поддерживает запуск как на архитектуре amd64, так и на arm64-based Apple Silicon (M1)
+  
+  Если вы хотите избежать автоматических обновлений, рекомендуем использовать вместо lts-<edition> соответствующий тег 9.9-<edition>.
+
+
+Configuration
+Database
+  
+  По умолчанию образ будет использовать встроенную базу данных H2, которая не пригодна для продакшена.
+  
+  ‼ Предупреждение: К схеме базы данных может подключаться только один экземпляр SonarQube.
+    Если вы используете Docker Swarm или Kubernetes, убедитесь, что несколько экземпляров SonarQube не работают одновременно с одной и той же схемой базы данных.
+    Это приведет к непредсказуемому поведению SonarQube и повреждению данных.
+    До появления SONAR-10362 такой защиты не было.
+    В версии Data Center Edition имеется то же ограничение: только один кластер может одновременно подключаться к одной схеме базы данных.
+
+Use volumes
+  Мы рекомендуем создать volumes для следующих директорий:
+
+    /opt/sonarqube/data: data files, such as the embedded H2 database and Elasticsearch indexes
+    /opt/sonarqube/logs: contains SonarQube logs about access, web process, CE process, Elasticsearch logs
+    /opt/sonarqube/extensions: for 3rd party plugins
+
+    Warning: Вы не можете использовать одни и те же тома в нескольких экземплярах SonarQube
+
+Upgrading
+
+инструкции по обновлению см. в разделе Обновление из образа Docker на странице Обновление сервера.
+Customized image
+
+В некоторых средах может оказаться более целесообразным подготовить собственный образ, содержащий вашу конфигурацию.
+Docker-файл для этого может быть простым:
+
+FROM sonarqube:8.9-community
+COPY sonar-custom-plugin-1.0.jar /opt/sonarqube/extensions/
+
+You could then build and try the image with something like:
+
+$ docker build --tag=sonarqube-custom .
+$ docker run -ti sonarqube-custom
+
+Avoid hard termination of SonarQube
+
+A SonarQube instance will stop gracefully, waiting for any tasks in progress to finish. Waiting for in-progress tasks to finish can take a large amount of time which the docker does not expect by default when stopping. To avoid having the SonarQube instance killed by the Docker daemon after 10 seconds, it is best to configure a timeout to stop the container with --stop-timeout. For example:
+
+docker run --stop-timeout 3600 sonarqube
+
+Administration
+
+The administration guide can be found here.

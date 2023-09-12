@@ -1,0 +1,9 @@
+Jenkins. Usefull articles
+
+1. Building with Docker Using Jenkins Pipelines: https://www.liatrio.com/blog/building-with-docker-using-jenkins-pipelines
+2. How to Build and Push Docker Images to Docker Hub using Jenkins Pipeline:
+  https://sweetcode.io/how-to-build-and-push-docker-images-to-docker-hub-using-jenkins-pipeline/
+3. Using Docker with Pipeline: https://www.jenkins.io/doc/book/pipeline/docker/
+4. Create a new Jenkins node, and run your Jenkins agent as a service: https://www.jenkins.io/blog/2022/12/27/run-jenkins-agent-as-a-service/
+5. Pipeline Syntax: https://www.jenkins.io/doc/book/pipeline/syntax/
+6. Using Jenkins agents: https://www.jenkins.io/doc/book/using/using-agents/
