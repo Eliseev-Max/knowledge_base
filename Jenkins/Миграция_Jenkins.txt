@@ -1,0 +1,7 @@
+1. Migrating a Jenkins instance to a new machine
+  https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/client-and-managed-controllers/migrating-jenkins-to-a-new-machine
+
+2. How to move Jenkins from one PC to another
+  https://stackoverflow.com/questions/8724939/how-to-move-jenkins-from-one-pc-to-another
+
+3. 

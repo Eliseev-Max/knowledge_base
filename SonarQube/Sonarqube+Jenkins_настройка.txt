@@ -1,0 +1,30 @@
+https://thetechdarts.com/sonarqube-integration-with-jenkins/
+
+
+Шаг 1: Генерация токена в SonarQube
+
+
+Шаг 2: Установка и настройка плагина Sonar Scanner в Jenkins
+
+
+Шаг 3: Настройка SonarQube в Jenkins
+
+
+Шаг 4: Создание проекта Jenkins Pipeline
+
+
+Шаг 5: Создание вебхука (webhook) в SonarQube
+
+
+Шаг 6: Build the Jenkins Pipeline project
+
+
+Шаг 7: Check the Code Analysis result in SonarQube
+
+
+---
+more:
+How to run and setup Sonarqube DevOps Tools in Docker: https://www.youtube.com/watch?v=fIvOt8t70c8
+
+Установка SonarQube с Docker Compose: https://www.heyvaldemar.net/ustanovka-sonarqube-s-docker-compose/
+
