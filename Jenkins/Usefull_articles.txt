@@ -7,3 +7,7 @@ Jenkins. Usefull articles
 4. Create a new Jenkins node, and run your Jenkins agent as a service: https://www.jenkins.io/blog/2022/12/27/run-jenkins-agent-as-a-service/
 5. Pipeline Syntax: https://www.jenkins.io/doc/book/pipeline/syntax/
 6. Using Jenkins agents: https://www.jenkins.io/doc/book/using/using-agents/
+
+[26.09.2023]
+"How To Automate Jenkins Setup with Docker and Jenkins Configuration as Code":
+https://www.digitalocean.com/community/tutorials/how-to-automate-jenkins-setup-with-docker-and-jenkins-configuration-as-code
