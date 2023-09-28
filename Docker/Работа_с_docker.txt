@@ -4,6 +4,9 @@
 	3. Э.Моуэт. "Использование Docker"
 	4. https://habr.com/ru/company/skillfactory/blog/547116/
 ]
+## Обратить внимание на:
+## - docker cp :: https://docs.docker.com/engine/reference/commandline/cp/
+## - Docker run reference :: https://docs.docker.com/engine/reference/run/#env-environment-variables
 Все действия с контейнерами выполняются утилитой docker.
 Ее можно запускать от имени вашего пользователя после того, как он был добавлен в группу программы.
 

@@ -1,1 +1,19 @@
 -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true
+
+stage ("Configuration")
+---
+#Jenkins Pipeline:
+stages {
+        stage("Configuration") {
+            steps {
+                sh "cmake -B ./build --preset 'unit-tests'"
+            }
+        }
+    ...
+}
+--- 
+Сообщение об ошибке:
+sh: 1: cannot create /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1/jenkins-log.txt: Directory nonexistent
+sh: 1: cannot create /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1/jenkins-result.txt.tmp: Directory nonexistent
+mv: не удалось выполнить stat для '/var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1/jenkins-result.txt.tmp': Нет такого файла или каталога
+process apparently never started in /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1
