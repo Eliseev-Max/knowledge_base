@@ -17,3 +17,11 @@ sh: 1: cannot create /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf0
 sh: 1: cannot create /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1/jenkins-result.txt.tmp: Directory nonexistent
 mv: не удалось выполнить stat для '/var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1/jenkins-result.txt.tmp': Нет такого файла или каталога
 process apparently never started in /var/jenkins_home/workspace/keeper_master@tmp/durable-fbbf06d1
+
+Проблема: docker-контейнер с cmake и прочим окружением пытался примонтировать директорию хоста, а не volume.
+  в результате файлы создавались на хосте (/var/jenkins_home/workspace/...)
+
+  • содержимое jenkis_home из volume было скопировано в директорию /var/jenkins_home на хосте;
+  • данная директория была примонтирована к контейнеру Jenkins (bind mounts)
+  -v /var/jenkins_home:/var/jenkins_home
+

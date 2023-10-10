@@ -1,0 +1,37 @@
+Opened pages:
+
+1. How to Manage and Keep Environment Variables When Using sudo:
+-> https://www.baeldung.com/linux/sudo-manage-environment-variables
+
+2. How to keep environment variables when using sudo
+-> https://stackoverflow.com/questions/8633461/how-to-keep-environment-variables-when-using-sudo
+
+3. Знакомство с Kubernetes. Часть 4: Реплики (ReplicaSet)
+-> https://ealebed.github.io/posts/2018/%D0%B7%D0%BD%D0%B0%D0%BA%D0%BE%D0%BC%D1%81%D1%82%D0%B2%D0%BE-%D1%81-kubernetes-%D1%87%D0%B0%D1%81%D1%82%D1%8C-4-replicaset/
+
+4. Установка и настройка MongoDB на Debian, а также ReplicaSet и пара других мелочей
+-> https://habr.com/ru/articles/335772/
+
+5. Docker - /var/run/docker.sock (Communicating from container to the daemon)
+-> https://datacadamia.com/vm/docker/sock
+
+6. Network - (Internet) Socket (Network identifier)
+-> https://datacadamia.com/network/socket
+
+7. Official Jenkins Docker image
+-> https://github.com/jenkinsci/docker/blob/master/README.md
+
+8*. How to fix "process apparently never started in ..." error in Jenkins pipeline?
+-> https://stackoverflow.com/questions/58346984/how-to-fix-process-apparently-never-started-in-error-in-jenkins-pipeline
+
+9. durable-task-plugin
+-> https://github.com/jenkinsci/durable-task-plugin/blob/master/CHANGELOG.md
+
+10. How To Automate Jenkins Setup with Docker and Jenkins Configuration as Code
+-> https://www.digitalocean.com/community/tutorials/how-to-automate-jenkins-setup-with-docker-and-jenkins-configuration-as-code
+
+11. Операторы перенаправления вывода в Bash
+-> https://zalinux.ru/?p=3934
+
+12. How to Use the Linux tee Command
+-> https://phoenixnap.com/kb/linux-tee
