@@ -1,3 +1,11 @@
+[sources]:
+  1. The ultimate guide To crontab syntax
+  → https://crontabkit-develop.netlify.app/general/2022/12/27/the-ultimate-guide-to-crontab-syntax
+  2. ‘crontab’ in Linux with Examples
+  → https://www.geeksforgeeks.org/crontab-in-linux-with-examples/
+  3. Настройка Cron
+  → https://losst.pro/nastrojka-cron?ysclid=logshev5dm258995937#%D0%A1%D0%B8%D0%BD%D1%82%D0%B0%D0%BA%D1%81%D0%B8%D1%81_crontab
+
 Running bash script with crontab
 
 # В именах путей ведущая / не означает "домашний каталог";
@@ -13,8 +21,10 @@ Running bash script with crontab
 # Если это не сработает, то либо то, что вы понимаете под "каталогом пользователя", не совпадает с POSIX-концепцией "домашнего каталога",
 # либо сценарий не исполняется (что можно исправить, выполнив один раз команду chmod +x backupS3.sh).
 
-Если вы не уверены в том, каков полный путь, просто выполните команду pwd, находясь в том же каталоге, где расположен скрипт, и поставьте перед именем скрипта выход, за которым следует косая черта.
+Если вы не уверены в том, каков полный путь, просто выполните команду pwd, находясь в том же каталоге,
+где расположен скрипт, и поставьте перед именем скрипта выход, за которым следует косая черта.
 (https://crontabkit-develop.netlify.app/general/2022/12/27/the-ultimate-guide-to-crontab-syntax)
+
 Основы синтаксиса Crontab
 Cron проверяет конфигурационные файлы на предмет того, какие команды должны быть запущены. Строки в конфигурационных таблицах crontab интерпретируются демоном с помощью определенного синтаксиса.
 

@@ -1,0 +1,158 @@
+Check the Certificate Authority
+($ openssl s_client -connect hub.docker.com:443 -showcerts)
+
+devops@srv-cicd:~$ openssl s_client -connect hub.docker.com:443 -showcerts
+CONNECTED(00000003)
+depth=1 serialNumber = 20231020142339, CN = Ideco UTM
+verify error:num=19:self-signed certificate in certificate chain
+verify return:1
+depth=1 serialNumber = 20231020142339, CN = Ideco UTM
+verify return:1
+depth=0 CN = *.docker.com
+verify return:1
+---
+#---Смотрим эти строчки
+Certificate chain
+ 0 s:CN = *.docker.com
+   i:serialNumber = 20231020142339, CN = Ideco UTM
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Oct  2 00:00:00 2023 GMT; NotAfter: Oct 31 23:59:59 2024 GMT
+#--- END
+-----BEGIN CERTIFICATE-----
+MIICWjCCAgGgAwIBAgIUV19bkGzqST5uuMFO4pZwZJZIoI8wCgYIKoZIzj0EAwIw
+LTEXMBUGA1UEBRMOMjAyMzEwMjAxNDIzMzkxEjAQBgNVBAMMCUlkZWNvIFVUTTAe
+Fw0yMzEwMDIwMDAwMDBaFw0yNDEwMzEyMzU5NTlaMBcxFTATBgNVBAMMDCouZG9j
+a2VyLmNvbTBZMBMGByqGSM49AgEGCCqGSM49AwEHA0IABFVMwAzFzec2fZSxETR5
+G9mEs8Tz7k6BktYDF9CobMNbWfAJAkq2dlb0auYeq2BfdnU5WTJzxYN3MM/JgQ/W
+y+GjggETMIIBDzCBrgYDVR0RBIGmMIGjggwqLmRvY2tlci5jb22CCmRvY2tlci5j
+b22CECouaHViLmRvY2tlci5jb22CEyouZG9ja2VycHJvamVjdC5vcmeCCWRvY2tl
+ci5pb4ILKi5kb2NrZXIuaW+CEiouY2xvdWQuZG9ja2VyLmNvbYIaKi5tYXN0ZXIu
+ZG9ja2VycHJvamVjdC5vcmeCGCouY2xvdWQtc3RhZ2UuZG9ja2VyLmNvbTAOBgNV
+HQ8BAf8EBAMCBaAwHQYDVR0lBBYwFAYIKwYBBQUHAwEGCCsGAQUFBwMCMAwGA1Ud
+EwEB/wQCMAAwHwYDVR0jBBgwFoAU4t8O5YBoMlB8NzTWpekbS6zPTnswCgYIKoZI
+zj0EAwIDRwAwRAIgYqY2QPDLT7H88x/Bk2NvL9jgxMBnaYrtXiQEaF1iNLkCIBWa
+4SaudSM20WsAFre2LwNh03Kx8FpfLwXXcs/fUNq9
+-----END CERTIFICATE-----
+ 1 s:serialNumber = 20231020142339, CN = Ideco UTM
+   i:serialNumber = 20231020142339, CN = Ideco UTM
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Oct 19 14:23:39 2023 GMT; NotAfter: Oct 17 14:23:39 2033 GMT
+-----BEGIN CERTIFICATE-----
+MIIBvDCCAWKgAwIBAgIUDcuSEgGq4srXraGXkI0hS29djjgwCgYIKoZIzj0EAwIw
+LTEXMBUGA1UEBRMOMjAyMzEwMjAxNDIzMzkxEjAQBgNVBAMMCUlkZWNvIFVUTTAe
+Fw0yMzEwMTkxNDIzMzlaFw0zMzEwMTcxNDIzMzlaMC0xFzAVBgNVBAUTDjIwMjMx
+MDIwMTQyMzM5MRIwEAYDVQQDDAlJZGVjbyBVVE0wWTATBgcqhkjOPQIBBggqhkjO
+PQMBBwNCAARVTMAMxc3nNn2UsRE0eRvZhLPE8+5OgZLWAxfQqGzDW1nwCQJKtnZW
+9GrmHqtgX3Z1OVkyc8WDdzDPyYEP1svho2AwXjAdBgNVHQ4EFgQU4t8O5YBoMlB8
+NzTWpekbS6zPTnswDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAYYwHwYDVR0j
+BBgwFoAU4t8O5YBoMlB8NzTWpekbS6zPTnswCgYIKoZIzj0EAwIDSAAwRQIhANIz
+gL4FMqu9ES69LOdPx+Lbh4Bqbb2X0Xh3/OzNBKF4AiAT0X2LMJulTYWTo8ZG+P/B
+8dnFtFLqFfBN5CNFVX8oAw==
+-----END CERTIFICATE-----
+ 2 s:serialNumber = 20231020142339, CN = Ideco UTM
+   i:serialNumber = 20231020142339, CN = Ideco UTM
+   a:PKEY: id-ecPublicKey, 256 (bit); sigalg: ecdsa-with-SHA256
+   v:NotBefore: Oct 19 14:23:39 2023 GMT; NotAfter: Oct 17 14:23:39 2033 GMT
+-----BEGIN CERTIFICATE-----
+MIIBvDCCAWKgAwIBAgIUDcuSEgGq4srXraGXkI0hS29djjgwCgYIKoZIzj0EAwIw
+LTEXMBUGA1UEBRMOMjAyMzEwMjAxNDIzMzkxEjAQBgNVBAMMCUlkZWNvIFVUTTAe
+Fw0yMzEwMTkxNDIzMzlaFw0zMzEwMTcxNDIzMzlaMC0xFzAVBgNVBAUTDjIwMjMx
+MDIwMTQyMzM5MRIwEAYDVQQDDAlJZGVjbyBVVE0wWTATBgcqhkjOPQIBBggqhkjO
+PQMBBwNCAARVTMAMxc3nNn2UsRE0eRvZhLPE8+5OgZLWAxfQqGzDW1nwCQJKtnZW
+9GrmHqtgX3Z1OVkyc8WDdzDPyYEP1svho2AwXjAdBgNVHQ4EFgQU4t8O5YBoMlB8
+NzTWpekbS6zPTnswDwYDVR0TAQH/BAUwAwEB/zALBgNVHQ8EBAMCAYYwHwYDVR0j
+BBgwFoAU4t8O5YBoMlB8NzTWpekbS6zPTnswCgYIKoZIzj0EAwIDSAAwRQIhANIz
+gL4FMqu9ES69LOdPx+Lbh4Bqbb2X0Xh3/OzNBKF4AiAT0X2LMJulTYWTo8ZG+P/B
+8dnFtFLqFfBN5CNFVX8oAw==
+-----END CERTIFICATE-----
+---
+Server certificate
+subject=CN = *.docker.com
+issuer=serialNumber = 20231020142339, CN = Ideco UTM
+---
+No client certificate CA names sent
+Peer signing digest: SHA256
+Peer signature type: ECDSA
+Server Temp Key: ECDH, prime256v1, 256 bits
+---
+SSL handshake has read 2008 bytes and written 745 bytes
+Verification error: self-signed certificate in certificate chain
+---
+New, TLSv1.3, Cipher is TLS_AES_256_GCM_SHA384
+Server public key is 256 bit
+Secure Renegotiation IS NOT supported
+Compression: NONE
+Expansion: NONE
+No ALPN negotiated
+Early data was not sent
+Verify return code: 19 (self-signed certificate in certificate chain)
+---
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 048A545B3840CE9B98BF75E586DFA6896D676782F0EBF17C3C9C9B8C4960F545
+    Session-ID-ctx:
+    Resumption PSK: 25A3A9FB0AE90D3BE44541230AD6FE73998816BEB345A65400E6F51599F6836FF0A2E6436D318DBF1F50D114B3D51950
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 7200 (seconds)
+    TLS session ticket:
+    0000 - f6 56 d3 b2 5c bb 49 ba-21 ae 5d 5a 58 4a fa 2c   .V..\.I.!.]ZXJ.,
+    0010 - f1 1b 80 15 1e 3c 15 97-66 ee 3f 9d 4d 9a 1d c8   .....<..f.?.M...
+    0020 - 59 cb 63 37 11 6e 0a cd-df eb fb ac 4d 35 a8 e6   Y.c7.n......M5..
+    0030 - 29 1f fe 23 81 ae 9b 9d-b7 c5 42 b5 24 4d 84 fd   )..#......B.$M..
+    0040 - 80 55 f7 20 c8 0c 0b ae-b9 79 32 1b f5 ff 64 19   .U. .....y2...d.
+    0050 - 1b 6a 3e 18 89 d1 67 47-4a 41 af 64 cb 4b c4 4b   .j>...gGJA.d.K.K
+    0060 - 7a 45 bc 09 38 72 30 0f-48 3a 5c 03 6c 56 38 81   zE..8r0.H:\.lV8.
+    0070 - aa 96 d1 01 2e 7b fd b6-b8 0a 75 a8 c1 d6 fe a0   .....{....u.....
+    0080 - be 92 86 92 13 67 6d 64-bf 19 68 35 27 d7 8f a4   .....gmd..h5'...
+    0090 - 15 7c 19 f5 8c a2 c9 1d-93 33 a1 ce e2 86 5e 79   .|.......3....^y
+    00a0 - be 98 f7 69 5a 40 7e 64-76 47 2d 76 70 f0 35 88   ...iZ@~dvG-vp.5.
+    00b0 - c9 96 f5 a6 06 98 49 0f-e6 fe b7 65 ca ba 62 fe   ......I....e..b.
+    00c0 - 3c e7 82 57 54 80 d1 ff-d6 e3 2b b1 5f d5 75 8c   <..WT.....+._.u.
+
+    Start Time: 1701262518
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+---
+Post-Handshake New Session Ticket arrived:
+SSL-Session:
+    Protocol  : TLSv1.3
+    Cipher    : TLS_AES_256_GCM_SHA384
+    Session-ID: 7B0A45A55C1037D41E0D166618F38CD3447597A6E945639B0A92792C0B3DB32A
+    Session-ID-ctx:
+    Resumption PSK: 866DBF376FCCCCD8F0B21868C204D93AC435D0F964CB01E4FA381E5B280329BCC110040F279BF98D3767277853F1E738
+    PSK identity: None
+    PSK identity hint: None
+    SRP username: None
+    TLS session ticket lifetime hint: 300 (seconds)
+    TLS session ticket:
+    0000 - f6 56 d3 b2 5c bb 49 ba-21 ae 5d 5a 58 4a fa 2c   .V..\.I.!.]ZXJ.,
+    0010 - 65 e3 ab 17 c8 c2 fc 65-72 2c bb a9 43 44 05 01   e......er,..CD..
+    0020 - c0 a7 63 25 a0 a0 17 9a-65 8a 7b 39 5f 17 97 ef   ..c%....e.{9_...
+    0030 - c2 29 bc 5f d2 ca 95 45-45 50 14 99 61 47 f4 18   .)._...EEP..aG..
+    0040 - cd 54 a5 6f dc 88 82 8b-c3 44 1b 36 59 ef 6b dd   .T.o.....D.6Y.k.
+    0050 - 06 ed d3 e9 49 bb 63 64-49 a6 d2 c5 12 c7 9a 40   ....I.cdI......@
+    0060 - 41 f5 4e 3e 67 bb 03 bc-6d 05 29 4b 86 2e 7a 9b   A.N>g...m.)K..z.
+    0070 - 89 4d 69 72 0e f9 08 d4-3f 6b d7 bf 43 16 2c f5   .Mir....?k..C.,.
+    0080 - 3b 00 09 1a 9c b6 28 81-7b 05 1d d7 0b 95 a7 dc   ;.....(.{.......
+    0090 - 6c e4 70 f5 2f 72 2d d2-45 20 68 c4 45 00 d2 16   l.p./r-.E h.E...
+    00a0 - 52 70 18 a2 ab 5a 1c 1e-c5 6c 45 a2 41 48 b4 4b   Rp...Z...lE.AH.K
+    00b0 - 90 5e 1a db 47 e4 97 99-81 f6 70 ed 79 a7 a6 87   .^..G.....p.y...
+    00c0 - 2d 97 2d 44 bd da 99 e9-a8 c8 b0 3c 26 61 08 2a   -.-D.......<&a.*
+
+    Start Time: 1701262518
+    Timeout   : 7200 (sec)
+    Verify return code: 19 (self-signed certificate in certificate chain)
+    Extended master secret: no
+    Max Early Data: 0
+---
+read R BLOCK
+closed

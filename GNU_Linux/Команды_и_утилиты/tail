@@ -1,0 +1,17 @@
+tail
+  - вывести последние строки
+  - output the last part of files
+
+[Синтаксис]:
+  $ tail [опции] <файл>
+
+
+[Sources]:
+  1. tail(1) - Linux man page
+  → https://linux.die.net/man/1/tail
+  
+  2. tail(1)
+  → https://www.opennet.ru/man.shtml?topic=tail&category=1&russian=0
+  
+  3. Команда tail Linux
+  → https://losst.pro/komanda-tail-linux?ysclid=loh2jnzvbf78529686

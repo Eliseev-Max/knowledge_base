@@ -1,0 +1,86 @@
+__JFrog Container Registry Documentation__
+{https://jfrog.com/help/r/jfrog-artifactory-documentation/jfrog-container-registry-documentation}
+
+  JFrog Container Registry работает на базе JFrog Artifactory с набором функций,
+  которые были настроены для обслуживания основной цели: запуска пакетов Docker и Helm в Container Registry.
+
+‼  Поскольку JFrog Container Registry является версией Artifactory,
+  при работе с JFrog Container Registry обращайтесь к документации по JFrog Artifactory.
+  
+  Например:
+    - Настройка Artifactory:https://jfrog.com/help/r/TFrtp_Jcpcw1vmlHZ63Gmw/irNJgfWacsLMCLZqSsJ8kg
+    - Установка Artifactory: https://jfrog.com/help/r/jfrog-artifactory-documentation/jfrog-container-registry-documentation
+    - Обновление Artifactory:
+    - Информация о выпуске Artifactory: https://jfrog.com/help/r/jfrog-release-information/artifactory-release-notes
+
+‼ Совет: Просмотр всех страниц, относящихся к JFrog Container Registry
+>>  Чтобы просмотреть полный список страниц, поддерживаемых JFrog Container Registry,
+>> введите: jfrog_container_registry в строку поиска на левой панели.
+
+  Для просмотра списка поддерживаемых функций JFrog Container Registry см. таблицу функциональности JCR,
+  а для сравнения JFrog Container Registry с другими версиями →
+  → сравнительную матрицу Self-Hosted JFrog Platform
+    или
+  → сравнительную матрицу Cloud JFrog Platform в зависимости от ваших потребностей.
+  (https://jfrog.com/help/r/jfrog-artifactory-documentation/jfrog-container-registry-documentation (JS))
+
+#########################################
+# Get Started: JFrog Container Registry #
+#########################################
+https://jfrog.com/help/r/jfrog-artifactory-documentation/get-started-jfrog-container-registry
+
+######################
+# System Directories #
+######################
+https://jfrog.com/help/r/jfrog-installation-setup-documentation/system-directories
+
+
+# Docker-образ JFrog Container Registry
+docker pull releases-docker.jfrog.io/jfrog/artifactory-jcr:latest
+
+__Конфигурация баз данных__
+{https://jfrog.com/help/r/jfrog-installation-setup-documentation/database-configuration}
+
+Artifactory поддерживает следующие базы данных, которые Вы можете использовать в зависимости от Ваших потребностей:
+  • PostgreSQL (ver. 15.x, 13.x и ниже)
+  • MariaDB
+  • MySQL
+  • Microsoft SQL Server
+  • Oracle
+
+Artifactory также поставляется со встроенной базой данных Derby.
+
+Artifactory поддерживает следующие режимы работы.
+  ► Метаданные в базе данных и артефакты, хранящиеся в файловой системе (это стандартная и рекомендуемая конфигурация).
+  ► Метаданные и артефакты хранятся в базе данных как BLOB-файлы.
+
+Artifactory уникально хранит артефакты, используя хранение на основе контрольных сумм.
+Дополнительные сведения см. в разделе Хранение на основе контрольных сумм.
+(https://jfrog.com/help/r/jfrog-installation-setup-documentation/checksum-based-storage)
+
+Доступ к удаленной базе данных
+  При использовании внешней базы данных необходимо надежное, стабильное сетевое соединение с низкой задержкой,
+  чтобы обеспечить нормальное функционирование системы.
+  
+  При использовании конфигурации с полной базой данных (Full-DB) мы настоятельно рекомендуем использовать высокую пропускную способность
+  для передачи больших BLOB по сети.
+  
+# Двоичные провайдеры Full-DB и Full-DB-Direct
+
+# Эти бинарные провайдеры сохраняют все метаданные и бинарное содержимое в виде блобов в базе данных.
+# Бинарный провайдер Full-DB имеет дополнительный уровень кэширования в файловой системе,
+# в то время как Full-DB Direct не имеет кэша и обслуживает артефакты непосредственно из базы данных
+
+---< Artifactory + MariaDB >---
+{https://jfrog.com/help/r/jfrog-installation-setup-documentation/mariadb-for-artifactory}
+
+#→ Artifactory supports MariaDB versions 10.2.9-10.4 and version 10.5.9-10.5.19
+#→ Supported JDBC Driver Versions
+# Artifactory supports the MariaDB Java Connector versions 2.1.2 and above.
+# Note that when using JDBC version 2.4.x and above, you need to add the following flag: useMysqlMetadata=true to the connection string.
+
+  Artifactory поддерживает популярный форк MariaDB для MySQL.
+  Используя MariaDB, вы можете воспользоваться такими возможностями инфраструктуры MariaDB, как резервное копирование и восстановление.
+
+  Для работы Artifactory с MariaDB вам необходимо создать специальный экземпляр базы данных MariaDB,
+  а затем настроить Artifactory на его использование, как описано в следующих разделах.

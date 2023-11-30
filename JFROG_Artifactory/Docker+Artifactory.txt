@@ -22,9 +22,12 @@
 О работе Artifactory без обратного proxy
 	Ранее Artifactory поддерживал методы Ports и Subdomain при использовании обратного прокси.
 	Начиная с версии 5.8. Artifactory вводит новый метод, называемый "Repository Path",
-	поскольку он использует префикс пути к репозиторию Docker (<REPOSITORY_KEY/IMAGE>) для доступа к определенному реестру Docker Artifactory из клиента Docker.
-	‼ обратный прокси-сервер для Artifactory может быть настроен по другим причинам,
-	При использовании метода Repository Path запросы к реестрам Docker в Artifactory будут обрабатываться встроенным в Artifactory Tomcat вместо обратного прокси-сервера
+	поскольку он использует префикс пути к репозиторию Docker (<REPOSITORY_KEY/IMAGE>)
+    для доступа к определенному реестру Docker Artifactory из клиента Docker.
+
+ >> обратный прокси-сервер для Artifactory может быть настроен по другим причинам,
+	При использовании метода Repository Path запросы к реестрам Docker в Artifactory 
+    будут обрабатываться встроенным в Artifactory Tomcat вместо обратного прокси-сервера
 
 sudo apt purge jfrog-artifactory-purge
 sudo rm -rf /opt/jfrog/artifactory

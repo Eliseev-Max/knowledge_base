@@ -1,0 +1,14 @@
+Приоритет переменных окружения в Docker Compose
+
+  Когда вы задаете одну и ту же переменную окружения в нескольких источниках, Compose использует правило старшинства (приоритетности).
+  Оно направлено на разрешение значения для рассматриваемой переменной.
+
+  Порядок приоритета (от высшего к низшему) следующий:
+  
+  1. Заданная с помощью "docker compose run -e ..." в CLI
+  2. Заменённая из оболочки (shell) пользователя
+  3. Установленная с помощью атрибута окружения в файле Compose
+  4. Заданная с помощью аргумента --env-file в CLI
+    Use of the env_file attribute in the Compose file
+    Set using an .env file placed at base of your project directory
+    Set in a container image in the ENV directive. Having any ARG or ENV setting in a Dockerfile evaluates only if there is no Docker Compose entry for environment, env_file or run --env.

@@ -3,6 +3,20 @@ https://thetechdarts.com/sonarqube-integration-with-jenkins/
 
 Шаг 1: Генерация токена в SonarQube
 
+  ‼ сгенерировать токен пользователя в SonarQube
+    (чтобы мы могли получить доступ к SonarQube с сервера Jenkins)
+    Мы создадим секретный текстовый мандат в Jenkins с помощью токена, созданного в SonarQube.
+    
+  1. Чтобы создать токен в SonarQube, перейдем в раздел:
+    SonarQube -> Administration -> Security▼
+
+  2. Перейдите к пользователю, под которым вы хотите, чтобы Jenkins получил доступ к SonarQube.
+    (Security▼ → Users)
+    В нашем случае это пользователь Administrator
+    В столбце Tokens:  число и набор черточек рядом с ним.
+    Число = количество токенов, уже доступных для данного пользователя.
+    Если SonarQube только что установлен, то это число должно быть равно 0.
+    Теперь, когда мы щелкнем на наборе черточек рядом с этим числом, откроется диалоговое окно.
 
 Шаг 2: Установка и настройка плагина Sonar Scanner в Jenkins
 
@@ -28,3 +42,5 @@ How to run and setup Sonarqube DevOps Tools in Docker: https://www.youtube.com/w
 
 Установка SonarQube с Docker Compose: https://www.heyvaldemar.net/ustanovka-sonarqube-s-docker-compose/
 
+#### On-host_Jenkins ####
+squ_ea53dc6fa4266d7b1ba34679fecccee52c6f0b72
