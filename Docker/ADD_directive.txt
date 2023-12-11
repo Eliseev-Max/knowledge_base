@@ -119,8 +119,13 @@ To add a private repo via SSH, create a Dockerfile with the following form:
 FROM alpine
 ADD git@git.example.com:foo/bar.git /bar
 
-This Dockerfile can be built with docker build --ssh or buildctl build --ssh, e.g.,
+Такой Dockerfile может быть использован для создания образа следующими командами:
+  docker build --ssh
+    или
+  buildctl build --ssh
 
-$ docker build --ssh default
+  Например:
 
-$ buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --ssh default
+  $ docker build --ssh default
+
+  $ buildctl build --frontend=dockerfile.v0 --local context=. --local dockerfile=. --ssh default
