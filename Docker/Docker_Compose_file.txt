@@ -1,0 +1,370 @@
+Docker Compose file
+
+# Пример docker-compose.yml
+---
+version: "3.8"
+services:
+
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379"
+    networks:
+      - frontend
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  db:
+    image: postgres:9.4
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - backend
+    deploy:
+      placement:
+        max_replicas_per_node: 1
+        constraints:
+          - "node.role==manager"
+
+  vote:
+    image: dockersamples/examplevotingapp_vote:before
+    ports:
+      - "5000:80"
+    networks:
+      - frontend
+    depends_on:
+      - redis
+    deploy:
+      replicas: 2
+      update_config:
+        parallelism: 2
+      restart_policy:
+        condition: on-failure
+
+  result:
+    image: dockersamples/examplevotingapp_result:before
+    ports:
+      - "5001:80"
+    networks:
+      - backend
+    depends_on:
+      - db
+    deploy:
+      replicas: 1
+      update_config:
+        parallelism: 2
+        delay: 10s
+      restart_policy:
+        condition: on-failure
+
+  worker:
+    image: dockersamples/examplevotingapp_worker
+    networks:
+      - frontend
+      - backend
+    deploy:
+      mode: replicated
+      replicas: 1
+      labels: [APP=VOTING]
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 3
+        window: 120s
+      placement:
+        constraints:
+          - "node.role==manager"
+
+  visualizer:
+    image: dockersamples/visualizer:stable
+    ports:
+      - "8080:8080"
+    stop_grace_period: 1m30s
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+    deploy:
+      placement:
+        constraints:
+          - "node.role==manager"
+
+networks:
+  frontend:
+  backend:
+
+volumes:
+  db-data:
+---
+
+# Можно использовать расширения как .yml, так и .yaml; оба они работают
+
+  Файл Compose - это YAML-файл, определяющий
+    • службы (services),
+    • сети (networks)   и
+    • тома (volumes)
+
+  Определение сервиса содержит конфигурацию, которая применяется к каждому контейнеру, запущенному для этого сервиса;
+  (== передача параметров командной строки в docker run).
+  Аналогично:
+  определение сети ~ docker network create
+  определение тома ~ docker volume create
+
+  ‼ Как и в случае с docker run, опции, указанные в Dockerfile, такие как
+    • CMD,
+    • EXPOSE,
+    • VOLUME,
+    • ENV,
+    соблюдаются по умолчанию - НЕ НУЖНО указывать их снова в docker-compose.yml.
+
+  Можно использовать переменные окружения в значениях конфигурации с помощью Bash-like синтаксиса:
+    ${VARIABLE}
+
+#################################
+# Директивы docker-compose.yaml #
+#################################
++++++++++
++ build +
++++++++++
+
+  = параметры конфигурации, которые применяются во время сборки.
+  
+  build может быть указан:
+    • как строка, содержащая путь к контексту сборки:
+---
+version: "3.8"
+services:
+  webapp:
+    build: ./dir
+---
+
+    • как объект с путем, указанным в context, и опционально Dockerfile и args:
+---
+version: "3.8"
+services:
+  webapp:
+    build:
+      context: ./dir
+      dockerfile: Dockerfile-alternate
+      args:
+        buildno: 1
+---
+    → Если вы укажете image, а также build,
+      то Compose назовет собранный образ с webapp и необязательным тегом, указанным в image:
+---
+build: ./dir
+image: webapp:tag
+---
+## В результате получим образ с именем webapp и тегом tag, собранный из ./dir.
+
+[!] Внимание! Если используется docker stack deploy
+  Опция build игнорируется при развертывании стека в режиме swarm.
+  Команда $ docker stack не собирает образы перед развертыванием.
+
+
+  context
+    - Либо путь к директории, содержащей Dockerfile, либо url к git-репозиторию.
+      Если указанное значение является относительным путем,
+      оно интерпретируется как относительное к местоположению файла Compose.
+      
+      Этот каталог также является контекстом сборки, который отправляется демону Docker.
+      Compose
+        - собирает образ,
+        - помечает (tag) его сгенерированным именем
+        - в дальнейшем использует этот образ.
+---
+build:
+  context: ./dir
+---
+
+
+  dockerfile
+    - Альтернативный файл Dockerfile.
+      Compose использует альтернативный файл для сборки.
+      ‼ Путь к сборке также ДОЛЖЕН быть указан.
+---
+build:
+  context: .
+  dockerfile: Dockerfile-alternate
+---
+
+
+  args
+    - добавляет аргументы сборки, которые представляют собой переменные окружения, доступные только в процессе сборки.
+      1) сначала нужно указать аргументы в своем Dockerfile:
+---
+# syntax=docker/dockerfile:1
+
+ARG buildno
+ARG gitcommithash
+
+RUN echo "Build number: $buildno"
+RUN echo "Based on commit: $gitcommithash"
+---
+      2) затем укажем аргументы под ключом build.
+      (можно передать отображение (mapping) или список):
+---<with mapping>---
+build:
+  context: .
+  args:
+    buildno: 1
+    gitcommithash: cdc3b19
+---
+---<with list>---
+build:
+  context: .
+  args:
+    - buildno=1
+    - gitcommithash=cdc3b19
+---
+
+{Примечание:
+  [Область применения build-args]
+    Если в вашем Dockerfile указать ARG перед инструкцией FROM,
+    то ARG не будет доступен в инструкциях сборки под FROM.
+    Если вам нужно, чтобы аргумент был доступен в обоих местах, укажите его также в инструкции FROM.
+##(Подробности использования см. в разделе документации "Как взаимодействуют ARGS и FROM":
+## https://docs.docker.com/engine/reference/builder/#understand-how-arg-and-from-interact)
+##[[Подробный разбор:]]
+##  Инструкции FROM поддерживают переменные, объявленные любыми инструкциями ARG,
+##  которые встречаются перед первой инструкцией FROM:
+---
+ARG  CODE_VERSION=latest
+##FROM base:${CODE_VERSION}
+##CMD  /code/run-app
+
+FROM extras:${CODE_VERSION}
+CMD  /code/run-extras
+---
+##  ARG, объявленная до FROM, находится ВНЕ СТАДИИ СБОРКИ, поэтому ее нельзя использовать ни в одной инструкции после FROM.
+##  Чтобы использовать значение по умолчанию ARG, объявленного перед первым FROM,
+##  используйте инструкцию ARG без значения внутри этапа сборки:
+---
+ARG VERSION=latest
+FROM busybox:$VERSION
+ARG VERSION
+RUN echo $VERSION > image_version
+---
+}
+‼!  Вы можете опустить значение при указании аргумента сборки;
+‼!  в этом случае его значение во время сборки будет соответствовать значению в среде (environment),
+‼!  в которой запущен Compose.
+---
+args:
+  - buildno
+  - gitcommithash
+---
+
+<?> Параметр cache_from:
+  - добавлен в версии Compose file 3.2;
+  - определяет список образов, которые engine использует для разрешения кэша.
+---
+build:
+  context: .
+  cache_from:
+    - alpine:latest
+    - corp/web_app:3.14
+---
+
+  labels
+    Добавьте метаданные к полученному образу с помощью меток Docker.
+    Вы можете использовать массив или словарь.
+    Рекомендуется использовать нотацию reverse-DNS,
+    чтобы ваши метки не конфликтовали с метками, используемыми другими программами.
+
+---< Examples >---
+build:
+  context: .
+  labels:
+    com.example.description: "Accounting webapp"
+    com.example.department: "Finance"
+    com.example.label-with-empty-value: ""
+---
+build:
+  context: .
+  labels:
+    - "com.example.description=Accounting webapp"
+    - "com.example.department=Finance"
+    - "com.example.label-with-empty-value"
+---
+
+
+  network
+    - Установите сеть, к которой подключаются контейнеры для инструкций RUN во время сборки.
+
+---< Examples >---
+build:
+  context: .
+  network: host
+## OR
+build:
+  context: .
+  network: custom_network_1
+---
+build:
+  context: .
+  network: none     # to disable networking during build
+---
+
+
+  target
+    - Сборка указанного этапа, как определено в Dockerfile.
+    Подробности см. в документации по многоэтапной сборке.
+  ("Multi-stage builds":https://docs.docker.com/build/building/multi-stage/)
+
+
+  command
+    - перезаписывает команду по умолчанию.
+---
+command: bundle exec thin -p 3000
+---
+    Команда также может быть списком, подобно dockerfile:
+---
+command: ["bundle", "exec", "thin", "-p", "3000"]
+---
+
+
+  container_name
+    - указать пользовательское (custom) имя контейнера, а не сгенерированное имя по умолчанию.
+    # Поскольку имена контейнеров Docker должны быть уникальными,
+    # вы не можете масштабировать сервис более чем на 1 контейнер,
+    # если вы указали пользовательское имя.
+    # Попытка сделать это приведет к ошибке.
+  
+  
+  depends_on
+  {https://docs.docker.com/compose/compose-file/compose-file-v3/#depends_on}
+    - Определяет зависимость между сервисами.
+      Зависимости между сервисами приводят к следующему поведению:
+      • docker-compose up starts services in dependency order.
+        In the following example, db and redis are started before web.
+      • docker-compose up SERVICE automatically includes SERVICE's dependencies.
+        In the example below, docker-compose up web also creates and starts db and redis.
+      • docker-compose stop stops services in dependency order.
+        In the following example, web is stopped before db and redis.
+  
+  deploy
+  
+  
+  entrypoint
+  
+  
+  env_file
+  
+  
+  environment
+  
+  
+  healthcheck
+  
+  
+  image
+  
+  
+  logging
+  
+  
+  network_mode
