@@ -1,4 +1,5 @@
 Docker Compose file
+(https://docs.docker.com/compose/compose-file/compose-file-v3/)
 
 # Пример docker-compose.yml
 ---
@@ -249,9 +250,12 @@ ARG VERSION
 RUN echo $VERSION > image_version
 ---
 }
-‼!  Вы можете опустить значение при указании аргумента сборки;
-‼!  в этом случае его значение во время сборки будет соответствовать значению в среде (environment),
-‼!  в которой запущен Compose.
+
+######################################################################
+# ‼ Вы можете опустить значение при указании аргумента сборки;       #
+# ‼ в этом случае его значение во время сборки будет соответствовать #
+# ‼ значению в среде (environment), в которой запущен Compose.       #
+######################################################################
 ---
 args:
   - buildno
@@ -339,25 +343,140 @@ command: ["bundle", "exec", "thin", "-p", "3000"]
   {https://docs.docker.com/compose/compose-file/compose-file-v3/#depends_on}
     - Определяет зависимость между сервисами.
       Зависимости между сервисами приводят к следующему поведению:
-      • docker-compose up starts services in dependency order.
-        In the following example, db and redis are started before web.
-      • docker-compose up SERVICE automatically includes SERVICE's dependencies.
-        In the example below, docker-compose up web also creates and starts db and redis.
-      • docker-compose stop stops services in dependency order.
-        In the following example, web is stopped before db and redis.
+      • docker-compose up запускает сервисы в порядке зависимости.
+          (В следующем примере db и redis запускаются раньше web)
+      
+      • docker-compose up SERVICE автоматически включает зависимости SERVICE.
+          (В примере ниже $ docker-compose up web также создает и запускает db и redis)
+      • docker-compose stop останавливает сервисы в порядке зависимости.
+          (В следующем примере web остановлен раньше db и redis)
+---
+version: "3.8"
+services:
+  web:
+    build: .
+    depends_on:
+      - db
+      - redis
+  redis:
+    image: redis
+  db:
+    image: postgres
+---
+## При использовании depends_on следует обратить внимание на несколько моментов:
+##   ◘ depends_on не ждет, пока db и redis будут "готовы" ("ready") перед запуском web
+##     - только до тех пор, пока они не будут запущены.
+##     Если нужно дождаться готовности сервиса, смотрите раздел:
+**     ►{"Управление порядком запуска":https://docs.docker.com/compose/startup-order/}◄,
+##     чтобы узнать больше об этой проблеме и способах ее решения.
+##   ◘ Опция depends_on игнорируется при развертывании стека в режиме swarm с помощью файла Compose версии 3.
   
   deploy
-  
+    - Укажите конфигурацию, связанную с развертыванием и запуском служб.
+      Следующие вступают в силу только при развертывании в swarm с помощью docker stack deploy
+      и игнорируется docker-compose up и docker-compose run, за исключением ресурсов.
+    sub-options:
+      • endpoint_mode;
+      • labels;
+      • mode;
+      • placement;
+      • max_replicas_per_node;
+      • replicas;
+      • resources;
+      • restart_policy;
+      • rollback_config;
+      • update_config
   
   entrypoint
   
   
   env_file
-  
-  
+    - добавить переменные окружения из файла.
+      Может быть одно значение или список.
+    > Если вы указали файл Compose с помощью docker-compose -f FILE,
+    пути в env_file будут относительными к директории, в которой находится этот файл (docker-compose.yaml).
+    Переменные окружения, объявленные в разделе  environment, переопределяют эти значения
+    ‼- это справедливо, даже если эти значения пусты или неопределены.
+---
+env_file: .env
+---
+env_file:
+  - ./common.env
+  - ./apps/web.env
+  - /opt/runtime_opts.env
+---
+  ## Compose ожидает, что каждая строка в env-файле будет иметь формат VAR=VAL.
+  ## Строки, начинающиеся с #, рассматриваются как комментарии и игнорируются.
+  ## Пустые строки также игнорируются.
+---
+# Set Rails/Rack environment
+RACK_ENV=development
+---
+
+#### Compose также распознает встроенные комментарии, как, например:
+---
+MY_VAR = value # this is a comment
+---
+
+  ## Чтобы не интерпретировать "#" как встроенный комментарий, используйте кавычки:
+---
+MY_VAR = "All the # inside are taken as part of the value"
+---
+
+  [!] Если services: → service_name: → build:
+      переменные, определенные в environment files, не будут автоматически отображаться во время сборки.
+  >>  Использовать подпараметр  build: → args: для определения переменных окружения во время сборки.
+
+  [!] Значение VAL используется как есть и не изменяется.
+      Например, если значение окружено кавычками (как это часто бывает с переменными оболочки (shell variables)),
+      кавычки будут включены в значение, передаваемое Compose.
+
+  ## Имейте в виду, что порядок файлов в списке имеет значение для определения значения, присваиваемого переменной,
+  ## которая встречается несколько раз.
+  ## Файлы в списке обрабатываются сверху вниз.
+  ## Для одной и той же переменной, указанной в файле a.env и получившей другое значение в файле b.env,
+  ## если b.env находится в списке ниже (после), то значение из b.env будет приоритетным.
+  ## Например, если в файле docker-compose.yml указано следующее объявление:
+---
+services:
+  some-service:
+    env_file:
+      - a.env
+      - b.env
+---
+# a.env
+VAR=1
+---
+# b.env
+VAR=hello
+---
+=> VAR == hello
+
   environment
-  
-  
+    - добавьте переменные окружения.
+    Вы можете использовать либо массив, либо словарь.
+    ‼ Любые булевые значения (true, false, yes, no) необходимо ЗАКЛЮЧАТЬ В КАВЫЧКИ,
+    чтобы парсер YML не преобразовал их в True или False.
+
+    Переменные окружения, имеющие только ключ, преобразуются в их значения на машине,
+    на которой запущен Compose, что может быть полезно для секретных или специфических для хоста значений.
+---
+environment:
+  RACK_ENV: development
+  SHOW: 'true'
+  SESSION_SECRET:
+## OR
+environment:
+  - RACK_ENV=development
+  - SHOW=true
+  - SESSION_SECRET
+---
+
+#‼ Если в вашем сервисе указана опция build,
+#  переменные, определенные в окружении, не будут автоматически отображаться во время сборки.
+#  ► Используйте подпараметр args опции build для определения переменных окружения во время сборки.
+
+
   healthcheck
   
   
@@ -368,3 +487,10 @@ command: ["bundle", "exec", "thin", "-p", "3000"]
   
   
   network_mode
+
+
+########
+########
+1. Control startup and shutdown order in Compose: https://docs.docker.com/compose/startup-order/
+2. Store configuration data using Docker Configs: https://docs.docker.com/engine/swarm/configs/
+3. Overview of docker compose CLI: https://docs.docker.com/compose/reference/
