@@ -14,7 +14,12 @@ SonarQube in Docker
 ############################
 
 Поскольку SonarQube использует встроенный Elasticsearch, убедитесь,
-что конфигурация вашего хоста Docker соответствует требованиям к рабочему режиму Elasticsearch и настройке дескрипторов файлов.
+что конфигурация вашего хоста Docker соответствует:
+  * требованиям к рабочему режиму Elasticsearch 
+   (https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode)
+  и
+  * настройке дескрипторов файлов:
+   (https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html)
 
 Например, в Linux можно установить рекомендуемые значения для текущей сессии, выполнив следующие команды от имени root на хосте:
 sysctl -w vm.max_map_count=524288
@@ -38,11 +43,14 @@ Installation
   -<Database>-
   
   По умолчанию образ будет использовать встроенную базу данных H2, которая не пригодна для продакшена.
-  
-  ‼ Предупреждение: К схеме базы данных может подключаться только один экземпляр SonarQube.
-    Если вы используете Docker Swarm или Kubernetes, убедитесь,
-    что несколько экземпляров SonarQube НЕ работают одновременно с одной и той же схемой базы данных.
-    Это приведет к непредсказуемому поведению SonarQube и повреждению данных.
+  *******************
+  * Предупреждение: *
+  *******************
+    К схеме базы данных может подключаться ТОЛЬКО ОДИН экземпляр SonarQube.
+    
+  # Если вы используете Docker Swarm или Kubernetes, убедитесь,
+  # что несколько экземпляров SonarQube НЕ работают одновременно с одной и той же схемой базы данных.
+  # Это приведет к непредсказуемому поведению SonarQube и повреждению данных.
     
     До появления SONAR-10362 такой защиты не было.
     В версии Data Center Edition имеется то же ограничение:
@@ -55,7 +63,19 @@ Installation
     /opt/sonarqube/logs: contains SonarQube logs about access, web process, CE process, Elasticsearch logs
     /opt/sonarqube/extensions: for 3rd party plugins
 
-    Warning: Вы не можете использовать одни и те же тома в нескольких экземплярах SonarQube
+‼Warning: Вы не можете использовать одни и те же тома в нескольких экземплярах SonarQube
+
+  Environment variables for PostgreSQL DB:
+  
+  SONAR_JDBC_URL=jdbc:postgresql://localhost/sonarqube?currentSchema=my_schema
+  # По умолчанию используется схема с именем "public".
+  # Ее можно переопределить с помощью параметра "currentSchema"
+
+‼Важно:
+  Если вы не собираетесь удалять БД и запускать новую при запуске образа, будьте осторожны, 
+  [!] НЕ ИСПОЛЬЗУЙТЕ -v для docker-compose down, 
+  [!] и будьте осторожны при выполнении таких команд, как docker system prune или docker volume prune;
+      независимо от использования параметра external: true, тома вашей базы данных не сохранятся после первоначального запуска и выключения SonarQube
 
   -<Upgrading>-
 
@@ -64,21 +84,72 @@ Customized image
 
 В некоторых средах может оказаться более целесообразным подготовить собственный образ, содержащий вашу конфигурацию.
 Docker-файл для этого может быть простым:
-
+---
 FROM sonarqube:8.9-community
 COPY sonar-custom-plugin-1.0.jar /opt/sonarqube/extensions/
+---
 
-You could then build and try the image with something like:
-
+  # В дальнейшем можно создать и опробовать образ, используя команды:
+---
 $ docker build --tag=sonarqube-custom .
 $ docker run -ti sonarqube-custom
+---
 
-Avoid hard termination of SonarQube
+#########################################
+# SonarQube running with docker compose #
+#########################################
 
-A SonarQube instance will stop gracefully, waiting for any tasks in progress to finish. Waiting for in-progress tasks to finish can take a large amount of time which the docker does not expect by default when stopping. To avoid having the SonarQube instance killed by the Docker daemon after 10 seconds, it is best to configure a timeout to stop the container with --stop-timeout. For example:
+# Пример файла Docker Compose .yml
+---
+version: "3"
 
-docker run --stop-timeout 3600 sonarqube
+services:
+  sonarqube:
+    image: sonarqube:community
+    depends_on:
+      - db
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://db:5432/sonar
+      SONAR_JDBC_USERNAME: sonar
+      SONAR_JDBC_PASSWORD: sonar
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    ports:
+      - "9000:9000"
+  db:
+    image: postgres:12
+    environment:
+      POSTGRES_USER: sonar
+      POSTGRES_PASSWORD: sonar
+    volumes:
+      - postgresql:/var/lib/postgresql
+      - postgresql_data:/var/lib/postgresql/data
+
+volumes:
+  sonarqube_data:
+  sonarqube_extensions:
+  sonarqube_logs:
+  postgresql:
+  postgresql_data:
+---
+
+***************************************************
+*‼ Избегайте жесткого завершения работы SonarQube *
+***************************************************
+  
+  Экземпляр SonarQube остановится gracefully, ожидая завершения всех текущих задач.
+  Ожидание завершения текущих задач может занять большое количество времени,
+  которого докер по умолчанию не отводит (не ожидает) при остановке.
+  
+  ‼ Чтобы избежать уничтожения экземпляра SonarQube демоном Docker через 10 секунд,
+  лучше всего настроить таймаут для остановки контейнера с помощью параметра --stop-timeout.
+  Например:
+---
+$ docker run --stop-timeout 3600 sonarqube
+---
+
 
 Administration
-
-The administration guide can be found here.
+  The administration guide: https://docs.sonarsource.com/sonarqube/latest/

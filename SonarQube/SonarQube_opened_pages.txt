@@ -21,3 +21,9 @@ SonarQube. Opened pages
 7. sonar-cxx releases
   https://github.com/SonarOpenCommunity/sonar-cxx/releases
 
+---<Elasticsearch>---
+Install Elasticsearch with Docker:
+→ https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
+
+File Descriptors
+→ https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html#file-descriptors
