@@ -1,5 +1,8 @@
 SonarQube. Opened pages
 
+0. Мастер-класс SonarQube. В омут с головой:
+→ https://infostart.ru/1c/articles/1661973/?ysclid=lq6bpibtmr124362221
+
 1. Installing SonarQube from the Docker image
   https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/install-the-server/#installing-sonarqube-from-the-docker-image
 
@@ -21,9 +24,39 @@ SonarQube. Opened pages
 7. sonar-cxx releases
   https://github.com/SonarOpenCommunity/sonar-cxx/releases
 
+8. Environment variables
+  https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/configure-and-operate-a-server/environment-variables/#postgresql-96-or-greater
+
+9. How easily run Sonar Qube and PostgresSQL with Docker Containers
+  https://gist.github.com/ceduliocezar/b3bf93125024482b5f2f479696842046
+
+10. Deploy SonarQube Server
+  https://habr.com/ru/articles/474140/
+
 ---<Elasticsearch>---
 Install Elasticsearch with Docker:
 → https://www.elastic.co/guide/en/elasticsearch/reference/current/docker.html#docker-cli-run-prod-mode
 
 File Descriptors
 → https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html#file-descriptors
+---
+
+
+---< YouTube >---
+1. Jenkins CI/CD Pipeline - SonarQube, Docker, Github Webhooks on AWS | Resume Project | English:
+https://www.youtube.com/watch?v=361bfIvXMBI
+
+2. Контролируем качество кода с помощью SonarQube.:
+https://www.youtube.com/watch?v=fDqDeLkILoI
+
+3. Никита Грызлов. Мастер-класс. SonarQube. В омут с головой:
+https://youtu.be/wFwG8bKuEw4
+
+4. Sonarqube Tutorial Part - 01 out 06
+https://youtu.be/y8UF7rgtDEo?list=PLDhScTEBdP8ym3PaMkkTVuaaVHV2ktI0j
+
+5. Dockerized SonarQube – Code Quality and Code Security
+https://youtu.be/PgHIVt_S6PE
+
+6. How to install SonarQube using Docker Compose | Setup Sonar with Docker Compose & Integrate Jenkins:
+https://youtu.be/mNNSD_OdyEA

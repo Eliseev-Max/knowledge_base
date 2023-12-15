@@ -1,14 +1,6 @@
 SonarQube in Docker
 (https://hub.docker.com/_/sonarqube)
-
-##   SonarQube - это ведущий инструмент для непрерывной проверки качества и безопасности кодовых баз,
-## а также для руководства работой команд разработчиков в процессе проверки кода.
-## Охватывая 27 языков программирования и сопрягаясь с существующим программным конвейером,
-## SonarQube предоставляет разработчикам четкие рекомендации по устранению проблем,
-## а командам в целом - более качественное и безопасное программное обеспечение.
-## Имея более 225 000 деплоев (deployments), помогающих как небольшим командам разработчиков, так и глобальным организациям,
-## SonarQube предоставляет всем командам и компаниям по всему миру возможность контролировать качество и безопасность кода.
-
+Token:squ_aad6a8ee1da28da85ecfd5783838a789ed498603
 ############################
 # Docker Host Requirements #
 ############################
@@ -59,11 +51,14 @@ Installation
   -<Use volumes>-
   Мы рекомендуем создать volumes для следующих директорий:
 
-    /opt/sonarqube/data: data files, such as the embedded H2 database and Elasticsearch indexes
-    /opt/sonarqube/logs: contains SonarQube logs about access, web process, CE process, Elasticsearch logs
-    /opt/sonarqube/extensions: for 3rd party plugins
+    /opt/sonarqube/data:        файлы данных, такие как встроенная база данных H2 и индексы Elasticsearch
+    /opt/sonarqube/logs:        содержит журналы SonarQube о доступе, веб-процессе, CE-процессе, журналы Elasticsearch.
+    /opt/sonarqube/extensions:  для сторонних плагинов
 
-‼Warning: Вы не можете использовать одни и те же тома в нескольких экземплярах SonarQube
+‼‼‼‼‼‼‼‼‼‼‼‼
+‼ Warning: ‼
+‼‼‼‼‼‼‼‼‼‼‼‼ 
+  Вы не можете использовать одни и те же тома в нескольких экземплярах SonarQube
 
   Environment variables for PostgreSQL DB:
   
@@ -71,15 +66,21 @@ Installation
   # По умолчанию используется схема с именем "public".
   # Ее можно переопределить с помощью параметра "currentSchema"
 
-‼Важно:
+[‼]
   Если вы не собираетесь удалять БД и запускать новую при запуске образа, будьте осторожны, 
   [!] НЕ ИСПОЛЬЗУЙТЕ -v для docker-compose down, 
-  [!] и будьте осторожны при выполнении таких команд, как docker system prune или docker volume prune;
-      независимо от использования параметра external: true, тома вашей базы данных не сохранятся после первоначального запуска и выключения SonarQube
+  [!] и будьте осторожны при выполнении таких команд, как
+
+$ docker system prune
+      или
+$ docker volume prune;
+      независимо от использования параметра external: true,
+      тома вашей базы данных не сохранятся после первоначального запуска и выключения SonarQube
 
   -<Upgrading>-
 
   (инструкции по обновлению см. в разделе Обновление из образа Docker на странице Обновление сервера)
+
 Customized image
 
 В некоторых средах может оказаться более целесообразным подготовить собственный образ, содержащий вашу конфигурацию.
@@ -87,6 +88,13 @@ Docker-файл для этого может быть простым:
 ---
 FROM sonarqube:8.9-community
 COPY sonar-custom-plugin-1.0.jar /opt/sonarqube/extensions/
+---
+####
+---
+FROM library/postgres
+ENV POSTGRES_USER docker
+ENV POSTGRES_PASSWORD docker
+ENV POSTGRES_DB docker
 ---
 
   # В дальнейшем можно создать и опробовать образ, используя команды:
@@ -99,7 +107,7 @@ $ docker run -ti sonarqube-custom
 # SonarQube running with docker compose #
 #########################################
 
-# Пример файла Docker Compose .yml
+# Пример файла docker-compose.yml
 ---
 version: "3"
 
@@ -120,6 +128,7 @@ services:
       - "9000:9000"
   db:
     image: postgres:12
+    restart:always
     environment:
       POSTGRES_USER: sonar
       POSTGRES_PASSWORD: sonar

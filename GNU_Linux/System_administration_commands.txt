@@ -1,0 +1,2 @@
+Команды системного администрирования
+(https://www.opennet.ru/docs/RUS/bash_scripting_guide/c9708.html)
