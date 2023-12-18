@@ -19,16 +19,79 @@ https://thetechdarts.com/sonarqube-integration-with-jenkins/
     Теперь, когда мы щелкнем на наборе черточек рядом с этим числом, откроется диалоговое окно.
 
 Шаг 2: Установка и настройка плагина Sonar Scanner в Jenkins
-
+  Чтобы выполнить сканирование или анализ проекта с помощью SonarQube, нам сначала понадобится сканер.
+  Чтобы установить плагин сканера, на панели управления Jenkins перейдите в Manage Jenkins -> Manage Plugins
+  Плагин: "Sonar Scanner for Jenkins"
+  
 
 Шаг 3: Настройка SonarQube в Jenkins
-
+  
+  3.1 перейдем в Manage Jenkins-> Configure System;
+  3.2 прокрутим вниз до раздела, в котором говорится о серверах SonarQube
+  3.3 Установим флажок: [v]"Environment Variables"
+  3.4 Укажитем имя. (для нашего примера мы дадим ему имя SonarServer1)
+  3.5 Укажем url для сервера SonarQube.
+      (по умолчанию используется адрес http://localhost:9000, если не указать его в явном виде)
+  3.6 В разделе "Токен аутентификации сервера" (Server authentication token):
+      нажать кнопку "Добавить" ("Add") → (откроется новое диалоговое окно)
+      в открывшемся окне: создать новую учетную запись с токеном, который мы уже сгенерировали в SonarQube
+    (Kind = Secret text)
 
 Шаг 4: Создание проекта Jenkins Pipeline
+  Итог предыдущего шага: все конфигурации завершены.
+  Задача: приступить к созданию проекта в Jenkins, в котором мы будем обращаться к SonarQube для анализа кода.
+  
+  Jenkins Dashboard → выбрать "Add Item" → 
+  (в открывшемся окне):
+    - выбрать Pipeline Project,
+    - задать имя
+    - нажать "OK"
+---<Проект Java/Maven: пример этапов пайплайна для анализа SonarQube и Quality Gate>---
 
+node(label:'master') {
+  try{  
+    stage('Static Analysis') {
+      withSonarQubeEnv('SonarQube1') 
+      {
+        sh 'mvn clean package sonar:sonar
+   	    echo 'Static Analysis Completed' 
+      }
+   
+    stage("Quality Gate"){
+      timeout(time: 1, unit: 'HOURS') 
+      {
+        waitForQualityGate abortPipeline: true
+        def qg= waitForQualityGate()
+        if (qg.status!= 'OK'){
+          error "Pipeline aborted due to quality gate failure: ${qg.status}"
+        }
+      }         
+      echo 'Quality Gate Passed' 
+    }
+  } 
+}
 
+---
 Шаг 5: Создание вебхука (webhook) в SonarQube
 
+  Создание вебхука необходимо для второго шага, т. е. Quality Gate.
+  SonarQube потребуется некоторое время для обработки анализа, чтобы показать, пройден ли Quality Gate.
+  До этого времени он находится в статусе IN-PROGRESS. Если ваш веб-хук настроен правильно,
+  SonarQube отправит обновление в Jenkins, как только результат прохождения Quality Gate будет обработан.
+---
+Webhooks используются для уведомления внешних сервисов о выполнении анализа проекта.
+На каждый из указанных URL-адресов отправляется HTTP POST-запрос с полезной нагрузкой в формате JSON.
+Более подробную информацию можно найти в документации по Webhooks.
+---
+
+  Пошаговое создание вебхука в SonarQube:
+    1. SonarQube Server:
+         → перейти в раздел:
+       Administration -> Configuration -> Webhooks
+
+    2. Нажать кнопку "Create", чтобы создать веб-хук.
+    3. Укажите имя и URL.
+       (URL должен быть jenkinsservername/, а затем sonarqube-webhook
 
 Шаг 6: Build the Jenkins Pipeline project
 
@@ -42,5 +105,11 @@ How to run and setup Sonarqube DevOps Tools in Docker: https://www.youtube.com/w
 
 Установка SonarQube с Docker Compose: https://www.heyvaldemar.net/ustanovka-sonarqube-s-docker-compose/
 
-#### On-host_Jenkins ####
-squ_ea53dc6fa4266d7b1ba34679fecccee52c6f0b72
+---
+С помощью этого плагина вы можете настраивать экземпляры SonarQube и запускать анализ Sonar Scanner несколькими способами:
+  • Внедряя конфигурацию SonarQube в качестве переменных окружения и используя их на любом этапе работы (например, Maven, Ant, Gradle, ...).
+  • Используя шаг сборки SonarQube Scanner
+  • Использование SonarScanner для шагов анализа MSBuild
+
+'SonarQube Scanner' и 'SonarScanner for MSBuild' управляются как устанавливаемые инструменты. Список доступных версий автоматически извлекается Jenkins из json-файла, размещенного на сайте обновлений:
+---

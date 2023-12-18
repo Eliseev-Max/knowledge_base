@@ -1,6 +1,6 @@
 SonarQube in Docker
 (https://hub.docker.com/_/sonarqube)
-Token:squ_aad6a8ee1da28da85ecfd5783838a789ed498603
+
 ############################
 # Docker Host Requirements #
 ############################

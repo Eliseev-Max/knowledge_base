@@ -1,0 +1,3 @@
+Structure of a Scripted Pipeline in Jenkins with sample code
+
+https://thetechdarts.com/structure-of-a-scripted-pipeline-in-jenkins-with-sample-code/

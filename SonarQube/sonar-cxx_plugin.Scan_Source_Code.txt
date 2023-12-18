@@ -1,0 +1,28 @@
+SonarQube. Sonar-cxx plugin.
+Scan Source Code
+(https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Scan-Source-Code)
+
+В простейшем случае исходный код
+  1) считывается с помощью датчика языка программирования плагина cxx
+##  (https://docs.sonarsource.com/sonarqube/latest/extension-guide/developing-a-plugin/supporting-new-languages/)
+  и
+  2) передается через SonarScanner в SonarQube для анализа
+##  (https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/sonarscanner/)
+
+Датчик языка программирования берет на себя задачу разделения исходного кода на лексемы и генерирует абстрактное дерево синтаксиса (AST)
+с помощью грамматики.
+На основе AST генерируются метрики и проблемы программного обеспечения.
+
+В SonarQube каждое расширение файла должно быть однозначно отнесено к одному языку программирования.
+При параллельной работе нескольких плагинов C/C++ это необходимо учитывать при конфигурировании (sonar.cxx.file.suffixes).
+(https://github.com/SonarOpenCommunity/sonar-cxx/wiki/sonar.cxx.file.suffixes)
+
+[‼] Подсказка:
+  ► только один датчик языка программирования может считывать исходный файл!
+
+Считывание исходных файлов (индексирование) является необходимым условием для последующего считывания и визуализации отчетов внешних инструментов.
+
+{Jenkins.SonarQube_Scanner: https://plugins.jenkins.io/sonar/}
+{ Jenkins extensions for SonarQube:
+  https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/jenkins-extension-sonarqube/
+}
