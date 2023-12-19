@@ -15,3 +15,148 @@ SonarQube. Webhooks
   • Включает JSON-документ в качестве полезной нагрузки, используя метод POST.
   • Имеет тип содержимого application/json, с кодировкой UTF-8.
 
+
+################
+# Конфигурация #
+################
+
+  Вы можете настроить до 10 вебхуков на уровне проекта в Project Settings -> Webhooks.
+
+Дополнительный набор из 10 вебхуков можно настроить на глобальном уровне в разделе:
+  Administration -> Configuration -> Webhooks.
+
+  Если они настроены, будут выполнены все 20.
+
+
+########################
+# Delivery and payload #
+########################
+
+  Delivery (Доставка)
+
+  В консоли администрирования Webhook отображается результат и временная метка последней доставки каждого веб-хука,
+  а полезная нагрузка (payload) доступна через значок списка.
+  Результаты и полезная нагрузка более ранних доставок доступны в меню инструментов справа от каждого вебхука.
+
+[►] Записи ответов удаляются через 30 дней.
+
+[!] URL-адрес должен ответить в течение 10 секунд, иначе доставка будет помечена как неудачная.
+
+  Payload (полезная нагрузка)
+  
+  Для быстрой идентификации проекта отправляется HTTP-заголовок (header) X-SonarQube-Project
+  с ключом проекта в качестве значения (X-SonarQube-Project:<project_key>).
+
+  Полезная нагрузка представляет собой документ JSON, который включает в себя:
+    • Когда был проведен анализ: (см. analysedAt)
+    • Идентификация анализируемого проекта: (см. project)
+    • Каждый проверенный критерий Quality Gate и его статус: (см. qualityGate)
+    • Статус врат качества проекта: (см. qualityGate.status)
+    • Статус и идентификатор фоновой задачи: (см. status и taskId)
+    • Пользовательские свойства: см. (properties)
+
+[Пример:]
+---
+{
+    "serverUrl": "http://localhost:9000",
+    "taskId": "AVh21JS2JepAEhwQ-b3u",
+    "status": "SUCCESS",
+    "analysedAt": "2016-11-18T10:46:28+0100",
+    "revision": "c739069ec7105e01303e8b3065a81141aad9f129",
+    "project": {
+        "key": "myproject",
+        "name": "My Project",
+        "url": "https://mycompany.com/sonarqube/dashboard?id=myproject"
+    },
+    "properties": {
+    },
+    "qualityGate": {
+        "conditions": [
+            {
+                "errorThreshold": "1",
+                "metric": "new_security_rating",
+                "onLeakPeriod": true,
+                "operator": "GREATER_THAN",
+                "status": "OK",
+                "value": "1"
+            },
+            {
+                "errorThreshold": "1",
+                "metric": "new_reliability_rating",
+                "onLeakPeriod": true,
+                "operator": "GREATER_THAN",
+                "status": "OK",
+                "value": "1"
+            },
+            {
+                "errorThreshold": "1",
+                "metric": "new_maintainability_rating",
+                "onLeakPeriod": true,
+                "operator": "GREATER_THAN",
+                "status": "OK",
+                "value": "1"
+            },
+            {
+                "errorThreshold": "80",
+                "metric": "new_coverage",
+                "onLeakPeriod": true,
+                "operator": "LESS_THAN",
+                "status": "NO_VALUE"
+            }
+        ],
+        "name": "SonarQube way",
+        "status": "OK"
+    }
+}
+---
+
+###################
+# Защита вебхуков #
+###################
+
+  После того как вы настроили свой сервер на получение payloads (полезной нагрузки), вы должны быть уверены,
+  что получаемая вами полезная нагрузка инициирована SonarQube, а не злоумышленниками.
+  [?] Как этого добиться?
+  [!] Проверить хэш-подпись.
+   → хеш-подпись гарантирует, что запросы исходят от SonarQube.
+
+  ► Установка вашего секрета
+
+  Чтобы установить свой секрет в SonarQube:
+    1. В проекте или организации, где вы защищаете свои вебхуки, перейдите к настройкам вебхуков по адресу:
+    ► Project Settings -> Webhooks (Настройки проекта > Вебхуки)
+
+    2. Вы можете:
+      - либо нажать кнопку "Create" ("Создать"), чтобы создать новый вебхук,
+      - либо щелкнуть выпадающий список настроек существующего вебхука и нажать кнопку "Update" ("Обновить")
+
+    3. Введите случайную строку в текстовое поле Secret.
+      Она используется в качестве ключа для генерации шестнадцатеричного значения HMAC в заголовке X-Sonar-Webhook-HMAC-SHA256.
+
+    4. Нажмите кнопку "Update" ("Обновить")
+
+########################################
+# Проверка полезной нагрузки SonarQube #
+# (Validating SonarQube Payloads)      #
+########################################
+
+  После установки вашего секрета SonarQube использует его для создания хэш-подписи для каждой полезной нагрузки,
+  передаваемой с помощью HTTP-заголовка X-Sonar-Webhook-HMAC-SHA256.
+  Значение заголовка должно соответствовать подписи, которую вы ожидаете получить.
+  
+  SonarQube использует дайджест HMAC SHA256 в нижнем регистре для вычисления подписи тела запроса.
+  Вот пример Java-кода для вашего сервера:
+---
+private static boolean isValidSignature(YourHttpRequest request) {
+  String receivedSignature = request.getHeader("X-Sonar-Webhook-HMAC-SHA256");
+  // See Apache commons-codec
+  String expectedSignature = new HmacUtils(HmacAlgorithms.HMAC_SHA_256, "your_secret").hmacHex(request.getBody())
+  return Objects.equals(expectedSignature, receivedSignature);  
+}
+---
+
+
+#########################
+# Additional parameters #
+#########################
+(https://docs.sonarsource.com/sonarqube/9.9/project-administration/webhooks/#additional-parameters)
