@@ -22,8 +22,9 @@ SonarQube. Webhooks
 
   Вы можете настроить до 10 вебхуков на уровне проекта в Project Settings -> Webhooks.
 
-Дополнительный набор из 10 вебхуков можно настроить на глобальном уровне в разделе:
-  Administration -> Configuration -> Webhooks.
+  Дополнительный набор из 10 вебхуков можно настроить на глобальном уровне в разделе:
+  
+Administration -> Configuration -> Webhooks
 
   Если они настроены, будут выполнены все 20.
 
@@ -34,7 +35,7 @@ SonarQube. Webhooks
 
   Delivery (Доставка)
 
-  В консоли администрирования Webhook отображается результат и временная метка последней доставки каждого веб-хука,
+  В консоли администрирования Webhook отображается результат и временная метка последней доставки каждого вебхука,
   а полезная нагрузка (payload) доступна через значок списка.
   Результаты и полезная нагрузка более ранних доставок доступны в меню инструментов справа от каждого вебхука.
 
@@ -160,3 +161,22 @@ private static boolean isValidSignature(YourHttpRequest request) {
 # Additional parameters #
 #########################
 (https://docs.sonarsource.com/sonarqube/9.9/project-administration/webhooks/#additional-parameters)
+
+  Базовый механизм аутентификации поддерживается путем указания логина и пароля в URL вебхука,
+  например, так:
+  https://myLogin:myPassword@my_server/foo.
+
+  Если вы укажете дополнительные свойства вашего SonarScanner, используя шаблон sonar.analysis.*,
+  эти свойства будут автоматически добавлены в свойства секции полезной нагрузки.
+
+  Например, эти дополнительные параметры:
+---
+sonar-scanner -Dsonar.analysis.buildNumber=12345
+---
+  добавят это к полезной нагрузке:
+---
+"properties": {
+  "sonar.analysis.buildNumber": "12345"
+}
+---
+  

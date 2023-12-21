@@ -51,8 +51,7 @@ https://thetechdarts.com/sonarqube-integration-with-jenkins/
 node(label:'master') {
   try{  
     stage('Static Analysis') {
-      withSonarQubeEnv('SonarQube1') 
-      {
+      withSonarQubeEnv('SonarQube1') {
         sh 'mvn clean package sonar:sonar
    	    echo 'Static Analysis Completed' 
       }
@@ -92,6 +91,19 @@ Webhooks используются для уведомления внешних �
     2. Нажать кнопку "Create", чтобы создать веб-хук.
     3. Укажите имя и URL.
        (URL должен быть jenkinsservername/, а затем sonarqube-webhook
+
+---
+URL:
+Конечная точка сервера, которая получит полезную нагрузку вебхука,
+например: "http://my_server/foo".
+Если используется HTTP Basic authentication,
+рекомендуется использовать HTTPS во избежание атак типа MITM (man in the middle).
+Example: "https://myLogin:myPassword@my_server/foo"
+
+Secret:
+Если указано, секрет будет использоваться в качестве ключа для генерации шестнадцатеричного
+строчного (lowercase) значения алгоритма HMAC в заголовке 'X-Sonar-Webhook-HMAC-SHA256'.
+---
 
 Шаг 6: Build the Jenkins Pipeline project
 
