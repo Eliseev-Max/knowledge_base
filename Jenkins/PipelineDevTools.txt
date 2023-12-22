@@ -1,0 +1,89 @@
+Pipeline Development Tools
+
+Jenkins Pipeline включает встроенную документацию и генератор сниппетов,
+которые являются ключевыми ресурсами при разработке конвейеров.
+Они предоставляют подробную справку и информацию, адаптированную к текущей установленной версии Jenkins и сопутствующих плагинов.
+В этом разделе мы обсудим другие инструменты и ресурсы, которые могут помочь в разработке конвейеров Jenkins.
+
+Линтер конвейеров командной строки
+
+Jenkins может проверить, или "lint", декларативный конвейер из командной строки перед его запуском.
+Это можно сделать с помощью команды Jenkins CLI или HTTP POST-запроса с соответствующими параметрами.
+Мы рекомендуем использовать SSH-интерфейс для запуска линтера.
+Подробную информацию о том, как правильно настроить Jenkins для безопасного доступа к командной строке, см. в документации по Jenkins CLI.
+
+---< Linting via the CLI with SSH >---
+# ssh (Jenkins CLI)
+# JENKINS_PORT=[sshd port on controller]
+# JENKINS_HOST=[Jenkins controller hostname]
+ssh -p $JENKINS_PORT $JENKINS_HOST declarative-linter < Jenkinsfile
+---
+
+---< Linting via HTTP POST using curl >---
+# curl (REST API)
+# Assuming "anonymous read access" has been enabled on your Jenkins instance.
+# JENKINS_URL=[root URL of Jenkins controller]
+# JENKINS_CRUMB is needed if your Jenkins controller has CRSF protection enabled as it should
+JENKINS_CRUMB=`curl "$JENKINS_URL/crumbIssuer/api/xml?xpath=concat(//crumbRequestField,\":\",//crumb)"`
+curl -X POST -H $JENKINS_CRUMB -F "jenkinsfile=<Jenkinsfile" $JENKINS_URL/pipeline-model-converter/validate
+---
+
+
+<_Примеры_>
+Ниже приведены два примера работы Pipeline Linter в действии.
+В первом примере показан вывод линтера, когда ему передается некорректный Jenkinsfile, в котором отсутствует часть объявления агента.
+
+---
+pipeline {
+  agent
+  stages {
+    stage ('Initialize') {
+      steps {
+        echo 'Placeholder.'
+      }
+    }
+  }
+}
+
+#########################################
+# Linter output for invalid Jenkinsfile #
+#########################################
+
+# pass a Jenkinsfile that does not contain an "agent" section
+ssh -p 8675 localhost declarative-linter < ./Jenkinsfile
+Errors encountered validating Jenkinsfile:
+WorkflowScript: 2: Not a valid section definition: "agent". Some extra configuration is required. @ line 2, column 3.
+     agent
+     ^
+
+WorkflowScript: 1: Missing required section "agent" @ line 1, column 1.
+   pipeline &#125;
+   ^
+---
+
+# Во втором примере файл Jenkins был обновлен, чтобы включить отсутствующий агент any on.
+# Теперь линтер сообщает, что пайплайн действителен.
+
+---
+Jenkinsfile
+
+pipeline {
+  agent any
+  stages {
+    stage ('Initialize') {
+      steps {
+        echo 'Placeholder.'
+      }
+    }
+  }
+}
+#######################################
+# Linter output for valid Jenkinsfile #
+#######################################
+
+ssh -p 8675 localhost declarative-linter < ./Jenkinsfile
+Jenkinsfile successfully validated.
+---
+
+Blue Ocean Editor
+(https://www.jenkins.io/doc/book/pipeline/development/#blue-ocean-editor)
