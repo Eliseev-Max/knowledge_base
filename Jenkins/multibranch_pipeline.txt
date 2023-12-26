@@ -1,0 +1,142 @@
+(source: https://devopscube.com/jenkins-multibranch-pipeline-tutorial/)
+Multibranch Pipeline
+  - это концепция автоматического создания конвейеров Jenkins на основе веток Git.
+  Он может:
+    ► автоматически обнаруживать новые ветки в системе управления исходным кодом (Github);
+    ► автоматически создавать конвейер для этой ветки.
+    
+  Когда начинается сборка конвейера, Jenkins использует Jenkinsfile в этой ветке для этапов сборки. 
+
+Варианты SCM (Source Control):
+  • Github,
+  • Bitbucket,
+  • репозиторий Gitlab.
+
+
+[!] Существует возможность исключить выбранные ветви, которые не планируется запускать в автоматическом пайплайне;
+  Это можно сделать с помощью регулярных выражений Java.
+
+
+[►] Multibranch pipeline поддерживает обнаружение ветвей на основе PR (pull request):
+  = ветки автоматически обнаруживаются в конвейере, если кто-то совершает PR от ветки.
+
+[‼] Если вы включили эту настройку, сборки будут запускаться только при наличии PR.
+  Так что если вам нужен рабочий процесс сборки Jenkins, основанный на PR, это отличный вариант.
+
+  Вы можете добавить условную логику в Jenkinsfile, чтобы собирать задания на основе требований ветки.
+# ПРИМЕР:
+  → Мы хотим, чтобы ветка с функциями выполняла только:
+    • модульное тестирование  и
+    • sonar анализ,
+  мы можем задать условие для пропуска этапа развертывания (skip deployment stage)
+  с помощью условия "when", как показано ниже:
+---
+stage('Deploy for production') {
+  when {
+      branch 'production'
+  }
+  steps {
+   ----
+  }
+}
+---
+  
+  Поэтому всякий раз, когда разработчик поднимает PR из функциональной ветки (feature branch) в другую ветку,
+  конвейер будет выполнять этапы модульного тестирования и sonar анализа, минуя этап развертывания.
+
+  Кроме того, multibranch pipelines не ограничиваются непрерывной доставкой (CD) приложений.
+  Вы можете использовать их и для управления кодом инфраструктуры.
+
+  Один из таких примеров - конвейер непрерывной доставки (continuous delivery pipeline)
+  для исправления, сборки и обновления образов Docker или VM.
+
+#####################################
+# Как работает Multibranch Pipeline #
+#####################################
+
+  Прежде чем перейти к реализации, давайте рассмотрим пример Jenkinsfile,
+  который можно использовать в multibranch pipeline.
+
+[Условие:] Jenkinsfile должен находиться в репозитории SCM.
+
+  Учебный экземпляр Jenkinsfile для multibranch pipeline:
+---
+pipeline {
+
+    agent {
+        node {
+            label 'master'
+        }
+    }
+
+    options {
+        buildDiscarder logRotator( 
+                    daysToKeepStr: '16', 
+                    numToKeepStr: '10'
+            )
+    }
+
+    stages {
+        
+        stage('Cleanup Workspace') {
+            steps {
+                cleanWs()
+                sh """
+                echo "Cleaned Up Workspace For Project"
+                """
+            }
+        }
+
+        stage('Code Checkout') {
+            steps {
+                checkout([
+                    $class: 'GitSCM', 
+                    branches: [[name: '*/main']], 
+                    userRemoteConfigs: [[url: 'https://github.com/spring-projects/spring-petclinic.git']]
+                ])
+            }
+        }
+
+        stage(' Unit Testing') {
+            steps {
+                sh """
+                echo "Running Unit Tests"
+                """
+            }
+        }
+
+        stage('Code Analysis') {
+            steps {
+                sh """
+                echo "Running Code Analysis"
+                """
+            }
+        }
+
+        stage('Build Deploy Code') {
+            when {
+                branch 'develop'
+            }
+            steps {
+                sh """
+                echo "Building Artifact"
+                """
+
+                sh """
+                echo "Deploying Code"
+                """
+            }
+        }
+
+    }   
+}
+---
+
+# В этом Jenkinsfile есть стадия проверки и другие фиктивные стадии, которые передают сообщение echo.
+# Также вы можете клонировать и использовать это репо на Github, в котором есть этот Jenkinsfile:
+# https://github.com/devopscube/multibranch-pipeline-demo
+
+###############################################################
+# Create Multibranch Pipeline on Jenkins (Step by Step Guide) #
+###############################################################
+  См. на сайте.
