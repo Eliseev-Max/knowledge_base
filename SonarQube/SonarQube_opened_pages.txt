@@ -60,3 +60,9 @@ https://youtu.be/PgHIVt_S6PE
 
 6. How to install SonarQube using Docker Compose | Setup Sonar with Docker Compose & Integrate Jenkins:
 https://youtu.be/mNNSD_OdyEA
+
+7. Sonarqube Complete Tutorial 2023
+https://youtu.be/r2UVTDpIUj8
+
+8. How to run and setup Sonarqube DevOps Tools in Docker
+https://youtu.be/fIvOt8t70c8
