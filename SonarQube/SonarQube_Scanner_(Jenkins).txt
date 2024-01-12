@@ -1,0 +1,136 @@
+SonarQube Scanner for Jenkins
+(https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/jenkins-extension-sonarqube/#other-project-types)
+Analyzing other project types
+
+< Global configuration >
+  Этот шаг обязателен, если вы хотите запускать любой из анализов SonarQube с помощью SonarScanner CLI.
+  Вы можете определить столько экземпляров сканера, сколько пожелаете.
+  Затем для каждого задания Jenkins вы сможете выбрать, какой launcher использовать для запуска анализа SonarQube.
+
+1) Войдите в систему Jenkins в качестве администратора
+2) перейдите в Manage Jenkins > Global Tool Configuration.
+3) Прокрутите страницу вниз до раздела конфигурации SonarScanner и нажмите на Add SonarScanner.
+## Он основан на типичной автоустановке инструментов Jenkins.
+#>> Варианты действий:
+## * указать на уже установленную версию SonarScanner CLI (снимите флажок 'Install automatically');
+## * попросить Jenkins взять программу установки из удаленного места (установите флажок 'Install automatically').
+## Если вместо выпадающего списка со всеми доступными версиями SonarScanner CLI - пустое текстовое поле:
+## = Jenkins еще не загрузил необходимый файл центра обновления (по умолчанию период составляет 1 день).
+## Вы можете принудительно обновить список, нажав кнопку "Проверить сейчас" на вкладке "Управление плагинами" > "Дополнительно".
+
+< Job configuration >
+  1. Настройте проект и перейдите в раздел Build ("Сборка")
+  2. Добавьте шаг сборки SonarScanner CLI в вашу сборку.
+  3. Настройте свойства анализа SonarQube.
+	 >> Вы можете
+	    -> указать на существующий файл sonar-project.properties
+	    или
+	    -> задать свойства анализа непосредственно в поле Analysis properties.
+
+
+################################
+# < Using a Jenkins pipeline > #
+################################
+(https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/jenkins-extension-sonarqube/#jenkins-pipeline)
+
+  Блок withSonarQubeEnv(){...}
+    -> позволяет вам выбрать сервер SonarQube, с которым вы хотите взаимодействовать.
+	Данные подключения, которые вы настроили в глобальной конфигурации Jenkins, будут автоматически переданы сканеру.
+
+  При необходимости можно переопределить credentialsId,
+  если не хотите использовать тот, что задан в глобальной конфигурации (например, если вы определяете учетные данные на уровне папки).
+
+  Если вам нужно, чтобы только переменные окружения SonarQube были расширены в контексте сборки,
+  вы можете переопределить флаг envOnly:
+---
+withSonarQubeEnv('My SonarQube Server', envOnly: true) {
+  // Это расширяет переменные окружения:
+  // SONAR_CONFIG_NAME,
+  // SONAR_HOST_URL,
+  // SONAR_AUTH_TOKEN
+  // которые могут быть использованы любым скриптом.
+  println ${env.SONAR_HOST_URL} 
+}
+---
+
+Примеры использования в pipeline:
+# Условия:
+# 1. работаем на ведомых устройствах (slaves) Unix;
+# 2. настроили сервер с именем "My SonarQube Server"
+# 3. настроили необходимые инструменты
+
+#> SonarScanner CLI:
+---
+node {
+  stage('SCM') {
+    git 'https://github.com/foo/bar.git'
+  }
+  stage('SonarQube analysis') {
+    def scannerHome = tool 'SonarScanner 4.0';
+    withSonarQubeEnv('My SonarQube Server') { // Если вы настроили более одного подключения к глобальному серверу, вы можете указать его имя
+      sh "${scannerHome}/bin/sonar-scanner"
+	  //#sh "${scannerHome}/bin/sonar-scanner --version"  # пример проверки работоспособности
+    }
+  }
+}
+---
+
+#> SonarScanner for .NET:
+---
+node {
+  stage('SCM') {
+    git 'https://github.com/foo/bar.git'
+  }
+  stage('Build + SonarQube analysis') {
+    def sqScannerMsBuildHome = tool 'Scanner for .Net Framework'
+    withSonarQubeEnv('My SonarQube Server') {
+      bat "${sqScannerMsBuildHome}\\SonarQube.Scanner.MSBuild.exe begin /k:myKey"
+      bat 'MSBuild.exe /t:Rebuild'
+      bat "${sqScannerMsBuildHome}\\SonarQube.Scanner.MSBuild.exe end"
+    }
+  }
+}
+---
+
+
+< Pause pipeline until the quality gate is computed >
+(Приостановите конвейер, пока не будут вычислены ворота качества)
+(https://docs.sonarsource.com/sonarqube/latest/analyzing-source-code/scanners/jenkins-extension-sonarqube/#pause-pipeline)
+
+  Шаг (step) waitForQualityGate
+    - приостанавливает конвейер до завершения анализа SonarQube и возвращает статус Quality Gate.
+
+  !Необходимые условия:
+  1. Настройте веб-хук на сервере SonarQube по адресу <ваш экземпляр Jenkins>/sonarqube-webhook/.
+  2. Используйте шаг withSonarQubeEnv в вашем пайплайне (чтобы SonarQube taskId был правильно привязан к контексту пайплайна).
+
+# Пример Scripted pipeline:
+---
+node {
+  stage('SCM') {
+    git 'https://github.com/foo/bar.git'
+  }
+  stage('SonarQube analysis') {
+    withSonarQubeEnv('My SonarQube Server') {
+      sh 'mvn clean package sonar:sonar'
+    } // переданный SonarQube taskId автоматически привязывается к контексту конвейера
+  }
+}
+  
+// Нет необходимости занимать node
+stage("Quality Gate"){
+  timeout(time: 1, unit: 'HOURS') { // На всякий случай, если что-то пойдет не так, конвейер будет завершен по истечении таймаута
+    def qg = waitForQualityGate() // повторное использование идентификатора задачи, ранее собранного с помощью withSonarQubeEnv
+    if (qg.status != 'OK') {
+      error "Pipeline aborted due to quality gate failure: ${qg.status}"
+    }
+  }
+}
+---
+  
+
+--->>
+(more:
+  https://community.sonarsource.com/t/sonar-scanner-command-not-found-jenkins/35658
+  
+)
