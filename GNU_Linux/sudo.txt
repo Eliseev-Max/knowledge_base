@@ -1,0 +1,10 @@
+[ sources:
+    sudo(8) - Linux man page
+	https://linux.die.net/man/8/sudo
+	
+	OpenNET. sudo (8)
+	https://www.opennet.ru/man.shtml?topic=sudo&category=8&russian=0
+	
+	Запустить команду от другого пользователя в Unix/Linux
+	https://linux-notes.org/zapustit-komandu-ot-drugogo-pol-zovatelya-v-unix-linux/
+]
