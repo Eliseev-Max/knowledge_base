@@ -1,0 +1,29 @@
+[sources:]
+  Учимся конфигурировать и настраивать Jenkins:
+  https://habr.com/ru/companies/slurm/articles/741358/
+  
+  Как собирать проекты в Jenkins, если нужно много разных окружений
+  https://habr.com/ru/articles/481466/
+  
+  Docker can now run within Docker
+  https://www.docker.com/blog/docker-can-now-run-within-docker/
+
+  Pipeline
+  https://www.jenkins.io/doc/book/pipeline/
+
+  Jenkins Multibranch Pipeline Tutorial For Beginners
+  https://devopscube.com/jenkins-multibranch-pipeline-tutorial/
+
+  # How can I use `def` in Jenkins Pipeline?
+  # https://stackoverflow.com/questions/47216731/how-can-i-use-def-in-jenkins-pipeline
+
+  Using Jenkins agents
+  https://www.jenkins.io/doc/book/using/using-agents/
+
+  Using Docker with Pipeline
+  https://www.jenkins.io/doc/book/pipeline/docker/
+  
+  # run jenkins pipeline agent with sudo
+  (Docker Jenkins Plugin запускает новый контейнер с определенной опцией -u UID:GID)
+  https://stackoverflow.com/questions/44791060/run-jenkins-pipeline-agent-with-sudo
+---

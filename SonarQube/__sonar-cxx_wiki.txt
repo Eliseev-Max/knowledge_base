@@ -1,0 +1,2 @@
+Scan Source Code
+https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Scan-Source-Code
