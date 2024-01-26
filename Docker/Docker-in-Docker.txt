@@ -78,4 +78,14 @@ Docker-in-Docker-in-Docker-in…
   
     $ docker run -t -i -privileged jpetazzo/dind
 
-  
+  А в результирующем контейнере можно повторить процесс ad lib.
+
+  Кроме того, при выходе из вложенных контейнеров Docker произойдет следующее (обратите внимание на подсказки root):
+---
+root@975423921ac5:/# exit
+root@6b2ae8bf2f10:/# exit
+root@419a67dfdf27:/# exit
+root@bc9f450caf22:/# exit
+jpetazzo@tarrasque:~/Work/DOTCLOUD/dind$
+---
+(В этот момент вы должны включить в своих колонках "Dream Is Collapsing" Ханса Циммера, крутясь на spinning top :-)
