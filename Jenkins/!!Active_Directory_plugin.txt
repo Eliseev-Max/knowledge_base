@@ -1,0 +1,280 @@
+Active Directory Documentation
+(https://plugins.jenkins.io/active-directory/)
+
+С помощью этого плагина можно настроить Jenkins на аутентификацию имени пользователя и пароля через Active Directory.
+Внутренне этот плагин использует две разные реализации.
+Выбор реализации зависит от следующих факторов:
+  -> работает ли Jenkins под Windows/не Windows;
+  -> указан ли домен.
+
+1. > Jenkins работает на машине под управлением Windows;
+   > мы не указываем домен:
+
+    эта машина должна быть членом домена, в котором вы хотите аутентифицироваться.
+    Jenkins использует ADSI, чтобы выяснить все детали, поэтому дополнительная настройка не требуется.
+
+
+2. > Jenkins работает на машине, отличной от Windows
+   > (или мы указали один или несколько доменов):
+
+  нужно указать Jenkins имя домена (доменов) Active Directory, который нужно использовать.
+  Затем Jenkins использует записи DNS SRV и службу LDAP в Active Directory для аутентификации пользователей.
+
+  Jenkins распознает все группы в Active Directory, к которым принадлежит пользователь, -> можно использовать их для принятия решений об авторизации
+  (например, мы можем выбрать матричную безопасность в качестве стратегии авторизации и, возможно, разрешить "Администраторам домена" администрировать Jenkins).
+
+
+[Установка]
+
+  - Install Certs in Store (Установите сертификаты в Store)
+  - Update config.xml (Обновление config.xml)
+  - Update jenkins.xml (Обновление jenkins.xml)
+
+
+[ Active Directory Health Status ]
+
+  Начиная с версии 2.5 плагин AD добавляет ManagementLink для отчета о состоянии здоровья домена и контроллеров домена.
+  Чтобы правильно использовать эту функцию, 
+    -> вы должны быть авторизованы в экземпляре
+    -> + кэш должен быть отключен.
+
+  Тогда вы получите:
+---
+-> The Domain health
+  --> DNS resolution (Разрешение DNS)
+  --> Global Catalog
+  --> Ldap Catalog
+
+-> The Domain Controller Health
+  --> If the user can login into the DC (Может ли пользователь войти в DC)
+  --> The Connection time
+  --> The total time in the lookup process (Общее время процесса поиска)
+---
+####(см. рисунок)
+
+
+[ Fall-back user (Резервный пользователь) ]
+
+  * Начиная с версии 2.5 плагина AD, вы можете определить пользователя для резервного копирования в случае проблем со связью между Jenkins и сервером AD.
+
+  * Таким образом, этот пользователь-администратор может быть использован для продолжения администрирования Jenkins в случае проблем со связью,
+      когда обычно вы переходили по ссылке 'Отключить безопасность' (https://www.jenkins.io/doc/book/security/securing-jenkins/).
+
+  * Пароль этого пользователя автоматически синхронизируется с внутренней базой данных Jenkins с помощью этой функции.
+    Чтобы настроить эту новую функцию, необходимо включить
+        [Use Jenkins Internal Database]
+      в конфигурации AD в разделе:
+
+#>Manage Jenkins → Configure Global Security
+
+      и указать ОДНОГО пользователя по его имени пользователя.
+
+  [!] Эта функция НЕ СИНХРОНИЗИРУЕТ пользователей на сервере Active Directory и во внутренней базе данных Jenkins.
+  [!] Она позволяет иметь ТОЛЬКО ОДНОГО резервного пользователя, который должен быть ПРЕДВАРИТЕЛЬНО СОЗДАН на стороне Jenkins.
+  
+  Чтобы создать такого пользователя, вы можете:
+    1) перейти в
+
+#> Manage Jenkins -> Configure Global Security -> Security Realm -> Jenkins' own user database [enable Allow users to sign up].
+
+  ## Это позволит вам создать нового пользователя с паролем, который вы хотите.
+  ## После этого вы можете снова изменить использование Active Directory в качестве Security Realm и использовать резервного пользователя.
+
+  2) альтернативный способ: выполнение приведенного ниже кода Groovy в разделе:
+
+#> Manage Jenkins -> Script console.
+  
+  Этот код создаст пользователя admin во внутренней базе данных Jenkins с паролем `mypassword`:
+  [!]  Не забудьте настроить этого пользователя с именем пользователя/паролем, которые вы хотите.
+
+---<Groovy script>---
+import hudson.security.HudsonPrivateSecurityRealm;
+
+HudsonPrivateSecurityRealm hudsonPrivateSecurityRealm = new HudsonPrivateSecurityRealm(true, true, null);
+hudsonPrivateSecurityRealm.createAccount("admin", "mypassword");
+---
+
+[ВАЖНО!]
+  Этот резервный пользователь будет работать ТОЛЬКО в случае NamingException, который включает в себя CommunicationException.
+  Это означает, что не всегда будет происходить откат к резервному пользователю.
+  Он будет делать это только в случае проблем при обращении к серверу AD.
+####(см. рисунок)
+
+
+[ Поддержка шифрования ]
+
+  Начиная с версии 2.26 (SECURITY-1389) подключение к серверу Active Directory может быть настроено через пользовательский интерфейс на использование TLS для связи
+  (опция "require TLS").
+####(см. рисунок)
+  
+  До этого изменения оно настраивалось только с помощью теперь уже не существующего системного свойства:
+      hudson.plugins.active_directory.ActiveDirectorySecurityRealm.forceLdaps
+  и оно не использовалось для настроек на основе ADSI.
+  Для новых установок это свойство по умолчанию будет включено.
+
+  Если вы ранее использовали вышеуказанное свойство, после сохранения "Глобальной безопасности" ($JENKINS_URL/configureSecurity) вы можете удалить это системное свойство.
+
+Примечание: При обновлении с предыдущих версий без установленного системного свойства соединения все еще могут осуществляться с помощью обычного текста (если используется Enable StartTls и команда StartTLS не работает, или плагин использует ADSI), настоятельно рекомендуется включить эту опцию.
+
+  Настройка доверенных сертификатов
+
+    При использовании TLS для новых установок по умолчанию будет использоваться хранилище доверия JVM (JVM trust store).
+
+
+[ ADSI mode flags (expert use only) ]
+[ Флаги режима ADSI (только для экспертного использования) ]
+
+  При использовании режима ADSI плагин передает интерфейсу ADS различные параметры флага.
+  Различные опции передаются в зависимости от флага "require TLS", при этом режим ADSI обрабатывается несколько иначе.
+
+  Существуют различные режимы работы, которые можно установить для тонкой настройки поведения,
+  и различные флаги необходимы для
+    - поиска пользователя (при использовании учетной записи локального компьютера)
+	- и для проверки пароля пользователя.
+
+  Плагин попытается установить их для версий, использующих шифрование,
+  но в зависимости от настроек AD-сервера это может НЕ ПОДДЕРЖИВАТЬСЯ,
+  и альтернатива использования шифрования на основе Kerberos может быть лучше.
+
+  В этом документе: (https://learn.microsoft.com/en-gb/windows/win32/api/iads/ne-iads-ads_authentication_enum) 
+  microsoft объясняются текущие флаги, и если значения по умолчанию не работают, их можно изменить, установив системные свойства:
+    - hudson.plugins.active_directory.ActiveDirectoryAuthenticationProvider.ADSI_FLAGS_OVERRIDE
+	  и
+    - hudson.plugins.active_directory.ActiveDirectoryAuthenticationProvider.ADSI_PASSWORDLESS_FLAGS_OVERRIDE
+	на целочисленные значения, соответствующие флагам, которые вы хотите включить.
+	
+  Значения перечислены в этом документе, и нужно быть предельно внимательным, чтобы выбрать набор значений, не нарушающий безопасность экземпляра Jenkins.
+
+hudson.plugins.active_directory.ActiveDirectoryAuthenticationProvider.ADSI_FLAGS_OVERRIDE
+  -> используется для проверки комбинации имени пользователя/пароля пользователей, а
+
+hudson.plugins.active_directory.ActiveDirectoryAuthenticationProvider.ADSI_PASSWORDLESS_FLAGS_OVERRIDE
+  -> используется при поиске пользователя или группы с помощью учетной записи компьютера или службы служб Jenkins.
+     (with the Jenkins services' computer or service account)
+
+
+[SECURITY-251 Active Directory Plugin did not verify certificate of AD server]
+[SECURITY-251 Плагин Active Directory Plugin не проверил сертификат сервера AD]
+
+  До версии 2.3 плагин Active Directory Plugin не проверял сертификаты сервера Active Directory,
+  -> тем самым позволяя осуществлять атаки типа MITM ("человек посередине").
+
+  Начиная с версии 2.3 плагин позволяет выбирать между:
+  * безопасной опцией
+    и
+  * дальнейшим доверием ко всем сертификатам.
+
+  В случае если на экземпляре ранее была настроена Active Directory, после обновления плагина появится следующий административный монитор:
+####(см. рисунок)
+
+
+  Чтобы избежать повторного появления этого сообщения в случае, если вы хотите продолжать доверять всем сертификатам,
+  единственное, что вам нужно сделать, это
+    1) перейти в Manage Jenkins -> Configure Global Security
+	2) нажать кнопку save.
+  
+  После этого административный монитор больше не должен появляться
+  (так как вы подтверждаете, что все в порядке, если вы продолжаете работать в режиме TrustAllCertificates).
+
+[!] Однако в целях безопасности рекомендуется перейти к защищенному варианту.
+    Это можно сделать в конфигурации Active Directory под кнопкой Advanced, выбрав конфигурацию TLS: JDK TrustStore.
+	Когда эта опция включена, обратите внимание, что если ваш сервер Active Directory использует СЕРТИФИКАТ С САМОПОДПИСЬЮ, что обычно и происходит, вы должны:
+####(см. рисунок)
+
+  1. Экспортировать сертификат с сервера AD;
+  2. Создать пользовательское хранилище ключей из хранилища ключей JVM.
+####
+---
+[For Unix:]
+CUSTOM_KEYSTORE=$JENKINS_HOME/.keystore/
+mkdir -p $CUSTOM_KEYSTORE
+cp $JAVA_HOME/jre/lib/security/cacerts $CUSTOM_KEYSTORE
+---
+---
+[For Windows:]
+CUSTOM_KEYSTORE=%JENKINS_HOME%\.keystore\
+md %CUSTOM_KEYSTORE%
+copy %JAVA_HOME%\jre\lib\security\cacerts %CUSTOM_KEYSTORE%
+---
+####
+
+  3. Импортировать наш сертификат
+####
+---
+[For Unix:]
+
+$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+  -import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
+---
+---
+[For Windows:]
+
+%JAVA_HOME%\bin\keytool -keystore %JENKINS_HOME%\.keystore\cacerts -import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
+---
+#### 
+
+  4. Добавить сертификат в параметры запуска Jenkins
+# В зависимости от вашей ОС необходимо добавить следующие свойства JAVA:
+####
+---
+[For Unix:]
+
+-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts \
+-Djavax.net.ssl.trustStorePassword=changeit
+---
+---
+[For Windows:]
+
+-Djavax.net.ssl.trustStore=%JENKINS_HOME%\.keystore\cacerts
+-Djavax.net.ssl.trustStorePassword=changeit
+####
+
+  5. Следуйте разделу Защита доступа к серверам Active Directory для включения LDAPS.
+
+
+  < Восстановление после катастрофы: >
+  
+    Если после всего этого вы больше не можете войти в систему, вам следует включить логирование на плагине, чтобы понять, почему оно не работает.
+	В случае если после включения защищенной опции вы больше не можете войти в инстанс, вам может понадобиться быстро вернуться к предыдущему состоянию, особенно в production environments.
+	
+	Это можно легко сделать,
+	  1) перейдя в $JENKINS_HOME/config.xml
+	  2) в разделе <securityRealm class="hudson.plugins.active_directory.ActiveDirectorySecurityRealm" верните tlsConfiguration к предыдущему состоянию.
+	Необходим перезапуск.
+#> <tlsConfiguration>TRUST_ALL_CERTIFICATES</tlsConfiguration>
+
+
+
+[ ВАЖНО! Active Directory 2.0 - улучшенная поддержка нескольких доменов ]
+
+  В последней версии плагина Active Directory улучшена поддержка нескольких доменов.
+
+[!]  Пользователи, работающие с плагином Active Directory 1.49, могут быть заблокированы в случае использования нескольких доменов с несколькими контроллерами доменов
+    = это побочный эффект исправления возможности блокировки учетной записи при неиспользовании контроллеров доменов по простой ошибке в пароле.
+	Проблемный PR находится здесь: https://github.com/jenkinsci/active-directory-plugin/pull/41
+
+  В случае, если это так, и вы заблокированы, вам просто нужно:
+
+  1) перейти в $JENKINS_HOME/config.xml   и
+  2) изменить раздел <servers>, удалив те, которые не являются членами соответствующего домена.
+
+---
+<securityRealm class="hudson.plugins.active_directory.ActiveDirectorySecurityRealm" plugin="active-directory@2.0">
+    <domains>
+      <hudson.plugins.active__directory.ActiveDirectoryDomain>
+        <name>support-cloudbees-2.com</name>
+        <servers>192.168.1.32:3268,192.168.1.33:3268</servers>
+      </hudson.plugins.active__directory.ActiveDirectoryDomain>
+      <hudson.plugins.active__directory.ActiveDirectoryDomain>
+        <name>support-cloudbees.com</name>
+        <servers>192.168.1.16:3268,192.168.1.17:3268</servers>
+      </hudson.plugins.active__directory.ActiveDirectoryDomain>
+    </domains>
+    <bindName>bindUser</bindName>
+    <bindPassword>dk5ISc2eOWTrub9YFUkfFzSsUvy061yV4/Udna+0Wa0=</bindPassword>
+    <groupLookupStrategy>RECURSIVE</groupLookupStrategy>
+    <removeIrrelevantGroups>false</removeIrrelevantGroups>
+  </securityRealm>
+---
+
+  после этого необходим перезапуск инстанса.

@@ -1,0 +1,4 @@
+https://troy.jdmz.net/rsync/index.html
+https://calomel.org/rsync_tips.html
+
+(Add MAN-pages)
