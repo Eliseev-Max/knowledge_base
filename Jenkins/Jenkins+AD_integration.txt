@@ -1,0 +1,50 @@
+##############################################
+# Jenkins. Integration with Active Directory #
+##############################################
+
+{sources:
+  1. Jenkins Integration With Active Directory - Jenkins Ldap Integration: https://youtu.be/JG7T4F3w7qY
+  2. Jenkins- Active Directory Authentication: https://youtu.be/dcUXBnsKDcc
+  3. Install and Configure LDAP Server and Integration with Jenkins Server: https://youtu.be/jXrHx7S0vh4
+}
+
+Заметки:
+1. По мнению автора [1]:
+  Для установки Jenkins нам потребуется установленная Java (JDK).
+  Для Jenkins вполне подойдёт OpenJDK, однако для некоторых плагинов (Maven и некоторые другие движки) лучше подойдёт Java JDK Development Kit с официального сайта:
+  (https://www.oracle.com/cis/java/technologies/downloads/)
+  Выбрал версию: Java SE 8u171/8u172: JDK
+  (Java SE Development Kit) 
+  Далее устанавливается переменная окружения $JAVA_HOME:
+---
+$ update-alternatives --display java
+>
+  java - status is auto
+  link currently points to /usr/java/jdk1.8.0_171-amd64/jre/bin/java
+  ...
+  ...
+  Current 'best' version is /usr/java/jdk1.8.0_171-amd64/jre/bin/java
+
+$ vi .bash_profile
+#### .bash_profile ####
+export JAVA_HOME=/usr/java/jdk1.8.0_171-amd64/jre
+PATH=$PATH:$HOME/bin:$JAVA_HOME/bin
+########
+# полагаю, что .bash_profile в Fedora/Red_Hat-based systems ~ .bashrc в Debian-based Linux OS
+
+[https://sravancloudarch.blogspot.com] -> Installation and Setup Jenkins on Centos 7.x
+
+
+---
+[!] В результате некорректной настройки интеграции и применения изменений в Jenkins стало невозможно войти:
+  - ни под доменной учётной записью
+  - ни под учётной записью локального пользователя Jenkins
+https://stackoverflow.com/questions/65787455/jenkins-active-directory-broke-cannot-login-no-valid-crumb
+
+[Что нужно сделать:]
+В конфигурационном файле /var/lib/jenkins/config.xml (в нашем случае:"/var/jenkins_home/config.xml"),
+ УСТАНОВИТЬ вместо значения:
+<useSecurity>true</useSecurity>
+значение:
+<useSecurity>false</useSecurity>
+и перезапустить сервис jenkins.

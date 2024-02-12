@@ -1,0 +1,9 @@
+How to get the list of installed Jenkins plugins
+{https://stackoverflow.com/questions/9815273/how-to-get-a-list-of-installed-jenkins-plugins-with-name-and-version-pair}
+
+Dashboard -> Settings (Настроить Jenkins) -> Jenkins Script Console
+
+Jenkins.instance.pluginManager.plugins.each{
+  plugin -> 
+    println ("${plugin.getDisplayName()} (${plugin.getShortName()}): ${plugin.getVersion()}")
+}
