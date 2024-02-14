@@ -1,0 +1,17 @@
+Docker notes (oficial man-pages)
+1. Overview of docker compose CLI: https://docs.docker.com/compose/reference/
+2. docker compose: https://docs.docker.com/engine/reference/commandline/compose/
+3. docker compose restart: https://docs.docker.com/engine/reference/commandline/compose_restart/
+4. docker compose images: https://docs.docker.com/engine/reference/commandline/compose_images/
+5. docker compose build: https://docs.docker.com/engine/reference/commandline/compose_build/
+6. docker compose stop: https://docs.docker.com/engine/reference/commandline/compose_stop/
+7. docker compose up : https://docs.docker.com/engine/reference/commandline/compose_up/
+8. Compose Build Specification: https://docs.docker.com/compose/compose-file/build/
+9. Use Docker Compose: https://docs.docker.com/get-started/08_using_compose/
+10. Networks top-level elements : https://docs.docker.com/compose/compose-file/06-networks/
+
+---
+restart_policy: https://github.com/compose-spec/compose-spec/blob/master/deploy.md#restart_policy
+restart: https://github.com/compose-spec/compose-spec/blob/master/spec.md#restart
+
+Docker Compose: https://ru.hexlet.io/courses/docker-basics/lessons/docker-compose/theory_unit
