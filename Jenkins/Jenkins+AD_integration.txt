@@ -11,7 +11,8 @@
 Заметки:
 1. По мнению автора [1]:
   Для установки Jenkins нам потребуется установленная Java (JDK).
-  Для Jenkins вполне подойдёт OpenJDK, однако для некоторых плагинов (Maven и некоторые другие движки) лучше подойдёт Java JDK Development Kit с официального сайта:
+  Для Jenkins вполне подойдёт OpenJDK,
+  однако для некоторых плагинов (Maven и некоторые другие движки) лучше подойдёт Java JDK Development Kit с официального сайта:
   (https://www.oracle.com/cis/java/technologies/downloads/)
   Выбрал версию: Java SE 8u171/8u172: JDK
   (Java SE Development Kit) 
@@ -42,9 +43,15 @@ PATH=$PATH:$HOME/bin:$JAVA_HOME/bin
 https://stackoverflow.com/questions/65787455/jenkins-active-directory-broke-cannot-login-no-valid-crumb
 
 [Что нужно сделать:]
-В конфигурационном файле /var/lib/jenkins/config.xml (в нашем случае:"/var/jenkins_home/config.xml"),
+В конфигурационном файле /var/lib/jenkins/config.xml
+(в нашем случае:"/var/jenkins_home/config.xml"),
+
  УСТАНОВИТЬ вместо значения:
 <useSecurity>true</useSecurity>
 значение:
 <useSecurity>false</useSecurity>
 и перезапустить сервис jenkins.
+
+####
+Logging ID=21ff064e-6ac4-4bb2-bd13-17fa30ec3cd4
+####
