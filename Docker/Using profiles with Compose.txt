@@ -1,0 +1,170 @@
+Using profiles with Compose
+(https://docs.docker.com/compose/profiles/#using-profiles-with-compose)
+
+Профили помогают настроить модель приложения Compose для различных применений и сред путем выборочного запуска служб.
+Это достигается путем назначения каждому сервису нулевого или нескольких профилей.
+Если служба не назначена (unassigned), она запускается всегда,
+  а если назначена (assigned), то только при активации профиля.
+
+Это позволяет определить в одном файле compose.yml дополнительные сервисы, которые должны запускаться только в определенных сценариях, например:
+  > для задач отладки (debugging)
+  > для задач разработки (development).
+
+################################
+# Назначение профилей сервисам #
+################################
+
+  Сервисы ассоциируются с профилями через атрибут profiles,
+  который принимает массив имен профилей:
+#(https://docs.docker.com/compose/compose-file/05-services/#profiles)
+## profiles задает список именованных профилей, под которыми должна быть включена служба.
+## Если профиль не назначен, служба запускается всегда, а если назначен, то только при активированном профиле.
+## При наличии профилей используется regex-формат: [a-zA-Z0-9][a-zA-Z0-9_.-]+
+
+---< Example >---
+services:
+  frontend:
+    image: frontend
+    profiles: ["frontend"]
+
+  phpmyadmin:
+    image: phpmyadmin
+    depends_on:
+      - db
+    profiles:
+      - debug
+
+  backend:
+    image: backend
+
+  db:
+    image: mysql
+---
+# Здесь сервисы frontend и phpmyadmin назначены профилям frontend и debug соответственно
+# и, как таковые, запускаются только при включении соответствующих профилей.
+
+# Сервисы без атрибута профиля всегда включены.
+!! В этом случае запуск docker compose up запустит только backend и db.
+
+# Допустимые имена профилей соответствуют regex-формату
+
+################################
+# Запуск определенных профилей #
+################################
+
+  Чтобы запустить определенный профиль
+    * введите параметр командной строки --profile
+      или
+    * используйте переменную окружения COMPOSE_PROFILES
+---
+$ docker compose --profile debug up
+## == ##
+$ COMPOSE_PROFILES=debug docker compose up
+---
+
+  Обе приведенные выше команды запустят приложение с включенным профилем debug.
+  В примере с файлом compose.yml, приведенном выше, это запускает сервисы:
+    - backend,
+    - db
+    - phpmyadmin.
+
+##############################
+# Запуск нескольких профилей #
+##############################
+
+  Несколько профилей можно указать, передав:
+    -> несколько флагов --profile
+      или
+    -> список, разделенный запятыми, для переменной окружения COMPOSE_PROFILES
+---
+$ docker compose --profile frontend --profile debug up
+## == ##
+$ COMPOSE_PROFILES=frontend,debug docker compose up
+---
+
+Автоматический запуск профилей и разрешение зависимостей
+
+Когда служба с назначенными профилями явно нацелена в командной строке, ее профили запускаются автоматически, так что вам не нужно запускать их вручную. Это можно использовать для одноразовых служб и инструментов отладки. В качестве примера рассмотрим следующую конфигурацию:
+
+---
+services:
+  backend:
+    image: backend
+
+  db:
+    image: mysql
+
+  db-migrations:
+    image: backend
+    command: myapp migrate
+    depends_on:
+      - db
+    profiles:
+      - tools
+---
+
+# Only start backend and db
+$ docker compose up -d
+
+# This runs db-migrations (and,if necessary, start db)
+# by implicitly enabling the profiles `tools`
+$ docker compose run db-migrations
+
+[!] Но имейте в виду, что docker compose автоматически запускает профили только тех сервисов,
+  которые указаны в командной строке, но не всех зависимых.
+
+  Это означает, что все другие сервисы, от которых зависит целевой сервис, должны либо:
+    - Использовать общий профиль
+    - Всегда запускаться, пропуская профили или запуская соответствующий профиль явно
+
+---
+services:
+  web:
+    image: web
+
+  mock-backend:
+    image: backend
+    profiles: ["dev"]
+    depends_on:
+      - db
+
+  db:
+    image: mysql
+    profiles: ["dev"]
+
+  phpmyadmin:
+    image: phpmyadmin
+    profiles: ["debug"]
+    depends_on:
+      - db
+---
+
+# Команда запустит только сервис "web":
+  $ docker compose up -d
+
+# Запустит mock-backend (и, если понадобится, db)
+# неявно включив профили `dev`
+  $ docker compose up -d mock-backend
+
+# Выполнить не удастся, поскольку профили "dev" отключены
+  $ docker compose up phpmyadmin
+
+  Хотя таргетинг phpmyadmin автоматически запускает профили debug,
+  он не запускает автоматически профили, необходимые для db, которым является dev.
+
+  Чтобы исправить это, вам нужно
+  -> добавить профиль `debug` в службу db:
+---
+db:
+  image: mysql
+  profiles: ["debug", "dev"]
+---
+  или
+
+  -> запустить профиль dev явно:
+---
+# Profiles "debug" is started automatically by targeting phpmyadmin
+  $ docker compose --profile dev up phpmyadmin
+## == ##
+  $ COMPOSE_PROFILES=dev docker compose up phpmyadmin
+---
