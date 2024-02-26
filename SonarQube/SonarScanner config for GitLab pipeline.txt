@@ -1,0 +1,49 @@
+sonarqube-sast:
+ stage: test
+ image:
+   name: sonarsource/sonar-scanner-cli:latest
+   entrypoint: [""]
+ script:
+   - cd frontend
+   - >
+       sonar-scanner -Dsonar.qualitygate.wait=true
+       -Dsonar.projectName=17_MAXELISEEV_FRONTEND
+       -Dsonar.projectKey=${SONAR_PROJECT_KEY}
+       -Dsonar.sources=.
+       -Dsonar.host.url=${SONARQUBE_URL}
+       -Dsonar.login=${SONAR_LOGIN}
+ dependencies:
+   - build-frontend
+
+
+####
+Такой результат был сгенерирован после выбора:
+  <What option best describes your build?>
+:> Other (for JS, TS, Go, Python...)
+
+  <What is your OS?>
+:> Linux
+
+---
+sonar-scanner \
+  -Dsonar.projectKey=17_MAXELISEEV_REPORT \
+  -Dsonar.sources=. \
+  -Dsonar.host.url=https://sonarqube.praktikum-services.ru \
+  -Dsonar.login=217045276f79c68a76800dea3ae3e018b94174b5
+---
+
+sonarqube-backend-report-sast:
+  stage: test
+  image:
+    name: sonarsource/sonar-scanner-cli:latest
+    entrypoint: [""]
+  script:
+    - cd backend-report
+    - >
+        sonar-scanner -Dsonar.qualitygate.wait=true
+        -Dsonar.projectKey=17_MAXELISEEV_REPORT \
+        -Dsonar.sources=. \
+        -Dsonar.host.url=${SONARQUBE_URL}
+        -Dsonar.login=${SONAR_LOGIN}
+  dependencies:
+    - build-backend-report
