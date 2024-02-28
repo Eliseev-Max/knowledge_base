@@ -55,3 +55,75 @@ https://stackoverflow.com/questions/65787455/jenkins-active-directory-broke-cann
 ####
 Logging ID=21ff064e-6ac4-4bb2-bd13-17fa30ec3cd4
 ####
+
+###################################################
+# Добавление сертификата доверия Active Directory #
+###################################################
+
+# Имя файла сертификата:
+certnew.cer
+
+# Копируем файл сертификата в docker контейнер Jenkins
+# ($ docker cp <container-ID>:src_path dest_path)
+---
+docker cp /home/devops/certnew.cer e4a8f5549c5c:/var/jenkins_home/certnew.cer
+---
+
+# Добавляем сертификат в хранилище сертификатов Java при помощи встроенной (в JDK) утилиты keytool
+---
+keytool -importcert \
+	 -file certnew.cer \
+	 -alias prosoftad \
+	 -cacerts \
+	 -storepass changeit \
+	 -noprompt
+---
+## Таким способом не сработало
+
+
+
+[Step 1. Создаём хранилище сертификатов]
+---
+CUSTOM_KEYSTORE=$JENKINS_HOME/.keystore/
+mkdir -p $CUSTOM_KEYSTORE
+#cp $JAVA_HOME/jre/lib/security/cacerts $CUSTOM_KEYSTORE
+cp $JAVA_HOME/lib/security/cacerts $CUSTOM_KEYSTORE
+---
+
+[Step 2. Импортируем наш сертификат]
+---
+	$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+	-import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
+---
+---
+$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+	-import -alias Jenkins_AD -file certnew.cer
+---
+
+[Step 3. Добавить сертификат в параметры запуска Jenkins]
+---
+-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts \
+-Djavax.net.ssl.trustStorePassword=changeit
+---
+
+[!] По сути Step 2, Step 3 - это ранее описанный (первый) способ
+
+Эти параметры будем прокидывать с помощью специальной переменной окружения JAVA_OPTS
+---
+  environment:
+    JAVA_OPTS: "-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+---
+
+ISSUE:
+
+--->
+# Проблема возникает, когда хост LDAP передает сертификат, не содержащий правильного имени хоста в SAN (Subject Alternative Name).
+# Java проверяет имя хоста в сертификате вместе с хостом во время рукопожатия SSL. При этом отображается следующее сообщение об ошибке:
+
+Выполните следующие действия, чтобы устранить эту проблему:
+  1. Убедитесь, что вы извлекли правильный сертификат контроллера домена, который вы пытаетесь привязать с помощью MMC, из самого контроллера домена.
+  2. При привязке к нескольким контроллерам домена рекомендуется использовать сертификат главного корневого контроллера домена, который должен охватывать все существующие контроллеры домена для привязки.
+  3. Загрузите новый сертификат LDAPS в существующее хранилище сертификатов. Или создайте новый, если забыли пароль. (Применимо только для XDM9 и более ранних версий).
+  4. Перепривязка.
+(https://support.citrix.com/article/CTX201087/error-javaxnamingcommunicationexception-simple-bind-failed-while-binding-ldaps-on-xenmobile)
+<---
