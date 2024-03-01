@@ -1,0 +1,97 @@
+The SSL Protocol
+(Version 3.0)
+
+{source: https://datatracker.ietf.org/doc/html/draft-ietf-tls-ssl-version3-00}
+
+[Original]
+
+
+The primary goal of the SSL Protocol is to provide privacy and reliability between two communicating applications.
+The protocol is composed of two layers.
+At the lowest level, layered on top of some reliable transport protocol (e.g., TCP[TCP]), is the SSL Record Protocol.
+The SSL Record Protocol is used for encapsulation of various higher level protocols.
+One such encapsulated protocol, the SSL Handshake Protocol, allows the server and client to authenticate each other and to negotiate an encryption algorithm and cryptographic keys before the application protocol transmits or receives its first byte of data.
+One advantage of SSL is that it is application protocol independent.
+A higher level protocol can layer on top of the SSL Protocol transparently.
+The SSL protocol provides connection security that has three basic properties:
+  - The connection is private.  Encryption is used after an initial handshake to define a secret key.
+    Symmetric cryptography is used for data encryption (e.g., DES[DES], RC4[RC4], etc.)
+  - The peer's identity can be authenticated using asymmetric, or public key, cryptography (e.g., RSA[RSA], DSS[DSS], etc.).
+  - The connection is reliable.  Message transport includes a message integrity check using a keyed MAC.
+     Secure hash functions (e.g., SHA, MD5, etc.) are used for MAC computations.
+
+2. Goals
+
+The goals of SSL Protocol v3.0, in order of their priority, are:
+  1. Cryptographic security SSL should be used to establish a secure connection between two parties.
+  2. Interoperability Independent programmers should be able to develop applications utilizing SSL 3.0 that will then be able to successfully exchange cryptographic parameters without knowledge of one another's code.
+
+Note: It is not the case that all instances of SSL (even in the same application domain) will be able to successfully connect.
+For instance, if the server supports a particular hardware token, and the client does not have access to such a token, then the connection will not succeed.
+
+  3. Extensibility  SSL seeks to provide a framework into which new public key and bulk encryption methods can be incorporated as necessary.
+  This will also accomplish two sub-goals: to prevent the need to create a new protocol (and risking the introduction of possible new weaknesses) and to avoid the need to implement an entire new security library.
+
+  4. Relative efficiency Cryptographic operations tend to be highly CPU intensive, particularly public key operations.
+For this reason, the SSL protocol has incorporated an optional session caching scheme to reduce the number of connections that need to be established from scratch.
+Additionally, care has been taken to reduce network activity.
+
+###***###
+
+[Translation]
+
+Основной целью протокола SSL является обеспечение конфиденциальности и надежности между двумя взаимодействующими приложениями.
+Протокол состоит из двух уровней.
+    На самом нижнем уровне, поверх надежного транспортного протокола (например, TCP[TCP]), находится протокол SSL Record Protocol.
+     Протокол SSL Record Protocol используется для инкапсуляции различных протоколов более высокого уровня.
+
+    Один из таких инкапсулированных протоколов, SSL Handshake Protocol,
+	позволяет серверу и клиенту:
+	  * аутентифицировать друг друга
+	   <и>
+	  * согласовать алгоритм шифрования и криптографические ключи
+	ДО ТОГО, как ПРИКЛАДНОЙ ПРОТОКОЛ передаст или получит первый байт данных.
+
+[!] Одно из преимуществ SSL заключается в том, что он не зависит от прикладного протокола.
+    Протокол более высокого уровня может прозрачно накладываться поверх протокола SSL.
+
+Протокол SSL обеспечивает безопасность соединения, которое обладает тремя основными свойствами:
+  1) Соединение является приватным (private).
+     Шифрование используется после начального рукопожатия для определения секретного ключа.
+     Для шифрования данных используется СИММЕТРИЧНАЯ криптография
+	 (например, DES[ДЭС], RC4[РЦ4] и т. д.).
+
+  2) Идентификация партнера может быть подтверждена с помощью асимметричной криптографии, или криптографии с открытым ключом (например, RSA [RSA], DSS [DSS] и т. д.).
+
+  3) Соединение надежно.
+    Передача сообщений включает проверку целостности сообщения с помощью MAC с ключом.
+    Для вычисления MAC используются безопасные хэш-функции (например, SHA, MD5 и т. д.).
+
+Цели
+
+Цели протокола SSL v3.0, в порядке их приоритетности, следующие:
+  1. Криптографическая безопасность SSL
+     - должна использоваться для установления безопасного соединения между двумя сторонами.
+
+  2. Взаимозаменяемость
+     Независимые программисты должны иметь возможность разрабатывать приложения, использующие SSL 3.0,
+	 которые затем смогут успешно обмениваться криптографическими параметрами, не зная кода друг друга.
+
+
+[Примечание:]
+  Не факт, что все экземпляры SSL (даже в одном и том же домене приложений) смогут успешно соединяться.
+  Например, если сервер поддерживает определенный аппаратный токен, а у клиента нет доступа к такому токену,
+  то соединение не будет успешным.
+
+
+  3. Расширяемость SSL
+     - стремится обеспечить основу, в которую при необходимости могут быть включены новые методы шифрования с открытым ключом и массовые методы шифрования.
+     Это также позволит достичь двух подцелей:
+	  + предотвратить необходимость создания нового протокола (что чревато появлением новых слабых мест)
+	  + избежать необходимости реализации целой новой библиотеки безопасности.
+
+  4. Относительная эффективность
+     Криптографические операции, как правило, требуют больших затрат процессора, особенно операции с открытыми ключами.
+     По этой причине в протокол SSL была включена дополнительная схема кэширования сеансов,
+	 чтобы уменьшить количество соединений, которые необходимо устанавливать с нуля.
+	 Кроме того, была предпринята попытка снизить сетевую активность.

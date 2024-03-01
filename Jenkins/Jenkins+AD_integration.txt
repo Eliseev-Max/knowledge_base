@@ -60,8 +60,10 @@ Logging ID=21ff064e-6ac4-4bb2-bd13-17fa30ec3cd4
 # Добавление сертификата доверия Active Directory #
 ###################################################
 
-# Имя файла сертификата:
+# Имя файла корневого сертификата:
 certnew.cer
+
+## при обращении к конкретным контроллерам домена, их сертификаты будут валидными через высланный. Должны быть.
 
 # Копируем файл сертификата в docker контейнер Jenkins
 # ($ docker cp <container-ID>:src_path dest_path)
@@ -119,6 +121,44 @@ ISSUE:
 --->
 # Проблема возникает, когда хост LDAP передает сертификат, не содержащий правильного имени хоста в SAN (Subject Alternative Name).
 # Java проверяет имя хоста в сертификате вместе с хостом во время рукопожатия SSL. При этом отображается следующее сообщение об ошибке:
+---
+## for Domain Controller = dc1.prosoft.ural.ru:3268 | dc3.prosoft.ural.ru:3268
+java.net.SocketException: Connection reset
+...
+Caused: javax.naming.CommunicationException: simple bind failed: dc1.prosoft.ural.ru:3268 [Root exception is java.net.SocketException: Connection reset]
+
+####
+
+## for Domain Controller = 172.25.245.213:3268
+## port 3268 in docker container has binded to the host port
+
+java.net.SocketException: Connection reset
+...
+Caused: javax.naming.CommunicationException: simple bind failed: 172.25.245.213:3268 [Root exception is java.net.SocketException: Connection reset]
+---
+Проблемы возникают при включённых:
+[v] Require TLS
+TLS Configuration: JDK TrustStore
+Расширенные:
+  [v] Enable StartTls
+
+---<Require TLS>---
+Требуется, чтобы соединение с Active Directory было зашифровано TLS.
+
+Если вы используете не ADSI режим (вы указали имя домена в конфигурации),
+то это будет использовать LDAP over TLS (порт 636 или порт 3269)
+и будет иметь ПРИОРИТЕТ НАД startTLS, который обновляет соединение до TLS на месте.
+
+Для режима ADSI это изменит ADSI
+  с согласования шифрования только для части *аутентификации* ->
+  на использование шифрования TLS для всего соединения.
+
+[Примечание:]
+  в любом из режимов работы включение этой опции требует:
+    - чтобы в вашем домене (доменах) были установлены службы сертификации
+	  <или>
+	- была выполнена другая ручная настройка.
+---
 
 Выполните следующие действия, чтобы устранить эту проблему:
   1. Убедитесь, что вы извлекли правильный сертификат контроллера домена, который вы пытаетесь привязать с помощью MMC, из самого контроллера домена.
