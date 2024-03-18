@@ -1,0 +1,27 @@
+
+
+При попытке аутентифицироваться на удалённом приватном репозитории docker возникла ошибка:
+---
+m.eliseev@complextest:~$ docker login -u admin -p <password> 172.21.240.131:8123
+WARNING! Using --password via the CLI is insecure. Use --password-stdin.
+Error response from daemon: Get "https://172.21.240.131:8123/v2/": http: server gave HTTP response to HTTPS client
+---
+
+[Как я решил эту проблему]
+
+{https://stackoverflow.com/questions/49674004/docker-repository-server-gave-http-response-to-https-client}
+{https://github.com/docker/buildx/issues/1642}
+
+  1. Создал файл /etc/docker/daemon.json
+     содержимое файла:
+---<daemon.json>---
+{
+  "insecure-registries":["172.21.240.131:8123"]
+}
+---
+
+  2. Перезагрузил демон docker.service
+     $ sudo systemctl restart docker.service
+
+[Результат:]
+  Образ из удалённого репозитория Nexus спулился в локальный репозиторий
