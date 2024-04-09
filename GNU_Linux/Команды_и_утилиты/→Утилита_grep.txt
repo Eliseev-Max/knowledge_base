@@ -3,6 +3,9 @@ sources:
   ‼ Команда grep: опции, регулярные выражения и примеры использования: {https://zalinux.ru/?p=1270}
   Поиск текста в файлах Linux: {https://losst.pro/gerp-poisk-vnutri-fajlov-v-linux}
   Regular expressions in grep ( regex ) with examples {https://www.cyberciti.biz/faq/grep-regular-expressions/}
+***************************************************************************
+* https://timeweb.cloud/tutorials/linux/regulyarnye-vyrazheniya-bash-gajd *
+***************************************************************************
 
 Название команды grep расшифровывается как "search globally for lines matching the regular expression, and print them"
 
@@ -34,16 +37,11 @@ sources:
   • Имя файла или папки - это то место, где будет выполняться поиск. 
   
   * grep позволяет искать в нескольких файлах;
-  * grep позволяет искать каталоге, используя рекурсивный режим
+  * grep позволяет искать в каталоге, используя рекурсивный режим
     -r, --recursive
 	  или
 	-d =recurse (| --directories=recurse)
 
-
--F, --fixed-strings
-интерпретировать PATTERN как список фиксированных строк, разделенных новыми строками, любая из которых должна быть сопоставлена
--G, --basic-regexp
-интерпретировать PATTERN как базовое регулярное выражение (BRE, см. ниже). Это значение используется по умолчанию.
 
 Шаблон (PATTERN) выбора и его интерпретация:
   -E, --extended-regexp PATTERN     = интерпретировать PATTERN как расширенное регулярное выражение (ERE)
@@ -58,10 +56,6 @@ sources:
   -z, --null-data        строки разделяются байтом с нулевым значением, а не
                          символом конца строки
 
----[]---
-
----
- 
 Разное:
   -s, --no-messages         не показывать сообщения об ошибках
   
