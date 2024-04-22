@@ -1,0 +1,245 @@
+How to Setup Docker Containers As Build Agents for Jenkins
+(https://youtu.be/ymI02j-hqpU)
+
+#( больше не придется ограничиваться конкретными версиями конкретных инструментов!)
+
+У нас есть Jenkins LTS Controller ver. 2.289.2.
+К этому контроллеру прикреплен агент с ярлыком Linux.
+На этом агенте я установил среду выполнения Docker (Docker Runtime).
+
+Скачиваем плагин: Docker Pipeline (#в видео версия плагина: 1.26).
+
+Во время установки плагина мы видим, что скачиваются 3 компонента:
+  * Authentication Tokens API
+  * Docker Commons
+  * Docker Pipeline
+
+
+*************************
+* Разберём_на_примерах: *
+*************************
+
+[Пример №1: Агент задан на глобальном уровне (top-level agent)]
+
+---<Jenkinsfile-1>---
+pipeline {
+  agent {
+    docker { image 'node:16-alpine' }
+  }
+  stages {
+    stage('Test') {
+      steps {
+        sh 'node --version'
+      }
+    }
+  }
+}
+---
+## в данном примере agent top level = docker
+## (не label linux, и не any)
+Это означает, что все stages будут использовать этот агент, основанный на docker контейнере node:16-alpine
+
+Для агента верхнего уровня (top-level) определён образ
+(с помощью key-value конструкции: image 'node:16-alpine')
+
+При запуске пайплайна, если образа node:16-alpine нет в локальном репозитории docker,
+будет выполнена команда docker pull:
+---
+Error: No such object: node:16-alpine
+[Pipeline] isUnix
+[Pipeline] sh
++ docker pull node:16-alpine
+...
+---
+
+[!] После выполнения всех шагов/команд в пайплайне docker контейнер агента:
+  -> останавливается ($ docker stop --time=1 <container-id>)
+  -> удаляется ($ docker rm -f <container-id>)
+
+#> если вывести список всех контейнеров ($ docker ps -a)
+#> то мы обнаружим, что запущенных контейнеров агента Jenkins нет,
+#> также как и нет контейнеров агента Jenkins, находящихся в другом статусе (exited, paused...)
+
+[Пример №2: Global level агент не задан; агенты определены для каждого stage]
+
+---<Jenkinsfile-2>---
+pipeline {
+  agent none
+  stages {
+    stage('Back-end') {
+      agent {
+        docker { image 'maven:3.8.1-adoptopenjdk-11' }
+      }
+    steps {
+        sh 'mvn --version'
+      }
+    }
+    stage('Front-end') {
+      agent {
+        docker { image 'node:16-alpine' }
+      }
+      steps {
+        sh 'node --version'
+      }
+    }
+  }
+}
+---
+# На глобальном уровне не определёны агенты
+# Это означает, что мы определяем конкретного агента для каждого этапа (stage):
+## для stage('Back-end') определяем образ docker: maven:3.8.1-adoptopenjdk-11
+## для stage('Front-end') определяем образ node:16-alpine
+(Что происходит при запуске Pipeline):
+-->
++ docker inspect -f maven:3.8.1-adoptopenjdk-11
+
+Error: No such object: maven:3.8.1-adoptopenjdk-11
+[Pipeline] isUnix
+[Pipeline] sh
++ docker pull maven:3.8.1-adoptopenjdk-11
+...
+
+[Pipeline] withDockerContainer
+agent1 does not seem to be runing inside a container
+$ docker run -t -d -u 1000:1000 \
+             -w /home/vagrant/agent/workspace/docker
+             -v /home/vagrant/agent/workspace/docker:home/vagrant/agent/workspace/docker:rw,z \
+             -v /home/vagrant/agent/workspace/docker@tmp:home/vagrant/agent/workspace/docker@tmp:rw,z \
+             -e ******** -e ******** -e ******** -e ******** ... \
+             -e ******** maven:3.8.1-adoptopenjdk-11 cat
+$ docker top <container-id> -eo pid,comm
+[Pipeline] {
+[Pipeline] sh
++ mvn --version
+#[вывод команды]
+# ~ то же самое для stage('Front-end') и контейнера на базе образа node:16-alpine
+<--
+
+[!] Сообщение: "agent1 does not seem to be runing inside a container" свидетельствует о нормальной работе пайплайна
+    и говорит нам о том, что в данный момент на агенте ничего не запущено; 
+    Jenkins Runtime обнаруживает, что образ существует => тогда он запускает контейнер.
+
+[>] нет ничего особенного в использовании docker в качестве агентов.
+    Мы можем сделать это с помощью статических агентов.
+
+
+[Пример №3: Использование агента dockerfile true]
+
+(from: https://www.jenkins.io/doc/book/pipeline/docker/#dockerfile)
+-->
+Для проектов, требующих более индивидуальной среды выполнения,
+Pipeline также поддерживает создание и запуск контейнера из Dockerfile в исходном репозитории.
+
+В отличие от предыдущего подхода, когда использовался "готовый" контейнер,
+при использовании синтаксиса:
+---
+agent { dockerfile true }
+---
+-> создается новый образ из Dockerfile,
+   а не извлекается из Docker Hub/Docker Repository
+<--
+
+---< Jenkinsfile-3 >---
+pipeline {
+  agent { dockerfile true }
+  stages {
+    stage('Test') {
+      steps {
+        sh '''
+          node --version
+          git --version
+          curl --version
+        '''
+      }
+    }
+  }
+}
+---
+---< Dockerfile >---
+FROM node:16-alpine
+
+RUN apk add -U git curl
+---
+
+# В случае, если у нас еще нет конкретного образа, который бы содержал все необходимые инструменты,
+# мы можем определить Dockerfile в нашем репозитории вместе с Jenkinsfile;
+# когда мы запустим джобу, образ будет собран для нас "на лету".
+
+(Что происходит при запуске Pipeline):
+-->
++ docker build -t <hash-tag> -f Dockerfile .
+Sending build context to Docker daemon 198.7kB
+
+Step 1/2 : FROM node:16-alpine
+ ---> <layer-hash>
+Step 2/2 : RUN apk add -U git curl
+ ---> Running in <some-hash>
+<--
+
+В завершении выполнения пайплайна (выполнены все команды) контейнер также
+  -> останавливается  (docker stop -time=1 ...)
+  -> удаляется (docker rm -f )
+
+
+************************************************************************************
+* Что нам даёт использование docker контейнеров в качестве агентов сборки Jenkins? *
+************************************************************************************
+
+1) это даёт нам возможность определить конкретные инструменты и версии этих инструментов,
+   которые мы хотим использовать в нашем пайплайне;
+
+2) если в Вашем окружении кто-то ещё должен установить инструменты для Вашего агента,
+   Вы можете полностью обойти эту процедуру, потому что у Вас есть возможность
+   динамически добавлять инструменты, которые вам нужны, во время выполнения.
+
+3) это даёт Вам возможность экспериментировать с различными инструментами
+   без необходимости брать на себя долгосрочные обязательства по использованию этих инструментов.
+   Т.е. запустили сборку на базе агентов-контейнеров:
+     -> всё работает хорошо -> фиксируем изменения, делаем сборку статичной;
+     -> обнаружились неполадки/недоработки - откатились.
+
+
+#########################################
+# Jenkins agents: Docker and Dockerfile #
+#########################################
+()
+
+---<agent: docker>---
+agent {
+    docker {
+        image 'myregistry.com/node'
+        label 'my-defined-label'
+        registryUrl 'https://myregistry.com/'
+        registryCredentialsId 'myPredefinedCredentialsInJenkins'
+    }
+}
+---
+
+---<agent: dockerfile>---
+agent {
+    // Equivalent to "docker build -f Dockerfile.build --build-arg version=1.0.2 ./build/
+    dockerfile {
+        filename 'Dockerfile.build'
+        dir 'build'
+        label 'my-defined-label'
+        additionalBuildArgs  '--build-arg version=1.0.2'
+        args '-v /tmp:/tmp'
+    }
+}
+---
+
+# dockerfile также опционально принимает параметры registryUrl и registryCredentialsId,
+# которые помогут указать используемый реестр Docker и его учетные данные.
+[Например:]
+
+---<agent { dockerfile }>---
+agent {
+    dockerfile {
+        filename 'Dockerfile.build'
+        dir 'build'
+        label 'my-defined-label'
+        registryUrl 'https://myregistry.com/'
+        registryCredentialsId 'myPredefinedCredentialsInJenkins'
+    }
+}
+---

@@ -1,0 +1,15 @@
+Разница между docker compose down <SERVICE> и docker compose rm <SERVICE>
+{
+  "docker compose rm": https://docs.docker.com/reference/cli/docker/compose/rm/
+  "docker compose down": https://docs.docker.com/reference/cli/docker/compose/down/
+}
+
+[Кратко:]
+
+  $ docker compose rm -f -s <SERVICE> останавливает и удаляет контейнеры указанного сервиса
+
+  $ docker compose down <SERVICE> останавливает и удаляет контейнеры указанного сервиса, а также
+    - volumes
+    - network
+    [!] (если они не используются другими запущенными контейнерами)
+    [+] с опцией --rmi удаляет образ, на основе которого запущен контейнер
