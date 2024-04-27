@@ -1,0 +1,269 @@
+archiveArtifacts: Archive the artifacts
+
+(https://www.jenkins.io/doc/pipeline/steps/core/#archiveartifacts-archive-the-artifacts)
+
+  - Архивирует артефакты сборки (например, zip-файлы дистрибутива или jar-файлы),
+    чтобы их можно было загрузить позже.
+
+  Заархивированные файлы будут доступны с веб-страницы Jenkins.
+
+  Обычно Jenkins хранит артефакты сборки до тех пор, пока ведется сам журнал сборки (build log),
+  НО если вам не нужны старые артефакты и вы предпочитаете экономить место на диске, вы можете сделать это.
+
+[Архивация артефактов Maven:]
+[!] тип задания Maven автоматически архивирует все созданные артефакты Maven.
+    Любые артефакты, настроенные здесь, будут архивироваться поверх этого.
+    Автоматическое архивирование артефактов можно отключить в дополнительных опциях Maven.
+
+
+Пример, составленный Генератором сниппетов Pipeline (Pipeline Snippet Generator):
+# все аргументы имеют значение true (некоторые аргументы по умолчанию имеют значение true)
+
+---<Pipeline Snippet Generator>---
+archiveArtifacts artifacts: '**/*.txt',
+                   allowEmptyArchive: true,
+                   fingerprint: true,
+                   onlyIfSuccessful: true
+---
+
+## Разбор параметров:
+
+* artifacts: <string>
+    - можно использовать подстановочные знаки,
+      например: 'module/dist/**/*.zip'.
+  #(Точный формат см. the includes attribute of Ant fileset 
+[!]  за исключением того, что "," (запятая) является единственным поддерживаемым разделителем.
+-> (https://ant.apache.org/manual/Types/fileset.html)
+    )
+
+  Базовым каталогом является workspace.
+[!] Вы можете архивировать ТОЛЬКО ТЕ ФАЙЛЫ, которые находятся в вашем workspace.
+
+[Примеры использования в Pipeline:]
+  1) Как архивировать несколько артефактов из определенной папки:
+---
+archiveArtifacts artifacts: 'target/*.jar'
+---
+
+  2) Как архивировать несколько артефактов с разными шаблонами:
+---
+archiveArtifacts artifacts: 'target/*.jar, target/*.war'
+---
+
+  3) Как архивировать несколько вложенных артефактов:
+---
+archiveArtifacts artifacts: '**/*.jar'
+---
+
+
+* allowEmptyArchive : boolean (optional)
+    - обычно сборка завершается неудачей, если архивация возвращает ноль артефактов.
+    Эта опция позволяет процессу архивации ничего не возвращать, не приводя к неудаче сборки.
+    Вместо этого сборка просто выдаст предупреждение.
+
+* caseSensitive : boolean (optional)
+    - Архиватор артефактов использует Ant org.apache.tools.ant.DirectoryScanner,
+    который по умолчанию чувствителен к регистру.
+  [Например:]
+    если задание создает файлы *.hpi,
+    шаблон "**/*.HPI" НЕ СМОЖЕТ их найти.
+
+    Этот параметр можно использовать для ОТКЛЮЧЕНИЯ ЧУВСТВИТЕЛЬНОСТИ к регистру.
+    Если флажок СНЯТ, -> шаблон "**/*.HPI" будет соответствовать любым файлам *.hpi,
+    или шаблон "**/cAsEsEnSiTiVe.jar" будет соответствовать файлу с названием caseSensitive.jar.
+
+
+* defaultExcludes : boolean (optional)
+
+* excludes : String (optional)
+    - Опционально укажите шаблон 'excludes', например "foo/bar/**/*".
+    Используйте ",", чтобы задать список шаблонов.
+    Файл, соответствующий этой маске, НЕ БУДЕТ заархивирован,
+    даже если он соответствует маске, указанной в разделе "Файлы для архивации".
+
+* fingerprint : boolean (optional)
+
+* followSymlinks : boolean (optional)
+    - при ОТКЛЮЧЕНИИ этой опции все символические ссылки, найденные в рабочей области,
+    будут ИГНОРИРОВАТЬСЯ
+
+* onlyIfSuccessful : boolean (optional)
+
+
+*****************************************************************************
+* fingerprint: Запись fingerprints файлов для отслеживания их использования *
+*****************************************************************************
+
+  Jenkins может записывать fingerprints файлов (чаще всего jar-файлов), чтобы отслеживать,
+  где/когда эти файлы были созданы и использованы.
+
+  Когда у вас есть взаимозависимые проекты на Jenkins,
+  это позволяет быстро находить ответы на такие вопросы, как:
+    (?) У меня есть foo.jar на жестком диске, но из какого номера сборки FOO он был получен?
+    (?) Мой проект BAR зависит от foo.jar из проекта FOO.
+      (??) Какая сборка foo.jar используется в BAR #51?
+      (??) В какой сборке BAR содержится мое исправление ошибки в foo.jar #32?
+
+Чтобы воспользоваться этой функцией, все задействованные проекты:
+  + (не только) проект, в котором создается файл,
+  + (но и)  проекты, в которых этот файл используется
+должны использовать ее и записывать fingerprints.
+
+
+**************************************************************************
+* -> "Fingerprints": https://www.jenkins.io/doc/book/using/fingerprints/ *
+**************************************************************************
+
+
+* targets : String
+    -> можно использовать подстановочные знаки,
+    например module/dist/**/*.zip
+    (точный формат см. в "@includes of Ant fileset":https://ant.apache.org/manual/Types/fileset.html).
+    Базовым каталогом является workspace.
+
+* caseSensitive : boolean (optional)
+    Fingerprinter использует Ant org.apache.tools.ant.DirectoryScanner, который по умолчанию ЧУВСТВИТЕЛЕН К РЕГИСТРУ.
+    Например, если задание создает файлы *.hpi, шаблон "**/*.HPI" не сможет их найти.
+
+    Этот параметр можно использовать для отключения чувствительности к регистру.
+    Если флажок снят, шаблон «**/*.HPI» будет соответствовать любым файлам *.hpi,
+    или шаблон «**/cAsEsEnSiTiVe.jar» будет соответствовать файлу с названием caseSensitive.jar.
+
+* defaultExcludes : boolean (optional)
+* excludes : String (optional)
+    Опционально укажите шаблон 'excludes',
+    например «foo/bar/**/*».
+    Используйте «,», чтобы задать список шаблонов.
+    Файл, соответствующий этой маске, не будет отпечатан,
+    даже если он соответствует маске, указанной в разделе 'Файлы для отпечатка'.
+
+
+**************************************************
+* Где Jenkins хранит заархивированные артефакты? *
+* Where Does Jenkins Store Archived Artifacts?   *
+**************************************************
+
+-> (https://www.youtube.com/watch?v=u6LF-T-daS4&ab_channel=CloudBeesTV)
+
+Рассмотрим, где Jenkins хранит заархивированные артефакты, сгенерированные в результате выполнения:
+  -> Post Build Actions в Freestyle Job
+  -> Archive Artifacts step в Pipeline Job
+
+[!] Особенность Jenkins => всё основано на файлах! Нужно только знать, где находятся эти файлы.
+    (Everything is file based)
+## to take a look under the hood = взглянуть под капот
+
+# Разберём пример Pipeline
+## https://gist.github.com/darinpope/443f1d54b09b914fbeb59e5a12bf6dc1
+
+---<Jenkinsfile>---
+pipeline {
+  agent any
+  options {
+    buildDiscarder(logRotator(numToKeepStr: '5'))
+    durabilityHint('PERFORMANCE_OPTIMIZED')
+    disableConcurrentBuilds()
+  }
+  stages{
+    stage('build') {
+      steps {
+        sh 'echo "Hello World" > hello.txt'
+      }
+    }
+    stage('archive') {
+      steps {
+        archiveArtifacts(artifacts: '**/*.txt', followSymlinks: false)
+      }
+    }
+  }
+}
+---
+-> в качестве агента сборки выбран агент any
+-> агент, подключенный к контроллеру
+-> установлено несколько опций, в которых мы можем выбрать делать это или не делать;
+__Структура:__
+Pipeline состоит из 2 stages:
+  1) 'build':   мы создаём текстовый файл hello.txt
+  2) 'archive': мы архивируем текстовый файл, созданный на 1-ом этапе, используя совпадение по маске **/*.txt
+
+# Результаты сборки:
+-> В результате сборки сгенерирован артефакт:
+Build Artifacts: -> hello.txt
+
+## При клике на него открывается текстовый файл, содержащий строку: "Hello World"
+
+(!) Обратим внимание на URL:
+http://jenkins:8080/job/archive-artifacts/1/artifact/hello.txt
+
+[адрес_контроллера_jenkins:порт]/job/<name-of-the-job>/build-number/artifact/<name-of-file>
+
+Если мы вернёмся к заголовку job-ы, мы увидим: "Last Successful Artifacts".
+  -> здесь перечислены последние удачные артефакты.
+  -> увидим тот же текстовый файл hello.txt
+
+[Jenkins controller filesystem. Workspace]
+
+# в видео директория имеет путь:
+---
+/var/lib/jenkins/jobs
+---
+
+## Дерево файловой системы:
+
+.
+|_ archive-artifacts
+   |_ builds
+   |  |_ 1
+   |  |  |
+   |  |  |- archive
+   |  |  |  |_ hello.txt
+   |  |  |
+   |  |  |- build.xml
+   |  |  |- log
+   |  |  |-log-index
+   |  |  |_ workflow
+   |  |     |- 10.xml
+   |  |     |- 11.xml
+   .  .     |- 12.xml
+   .  .     |- 13.xml
+   .  .     |- 14.xml
+            |- 15.xml
+            |- 16.xml
+            |- 17.xml
+            |- 2.xml
+            |- 3.xml
+....................
+   |  |_ legasyIds
+   |  |_ permalinks
+   |
+   |-- config.xml
+   |__ nextBuildNumber
+
+---
+$ cat archive-artifacts/builds/1/archive/hello.txt
+#(OUTPUT):
+Hello World
+
+[!] ВОТ ГДЕ ЖИВУТ ЗААРХИВИРОВАННЫЕ АРТЕФАКТЫ!
+
+
+**************************
+*  Документация плагина  *
+* Artifact Manager on S3 *
+**************************
+
+  Необходимые условия, которые вам понадобятся:
+    * вам понадобится S3 Bucket;
+    * учётная запись, имеющая доступ к S3 Bucket (Credentials)
+
+## Далее в видео рассказывается об AWS S3 Bucket.
+## В качестве альтернативы AWS S3 я рассматриваю MinIO S3 Storage
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! stash и unstash вместо archiveArtifacts !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+1) https://stackoverflow.com/questions/52387621/jenkins-pipeline-how-to-download-a-archived-artifact-in-a-later-stage-in-a-jenk
+2) stash: https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#stash-stash-some-files-to-be-used-later-in-the-build
+3) unstash: https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#unstash-restore-files-previously-stashed
+
+ИЗУЧИТЬ МЕХАНИЗМ РАБОТЫ!
