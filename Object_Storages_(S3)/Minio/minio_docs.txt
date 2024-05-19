@@ -1,0 +1,29 @@
+###############################
+###############################
+## MinIO documentation pages ##
+###############################
+###############################
+
+1 MinIO Object Storage for Linux
+  -> https://min.io/docs/minio/linux/index.html
+
+2 Install and Deploy MinIO
+  -> https://min.io/docs/minio/linux/operations/installation.html#minio-installation-comparison
+  
+3 Deploy MinIO: Single-Node Single-Drive
+  -> https://min.io/docs/minio/linux/operations/install-deploy-manage/deploy-minio-single-node-single-drive.html#minio-snsd
+
+4 Core Operational Concepts
+  -> https://min.io/docs/minio/linux/operations/concepts.html#how-does-minio-provide-availability-redundancy-and-reliability?ref=docs-redirect
+
+5 MinIO Server
+  -> https://min.io/docs/minio/linux/reference/minio-server/minio-server.html
+
+6 MinIO Console
+  -> https://min.io/docs/minio/kubernetes/upstream/administration/minio-console.html#static-vs-dynamic-port-assignment
+
+7 Configure NGINX Proxy for MinIO Server
+  -> https://min.io/docs/minio/linux/integrations/setup-nginx-proxy-with-minio.html
+---
+NGINX. Руководство для начинающих.
+https://nginx.org/ru/docs/beginners_guide.html

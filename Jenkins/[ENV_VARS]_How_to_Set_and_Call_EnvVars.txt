@@ -1,0 +1,133 @@
+Environment variables in Jenkins. How to set and call it
+
+sources:
+  1. "Handling credentials": https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials
+  2. "How to Set Environment Variables in Jenkins?": https://www.baeldung.com/ops/jenkins-environment-variables
+  3. "Jenkins Pipeline Environment Variables - The Definitive Guide":
+  --> https://e.printstacktrace.blog/jenkins-pipeline-environment-variables-the-definitive-guide/
+
+
+Если значение переменной окружения содержит чувствительные данные: [1]
+Общий случай установки и вызова переменных окружения в Jenkins: [2]
+
+[1] Создать Credentials типа "Secret text" (в некоторых случаях "Username and Password")
+  В Пайплайне (Jenkinsfile) можно обратиться к Credentials с помощью директивы:
+---
+credentials('credential-id')
+---
+
+---<Declarative pipeline>---
+   environment {
+        AWS_ACCESS_KEY_ID     = credentials('jenkins-aws-secret-key-id')
+        AWS_SECRET_ACCESS_KEY = credentials('jenkins-aws-secret-access-key')
+    }
+---
+
+---<Scripted pipeline>---
+
+---
+
+[2] 
+*******************************************
+* Глобальные свойства (Global Properties) *
+*******************************************
+  Мы можем установить глобальные свойства, перейдя в раздел:
+  Manage Jenkins -> Configure System -> Global properties option
+  ("Управление Jenkins -> Настроить систему -> Глобальные настройки: Переменные среды").
+  1. Установим флажок "Переменные окружения",
+  2. Затем добавим переменные и их соответствующие значения (key:value) в раздел "Список переменных"
+
+
+##############################################
+# Определение переменных среды в Jenkinsfile #
+##############################################
+
+  В Jenkinsfile переменные окружения добавляются с помощью директивы environment { }
+
+---<Jenkinsfile (Declarative Pipeline)>---
+
+pipeline {
+    //Setting the environment variables DISABLE_AUTH and DB_ENGINE
+    environment {
+        DISABLE_AUTH = 'true'
+        DB_ENGINE    = 'mysql'
+    }
+
+}
+---
+
+# Такой подход к определению переменных в файле Jenkins полезен для указания скриптов,
+# например, файла Make
+
+[!] Директиву environment можно использовать
+      1) в блоке Pipeline верхнего уровня
+      2) в блоке Pipeline нижнего уровня
+
+1. Директива environment, используемая в блоке Pipeline верхнего уровня,
+   будет применяться КО ВСЕМ steps пайплайна.
+2. Директива environment, определенная в рамках stage,
+   будет применять заданные переменные окружения только к steps в рамках данного stage.
+
+
+*************************************************
+* Динамическое определение переменных окружения *
+*   Setting environment variables dynamically   *
+*************************************************
+#-> https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#setting-environment-variables-dynamically
+
+
+
+*************
+* EnvInject *
+*************
+
+  Мы можем установить и использовать плагин EnvInject для инъекции переменных окружения во время запуска сборки.
+(https://plugins.jenkins.io/envinject/)
+
+  В окне конфигурации сборки мы выбираем опцию "Inject environment variables"
+  в комбинированном окне (Combo Box) "Add build step".
+
+  Затем мы можем добавить необходимые переменные окружения в текстовое поле содержимого свойств.
+  Например, мы можем указать профиль пользователя:
+#-> https://www.baeldung.com/ops/jenkins-environment-variables#envinject  (см. изображение)
+
+
+**************************************
+* Использование переменных окружения *
+**************************************
+
+  Jenkins Pipeline предоставляет переменные окружения через глобальную переменную env,
+  которая доступна ИЗ ЛЮБОЙ ТОЧКИ Jenkins-файла.
+
+  Полный список переменных окружения, доступных из Jenkins Pipeline, задокументирован здесь:
+${YOUR_JENKINS_URL}/pipeline-syntax/globals#en
+
+---<Jenkinsfile (Declarative Pipeline)>---
+
+pipeline {
+    agent any
+    stages {
+        stage('Example') {
+            steps {
+                echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+            }
+        }
+    }
+}
+
+---<Jenkinsfile (Scripted Pipeline)>---
+
+node {
+    echo "Running ${env.BUILD_ID} on ${env.JENKINS_URL}"
+}
+---
+
+[!] Внутри этапов Pipeline к переменным окружения рекомендуется обращаться через глобальную переменную env:
+---
+${env.MY_ENV_VAR}
+---
+
+  Можно  использовать сокращенный вариант ${BUILD_NUMBER},
+  но этот вариант может смутить некоторых пользователей:
+  => в нем упускается контекст, что BUILD_NUMBER берется из переменной окружения.
+

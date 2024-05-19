@@ -1,0 +1,157 @@
+Хранение артефактов сборки в объектном хранилище. S3-хранилища. Minio
+
+**************************
+*  Документация плагина  *
+* Artifact Manager on S3 *
+**************************
+
+"Artifact Manager on S3":
+--> https://plugins.jenkins.io/artifact-manager-s3/
+  Необходимые условия, которые вам понадобятся:
+    * вам понадобится S3 Bucket;
+    * учётная запись, имеющая доступ к S3 Bucket (Credentials)
+
+## Далее в видео рассказывается об AWS S3 Bucket.
+## В качестве альтернативы AWS S3 я рассматриваю MinIO S3 Storage
+
+
+Minio Plugin: https://www.jenkins.io/doc/pipeline/steps/minio/
+[Also:]
+  "jenkinsci/minio-plugin": https://github.com/jenkinsci/minio-plugin
+
+
+[Необходимые зависимости:]
+#(https://plugins.jenkins.io/minio/dependencies/)
+  ● Pipeline: Step API ≥ 622.vb_8e7c15b_c95a_
+    → https://plugins.jenkins.io/workflow-step-api/
+
+  ● Credentials ≥ 2.6.1         # у нас 1311.vcf0a_900b_37c2
+    → https://plugins.jenkins.io/credentials/
+    → https://github.com/jenkinsci/credentials-plugin/blob/master/docs/user.adoc
+
+  ● Structs ≥ 308.v852b473a2b8c
+    → https://plugins.jenkins.io/structs/
+    = Плагин библиотеки для DSL-плагинов, которым нужны краткие имена для расширений Jenkins
+
+
+Minio in Pipeline
+
+[Snippet Generator]
+
+Sample Step:> minio:Upload build artifacts to Minio
+_minio_
+
+  Host:
+    - URL where Minio is reachable by Jenkins.
+    Leave this blank to use global configuration
+(
+  URL-адрес, по которому Minio доступен для Jenkins.
+  Оставьте это поле пустым, чтобы использовать глобальную конфигурацию
+)
+
+  Minio Credential:
+    - Credentials to use when authenticating to Minio.
+    If host is left blank the global configured credentials will be used
+(
+  Учетные данные, которые будут использоваться при аутентификации в Minio.
+  Если оставить значение host пустым, будут использоваться глобальные настроенные учетные данные
+)
+
+  Bucket:
+    - The bucket to upload the files to. This bucket will be created if it does not yet exist.
+    Please note the restrictions in bucket naming:
+    --> https://docs.aws.amazon.com/AmazonS3/latest/userguide/BucketRestrictions.html
+    --> https://docs.aws.amazon.com/AmazonS3/latest/userguide/bucketnamingrules.html
+(
+  Бакет, в который будут загружаться файлы.
+  Этот бакет будет создан, если он еще не существует.
+  Обратите внимание на ограничения в именовании бакета:
+)
+
+  Target folder: 
+    - If you want to store the artifacts in a specific folder in Minio you can specify it with this parameter.
+    Environment variables can be used with the ${...} syntax.
+(
+  Если вы хотите хранить артефакты в определенной папке в Minio, вы можете указать ее с помощью этого параметра.
+  Переменные окружения можно использовать с помощью синтаксиса ${...}.
+)
+
+  Includes:
+    - File pattern to indicate which files will be uploaded. Multiple entries can be used when separated by a ","
+(
+  Шаблон файла, указывающий, какие файлы будут загружены.
+  Можно использовать несколько записей, разделив их символом «,»
+)
+
+  Excludes: (Исключения)
+
+---
+  minio bucket: 'example',
+  credentialsId: credentials('minio-example-credentials'),
+  excludes: '',
+  host: '${MINIO_URL}',
+  includes: '${WORKSPACE}/${params.BUC_CAG_OUTPUT_DIR}/**/*',
+  targetFolder: 'release-${BUILD_ID}-${JOB_NAME}'
+---
+
+[!] Можно сконфигурировать глобальные настройки плагина Minio в Jenkins:
+(-> https://plugins.jenkins.io/minio-storage/)
+
+  Manage Jenkins >> Configure System >> Minio upload configuration
+  (Настроить Jenkins -> System -> Minio plugin: Host:"value", Minio_Credential:"choose")
+
+( ENTER
+    -> the Minio server URL,
+    -> AccessKey and SecretKey (available during Minio server installation)
+  CLICK
+    -> Save
+)
+[!] Если глобальные настройки сконфигурированы, то в Pipeline ключи minio = 
+  ( host:
+    credentialsId:
+  )
+    можно оставлять с пустым значением ('')
+    
+---
+minio bucket:'example',
+credentialsId: 'minio-example-credentials',
+excludes: '',
+host: 'http://127.0.0.1:9090',
+includes: '${WORKSPACE}/${params.BUC_CAG_OUTPUT_DIR}/**/*',
+targetFolder: 'release_node-${NODE_NAME}-${BUILD_TAG}'
+---
+
+6SpaceTruckin031972
+
+host: http://172.21.240.131:9091/
+
+
+[Compose file]
+---
+version: "3.3"
+
+services:
+  minio:
+    image: minio/minio:RELEASE.2024-04-18T19-09-19Z
+    container_name: minio
+    restart: always
+    ports:
+      - "9090:9000"
+      - "9091:9001"
+    volumes:
+      - minio_storage:/opt/minio/data
+      - /opt/microservices/minio/config/.minio.env:/etc/config.env
+    environment:
+      MINIO_CONFIG_ENV_FILE: /etc/config.env
+    command: server --console-address ":9001" /data
+
+volumes:
+  minio_storage:
+
+networks:
+  keeper-network:
+
+####EOF
+
+
+targetFolder: "release_JOB-${env.BUILD_TAG}"

@@ -1,0 +1,141 @@
+docker run -d --restart always \
+-p 9000:9000 --network minio-network \
+-v /opt/minio/data:/opt/minio/data \
+-v /opt/minio/config/.minio.env:/etc/config.env \
+-e "MINIO_CONFIG_ENV_FILE=/etc/config.env" \
+--name minio \
+minio/minio server --console-address ":9090"
+
+# docker-compose.yml
+---
+version: "2"
+services:
+  minio:
+    restart: always
+    image: minio/minio
+    ports:
+      - "9000:9000"
+    environment:
+      MINIO_ACCESS_KEY: minio
+      MINIO_SECRET_KEY: minio124
+    command: server /export
+    volumes:
+      - /mnt/hdd/minio/data:/export
+      - /mnt/hdd/minio/config:/root/.minio
+---
+#! Здесь следует обратить внимание на следующие моменты:
+   MINIO_ACCESS_KEY
+     <и>
+   MINIO_SECRET_KEY
+   => хранят данные для подключения к серверу.
+[!] Их необходимо СГЕНЕРИРОВАТЬ СЛУЧАЙНЫМ ОБРАЗОМ,
+    в противном случае сервер будет уязвим.
+
+  Каталоги:
+/mnt/hdd/minio/data
+  <и>
+/mnt/hdd/minio/config
+  !ДОЛЖНЫ СУЩЕСТВОВАТЬ!
+##########
+[!] В нашем случае это:
+->  /opt/minio/data:/opt/minio/data
+  <и>
+->  /opt/minio/config/.minio.env:/etc/config.env
+---
+/opt/minio/data                              ##= будут сохраняться данные, 
+
+/opt/minio/config/.minio.env:/etc/config.env ##= будут сохраняться настройки.
+
+#! Естественно, вместо приведенных можно указывать любые каталоги.
+
+
+---< https://sefidian.com/2022/04/08/deploy-standalone-minio-using-docker-compose/ >---
+# docker-compose.yml
+version: '3'
+
+services:
+  minio:
+    image: minio/minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_storage:/data
+    environment:
+      MINIO_ROOT_USER: masoud
+      MINIO_ROOT_PASSWORD: Strong#Pass#2022
+    command: server --console-address ":9001" /data
+
+volumes:
+  minio_storage: {}
+---
+
+
+[!] MINIO_ROOT_USER и MINIO_ROOT_PASSWORD - две важные переменные окружения в файле docker-compose:
+    => MINIO_ROOT_USER - это ключ доступа пользователя root, 
+    => MINIO_ROOT_PASSWORD - секретный ключ пользователя root в качестве учетных данных S3.
+
+[!] ЗАМЕНИТЕ ЭТИ ЗНАЧЕНИЯ длинными, случайными и уникальными строками.
+
+[Обратите внимание!]
+  при запуске сервера MinIO используются два номера портов:
+  a) The MinIO Console port: 9001 (default value)  == это значение для Web-API (в браузере добавляем этот порт)
+  b) The API port: 9000 (для подключения к MinIO и выполнения операций с ним через API)
+
+---< Консоль MinIO >---
+Консоль MinIO представляет собой богатый графический интерфейс пользователя, который обеспечивает функциональность, аналогичную инструменту командной строки mc.
+Вы можете использовать консоль MinIO для задач администрирования, таких как управление идентификацией и доступом, мониторинг метрик и журналов или настройка сервера.
+
+Консоль MinIO встроена в сервер MinIO. Вы также можете развернуть автономную консоль MinIO, используя инструкции в репозитории github.
+Конфигурация
+
+Консоль MinIO наследует большинство своих настроек конфигурации от сервера MinIO. Следующие переменные среды обеспечивают определенное поведение в консоли MinIO:
+...
+
+Note: By default, the Docker Compose file uses the Docker image for the latest MinIO server release.
+[!] You can (should) change the image tag to pull a specific MinIO Docker image.
+==> docker pull minio/minio:RELEASE.2024-04-18T19-09-19Z
+
+
+[Статическое и динамическое назначение портов:]
+  
+  MinIO по умолчанию выбирает СЛУЧАЙНЫЙ ПОРТ для консоли MinIO при каждом запуске сервера.
+
+  Клиенты браузера, обращающиеся к серверу MinIO, АВТОМАТИЧЕСКИ ПЕРЕНАПРАВЛЯЮТСЯ на консоль MinIO
+  через ее динамически выбираемый порт.
+  Такое поведение имитирует поведение устаревшего веб-браузера,
+  одновременно снижая риск коллизии портов в системах, на которых работал MinIO до обновления встроенной консоли.
+
+[!] Вы можете выбрать явный статический порт, передав параметр командной строки:
+---
+minio server --console-address
+---
+при запуске каждого сервера MinIO в развертывании.
+
+[Например:]
+  следующая команда запускает распределенное развертывание MinIO,
+  используя статическое назначение порта 9001 для консоли MinIO.
+  Это развертывание будет отвечать:
+    -> на операции API S3 на порту сервера MinIO по умолчанию: 9000
+    -> на доступ браузера к порту консоли MinIO: 9001.
+---
+
+##########################################
+# Configure NGINX Proxy for MinIO Server #
+##########################################
+(https://min.io/docs/minio/linux/integrations/setup-nginx-proxy-with-minio.html)
+
+Приведенная ниже документация содержит базовые сведения о настройке NGINX для проксирования запросов к MinIO в среде Linux.
+Она НЕ ЯВЛЯЕТСЯ всеобъемлющим подходом к NGINX, проксированию или обратному проксированию в целом.
+(!) Измените конфигурацию так, как это необходимо для вашей инфраструктуры.
+
+В данной документации предполагается следующее:
+
+    Существующее развертывание NGINX
+    Существующее развертывание MinIO
+
+    DNS-имя хоста, которое однозначно идентифицирует развертывание MinIO.
+
+Существует две модели проксирования запросов к API сервера MinIO и консоли MinIO:
+  1. Dedicated DNS
+  2. Subdomain
