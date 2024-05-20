@@ -1,0 +1,26 @@
+Not able to access a container created by Jenkins pipeline
+-> (https://stackoverflow.com/questions/49134911/not-able-to-access-a-container-created-by-jenkins-pipeline)
+
+
+---
+node {
+    docker.image('minio/minio').withRun('-p 9000:9000 -e "MINIO_ACCESS_KEY=mykey" -e "MINIO_SECRET_KEY=mysecret"', 'server /data') { c ->
+        docker.image('maven:3.5.2-jdk-8-alpine').inside() {
+            sh 'mvn clean package'
+        }
+    }
+}
+---
+
+---<Recomended>---
+node {
+  sh 'docker network create --driver bridge minio-net'
+  docker.image('minio/minio').withRun('--network-alias minio --net minio-net -e "MINIO_ACCESS_KEY=mykey" -e "MINIO_SECRET_KEY=mysecret"', 'server /data') { c ->
+    docker.image('maven:3.5.2-jdk-8-alpine').inside('--net minio-net') {
+      sh 'nc -zv minio 9000'
+      sh 'mvn clean package'
+    }
+  }
+  sh 'docker network rm minio-net'
+}
+---

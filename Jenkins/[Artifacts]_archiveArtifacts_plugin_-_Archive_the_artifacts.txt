@@ -385,3 +385,60 @@ stage("Deploy") {
 * unstash: Восстановите файлы, которые ранее были спрятаны (stashed) *
 **********************************************************************
 (https://www.jenkins.io/doc/pipeline/steps/workflow-basic-steps/#unstash-restore-files-previously-stashed)
+
+
+###############################
+# Использование stash/unstash #
+###############################
+
+--> (https://stackoverflow.com/questions/43916408/reuse-artifacts-at-a-later-stage-in-the-same-jenkins-project)
+
+"""
+archiveArtifacts предназначен скорее для сохранения артефактов для использования какой-либо сущностью после завершения сборки.
+Рекомендуется рассмотреть возможность использования "stash" и "unstash"
+[!] для передачи файлов между stages или nodes.
+"""
+
+---<Pipeline example>---
+pipeline {
+    agent none
+    stages {
+        stage('Build') {
+            agent any
+            steps {
+                checkout scm
+                sh 'make'
+                stash includes: '**/target/*.jar', name: 'app' 
+            }
+        }
+        stage('Test on Linux') {
+            agent { 
+                label 'linux'
+            }
+            steps {
+                unstash 'app' 
+                sh 'make check'
+            }
+            post {
+                always {
+                    junit '**/target/*.xml'
+                }
+            }
+        }
+        stage('Test on Windows') {
+            agent {
+                label 'windows'
+            }
+            steps {
+                unstash 'app'
+                bat 'make check' 
+            }
+            post {
+                always {
+                    junit '**/target/*.xml'
+                }
+            }
+        }
+    }
+}
+---
