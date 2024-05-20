@@ -1,0 +1,24 @@
+nc
+{Linux man page: https://linux.die.net/man/1/nc}
+
+nc [-46DdhklnrStUuvzC] \
+   [-i interval] \
+   [-p source_port] \
+   [-s source_ip_address] \
+   [-T ToS] \
+   [-w timeout] \
+   [-X proxy_protocol] \
+   [-x proxy_address[___:port]] [hostname] [port[s]]
+
+
+Утилита nc (или netcat) используется практически для всего, что связано с TCP или UDP.
+Она может:
+  + открывать TCP-соединения,
+  + отправлять UDP-пакеты,
+  + прослушивать произвольные TCP- и UDP-порты,
+  + выполнять сканирование портов
+  + работает как с IPv4, так и с IPv6.
+
+[!] В отличие от telnet(1):
+   nc хорошо скриптует и отделяет сообщения об ошибках на стандартную ошибку,
+   а не отправляет их на стандартный вывод, как это делает telnet(1).
