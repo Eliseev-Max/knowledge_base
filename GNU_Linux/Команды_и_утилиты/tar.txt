@@ -1,0 +1,106 @@
+Утилита GNU tar
+(1. "tar. Linux man page": https://linux.die.net/man/1/tar)
+(2. "OpenNET. tar": https://www.opennet.ru/man.shtml?topic=tar&category=1)
+
+tar
+  = GNU версия утилиты архивирования;
+  = GNU 'tar' сохраняет множество файлов в один ленточный или дисковый архив
+    и может восстанавливать отдельные файлы из архива.
+
+
+[Синтаксис:]
+
+tar [OPTION...] [FILE]...
+
+
+GNU-версия программы tar предназначена для хранения и извлечения файлов из архивного файла,
+известного как tarfile.
+(!) Файл tarfile может быть создан на ленточном накопителе,
+    однако, чаще всего, tarfile сохраняют как обычный файл.
+
+[!] ПЕРВЫМ АРГУМЕНТОМ к программе tar должна быть одна из следующих опций:
+  
+Acdrtux
+
+    за которой следуют необязательные дополнительные параметры.
+
+[!] Последними аргументами к программе tar являются ИМЕНА АРХИВИРУЕМЫХ ФАЙЛОВ
+  filename1 [ filename2, ... filenameN ]
+    или КАТАЛОГОВ 
+  directory1 [ directory2, ...directoryN ].
+
+(!) При использовании имени каталога всегда предполагается, что его ПОДКАТАЛОГИ будут также ВКЛЮЧЕНЫ В АРХИВ.
+
+
+---[Основные опции:]---
+
+  -c, --create
+    = создать новый архив;
+
+  -f, --file=ARCHIVE
+    = использовать архивный файл или устройство ARCHIVE= ;
+
+  -d, --diff, --compare
+    = найти различия между архивом и файловой системой;
+
+  -t, --list
+    = перечислить содержимое архива;
+
+  -A, --catenate, --concatenate
+    = добавление tar-файлов в архив
+
+  -r, --append
+    = добавлять файлы в конец архива;
+
+  -u, --update
+    = добавлять только файлы, более новые, чем копия в архиве;
+
+  -x,  --extract, --get
+    = извлечь файлы из архива;
+
+  -z, --gzip
+    = фильтровать архив с помощью gzip
+
+  -C, --directory=DIR
+    = перейти в каталог DIR (|| изменить каталог на указанный)
+
+  --remove-files
+    = удаляет исходные (оригинальные) файлы после добавления их в архив;
+
+  -j, --bzip2
+    = filter the archive through bzip2
+
+  -J, --xz
+    = filter the archive through xz
+
+  --lzip
+    = filter the archive through lzip
+
+  --lzma
+    = filter the archive through lzma
+
+  -w, --interactive, --confirmation
+    = запрашивает подтверждение для каждого действия;
+
+  -W, --verify
+    = пытается выполнять проверку архива после записи в него;
+
+---[EOF]---
+
+
+[Примеры:]
+
+$ tar -cf archive.tar foo bar
+#= Создать архив archive.tar из файлов foo и bar.
+
+$ tar -tvf archive.tar
+#= Вывести подробный список всех файлов в архиве archive.tar.
+
+$ tar -xf archive.tar
+#= Извлечь все файлы из archive.tar.
+
+$ tar -c -f doc-backup.tar /home/aleksander/Documents
+#= Архивировать все файлы директории /home/aleksander/Documents в архив doc-backup.tar
+
+$ tar -r -f doc-backup.tar /home/peter/Documents
+#= добавить файлы, содержащиеся в директории /home/peter/Documents, в конец архива doc-backup.tar

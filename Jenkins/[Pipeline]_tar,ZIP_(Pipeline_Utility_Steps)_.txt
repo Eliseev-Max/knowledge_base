@@ -1,0 +1,197 @@
+Шаги архивирования/извлечения файлов в рамках Pipeline
+
+#############
+# step: zip #
+#############
+
+  = Создать zip-файл с содержимым в рабочей области.
+
+  ● zipFile : String
+    = имя/путь до zip-файла для создания (= который мы создаём).
+
+  ● archive : boolean (optional)
+    = Если zip-файл должен быть заархивирован как артефакт текущей сборки.
+      После архивации файл будет по-прежнему храниться в рабочей области.
+
+  ● defaultExcludes : boolean (optional)
+
+  ● dir : String (optional)
+    = Путь к базовому каталогу, из которого будет создан zip.
+      Оставьте пустым, чтобы создать из текущей workdir.
+
+  ● exclude : String (optional)
+    = Шаблон в стиле Ant для исключения файлов из zip.
+
+  ● file : String (optional)
+
+  ● glob : String (optional)
+    = Шаблон файлов в стиле Ant для включения в zip.
+      Оставьте пустым, чтобы включить все файлы и каталоги.
+
+  ● overwrite : boolean (optional)
+    = перезаписать zip-файл в случае, если уже существует файл с таким же именем.
+
+---<Example>---
+  script {
+      zip zipFile: 'newZipFile.zip',
+      archive: false,
+      dir: './build',
+      overwrite: 'true'
+  }
+---
+
+###############
+# step: unzip #
+###############
+
+  = Распаковать zip-файл в рабочую область.
+
+  ● zipFile : String
+    = имя/путь до zip-файла для извлечения (который требуется извлечь)
+
+  ● charset : String (optional)
+    = Укажите, какой набор символов вы хотите использовать,
+      например UTF-8.
+
+  ● dir : String (optional)
+    = Путь к базовому каталогу, в который нужно распаковать zip-файл.
+      Оставьте пустым, чтобы распаковать в текущий рабочий каталог.
+
+  ● file : String (optional)
+
+  ● glob : String (optional)
+    = Шаблон файлов в стиле Ant для извлечения из zip.
+      Оставьте пустым, чтобы включить все файлы и каталоги.
+
+  ● quiet : boolean (optional)
+    = Подавление подробного вывода, в котором регистрируется каждый файл, с которым ведется работа.
+      Например, unzip zipFile: 'example.zip', quiet: true
+
+  ● read : boolean (optional)
+    = Считывать содержимое файлов в Map вместо записи их в рабочую область.
+      Ключами карты будут пути к прочитанным файлам.
+      Например:
+##---
+  def v = unzip
+  zipFile: 'example.zip',
+  glob: '*.txt',
+  read: true
+  String version = v['version.txt']
+##---
+
+  ● test : boolean (optional)
+    = Проверка целостности архива вместо его извлечения.
+      Когда этот параметр включен, все остальные параметры (кроме zipFile) будут ИГНОРИРОВАТЬСЯ.
+      Шаг будет возвращать true или false в зависимости от результата, а не выбрасывать исключение.
+
+---<Example>---
+  script {
+      unzip zipFile: './build/newZipFile.zip',
+      dir: "${WORKSPACE}/extracted",
+      quiet: false,
+      read: false,
+      test: false
+  }
+---
+
+-------------
+- step: tar - 
+-------------
+
+###################################
+# Этот шаг УСТАРЕЛ и не работает! #
+###################################
+
+tar: Create Tar file
+  = Создать файл tar/tar.gz с содержимым в workspace.
+
+  ● file : String (optional)
+    = Имя/путь создаваемого tar-файла.
+
+  ● archive : boolean (optional)
+    = Если tar-файл должен быть заархивирован как артефакт текущей сборки.
+      После архивации файл будет по-прежнему храниться в workspace.
+
+  ● compress : boolean (optional)
+    = Созданный tar-файл должен быть сжат в формате gz.
+
+  ● defaultExcludes : boolean (optional)
+
+  ● dir : String (optional)
+    = Путь к базовому каталогу, из которого будет создан tar.
+      Оставьте пустым, чтобы СОЗДАТЬ ИЗ ТЕКУЩЕГО рабочего каталога.
+
+  ● exclude : String (optional)
+    = Шаблон в стиле Ant для исключения файлов из tar.
+
+  ● glob : String (optional)
+    = Шаблон файлов в стиле Ant для включения в tar.
+      Оставьте пустым, чтобы включить все файлы и каталоги.
+
+  ● overwrite : boolean (optional)
+    = если требуется, чтобы tar-файл был перезаписан в случае, если уже существует файл с таким же именем.
+
+---<Pipeline_Example>---
+stage('Create-tar-file') {
+    steps {
+        script {
+            tar file: "${TAR_FILE}",
+            archive: false,
+            compress: false,
+            dir: "/path/to/directory",
+            glob:'',
+            overwrite: true
+        }
+    }
+}
+---
+
+
+---------------
+- step: untar - 
+---------------
+
+untar: Extract Tar file
+  = Распаковать файл tar/tar.gz в workspace.
+
+
+  ● file : String (optional)
+    = Имя/путь файла tar/tar.gz для извлечения/распаковки
+
+  ● dir : String (optional)
+    = Путь к базовому каталогу, в который нужно распаковать tar.
+      Оставьте пустым, чтобы распаковать в текущий рабочий каталог.
+
+  ● glob : String (optional)
+    = Шаблон файлов в стиле Ant для извлечения из tar.
+      Оставьте пустым, чтобы включить все файлы и каталоги.
+
+  ● keepPermissions : boolean (optional)
+    = Разрешения на извлечение файлов.
+      Например, распаковать файл: 'example.tgz', keepPermissions: true
+
+  ● quiet : boolean (optional)
+    = Подавить вывод подробной информации о каждом обрабатываемом файле.
+      Например, untar file: 'example.tgz', quiet: true
+
+  ● test : boolean (optional)
+    = Проверить целостность архива ВМЕСТО его извлечения.
+      Когда этот параметр ВКЛЮЧЕН, все остальные параметры (кроме file) БУДУТ ИГНОРИРОВАТЬСЯ.
+      Шаг будет возвращать true или false в зависимости от результата, а не выбрасывать исключение.
+
+---<Pipeline_Example>---
+stage('Untar-file') {
+    steps {
+        script {
+            untar file: "${TAR_FILE}",
+            dir: "/path/to/target/directory",
+            glob:'',            
+            overwrite: true
+        }
+    }
+}
+---
+
+
+# How To Create a Zip File in a Jenkins Pipeline: -> https://youtu.be/Vk2ZtXFIG78
+# (about zip and zipinfo)

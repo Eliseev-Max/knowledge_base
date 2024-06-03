@@ -153,5 +153,52 @@ networks:
 
 ####EOF
 
-
 targetFolder: "release_JOB-${env.BUILD_TAG}"
+
+
+********************************************
+* Download artifacts from the Minio Bucket *
+********************************************
+(-> https://www.jenkins.io/doc/pipeline/steps/minio/#miniodownload-download-files-from-minio)
+
+
+---<Minio downloading. Declarative Pipeline>---
+  minioDownload bucket: 'example',
+  credentialsId: 'minio-example-credentials',
+  failOnNonExisting: false,
+  file: '**/*',
+  host: '',
+  targetFolder: 'release-BUC_JOB-jenkins-clone-config-api-generator-46'
+---
+
+  ● bucket: String
+      = Бакет, из которого будут загружаться файлы.
+        Если бакет не существует, будет выдана ошибка.
+
+  ● file: String
+      = Указывает, какой файл должен быть загружен.
+        Переменные окружения можно использовать с помощью синтаксиса ${...}.
+
+  ● credentialsId : String (optional)
+      = Учетные данные, которые будут использоваться при аутентификации в Minio.
+        Если оставить значение host пустым, будут использоваться глобальные настроенные credentials
+
+  ● excludes : String (optional)
+
+  ● failOnNonExisting : boolean (optional)
+      Снимите этот флажок, если хотите, чтобы сборка продолжалась при обнаружении несуществующего файла.
+      (failOnNonExisting: false)
+
+  ● host : String (optional)
+      URL-адрес, по которому Minio доступен для Jenkins.
+      Оставьте это поле пустым, чтобы использовать глобальную конфигурацию
+
+  ● targetFolder : String (optional)
+      Опционально укажите, в какой каталог workspace должны быть загружены объекты.
+      Переменные окружения можно использовать с помощью синтаксиса ${...}.
+
+
+[ПРИМЕЧАНИЕ]
+1) значение file: НЕ ДОЛЖНО БЫТЬ
+   -> пустой строкой ('')
+   -> подстановочным символом **/*

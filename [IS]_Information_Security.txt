@@ -1,0 +1,6 @@
+Information security
+
+1) Supply chain attack
+--> https://en.wikipedia.org/wiki/Supply_chain_attack
+--> https://www.techtarget.com/searchsecurity/definition/supply-chain-attack
+

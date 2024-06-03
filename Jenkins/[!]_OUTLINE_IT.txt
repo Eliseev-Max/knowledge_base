@@ -1,0 +1,14 @@
+Jenkins Directives. Options:
+-> https://www.jenkins.io/doc/book/pipeline/syntax/#options
+
+
+Sections: post
+-> https://www.jenkins.io/doc/book/pipeline/syntax/#post
+
+
+Pipeline Utility Steps
+-> https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/
+
+Pipeline Syntax: Steps
+-> https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-steps
+[!] https://youtu.be/GJBlskiaRrI

@@ -28,6 +28,42 @@ credentials('credential-id')
 ---
 
 [2] 
+********************************
+* Переменные окружения Jenkins *
+********************************
+
+(1)  Чтобы увидеть список переменных окружения, нужно открыть веб-страницу:
+---
+${YOUR_JENKINS_HOST}/env-vars.html
+---
+, где ${YOUR_JENKINS_HOST} - адрес контроллера Jenkins (master server).
+
+  Переменная окружения Jenkins
+    - это глобальная переменная, открытая через глобальную переменную env и используемая в ЛЮБОМ МЕСТЕ Jenkinsfile.
+
+[!]  Любое значение, хранящееся в переменной env, сохраняется как тип String.
+
+  Переменные окружения могут быть установлены:
+    -> на верхнем уровне пайплайна (top-level) ||
+    -> на уровне конкретного этапа (stage)     ||
+    -> внутри блока script.
+
+
+(2) Кроме того, мы можем перечислить все переменные окружения, выполнив команду оболочки printenv:
+---<Jenkinsfile>---
+pipeline {
+    agent any
+
+    stages {
+        stage("Env Variables") {
+            steps {
+                sh "printenv"
+            }
+        }
+    }
+}
+---
+
 *******************************************
 * Глобальные свойства (Global Properties) *
 *******************************************
@@ -71,15 +107,59 @@ pipeline {
 
 *************************************************
 * Динамическое определение переменных окружения *
-*   Setting environment variables dynamically   *
+*  (Setting environment variables dynamically)  *
 *************************************************
 #-> https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#setting-environment-variables-dynamically
 
+  Переменные окружения могут быть установлены во время выполнения
+  и использоваться:
+  -> сценариями shell (sh),
+  -> пакетными сценариями Windows (bat)
+  -> и сценариями PowerShell (powershell).
 
+  Каждый скрипт может возвращать returnStatus или returnStdout.
+# Дополнительная информация о скриптах: https://www.jenkins.io/doc/pipeline/steps/workflow-durable-task-step/
+
+  Ниже приведен пример Declarative Pipeline с использованием sh (shell) с returnStatus и returnStdout.
+
+---< Jenkinsfile (Declarative Pipeline) >---
+pipeline {
+    agent any                           //#1
+    environment {
+        // Using returnStdout
+        CC = """${sh(
+                returnStdout: true,
+                script: 'echo "clang"'
+            )}"""                       //#2
+        // Using returnStatus
+        EXIT_STATUS = """${sh(
+                returnStatus: true,
+                script: 'exit 1'
+            )}"""
+    }
+    stages {
+        stage('Example') {
+            environment {
+                DEBUG_FLAGS = '-g'
+            }
+            steps {
+                sh 'printenv'
+            }
+        }
+    }
+}
+---
+#1: agent должен быть установлен на верхнем уровне pipeline.
+    Если agent задан как `agent none`, это приведет к ошибке.
+
+#2: При использовании returnStdout к возвращаемой строке будет добавлен пробел в конце.
+    Используйте .trim(), чтобы удалить его.
 
 *************
 * EnvInject *
 *************
+## This plugin is up for adoption! We are looking for new maintainers.
+## Visit our Adopt a Plugin initiative for more information.
 
   Мы можем установить и использовать плагин EnvInject для инъекции переменных окружения во время запуска сборки.
 (https://plugins.jenkins.io/envinject/)
@@ -128,6 +208,52 @@ ${env.MY_ENV_VAR}
 ---
 
   Можно  использовать сокращенный вариант ${BUILD_NUMBER},
-  но этот вариант может смутить некоторых пользователей:
-  => в нем упускается контекст, что BUILD_NUMBER берется из переменной окружения.
+(!)  но этот вариант может смутить некоторых пользователей:
+  => в нем упускается контекст, что BUILD_NUMBER берется из переменной окружения,
+  а не из параметров: именно ${env.BUILD_NUMBER}, а не ${params.BUILD_NUMBER}
 
+
+####################################################
+# Интерполяция чувствительных переменных окружения #
+# Interpolation of sensitive environment variables #
+####################################################
+
+(https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#interpolation-of-sensitive-environment-variables)
+
+[!]  Интерполяция строк в Groovy может привести к УТЕЧКЕ ЧУВСТВИТЕЛЬНЫХ ПЕРЕМЕННЫХ ОКРУЖЕНИЯ
+     (например, учетных данных, см.: "Работа с учетными данными":
+     -> https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#handling-credentials).
+
+  Это происходит потому, что чувствительная переменная окружения будет интерполирована ВО ВРЕМЯ ОЦЕНКИ Groovy,
+  и значение переменной окружения может стать доступным РАНЬШЕ, ЧЕМ ПРЕДПОЛАГАЛОСЬ,
+  что приведет к утечке чувствительных данных в различных контекстах.
+
+[Пример:]
+  рассмотрим чувствительную переменную окружения, переданную на шаг sh:
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent any
+    environment {
+        EXAMPLE_CREDS = credentials('example-credentials-id')
+    }
+    stages {
+        stage('Example') {
+            steps {
+                /* WRONG! */
+                sh("curl -u ${EXAMPLE_CREDS_USR}:${EXAMPLE_CREDS_PSW} https://example.com/")
+            }
+        }
+    }
+}
+---
+
+  Если Groovy выполнит интерполяцию, чувствительное значение будет внедрено непосредственно в аргументы шага sh,
+  что, помимо прочего, означает, что литеральное значение будет ВИДНО В КАЧЕСТВЕ АРГУМЕНТА процесса sh на агенте в листингах процессов ОС.
+
+[!] Использование ОДИНАРНЫХ КАВЫЧЕК ВМЕСТО ДВОЙНЫХ при ссылке на эти чувствительные переменные окружения предотвращает этот тип утечки.
+
+
+(!) Инъекция через интерполяцию
+    => Интерполяция строк Groovy может внедрять в командные интерпретаторы неавторизованные команды с помощью специальных символов.
+(-> https://www.jenkins.io/doc/book/pipeline/jenkinsfile/#injection-via-interpolation)
