@@ -1,0 +1,9 @@
+Docker-Composed Jenkins agents
+
+1) "How to Install and Run Jenkins With Docker Compose":
+--> https://www.cloudbees.com/blog/how-to-install-and-run-jenkins-with-docker-compose
+2) "How to Setup Docker Containers as Build Agents for Jenkins":
+--> https://devopscube.com/docker-containers-as-build-slaves-jenkins/
+
+[BASE] "Pipeline Syntax": https://www.jenkins.io/doc/book/pipeline/syntax/
+
