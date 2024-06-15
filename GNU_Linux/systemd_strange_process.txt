@@ -1,0 +1,9 @@
+На сервере srv-cicd странным показался такой процесс:
+USER         PID %CPU %MEM    VSZ   RSS TTY      STAT START   TIME COMMAND
+root           1  0.0  0.0 166724  8960 ?        Ss   Apr16  16:38 /lib/systemd/systemd --system --deserialize 57
+
+---
+--deserialize используется для восстановления сохраненного внутреннего состояния,
+ предыдущий вызов systemd, exec(), записал в файл.
+Аргументом опции является дескриптор открытого файла для этого процесса.
+---

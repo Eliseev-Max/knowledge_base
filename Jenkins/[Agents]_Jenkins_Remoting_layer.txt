@@ -1,0 +1,79 @@
+Jenkins Remoting layer
+(https://github.com/jenkinsci/remoting?tab=readme-ov-file#jenkins-remoting-layer)
+
+
+Jenkins remoting - это исполняемый JAR, который реализует коммуникационный уровень в сервере автоматизации Jenkins.
+Он используется для связи:
+  [контроллер] <=> [агент]
+    <и>
+  [контроллер] <=> [CLI]
+
+В целом, эта библиотека содержит загрузочный код для объединения отдельных JVM в единое полуобщее пространство (semi-shared space).
+Она включает в себя:
+  * Протоколы связи на основе TCP,
+  * сериализацию данных,
+  * загрузку классов Java.
+
+(!) Библиотека может быть повторно использована вне Jenkins.
+
+
+*************
+* Downloads *
+*************
+
+  Библиотеки Jenkins Remoting поставляются в составе дистрибутивов Jenkins,
+  и рекомендуется использовать их версии для обеспечения совместимости с вашим экземпляром Jenkins.
+
+  Вы можете загрузить ${JENKINS_URL}/jnlpJars/agent.jar с вашего сервера Jenkins.
+  Если вам нужна конкретная версия Remoting, ее можно загрузить из репозитория артефактов Jenkins.
+#(Последние артефакты доступны здесь: 
+# -> https://repo.jenkins-ci.org/ui/#/artifacts/browse/tree/General/releases/org/jenkins-ci/main/remoting
+#)
+
+[!] Для использования в Docker проект Jenkins также предоставляет официальные образы агентов,
+    включающие Remoting:
+      * jenkins/agent
+        <и>
+      * jenkins/inbound-agent
+
+  Мы рекомендуем использовать и расширять эти образы, если вам нужно запускать агентов в Docker.
+
+
+****************
+* Документация *
+****************
+  Документация по Remoting находится в стадии разработки.
+
+Пользовательская документация:
+  Changelog
+    = Заметки о выпуске Remoting
+    (https://github.com/jenkinsci/remoting/blob/master/CHANGELOG.md);
+
+  Launching inbound agents (Запуск входящих агентов)
+    = Механизмы и параметры для запуска входящих агентов
+    (https://github.com/jenkinsci/remoting/blob/master/docs/inbound-agent.md);
+
+  Remoting Protocols (Протоколы Remoting)
+    = Обзор протоколов, интегрированных с Jenkins
+    (https://github.com/jenkinsci/remoting/blob/master/docs/protocols.md);
+
+  Remoting Configuration (Конфигурация Remoting)
+    = Конфигурирование агентов Remoting
+    (https://github.com/jenkinsci/remoting/blob/master/docs/configuration.md);
+
+  Logging (Ведение журнала)
+    = Ведение журнала
+    (https://github.com/jenkinsci/remoting/blob/master/docs/logging.md);
+
+  Work Directory (Рабочая директория)
+    = Рабочая директория Remoting (новое в Remoting 3.8)
+    (https://github.com/jenkinsci/remoting/blob/master/docs/workDir.md);
+
+  Jenkins Specifics (Специфика Jenkins)
+    = Заметки по использованию remoting в Jenkins
+    (https://github.com/jenkinsci/remoting/blob/master/docs/jenkins-specifics.md);
+
+  Troubleshooting (Устранение неполадок)
+    = Исследование и решение распространенных проблем с удаленным доступом
+    (https://github.com/jenkinsci/remoting/blob/master/docs/troubleshooting.md);
+  

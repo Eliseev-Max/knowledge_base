@@ -1,0 +1,314 @@
+Jenkins Multibranch Pipeline
+
+[sources:]
+
+  1) "Branches and Pull Requests":
+  -> https://www.jenkins.io/doc/book/pipeline/multibranch/
+
+    1.1) "Jenkins Multibranch Pipeline With Git Tutorial":
+      -> https://youtu.be/B_2FXWI6CWg
+
+  2) "How to Install and Run Jenkins With Docker Compose"
+      -> https://www.cloudbees.com/blog/how-to-install-and-run-jenkins-with-docker-compose
+
+  3) "End-to-End Multibranch Pipeline Project Creation":
+  -> https://www.jenkins.io/doc/tutorials/build-a-multibranch-pipeline-project/
+
+  4) "Jenkins Multibranch Pipeline With Git Tutorial":
+  -> https://www.cloudbees.com/blog/jenkins-multibranch-pipeline-with-git-tutorial
+
+  5) [Plugin] Pipeline: Multibranch
+  -> https://www.jenkins.io/doc/pipeline/steps/workflow-multibranch/
+
+
+##############################
+# Branches and Pull Requests #
+##############################
+
+  Multibranch Pipelines обеспечивают более динамичные и автоматические функции в Jenkins.
+
+[Создание Multibranch Pipeline]
+
+  Тип проекта Multibranch Pipeline (MP) позволяет реализовать РАЗНЫЕ Jenkinsфайлы ДЛЯ РАЗНЫХ ВЕТОК одного проекта.
+  В проекте Multibranch Pipeline Jenkins автоматически
+    -> обнаруживает,
+    -> управляет
+    -> и выполняет Pipelines
+  для веток, содержащих Jenkinsfile в контроле исходного кода.
+
+
+  Это устраняет необходимость ручного создания и управления pipelines.
+
+Шаги создания Multibranch Pipeline:
+  1) Кликнуть [New Item] на домашней странице Jenkins
+  2) Ввести имя пайплайна в поле (!без_пробелов!)
+  3) Выбрать тип задачи: "Multibranch Pipeline" и нажать [Ok]
+
+[!] Jenkins использует имя Pipeline'а для создания каталогов на диске.
+    Имена пайплайнов, содержащие пробелы, могут выявить ошибки в скриптах,
+    которые не ожидают, что пути будут содержать пробелы.
+
+
+На первых этапах настройки MP необходимо
+  -> добавить Branch Source (например, Git)
+  -> и указать местоположение репозитория.
+
+Далее - сохранить проект Multibranch Pipeline.
+
+После сохранения Jenkins:
+  -> автоматически сканирует указанный репозиторий
+    <и>
+  -> создает соответствующие элементы для каждой ветки в репозитории, содержащей Jenkinsfile.
+
+
+[!] По умолчанию Jenkins не будет автоматически переиндексировать репозиторий при добавлении или удалении веток
+
+  ( если не используется Organization Folder ( = папка организации):
+    -> https://www.jenkins.io/doc/book/pipeline/multibranch/#organization-folders
+  )
+   , поэтому часто бывает полезно настроить MP на периодическую переиндексацию в конфигурации:
+---
+[Scan Multibranch Pipeline Triggers]:
+  [v] Periodically if not otherwise run
+##(Периодически, если не запущено иначе)
+      Interval
+      [__30 minutes__]
+---
+
+***************************************
+* Дополнительные переменные окружения *
+*   Additional Environment Variables  *
+***************************************
+
+  Multibranch Pipelines предоставляют дополнительную информацию о собираемой ветви через глобальную переменную env,
+  например:
+
+---<Environment Variables>---
+BRANCH_NAME
+  Имя ветки, для которой выполняется этот Pipeline,
+  например master.
+
+CHANGE_ID
+  Идентификатор, соответствующий какому-либо запросу на изменение,
+  например, номер запроса на изменение (pull request number).
+---
+#("Global Variable Reference":
+#-> https://www.jenkins.io/doc/book/pipeline/getting-started/#global-variable-reference#)
+
+
+***************************
+* Поддержка Pull Requests *
+***************************
+
+  Multibranch Pipelines можно использовать для проверки запросов pull/change requests с помощью соответствующего плагина.
+  Эту функциональность обеспечивают следующие плагины:
+
+  ● GitHub Branch Source
+    ➞ https://plugins.jenkins.io/github-branch-source
+
+  ● Bitbucket Branch Source
+    ➞ https://plugins.jenkins.io/cloudbees-bitbucket-branch-source/
+
+  ● GitLab Branch Source
+
+  ● Gitea
+    ➞ https://plugins.jenkins.io/gitea
+
+  ● Tuleap Git Branch Source
+  ● AWS CodeCommit Jobs
+  ● DAGsHub Branch Source
+
+
+**************************************
+* Использование Organization Folders *
+**************************************
+
+  Organization Folders (Папки организаций) позволяют Jenkins отслеживать
+    ➞ всю организацию GitHub,
+    ➞ команду/проект Bitbucket,
+    ➞ организацию GitLab
+    ➞ или организацию Gitea
+
+  и автоматически создавать новые конвейеры Multibranch Pipelines для репозиториев,
+  содержащих ветки и pull request'ы, содержащие Jenkinsfile.
+
+  Организационные папки используются в частности для:
+  Bitbucket в плагине Bitbucket Branch Source
+  (https://plugins.jenkins.io/cloudbees-bitbucket-branch-source)
+
+
+Работа в команде разработки приложений накладывает требование иметь несколько веток в git-репозитории.
+Это означает, что каждый раз, когда мы создадим новую ветку, мы вынуждены будем создать новую Pipeline Job в Jenkins.
+В реальности это означает большое количество затраченных на создание и поддержку отдельных Jenkinsfile'ов часов.
+
+Это одна из причин (один из поводов), по которой мы создали multibranch задачу.
+# (В данном примере не будут рассматриваться какие-либо специфичные Github Items, 
+# будет использоваться только git, никаких специализированных плагинов)
+
+В соответствующее поле вставили URL репозитория на GitHub.
+Репозиторий публичный, Credentials не требуются.
+
+После нажатия кнопки Save начинается сканирование репозитория.
+[OUTPUT:]
+"""
+Checking branches...
+  Checking branch main
+  'Jenkinsfile' not found
+  Does not meet criteria
+...
+...
+Finished: SUCCESS
+"""
+
+Если вернуться назад, на страницу запуска нашего Multibranch Pipeline (sample app),
+мы увидим, что ни одной Job'ы нет, но есть надпись:
+"This folder is empty"
+
+[!] Multibranch Pipeline фактически представляет собой папку с Pipeline Jobs!
+
+Т.о. вместо того, чтобы создавать отдельные Pipeline Jobs для каждой из веток,
+для которых я хочу создать задания, я могу настроить одно Multibranch Pipeline,
+и на основе того, как я настрою это задание, оно найдет ветки, которые я хочу создать.
+
+Но все сводится к тому, что Multibranch Pipeline = папка с Pipeline Jobs.
+
+[конфигурация Multibranch Pipeline:]
+  Build Configuration:
+    -> Mode:= by Jenkinsfile          # это единственный доступный вариант;
+    -> Script Path: Jenkinsfile       # можно изменить на произвольное, но соглашение обязывает назвать Jenkinsfile
+
+Создадим Jenkinsfile и запушим его в нашу main ветку.
+---<Basic Declarative Pipeline>---
+pipeline {
+  agent {label "linux"}
+  options {
+     buildDiscarder(
+       logRotator(
+         artifactDaysToKeepStr: '',
+         artifactNumToKeepStr: '5',
+         daysToKeepStr: '',
+         numToKeepStr: '5'
+       )
+     ) 
+  }
+  stages {
+    stage('Hello') {
+      steps {
+        echo "hello"
+      }
+    }
+  }
+}
+---
+
+$ git add Jenkinsfile
+$ git commit -m "added Jenkinsfile"
+$ git push origin main
+## For public GitHub repository
+
+(!) Теперь мы столкнулись с другой проблемой:
+    поскольку у меня НЕ НАСТРОЕНЫ WEBHOOKS, эта job'а не была уведомлена об изменениях,
+    которые только что произошли в нашем репозитории.
+
+#! Webhook'и возможно настроить, если контроллер Jenkins находится в сети с входящим (inbound) доступом в Интернет.
+
+Кое-что мы можем сделать: настроить опцию "Сканировать периодически"
+  Scan Multibranch Pipeline Triggers:
+  [v] Periodically if not otherwise run: 1 day
+
+# Что означает "otherwise run"?
+Если не было зафиксировано никаких eveny'ов, инициирующих запуск сканирования Multibranch Pipeline:
+  * receive a webhook;
+  * job happens;
+  * в репозитории была создана новая ветка
+
+  , срабатывает триггер периодического сканирования.
+
+(!) Теперь при запуске сканирования пайплайна ([Scan Multibranch Pipeline Now]) в логе мы увидим:
+---[LOG OUTPUT]---
+Checking branches...
+  Checking branch main
+    `Jenkinsfile` found
+  Met criteria
+Scheduled build for branch: main
+Processed 1 branches
+---
+
+Теперь поскольку обнаружена ветка, содержащая Jenkinsfile (by default),
+этап сканирования Multibranch Pipeline продолжился выполнением пайплайна -> выполнился шаг echo "hello"
+
+[!Обратите внимание!]
+  мы только что сделали git checkout этого хеша
+  == в процессе выполнения Multibranch Pipeline был создан commit hash,
+  который отображается и в source repository (GitHub).
+
+#(*) Мы не можем конфигурировать только одну main job, 
+# мы можем конфигурировать только multibranch.
+
+[11:55] We're doing multibranch, so we need more branches!
+##(создадим ветки 'fix-123' и 'dev-456')
+
+# Мы создали эти ветки у себя на компьютере.
+(!) Запушим эти ветки в source repository (GitHub)!
+  $ git checkout dev-456
+  $ git push --set-upstream origin dev-456
+  $ git checkout fix-123
+  $ git push --set-upstream origin fix-123
+
+## теперь эти созданные ветки в репозитории GitHub
+# И в результате сканирования Multibranch Pipeline эти ветки будут обнаружены и отображены!
+
+[14:29] Избирательный запуск MP для конкретных веток
+Представим, что нам нужно собрать только ветки:
+  main
+    <или>
+  ветки, начинающиеся с "fix-"
+
+Мы можем сказать: "Я хочу собрать всё за исключением dev-"
+
+Обратимся к конфигурации MP
+  -> Branch Sources: Git.Behaviors
+     -[Add] (--Within Repository--)
+     Filter by name (with wildcards)
+---[Filter by name (with wildcards)]---
+Include: *
+Exclude: dev-*
+---
+# это означает: "Дай мне всё, за исключением dev-*"
+# Можно так, но это не совсем то, что нам нужно.
+
+---[Filter by name (with wildcards)]---
+Include: main fix-*
+Exclude:
+---
+
+# Include: Этот фильтр будет применяться ко всем веткам, подобным вещам, включая запросы на изменения
+
+# Т.о., когда мы сканируем репозиторий, единственными ветками,
+# где будет запущена сборка, будут main и начинающиеся с 'fix-'
+
+[Что ещё можно добавить из Behaviors]
+
+  * Check out to matching local branch
+  (Проверить соответствие локальной ветке)
+---
+Если задано, проверьте (checkout) ревизию для сборки в качестве HEAD в этой ветке.
+Если выбрано, и его значение - пустая строка или "**",
+то имя ветки вычисляется из удалённой ветки без origin (без учёта происхождения).
+
+В этом случае удалённая ветка origin/master будет проверена на локальную ветку с именем master,
+а удалённая ветка origin/develop/new-feature будет проверена (checked out)
+на локальную ветку с именем develop/newfeature
+# Убедитесь, что вы chekout-ите в совпадающую локальную ветку
+---
+
+  * Clean after checkout
+
+  * Clean before checkout
+
+# Чтобы, работая с WORKSPACE, быть уверенным, что она чистая.
+
+## Ещё есть Wipe out repository & force clone
+
+#* Сохраняем изменения, и запускается новое сканирование
+

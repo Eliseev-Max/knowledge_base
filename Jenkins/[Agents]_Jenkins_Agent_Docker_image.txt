@@ -1,0 +1,172 @@
+Jenkins Agent Docker image
+
+  Это базовый образ для Docker, который включает:
+  + Java
+  + исполняемый файл агента Jenkins (agent.jar).
+
+[!] Этот исполняемый файл (agent.jar) представляет собой экземпляр библиотеки Jenkins Remoting:
+    # (https://github.com/jenkinsci/remoting)
+  Версия Java зависит от образа и платформы, см. раздел "Конфигурации" ниже.
+
+
+*****************
+* Использование *
+*****************
+  Этот образ используется в качестве основы для образа Docker Inbound Agent:
+# Inbound Agent = Входящий агент
+# "Docker image for inbound Jenkins agents":
+#  -> https://github.com/jenkinsci/docker-agent/blob/master/README_inbound-agent.md
+#
+# "Jenkins Agent Docker image":
+#  -> https://github.com/jenkinsci/docker-agent/blob/master/README_agent.md
+
+  В этом образе контейнер запускается извне и подключается к Jenkins.
+
+[!] Вместо этого образ может быть использован для запуска агента с помощью метода Launch (Запуск агента через выполнение команды на контроллере).
+  Например, в Linux вы можете попробовать:
+---<CLI>---
+docker run -i --rm --name agent --init jenkins/agent java -jar /usr/share/jenkins/agent.jar
+---
+  после установки корневого каталога Remote в /home/jenkins/agent
+
+
+**************************
+* Agent Work Directories *
+**************************
+
+  Начиная с Remoting 3.8 появилась поддержка рабочих директорий,
+  которая обеспечивает протоколирование по умолчанию и изменяет поведение JAR Caching.
+
+  Пример вызова для Linux:
+---<CLI>---
+docker run -i --rm \
+              --name agent1 \
+              --init \
+              -v agent1-workdir:/home/jenkins/agent \
+              jenkins/agent java -jar /usr/share/jenkins/agent.jar \
+              -workDir /home/jenkins/agent
+---
+---
+docker run -d --rm \
+              --name agent-deb \
+              --init \
+              -v agent-deb-workdir:/home/jenkins/agent \
+              --network 8d676d90fdfb \
+              --env JENKINS_AGENT_SSH_PUBKEY=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMPtNkZB0CAaQYIAxsuZIAmp17tG7yB38rSztRSxWeqwkKEUvVhAgouzZmQX+bTdI7jUyIFQFknQ9g5PVHlgzkU= devops@srv-cicd \
+              --expose 22 \
+              jenkins/agent:bookworm-jdk17 java -jar /usr/share/jenkins/agent.jar -workDir /home/jenkins/agent
+---
+
+
+agent-deb-workdir
+
+
+##################
+# Configurations #
+##################
+
+  Docker image имеет несколько поддерживаемых конфигураций,
+  доступ к которым можно получить с помощью следующих тегов:
+
+---
+Linux Images:
+
+  Java 17 (default):
+    jenkins/agent:latest: Based on debian:bookworm-${builddate}
+      Also tagged as:
+        jenkins/agent:jdk17
+        jenkins/agent:bookworm-jdk17
+        jenkins/agent:latest-bookworm
+        jenkins/agent:latest-bookworm-jdk17
+        jenkins/agent:latest-jdk17
+
+    alpine (Small image based on Alpine Linux, based on alpine:${version}):
+      jenkins/agent:jenkins/agent:alpine
+      jenkins/agent:alpine-jdk17
+      jenkins/agent:latest-alpine
+      jenkins/agent:latest-alpine-jdk17
+
+
+  Java 21:
+    bookworm (Based on debian:bookworm-${builddate}):
+      jenkins/agent:bookworm
+      jenkins/agent:bookworm-jdk21
+      jenkins/agent:jdk21
+      jenkins/agent:latest-bookworm-jdk21
+
+    alpine (Small image based on Alpine Linux, based on alpine:${version}):
+      jenkins/agent:alpine
+      jenkins/agent:alpine-jdk21
+      jenkins/agent:latest-alpine
+      jenkins/agent:latest-alpine-jdk21
+
+
+  Java 11:
+    bookworm (Based on debian:bookworm-${builddate}):
+      jenkins/agent:bookworm
+      jenkins/agent:bookworm-jdk11
+      jenkins/agent:jdk11
+      jenkins/agent:latest-bookworm-jdk11
+
+    alpine (Small image based on Alpine Linux, based on alpine:${version}):
+      jenkins/agent:alpine
+      jenkins/agent:alpine-jdk11
+      jenkins/agent:latest-alpine
+      jenkins/agent:latest-alpine-jdk11
+
+    archlinux (Image based on Arch Linux, based on archlinux:latest):
+      jenkins/agent:archlinux
+      jenkins/agent:archlinux-jdk11
+      jenkins/agent:latest-archlinux
+      jenkins/agent:latest-archlinux-jdk11
+---
+
+# Файл docker-bake.hcl
+# (https://github.com/jenkinsci/docker-agent/blob/master/docker-bake.hcl)
+#  => определяет всю конфигурацию для образов Linux и связанных с ними тегов.
+# В DockerHub также есть версионные теги, и они рекомендуются для использования в Production.
+# Полный список можно найти на сайте: https://hub.docker.com/r/jenkins/agent/tags
+
+
+#################
+#   Timezones   #
+# Часовые пояса #
+#################
+
+  По умолчанию в образе используется часовой пояс Etc/UTC.
+  Если вы хотите использовать часовой пояс вашей машины, вы можете смонтировать файл /etc/localtime с хоста
+  (согласно этому комментарию: https://github.com/moby/moby/issues/12084#issuecomment-89697533)
+  и файл /etc/timezone также с хоста.
+
+---
+docker run --rm --tty --interactive --env TZ=Asia/Shanghai --entrypoint=date jenkins/agent
+Sat Nov 26 01:27:58 CST 2022
+---
+
+  Вы также можете установить переменную окружения TZ в нужный часовой пояс.
+  TZ - это стандартная переменная окружения POSIX, используемая во многих изображениях,
+  (список допустимых значений см. в Википедии: https://en.wikipedia.org/wiki/List_of_tz_database_time_zones )
+
+  Следующая команда выполняется на машине с часовым поясом Европа/Париж через несколько секунд после предыдущей:
+---
+docker run --rm --tty --interactive --env TZ=Asia/Shanghai --entrypoint=date jenkins/agent
+Sat Nov 26 01:27:58 CST 2022 
+---
+
+
+##############################################################################
+# Использование образа jenkins/agent в качестве базового образа (Dockerfile) #
+##############################################################################
+
+  Если вы хотите адаптировать образ jenkins/agent к местному часовому поясу,
+  создав на его основе свой собственный образ,
+  вы можете воспользоваться следующей командой (вдохновленной проблемой #291):
+---
+FROM jenkins/agent as agent
+ [...]
+ENV TZ=Asia/Shanghai
+ [...]
+RUN ln -snf /usr/share/zoneinfo/"${TZ}" /etc/localtime && echo "${TZ}" > /etc/timezone \
+    && dpkg-reconfigure -f noninteractive tzdata \
+ [...] 
+---

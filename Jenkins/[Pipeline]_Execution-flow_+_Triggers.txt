@@ -1,0 +1,368 @@
+Поток выполнения конвейера.
+Инициирование заданий. Триггеры.
+
+[!]
+1) "Jenkins Automated Build Trigger On Github Pull Request":
+   → https://devopscube.com/jenkins-build-trigger-github-pull-request/
+
+2) "pipelineTriggers":
+   → https://www.jenkins.io/doc/pipeline/steps/params/pipelinetriggers/
+
+3) "Pipeline Syntax: triggers":
+   → https://www.jenkins.io/doc/book/pipeline/syntax/#triggers
+#[EOF]
+
+
+######################
+# Директива triggers #
+######################
+
+  Директива triggers определяет автоматические способы, с помощью которых pipeline должен быть ПОВТОРНО ЗАПУЩЕН.
+  Для пайплайнов, интегрированных с такими источниками, как
+    * GitHub
+      <или>
+    * BitBucket,
+  триггеры могут НЕ ПОНАДОБИТЬСЯ:
+  => интеграция на основе webhooks, скорее всего, уже присутствует.
+
+  В настоящее время доступны следующие триггеры:
+    ● cron
+        = принимает строку в стиле cron для определения регулярного интервала,
+          через который Pipeline должен быть повторно запущен.
+        Пример:
+---<triggers: cron>---
+triggers {
+    cron('H */4 * * 1-5')
+}
+---
+
+    ● pollSCM
+        = принимает строку в стиле cron для определения регулярного интервала,
+          через который Jenkins должен ПРОВЕРЯТЬ НАЛИЧИЕ НОВЫХ ИЗМЕНЕНИЙ в источнике (source).
+          Если новые изменения есть -> pipeline будет перезапущен.
+        #! подробнее о том, как установить расписание, и как будет выглядеть код Pipeline:
+        ## см. Directive Directive Generator
+        Пример:
+---<triggers: pollSCM>---
+triggers {
+    pollSCM('H */4 * * 1-5')
+}
+---
+
+    ● upstream
+        = принимает строку заданий, разделенных запятыми, и пороговое значение.
+          Когда любое задание в строке завершится с МИНИМАЛЬНЫМ ПОРОГОМ,
+          Pipeline будет перезапущен (re-triggered).
+        -<иначе_говоря>-
+          Запускает сборку по завершении задания вышестоящего проекта,
+          т.е. добавляет триггер "Сборка после сборки других проектов".
+          Возможные значения threshold (порогов):
+            ♦ SUCCESS ( = стабильно успешный)
+              #= Срабатывать, ТОЛЬКО если сборка стабильна
+
+            ♦ UNSTABLE ( = нестабилен)
+              #= Срабатывать, даже если сборка нестабильна
+
+            ♦ FAILURE ( = неудачный)
+              #= Срабатывать, даже если сборка провалилась
+
+            ♦ ABORTED ( = сборка была прервана)
+              #= Срабатывать в любом случае, даже если сборка была прервана
+
+
+        Пример:
+---<triggers: upstream>---
+triggers {
+    upstream(
+      upstreamProjects: 'job1,job2',
+      threshold: hudson.model.Result.SUCCESS
+      )
+}
+---
+# Если вышестоящий проект (сборка) один, и нужно указать конкретную ветку репозитория (git branch):
+  upstreamProjects: "some_project/some_branch"
+
+---<Declarative_Pipeline>---
+pipeline {
+    agent any
+    triggers {
+        cron('H */4 * * 1-5')
+    }
+    stages {
+        stage('Example') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+    }
+}
+---
+
+##=> Jenkins cron syntax: https://www.jenkins.io/doc/book/pipeline/syntax/#cron-syntax
+
+
+####
+Чтобы указать инициирующие события для кода конвейера, существует 3 подхода:
+  1) при работе в самом приложении Jenkins: раздел "Общая конфигурация" в веб-интерфейсе;
+
+  2) Scripted Pipeline:
+     => указать блок свойств (обычно до начала конвейера), который определяет триггеры в коде
+	  (‼ этот раздел свойств будет объединён с любыми свойствами, определёнными в веб-интерфейсе;
+	   ‼ ПРИОРИТЕТ - у веб-интерфейса)
+
+  3) Declarative Pipeline:
+     => существует специальная директива triggers → определение того, что должен запускать конвейер
+
+
+► Сборка после того, как собраны другие конвейеры ◄
+                    ► upstream() ◄
+  Можно выбрать конечный статус для сборки других проектов:
+    ♦ стабилен
+    ♦ нестабилен
+    ♦ неудачный
+
+
+*****************************************************
+*            Scripted Pipeline:                     *
+* запуск конвейера после успешно завершённой задачи *
+* ('build_iec61850_tester_image'):                  *
+*****************************************************
+---
+properties([
+	pipelineTriggers([
+		upstream(
+			threshold: hudson.model.Result.SUCCESS,
+			upstreamProjects: 'build_iec61850_tester_image'			# можно перечислить несколько заданий через запятую 
+		//# можно указать ветку для разветвлённого задания: build_iec61850_tester_image/master
+		)
+	])
+])
+---
+
+
+#########################
+# Собирать периодически #
+#########################
+
+  = тип функциональности cron для запуска заданий через определённые промежутки времени.
+
+[‼] Вариант НЕОПТИМАЛЕН для Continuous Integration.
+
+  В CI сборки основаны на обнаружении обновлений в управлении исходным кодом.
+	
+*******************
+* Синтаксис cron: *
+*******************
+
+[cron('M H d m wd')]
+
+#, где
+  M - желаемое значение минут в течение часа (0 - 59)
+  H - желаемое значение часов в течение дня (0 - 23)
+  d - желаемый день месяца (1 - 31)
+  m - желаемый месяц года (1 - 12)
+  wd - желаемый день недели (0 - 7),  # 0 и 7 - это воскресенье
+	
+	Синтаксис */<val> == "каждые val"
+	[cron('*/10 * * * *')] = каждые 10 минут часа
+	
+	Пример синтаксиса в конвейере:
+	  Scripted Pipeline:
+		properties([pipelineTriggers([cron('0 9 * * 1-5')])])
+	
+	  Declarative Pipeline
+	    triggers{ cron(0 9 * * 1-5)}		# Запуск в 9 часов с пнд по птн
+
+	# Можно указать в качестве значения символ H (== хеш проекта).
+	# "H" использует хеш имени проекта в пределах диапазона, чтобы сгенерировать уникальное значение смещения.
+	# Затем это значение прибавляется к наименьшему значению диапазона
+	# → избегаем одновременного запуска нескольких проектов, использующих cron
+	# использование H:
+	#	♦ H/<value>				- каждый определённый промежуток времени
+	#	♦ H(<val1>,<val2>)		- с несколькими значениями
+	#	♦ H(1-15)				- с диапазоном
+
+	Пример:
+	// сканируем на наличие изменений SCM с 20-минутным интервалом
+		triggers{ polSCM( */20 * * * *)}
+	
+	// Запуск сеанса конвейера в какой-то момент между 0 и 30 минутами после часа
+		triggers{ cron(H(0,30) * * * *)}
+
+
+***********************************************
+* Запуск Pipeline при merge в master. pollSCM *
+***********************************************
+
+---<Pipeline Example>---
+if (env.BRANCH_NAME == "master") {
+    properties([
+        pipelineTriggers([
+            pollSCM("H/5 * * * *")
+        ])
+    ])
+}
+
+pipeline {
+    agent none
+
+    stages {
+        stage("greet the general") {
+            steps {
+                echo "hello there"
+            }
+        }
+    }
+}
+---
+
+
+---<Example:Downstream_Jenkinsfile>---
+properties([
+    pipelineTriggers([
+        triggers: [
+            [
+                $class: 'jenkins.triggers.ReverseBuildTrigger',
+                upstreamProjects: "some_project",
+                threshold: hudson.model.Result.SUCCESS
+            ]
+        ]
+    ]),
+])
+---
+# Class ReverseBuildTrigger
+---
+java.lang.Object
+    hudson.triggers.Trigger<Job>
+        jenkins.triggers.ReverseBuildTrigger
+---
+= Подобен BuildTrigger, но определяется на downstream (нижележащем) проекте.
+Работает через:
+BuildTrigger.execute(hudson.model.AbstractBuild, hudson.model.BuildListener, hudson.tasks.BuildTrigger)
+  и
+DependencyGraph
+  => поэтому запускается неявно в конце сборки восходящего потока,
+  если используется для пары AbstractProjects.
+  В противном случае непосредственно ожидает завершения сборки.
+
+
+###################################
+# Declarative Directive Generator #
+###################################
+
+[triggers: Triggers]
+  1) bitBucketTrigger: Build with BitBucket Push and Pull Request Plugin
+
+  2) BitbucketWebhookTriggerlmpl: Bitbucket webhook trigger
+## 
+
+
+  3) BitbucketWebhookMultibranchTrigger: Bitbucket webhook trigger
+
+
+  4) bitbucketPush: Build when a change is pushed to BitBucket
+
+
+[!] Более подробно о post {}:
+$JENKINS_URL/job/JobName/directive-generator/
+Возможные значения:
+  1) Always run, regardless of build status:
+---
+post {
+  always {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  2) Run if the build status is "Unstable"
+---
+post {
+  unstable {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  3) Run if the build status is "Not Built"
+---
+post {
+  notBuilt {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+
+---
+
+  4) Always run after all other conditions, regardless of build status
+---
+post {
+  cleanup {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  5) Run if the current builds status is worse than the previous builds status
+---
+post {
+  regression {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+
+---
+
+  6) Run when the build status is "Aborted"
+---
+post {
+  aborted {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  7) Run if the build status is "Success" or hasnt been set yet
+---
+post {
+  success {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  8) Run if the build status is "Failure"
+---
+post {
+  failure {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  9) Run if the current builds status is "Aborted", "Failure" or "Unstable"
+---
+post {
+  unsuccessful {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  10) Run if the previous build was not successful and the current builds status is "Success"
+---
+post {
+  fixed {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---
+
+  11) Run if the current builds status is different than the previous builds status
+---
+post {
+  changed {
+    // One or more steps need to be included within each condition's block.
+  }
+}
+---

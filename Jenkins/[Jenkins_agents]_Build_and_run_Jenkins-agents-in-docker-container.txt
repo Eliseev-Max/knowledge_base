@@ -7,3 +7,186 @@ Docker-Composed Jenkins agents
 
 [BASE] "Pipeline Syntax": https://www.jenkins.io/doc/book/pipeline/syntax/
 
+
+***
+  Одна из самых мощных функций Jenkins = возможность распределять задания по нескольким nodes.
+  Контроллер Jenkins отправляет задания соответствующему агенту
+  в зависимости от:
+    -> требований к заданию
+       и
+    -> доступных на данный момент ресурсов.
+
+
+  Хотя можно запускать задания на контроллере, считается,
+[!] что ЛУЧШЕ ВСЕГДА СОЗДАВАТЬ ХОТЯ БЫ ОДНОГО АГЕНТА и ЗАПУСКАТЬ задания НА НЁМ.
+
+=> Поэтому мы будем использовать Docker Compose для этого
+
+# В учебных целях для простоты контейнеры будут запускаться от имени root.
+
+#[!] В production-среде вы добавите пользователя jenkins с UID 1000 в системы,
+#    на которых работают контроллеры и агенты Jenkins.
+
+
+#######################################
+# Running Jenkins With Docker Compose #
+#######################################
+
+---<Example: docker-compose.yaml>---
+version: '3.8'
+  services:
+    jenkins:
+      image: jenkins/jenkins:lts
+      privileged: true
+      user: root
+      ports:
+        - 8080:8080
+        - 50000:50000
+    container_name: jenkins
+    volumes:
+      - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+---
+#[!] Обратил внимание на privileged: true
+№ т.е. контейнер запускается в привилегированном режиме ( = с правами root).
+
+
+############################################
+# Adding Jenkins Agent With Docker Compose #
+############################################
+
+  1) Сгенерируем пару SSH ключей,
+     с помощью которых контроллер сможет получить доступ к агенту через SSH.
+
+  2)
+
+---<Example: Compose file with agent>---
+version: '3.8'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+      privileged: true
+      user: root
+      ports:
+        - 8080:8080
+        - 50000:50000
+    container_name: jenkins
+    volumes:
+      - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock
+  agent:
+    image: jenkins/ssh-agent:jdk11
+    privileged: true
+    user: root
+    container_name: agent
+    expose:
+      - 22
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDrSF2XICucxX//hz0PVgDVv3EisY6C99u9sA1QoZSdHuXW/H5i/1BT3CtUzBAsCOJxdSuadKfJZnNDEL98lmagU79tAgNjVgCnUyoKEkaEOz4J416cUsF/hR/rKUeRimcox6BncwixYsfmmcZMo1ImKWqdYIDu6TJV0RjhdpZyfn1RTxV0VXP1cn5yLO4aGz8ZCPLmvxVONykc0FLBVz3XgbpFW9xY3O4iaSrpoYn9Ce0m+Txx0lPYlm5bt6C2F6hp0LaBACsekAZz0oAXCKAel9gj27l8vXNj0eN2J8fxQdsTDtZ6Pnnd73ATfK114ceLDHL2VyV8m1KxD5Cm+zFgB7AfZ0xBsN+KGBtPqha7971lZSUvjKvRNXnPk3xrzwTPGKL8vnJOUidsx+6KzSTPB/sk8L9YsEy9i023KZTQMXTv0IrLp8Bbm3V4wWGsdfmviLMq3x2QMSMXlpE00alCar2eSah0425POSpyEtLFEDj2tURVjP+LmKroc8bOILc= egoebelbecker@zaku
+---
+#[!] JENKINS_AGENT_SSH_PUBKEY:
+  >> Добавьте точное содержимое текстового файла, включая префикс ssh-rsa в начале.
+  >> Не заключайте его в кавычки.
+
+
+########################################################
+# Добавление нового агента в Jenkins UI на контроллере #
+########################################################
+
+  1) [Manage Jenkins] -> [Manage Nodes and Clouds]
+  2) Click (New Node)
+  3) Определяем агента Jenkins
+    3.1 В верхней части формы задать имя агента и установите корневой каталог Remote в /home/jenkins/agent.
+    3.2 в следующей части формы выбрать 'Использовать этот узел как можно чаще' в разделе Использование.
+    3.3 В разделе "Способ запуска" выбрать: "Launch agents via SSH"
+    3.4 В поле Host введите agent.
+        (Каждый контейнер может связаться с другими, используя имена своих контейнеров в качестве имен хостов)
+
+    3.5 Далее щелкнуть выпадающий список в разделе "Credentials"
+        и выберите тот, который вы только что определили.
+    3.6 Теперь в разделе "Host Key Verification Strategy" выберите "Non verifying Verification Strategy"
+[Advanced:]
+  Нажать кнопку "Advanced"
+  -> откроется страница расширенных настроек
+
+[!] You need to change one setting here!
+[!] Set the JavaPath to:
+---
+#/usr/local/openjdk-17/bin/java
+---
+# в примере: /usr/local/openjdk-11/bin/java
+#[!] А в контейнере на самом деле путь $JAVA_HOME такой:  /opt/java/openjdk
+---
+/opt/java/openjdk/bin/java
+---
+
+**********************
+* Что такое JavaPath *
+**********************
+
+  Этот путь java будет использоваться для запуска jvm. (/mycustomjdkpath/bin/java )
+  Если он пуст, Jenkins будет искать команду java в агенте.
+
+  Выражения типа $key или ${key} могут быть объявлены в java Path
+  и будут расширены до значений соответствующих ключей, объявленных в списке переменных окружения этого узла,
+    <или>
+  если их нет => в списке глобальных переменных окружения.
+
+
+Нажмите кнопку Save внизу, и теперь пришло время посмотреть, как запускается агент.
+Jenkins вернет вас к списку узлов. Щелкните на имени вашего нового узла.
+Затем щелкните на Log в меню слева.
+Самая важная запись, которую вы увидите, - Agent successfully connected and online.
+Но если вы посмотрите на другие записи, то увидите много информации о вашем агенте, включая SSH-ключ.
+
+
+---
+version: "3.3"
+
+services:
+
+  jenkins-agent-deb:
+    restart: always
+    image: jenkins/agent:bookworm-jdk17
+    privileged: true
+    user: root
+    container_name: agent_debian
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMPtNkZB0CAaQYIAxsuZIAmp17tG7yB38rSztRSxWeqwkKEUvVhAgouzZmQX+bTdI7jUyIFQFknQ9g5PVHlgzkU= devops@srv-cicd
+    expose:
+      - 22
+    networks:
+      - keeper-network
+
+  jenkins-agent-alpine:
+    restart: always
+    image: jenkins/agent:bookworm-jdk17
+    privileged: true
+    user: root
+    container_name: agent_alpine
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMPtNkZB0CAaQYIAxsuZIAmp17tG7yB38rSztRSxWeqwkKEUvVhAgouzZmQX+bTdI7jUyIFQFknQ9g5PVHlgzkU= devops@srv-cicd
+    expose:
+      - 22
+    networks:
+      - keeper-network
+
+  jenkins-agent-multiplatform:
+    restart: always
+    image: jenkins/agent:jdk17
+    privileged: true
+    user: root
+    container_name: agent_multiplatform
+    environment:
+      - JENKINS_AGENT_SSH_PUBKEY=ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBMPtNkZB0CAaQYIAxsuZIAmp17tG7yB38rSztRSxWeqwkKEUvVhAgouzZmQX+bTdI7jUyIFQFknQ9g5PVHlgzkU= devops@srv-cicd
+    expose:
+      - 22
+    networks:
+      - keeper-network
+
+networks:
+  keeper-network:
+
+---
+
+agent { node { label 'labelName' } }

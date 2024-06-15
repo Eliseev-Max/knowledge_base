@@ -1,0 +1,10 @@
+Log File Navigator (LNAV) - средство просмотра файлов журналов
+(A log file viewer for the terminal)
+
+[sources:]
+1) "The Logfile Navigator":
+  -> https://lnav.org/
+
+2) "Log File Navigator (LNAV) - средство просмотра файлов журналов":
+  -> https://redos.red-soft.ru/base/manual/redos-manual/utilites/lnav/
+

@@ -11,6 +11,11 @@ Jenkins Pipeline предоставляет переменные среды че
 # Список переменных среды: #
 ############################
 
+BRANCH_NAME
+  - переменная окружения env.BRANCH_NAME содержит имя текущей ветки репозитория
+  # Начиная с Pipeline Groovy Plugin 2.18, можно просто использовать BRANCH_NAME
+  # (env не является обязательным, но считается правилом "хорошего тона").
+
 BUILD_ID
   - Идентификатор текущей сборки, идентичный BUILD_NUMBER 
     (=> для сборок, созданных в версиях Jenkins 1.597+)
@@ -114,6 +119,7 @@ Jenkinsfile (Scripted Pipeline)
 		def envVarName = 'MY_VAR' 
 		env.setProperty(envVarName, 'my-value2')
 	}
+
 
 Пример использования токенов для удалённого запуска задач:
 http://172.29.24.22:8080/job/upload_and_run_tests/build?token=TOKEN_NAME 

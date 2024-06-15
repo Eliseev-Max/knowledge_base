@@ -1,0 +1,43 @@
+Jenkins Pipeline parameters
+
+#(https://www.jenkins.io/doc/book/pipeline/syntax/#parameters)
+
+Директива parameters содержит список параметров, которые пользователь должен указать при запуске pipeline.
+Значения этих параметров, заданных пользователем, становятся доступными для Pipeline steps через объект params,
+#(о его использовании см. в разделе Параметры, Декларативный конвейер:
+#-> https://www.jenkins.io/doc/book/pipeline/syntax/#parameters-example)
+
+Каждый параметр имеет Имя и Значение (Name and Value), в зависимости от типа параметра.
+Эта информация ЭКСПОРТИРУЕТСЯ КАК ПЕРЕМЕННЫЕ ОКРУЖЕНИЯ при запуске сборки,
+что позволяет ПОСЛЕДУЮЩИМ ЧАСТЯМ конфигурации сборки ПОЛУЧИТЬ ДОСТУП к этим значениям.
+Например:
+  используйте синтаксис ${PARAMETER_NAME} в оболочках POSIX, таких как bash и ksh,
+  синтаксис ${Env:PARAMETER_NAME} в PowerShell
+  или синтаксис %PARAMETER_NAME% в cmd.exe Windows.
+
+[Доступные параметры:]
+
+string
+A parameter of a string type, for example: parameters { string(name: 'DEPLOY_ENV', defaultValue: 'staging', description: '') }.
+
+text
+A text parameter, which can contain multiple lines, for example: parameters { text(name: 'DEPLOY_TEXT', defaultValue: 'One\nTwo\nThree\n', description: '') }.
+
+booleanParam
+A boolean parameter, for example: parameters { booleanParam(name: 'DEBUG_BUILD', defaultValue: true, description: '') }.
+
+choice
+A choice parameter, for example: parameters { choice(name: 'CHOICES', choices: ['one', 'two', 'three'], description: '') }. The first value is the default.
+
+password
+A password parameter, for example: parameters { password(name: 'PASSWORD', defaultValue: 'SECRET', description: 'A secret password') }.
+
+########################################
+## Как ссылаться на параметры задания ##
+########################################
+	params.<Имя_параметра>
+	При вставке в steps: ${params.имя_параметра}
+	‼ Параметры можно задать:
+	• в веб-интерфейсе ([v] 'Это - параметризованная сборка')
+	• в блоке parameters (между agent и stages{}) - Declarative pipeline
+	○ properties([parameters([...])]) - Scripted pipeline

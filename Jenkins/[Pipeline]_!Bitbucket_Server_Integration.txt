@@ -1,0 +1,171 @@
+Bitbucket Server Integration
+
+[sources:]
+
+1) "Bitbucket Server Integration": https://www.jenkins.io/doc/pipeline/steps/atlassian-bitbucket-server-integration/
+
+2) "Bitbucket Server Integration. Plugins site":
+   -> https://plugins.jenkins.io/atlassian-bitbucket-server-integration/
+
+3) "pipelineTriggers": https://www.jenkins.io/doc/pipeline/steps/params/pipelinetriggers/
+
+
+################
+# bbs_checkout #
+################
+
+
+bbs_checkout: BitbucketSCMStep
+
+  ● projectName : String
+      Enter the name of the Bitbucket Server project containing the repository you want Jenkins to build from. To find a project, start typing. If it doesn't appear in the search results, the credentials that you've chosen may not have read access to it and you'll need to provide different credentials.
+
+      To get Jenkins to build from a personal repository, enter a tilde (~) followed by repository owner's username. For example, ~jsmith.
+
+  ● repositoryName : String
+      Enter the Bitbucket Server repository you want Jenkins to build from. To find a repository, start typing. If it doesn't appear in the search results, the credentials that you've chosen may not have read access to it and you'll need to provide different credentials.
+
+To get Jenkins to build from a personal repository, enter its slug. This is the URL-friendly version of the repository name. For example, a repository called my example repo will have the slug my-example-repo, and you can see this in its URL, https://bitbucketserver.mycompany.com/myproject/my-example-repo.
+
+  ● branches (optional)
+      Array / List of Nested Object
+
+  ● name : String
+Specify the branches if you'd like to track a specific branch in a repository. If left blank, all branches will be examined for changes and built.
+
+The safest way is to use the refs/heads/<branchName> syntax. This way the expected branch is unambiguous.
+
+If your branch name has a / in it make sure to use the full reference above. When not presented with a full path the plugin will only use the part of the string right of the last slash. Meaning foo/bar will actually match bar.
+
+If you use a wildcard branch specifier, with a slash (e.g. release/), you'll need to specify the origin repository in the branch names to make sure changes are picked up. So e.g. origin/release/
+
+  Possible options:
+
+    <branchName>
+Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one. Better use refs/heads/<branchName>.
+E.g. master, feature1, ...
+
+    refs/heads/<branchName>
+Tracks/checks out the specified branch.
+E.g. refs/heads/master, refs/heads/feature1/master, ...
+
+    <remoteRepoName>/<branchName>
+Tracks/checks out the specified branch. If ambiguous the first result is taken, which is not necessarily the expected one.
+Better use refs/heads/<branchName>.
+E.g. origin/master
+
+    remotes/<remoteRepoName>/<branchName>
+Tracks/checks out the specified branch.
+E.g. remotes/origin/master
+
+    refs/remotes/<remoteRepoName>/<branchName>
+Tracks/checks out the specified branch.
+E.g. refs/remotes/origin/master
+
+    <tagName>
+This does not work since the tag will not be recognized as tag.
+Use refs/tags/<tagName> instead.
+E.g. git-2.3.0
+
+    refs/tags/<tagName>
+Tracks/checks out the specified tag.
+E.g. refs/tags/git-2.3.0
+
+    <commitId>
+Checks out the specified commit.
+E.g. 5062ac843f2b947733e6a3b105977056821bd352, 5062ac84, ...
+
+    ${ENV_VARIABLE}
+It is also possible to use environment variables. In this case the variables are evaluated and the result is used as described above.
+E.g. ${TREEISH}, refs/tags/${TAGNAME}, ...
+
+    <Wildcards>
+The syntax is of the form: REPOSITORYNAME/BRANCH. In addition, BRANCH is recognized as a shorthand of */BRANCH, '*' is recognized as a wildcard, and '**' is recognized as wildcard that includes the separator '/'. Therefore, origin/branches* would match origin/branches-foo but not origin/branches/foo, while origin/branches** would match both origin/branches-foo and origin/branches/foo.
+
+    :<regular expression>
+The syntax is of the form: :regexp. Regular expression syntax in branches to build will only build those branches whose names match the regular expression.
+
+  Examples:
+    :^(?!(origin/prefix)).*
+      matches: origin or origin/master or origin/feature
+      does not match: origin/prefix or origin/prefix_123 or origin/prefix-abc
+
+    :origin/release-\d{8}
+      matches: origin/release-20150101
+      does not match: origin/release-2015010 or origin/release-201501011 or origin/release-20150101-something
+
+    :^(?!origin/master$|origin/develop$).*
+      matches: origin/branch1 or origin/branch-2 or origin/master123 or origin/develop-123
+      does not match: origin/master or origin/develop
+
+  ● changelog : boolean (optional)
+Enable or Disable 'Include in changelog':
+If 'Include in changelog' is enabled for an SCM source, then when a build occurs, the changes from that SCM source will be included in the changelog.
+
+If 'Include in changelog' is disabled, then when a build occurs, the changes from this SCM source will not be included in the changelog.
+
+  ● credentialsId : String (optional)
+When running a job, Jenkins requires credentials to authenticate with Bitbucket Server. For example, to checkout the source code for builds. To do this, it needs credentials with access to the projects and repositories you want it to build from.
+
+You can provide Jenkins with credentials here by:
+
+selecting credentials from the list
+adding credentials as a Username with password (for the password, you can enter a Bitbucket Server password or a Bitbucket Server personal access token)
+In addition, you can provide Jenkins with SSH credentials below. If you do, Jenkins will use them for clone operations instead of the credentials you select here.
+
+  ● id : String (optional)
+mirrorName : String (optional)
+Choose the location that Jenkins should clone from when running this build. This can be the primary server or a mirror if one is available. To see available mirrors, first choose a Bitbucket Server project and repository.
+
+  ● poll : boolean (optional)
+Enable or Disable 'Include in polling'
+If 'Include in polling' is enabled or 'Include in changelog' is enabled, then when polling occurs, the job will be started if changes are detected from this SCM source.
+
+If 'Include in polling' is disabled and 'Include in changelog' is disabled, then when polling occurs, changes that are detected from this repository will be ignored.
+
+  ● serverId : String (optional)
+Choose the Bitbucket Server instance containing the repository you want Jenkins to build from. If you can't find your instance, check this plugin's configuration and try again.
+
+  ● serverName : String (optional)
+  ● sshCredentialsId : String (optional)
+If specified, Jenkins will use these credentials to check out the source code for builds. If no SSH credentials are specified, Jenkins will use the basic credentials instead.
+
+To provide Jenkins with SSH credentials, you can:
+
+choose credentials from the list
+add credentials as a SSH Username with private key (the username must be "git")
+
+
+##############
+# bbs_deploy #
+##############
+
+bbs_deploy: Wrapper step to notify Bitbucket Server of the deployment status.
+
+  ● environmentName : String
+A human-readable display name for the environment that was deployed to.
+
+  ● environmentKey : String (optional)
+This is a unique identifier for the environment in Bitbucket Server. You can name it something readable like MY-ENV, or you can leave it blank and have it auto-generated by the plugin.
+
+  ● environmentType : String (optional)
+The type of environment that was deployed to, or 'None' if the environment type does not apply.
+
+  ● environmentUrl : String (optional)
+
+
+######################
+# DeploymentNotifier #
+######################
+
+step([$class: 'DeploymentNotifier']): Notify Bitbucket Server of deployment
+  environmentName : String
+    A human-readable display name for the environment that was deployed to.
+
+  environmentKey : String (optional)
+    This is a unique identifier for the environment in Bitbucket Server. You can name it something readable like MY-ENV, or you can leave it blank and have it auto-generated by the plugin.
+
+  environmentType : String (optional)
+    The type of environment that was deployed to, or 'None' if the environment type does not apply.
+
+  environmentUrl : String (optional)
