@@ -1,0 +1,121 @@
+Запуск Kubernetes кластера для тестирования и разработки
+Практика в теле занятия
+
+
+1) Получаем токен Kubernetes
+  1.1) Проходим по ссылке: http://kubeconfig.praktikum-services.tech/.
+  1.2) Использую логин/пароль — student/student.
+  1.3) Нажимаю кнопку [log in with LDAP]
+  1.4) Ввожу свой логин и пароль от всех сервисов курса:
+       std-017-033
+       T17***O7
+
+  1.5) Получил свой Kubeconfig, скопируйте содержимое в файл и пользуйтесь.
+
+---<Рекомендации>---
+# Если у вас не установлен kubectl - предварительно установите его, выполнив команду:
+
+curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
+kubectl version --client
+
+[OUTPUT:>]
+Client Version: v1.29.3
+Kustomize Version: v5.0.4-0.20230601165947-6ce0bf390ce3
+
+[kubectl]
+
+# Затем копирую сгенерированый файл и сохраняю его в ~/.kube/config
+
+---
+
+# В качестве инструмента для запуска локальных кластеров k8s используем Minikube
+2) Скачиваю и устанавливаю Minikube на VM:
+---
+$ curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube_latest_amd64.deb
+$ sudo dpkg -i minikube_latest_amd64.deb
+---
+
+3) Настраиваю драйвер запуска кластера:
+---
+$ minikube config set driver docker
+---
+[OUTPUT:>]
+! These changes will take effect upon a minikube delete and then a minikube start
+
+4) Запускаю тестовый кластер:
+---
+minikube start
+---
+[OUTPUT:>]
+* minikube v1.32.0 on Ubuntu 20.04 (amd64)
+* Using the docker driver based on user configuration
+* Using Docker driver with root privileges
+* Starting control plane node minikube in cluster minikube
+* Pulling base image ...
+* Downloading Kubernetes v1.28.3 preload ...
+    > preloaded-images-k8s-v18-v1...:  403.35 MiB / 403.35 MiB  100.00% 30.95 M
+    > gcr.io/k8s-minikube/kicbase...:  453.90 MiB / 453.90 MiB  100.00% 28.63 M
+* Creating docker container (CPUs=2, Memory=2200MB) ...| E0411 11:26:07.241024  794843 network_create.go:103] failed to find free subnet for docker network minikube after 20 attempts: no free private network subnets                                                                                                                                                                                                                     found with given parameters (start: "192.168.49.0", step: 9, tries: 20)
+! Unable to create dedicated network, this might result in cluster IP change after restart: un-retryable: no free private network subnets found with given parameters (start: "192.168.49.0", step: 9, tries: 20)
+* Preparing Kubernetes v1.28.3 on Docker 24.0.7 ...
+  - Generating certificates and keys ...
+  - Booting up control plane ...
+  - Configuring RBAC rules ...
+* Configuring bridge CNI (Container Networking Interface) ...
+  - Using image gcr.io/k8s-minikube/storage-provisioner:v5
+* Verifying Kubernetes components...
+* Enabled addons: storage-provisioner, default-storageclass
+* Done! kubectl is now configured to use "minikube" cluster and "default" namespace by default
+
+[Установка kubectl. Материал из теории:]
+
+---
+$ curl -LO https://storage.googleapis.com/kubernetes-release/release/`curl \
+-s https://storage.googleapis.com/kubernetes-release/release/stable.txt`/bin/linux/amd64/kubectl
+
+$ chmod +x kubectl 
+$ sudo cp kubectl /usr/local/bin/
+---
+
+# Проверим работоспособность kubectl + узнаем версию:
+---
+$ kubectl version
+Client Version: version.Info{Major:"1", Minor:"23", GitVersion:"v1.23.3", Platform:"linux/amd64"}
+#[OUTPUT:]
+Server Version: version.Info{Major:"1", Minor:"23", GitVersion:"v1.23.1", Platform:"linux/amd64"}
+---
+
+# текущий контекст можно узнать командой config:
+---
+$ kubectl config current-context
+
+#[OUTPUT:]
+minikube
+---
+
+# Посмотрим конфигурацию этого контекста:
+---
+$ kubectl config get-contexts minikube
+
+CURRENT   NAME       CLUSTER    AUTHINFO   NAMESPACE
+*         minikube   minikube   minikube   default
+---
+
+******************************
+* Синтаксис командной строки *
+*        (общий вид)         *
+******************************
+
+$ kubectl [command] [TYPE] [NAME] [flags]
+
+  [command] = при работе с ресурсами кластера команда определяет глагол выполняемого действия,
+              например, get, create или delete.
+
+  [TYPE] = название типа ресурса кластера.
+           Содержимое кластера разберём позже.
+
+  [NAME] = имя ресурса в кластере.
+
+  [flags] = дополнительные флаги,
+            например, для изменения формата вывода.

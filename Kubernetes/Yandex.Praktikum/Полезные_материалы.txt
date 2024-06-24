@@ -1,0 +1,42 @@
+Всем привет!
+
+Дублирую пост с ссылками вебинара в инфо, чтобы не потерять
+
+Всем привет!
+
+Ссылки с вебинара по Кубу
+
+Kubernetes the hard way
+https://github.com/kelseyhightower/kubernetes-the-hard-way
+
+Про CNI
+
+https://habr.com/ru/companies/flant/articles/329830/
+https://habr.com/ru/companies/flant/articles/485716/
+
+flanel – https://github.com/flannel-io/flannel
+calico – https://docs.tigera.io/calico/latest/about
+
+Про SCI
+
+https://docs.ceph.com/en/latest/mgr/rook/#configuration
+
+MetalLB
+
+https://metallb.org/
+
+Ingreses
+
+https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/
+https://kubernetes.github.io/ingress-nginx/deploy/#bare-metal-clusters
+
+Metric server
+
+https://github.com/kubernetes-sigs/metrics-server
+https://github.com/kubernetes-sigs/prometheus-adapter
+
+Плюс работа алгоритма RAFT
+
+https://raft.github.io/
+
+За счёт его работает отказоустойчивость etcd в кластере

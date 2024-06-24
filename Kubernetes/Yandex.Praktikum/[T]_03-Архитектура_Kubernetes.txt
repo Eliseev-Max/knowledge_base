@@ -1,0 +1,698 @@
+Архитектура Kubernetes
+
+Из этого урока вы узнаете:
+  * Из каких компонентов состоит кластер Kubernetes.
+  * Что обеспечивает работу управляющей части кластера.
+  * Что обеспечивает работу приложений на рабочих нодах.
+
+
+1. Выведите список подов в Minikube в неймспейсе kube-system:
+---
+kubectl --namespace kube-system get pods
+
+[OUTPUT:]
+E0416 07:00:18.028181  671414 memcache.go:265] couldn't get current server API group list: Get "https://172.17.0.3:8443/api?timeout=32s": dial tcp 172.17.0.3:8443: connect: no route to host
+E0416 07:00:21.104192  671414 memcache.go:265] couldn't get current server API group list: Get "https://172.17.0.3:8443/api?timeout=32s": dial tcp 172.17.0.3:8443: connect: no route to host
+E0416 07:00:24.172178  671414 memcache.go:265] couldn't get current server API group list: Get "https://172.17.0.3:8443/api?timeout=32s": dial tcp 172.17.0.3:8443: connect: no route to host
+E0416 07:00:27.244135  671414 memcache.go:265] couldn't get current server API group list: Get "https://172.17.0.3:8443/api?timeout=32s": dial tcp 172.17.0.3:8443: connect: no route to host
+E0416 07:00:30.316289  671414 memcache.go:265] couldn't get current server API group list: Get "https://172.17.0.3:8443/api?timeout=32s": dial tcp 172.17.0.3:8443: connect: no route to host
+Unable to connect to the server: dial tcp 172.17.0.3:8443: connect: no route to host
+#_EOF_#
+
+#<_что должно получиться_>
+$ kubectl --namespace kube-system get pods
+
+#[OUTPUT:]
+NAMESPACE              NAME                             READY   STATUS
+kube-system            etcd-minikube                    1/1     Running
+kube-system            kube-apiserver-minikube          1/1     Running
+kube-system            kube-controller-manager-minikube 1/1     Running
+kube-system            kube-scheduler-minikube          1/1     Running
+kube-system            kube-proxy-mkmx6                 1/1     Running
+####
+
+---<$ minikube --help>---
+minikube provisions and manages local Kubernetes clusters optimized for development workflows.
+
+Basic Commands:
+  start            Starts a local Kubernetes cluster
+  status           Gets the status of a local Kubernetes cluster
+  stop             Stops a running local Kubernetes cluster
+  delete           Deletes a local Kubernetes cluster
+  dashboard        Access the Kubernetes dashboard running within the minikube cluster
+  pause            pause Kubernetes
+  unpause          unpause Kubernetes
+
+Images Commands:
+  docker-env       Provides instructions to point your terminal's docker-cli to the Docker Engine inside minikube.
+(Useful for building docker images directly inside minikube)
+  podman-env       Configure environment to use minikube's Podman service
+  cache            Manage cache for images
+  image            Manage images
+
+Configuration and Management Commands:
+  addons           Enable or disable a minikube addon
+  config           Modify persistent configuration values
+  profile          Get or list the current profiles (clusters)
+  update-context   Update kubeconfig in case of an IP or port change
+
+Networking and Connectivity Commands:
+  service          Returns a URL to connect to a service
+  tunnel           Connect to LoadBalancer services
+
+Advanced Commands:
+  mount            Mounts the specified directory into minikube
+  ssh              Log into the minikube environment (for debugging)
+  kubectl          Run a kubectl binary matching the cluster version
+  node             Add, remove, or list additional nodes
+  cp               Copy the specified file into minikube
+
+Troubleshooting Commands:
+  ssh-key          Retrieve the ssh identity key path of the specified node
+  ssh-host         Retrieve the ssh host key of the specified node
+  ip               Retrieves the IP address of the specified node
+  logs             Returns logs to debug a local Kubernetes cluster
+  update-check     Print current and latest version number
+  version          Print the version of minikube
+  options          Show a list of global command-line options (applies to all commands).
+
+Other Commands:
+  completion       Generate command completion for a shell
+  license          Outputs the licenses of dependencies to a directory
+---
+
+
+####_РЕШЕНИЕ_ПРОБЛЕМЫ_####
+
+---<$ minikube status>---
+
+minikube
+type: Control Plane
+host: Stopped
+kubelet: Stopped
+apiserver: Stopped
+kubeconfig: Stopped
+---
+
+--> $ kubectl start
+...
+
+--> $ kubectl --namespace kube-system get pods
+[OUTPUT:]
+NAME                               READY   STATUS    RESTARTS        AGE
+coredns-5dd5756b68-znlbp           0/1     Running   1 (4d18h ago)   4d19h
+etcd-minikube                      1/1     Running   1 (4d18h ago)   4d19h
+kube-apiserver-minikube            1/1     Running   1 (2m18s ago)   4d19h
+kube-controller-manager-minikube   1/1     Running   1 (4d18h ago)   4d19h
+kube-proxy-n7pwx                   1/1     Running   1 (4d18h ago)   4d19h
+kube-scheduler-minikube            1/1     Running   1 (4d18h ago)   4d19h
+storage-provisioner                1/1     Running   2 (4d18h ago)   4d19h
+---
+####____####____####____####
+
+[Резюме:]
+
+1)  $ minikube status
+## если статусы 'Stopped', то:
+
+2) $ kubectl start
+# если запуск прошёл успешно, то
+
+3) $ kubectl --namespace kube-system get pods
+
+
+##########################
+##########################
+## Структура Kubernetes ##
+##########################
+##########################
+
+Кластер Kubernetes состоит из 2 больших частей: 
+  ➤ Kubernetes Control Plane Components
+      = слой управления кластером
+
+  ➤ Kubernetes Nodes
+    = место, где «живут» приложения
+
+
+############################
+# Kubernetes Control Plane #
+############################
+
+Kubernetes Control Plane Components
+  — это компоненты, которые
+    + обрабатывают пользовательские ЗАПРОСЫ НА ЗАПУСК Pod'ов
+      <и>
+    + присматривают за этими Pod'ами на протяжении их жизненного цикла.
+
+Control Plane состоит из нескольких компонентов-сервисов:
+  * kube-api-server
+  * etcd
+  * kube-scheduler
+  * kube-controller-manager
+
+Эти сервисы можно запустить НА ЛЮБОМ ХОСТЕ(*) в кластере НЕЗАВИСИМО ДРУГ ОТ ДРУГА,
+[но] обычно их запускают
+  -> на выделенном хосте
+    <и>
+  -> сразу пачкой.
+
+(* Хост — это просто какая-то машина в кластере, НЕ Kubernetes Nodes)
+
+Чтобы повысить ОТКАЗОУСТОЙЧИВОСТЬ кластера, поднимают несколько таких хостов.
+
+
+*******************
+* kube-api-server *
+*******************
+
+kube-api-server
+  — API-сервер (http-сервер), через который происходит взаимодействие с кластером.
+  
+  kubectl и Kubernetes Dashboard обращаются к Kubernetes API.
+
+[!] ВСЕ компоненты кластера взаимодействуют ДРУГ С ДРУГОМ также через API.
+
+API-сервер выступает фронтендом слоя управления и реализует механизмы авторизации и аутентификации
+(например, конфигурация users в kubeconfig).
+
+[API-сервер]:
+  1) Получает запрос;
+  2) (обязательно!) валидирует запрос;
+  3) применяются admission controller plugins =
+     = контроллеры доступа (если таковые имеются);
+  4) ЗАПРОС проходит || пользователю возвращается ошибка
+
+  КОНТРОЛЛЕРЫ ДОСТУПА (Admission Controllers) могут:
+    * проверить дополнительные правила, специфичные для вашего кластера,
+      <либо>
+    * добавить какие-то действия к запросу ( == модифицировать запрос).
+
+[Например:]
+  NamespaceAutoProvision:
+  --> автоматически создаст namespace, если пришёл запрос в НЕСУЩЕСТВУЮЩИЙ namespace;
+
+  PodSecurity:
+  --> проверит, удовлетворяет ли создаваемый Pod политике безопасности, определённой в кластере.
+
+# Документация подробнее расскажет про:
+  * Using Admission Controllers
+    (https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/)
+    <и>
+  * Dynamic Admission Control
+    (https://kubernetes.io/docs/reference/access-authn-authz/extensible-admission-controllers/)
+
+После
+  + аутентификации,
+  + авторизации,
+  + проверки и корректировки запроса
+
+[API сервер]:-> сохраняет конфигурацию в постоянное хранилище кластера => etcd
+(если, конечно, всё в порядке)
+
+
+
+********
+* etcd *
+********
+
+etcd
+  — это строго согласованное распределённое хранилище типа «ключ-значение»,
+  обеспечивающее надёжный способ хранения данных, к которым может обращаться распределённая система или кластер машин.
+
+«Строго согласованное» и «распределённое» означают,
+  = что даже если «упадёт» один инстанс из кластера etcd,
+    то данным и кластеру ничего не будет угрожать, кластер продолжит работать.
+
+Такая работа возможна благодаря RAFT протоколу, который обеспечивает согласованность данных в кластере.
+("Raft library": https://github.com/etcd-io/raft/blob/main/README.md)
+
+[Роль etcd внутри K8s:]
+  Внутри Kubernetes etcd используется в качестве глобального склада, где хранится СОСТОЯНИЕ КЛАСТЕРА.
+
+[!] Из всех компонентов Kubernetes !ТОЛЬКО API-сервер! взаимодействует с хранилищем etcd,
+    остальные обращаются к API для чтения или изменения состояния ресурсов.
+
+
+[Механизм нотификаций об изменениях состояния:]
+
+  API-сервер поддерживает эффективный механизм нотификаций об изменениях состояния:
+    специальные watch запросы к API позволяют клиенту получать сообщения об изменениях,
+     не потребляя ресурсы сервера за счёт постоянных опросов.
+
+  Этот механизм можно использовать при работе с kubectl,
+  (например):
+   # для отслеживания изменения состояния Pod'ов в процессе обновления приложения:
+---
+$ kubectl get pods --watch
+---
+
+  # Если в кластере не произойдут какие-либо изменения, то watch будет «висеть» в их ожидании.
+
+(->) поддержка нотификаций API-сервера работает на механизме watch, который предоставляет etcd:
+(https://etcd.io/docs/v3.2/learning/api/#watch-api)
+
+
+[etcd в проде:]
+
+  etcd в Production занимается:
+    ➜ кластеризацией
+    ➜ заботится о резервном копировании состояния кластера.
+      (в etcd для этого существует эффективный механизм моментальных снимков (snapshots) хранилища)
+
+
+
+******************
+* kube-scheduler *
+******************
+
+  kube-scheduler — планировщик, который распределяет Pod'ы между рабочими нодами.
+
+(User) --{Запустить Pod'ы}--> [Kubernetes]:
+  [Планировщик]
+    - анализирует требования и настройки Pod'ов,
+    - сравнивает с состоянием и настройками нод,
+    - находит подходящие рабочие ноды и выбирает одну из них.
+
+[!] Если НИ ОДНА ИЗ НОД не подойдёт по критериям:
+    —> Pod останется нераспределённым (unscheduled) до тех пор,
+       пока не появится возможность развернуть его на одной из рабочих нод.
+
+#(Что влияет на выбор целевой рабочей ноды?)
+
+= Две сущности:
+  1) Политики (Scheduling Policies)
+       = позволяют задавать настройки для работы планировщика,
+         чтобы БОЛЕЕ ГИБКО УПРАВЛЯТЬ этапами выбора рабочей ноды
+       #! (для версии Kubernetes старше 1.23).
+
+  2) Профили(Scheduling Profiles)
+     = аналогично Scheduling Policies позволяют:
+       -> задавать настройки планировщика
+         <и>
+       -> создавать файлы конфигурации для планировщика:
+       #! "kind: KubeSchedulerConfiguration" (для Kubernetes новее 1.23).
+
+(+) "Выбор целевой ноды"
+# (после этого)
+
+1) [Планировщик]---{сообщает свой выбор}--> [API-сервер]
+
+2) [API-сервер]---{вносит данные}-->[etcd]
+
+3) [Kubelet (на_целевой_машине)]---{Запускает}-->[Pod]
+
+(Kubelet = сущность, которая умеет управлять Pod'ами)
+
+
+#(Когда ещё активизируется Планировщик?)
+  => когда одна из рабочих Node ВЫХОДИТ ИЗ СТРОЯ
+     и нужно ПЕРЕРАСПРЕДЕЛИТЬ Pod'ы между доступными Node'ами.
+
+
+[Если есть необходимость в ПРИВЯЗКЕ Pod'ов к определённым рабочим узлам кластера:]
+
+  -> предусмотрены механизмы
+    + как со стороны конфигурации Pod'ов,
+    + так и конфигурации серверов
+
+[Механизмы:]
+  ● Node labels
+    (https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector)
+
+  ● Affinity and anti-affinity
+    (https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity)
+
+  ● nodeName
+    (https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodename)
+
+
+
+***************************
+* kube-controller-manager *
+***************************
+
+  kube-controller-manager — менеджер контроллеров, отвечающий за работу кластера:
+    ➜ отслеживает СОСТОЯНИЕ рабочих узлов
+      <и>
+    ➜ контролирует процесс МАСШТАБИРОВАНИЯ Pod'ов.
+
+
+[Контроллер в Kubernetes] = робот, отслеживающий состояние "подопечных" ресурсов.
+
+Ресурс:
+  = рабочая нода;
+  = Pod
+
+[Контроллер]:
+  ➜ сравнивает текущее состояние с требуемым;
+  ➜ выполняет действия по корректировке
+    (если есть расхождения: "текущее состояние" != "требуемое состояние")
+
+[!] При этом изменение одного ресурса может повлечь за собой изменения связанных ресурсов ➜
+[!] ➜ тогда будут вызываться контроллеры, ответственные за связанные ресурсы.
+
+
+Контроллеры бывают:
+  * Стандартные.
+      (например: Deployment, Node или Service)
+
+  * Контроллеры, которые можно ДОБАВЛЯТЬ в конфигурацию.
+      (например: чаще всего добавляют:
+        -> Istio ingress controller,
+        -> HAProxy ingress controller
+        и другие
+        => для настройки сетевого доступа к приложениям <=
+
+(!) Когда кластер Kubernetes развёрнут в облаке,
+    компонент cloud-controller-manager обеспечивает ИНТЕГРАЦИЮ с API облачного провайдера.
+
+
+!!!!!!!!!!!!!
+! Задание 2 !
+!!!!!!!!!!!!!
+*****************************************************
+*                  Траблшутинг                      *
+* Какой компонент будем проверять в первую очередь? *
+*****************************************************
+
+Запросы на увеличение количества реплик Pod'ов НЕ ВЫПОЛНЯЮТСЯ |==> kube-controller-manager
+
+#(kube-controller-manager отвечает за МАСШТАБИРОВАНИЕ Pod'ов)
+
+---
+
+При запуске команды `kubectl` получаем ошибку:                |
+"The connection to the server  kubernetes:6443 was refused -  |==> kube-api-server
+did you specify"                                              |
+
+#(kubectl общается напрямую с kube-api-server)
+---
+
+Ошибка в логах kube-api-server:                          |
+"transport: Error while dialing dial tcp 127.0.0.1:2379: |==> etcd
+connect: connection refused"                             |
+#* dialing = "набор номера"
+---
+
+Pod'ы не переходят в состояние  `Running` долгое время  |==> kube-scheduler
+#(возможная причина: нет подходящей по параметрам/ресурсам Node)
+
+
+
+####################
+# Kubernetes Nodes #
+####################
+
+  Kubernetes Nodes
+    — серверы, рабочие узлы кластера, на которых запускаются контейнеризированные приложения.
+
+  Каждая такая машина должна включать:
+    ► kubelet
+    ► Container Runtime
+    ► kube-proxy
+
+
+***********
+* kubelet *
+***********
+
+  Сервис kubelet:
+    ➜ получает задачи от API-сервера на запуск контейнеров
+      <и>
+    ➜ контролирует состояние этих контейнеров.
+
+[!] Сам kubelet контейнеры НЕ ЗАПУСКАЕТ,
+    а взаимодействует со средой выполнения ( = Container Runtime)
+    через специальное API = Container Runtime Interface (CRI).
+
+[При старте сервиса:]
+  kubelet:
+    ➜ регистрирует рабочий узел в кластере Kubernetes
+      <и>
+    ➜ постоянно отслеживает состояние запущенных Pod'ов.
+
+***************************************************
+*[!] Когда приложение в контейнере Pod'а упадёт,  *
+  именно kubelet "ПЕРЕЗАПУСТИТ сбоящий контейнер. *
+***************************************************
+
+
+*********************
+* Container Runtime *
+*********************
+
+  Среда выполнения контейнеров Container Runtime
+    — это сервис, выполняющий ЗАПУСК КОНТЕЙНЕРОВ на рабочем узле.
+
+  Сообщество Kubernetes разработало спецификацию CRI для унификации правил взаимодействия с Container Runtime.
+
+  В настоящий момент популярны:
+    ● containerd (из экосистемы Docker)
+      <и>
+    ● CRI-O (активно используется в OpenShift).
+
+
+**************
+* kube-proxy *
+**************
+
+  — небольшой, но производительный ПРОЦЕСС, который обеспечивает работу концепции Service внутри кластера Kubernetes.
+
+  Детали работы и назначение этой концепции -> ПОЗЖЕ.
+
+  kube-proxy настраивает СЕТЕВЫЕ ПРАВИЛА на рабочем узле,\
+  обеспечивающие ДОСТУП к Pod'ам.
+
+
+!!!!!!!!!!!!!
+! Задание 3 !
+!!!!!!!!!!!!!
+*****************************************************
+*                  Траблшутинг                      *
+* Какой компонент будем проверять в первую очередь? *
+*****************************************************
+
+Команда `kubectl get nodes` показывает статус узла: NotReady  |==> kubelet
+  
+---
+
+Развёрнутое в Kubernetes приложение недоступно по сети       |==> kube-proxy
+как снаружи, так и изнутри кластера                          |
+
+---
+
+Ошибка в логах kubelet:                                             |
+Cannot connect to thr Docker daemon at unix:///var/run/docker.sock. |==> Container Runtime
+Is the docker daemon running?                                       |
+
+
+
+##############################
+# Взаимодействие компонентов #
+##############################
+
+Допустим, на понятном для Kubernetes языке мы
+  ➜ попросили cоздать Pod и
+  ➜ сохранили в YAML формате в pod.yaml.
+#(так можно делать и это работает:)
+
+  1) Применяем в кластер команду:
+---
+$ kubectl apply -f pod.yaml
+---
+
+  2) kubectl:
+     ➜ смотрит в конфиг ~/.kube/config,
+     ➜ ищет нужный сервер kube-api-server  и
+     ➜ отправляет ему запрос.
+
+  3) kube-api-server:
+     ➜ получает запрос на создание Pod'а,
+     ➜ затем проверяет и
+       #(если всё ок)#
+     ➜ сохраняет его в etcd.
+
+     Кроме того, через kubectl он «выводит» пользователю сообщение:
+       (+) "Pod создан"
+         <или>
+       (-) ошибку (если что-то пошло не так)
+
+  4) etcd сообщает kube-api-server, что в нём изменилась информация;
+     kube-api-server -{вызывает}-> kube-scheduler.
+
+  5) kube-scheduler 
+       ➜ выбирает для Pod'а Node, на котором он должен быть запущен;
+          #("выбрал" || "не может выбрать")
+
+       ➜ kube-scheduler отдаёт эту информацию kube-api-server;
+
+     [kube-api-server]: ➜ обновляет информацию о Pod'е в etcd.
+
+  6) [etcd] снова сообщает kube-api-server: "Есть изменения!"
+
+     kube-api-server ➜{обращается к}➜ kubelet на «выбранном» узле:
+       ([kube-api-server]: "Надо бы Pod запустить")
+
+  7) kubelet ➜{обращается к}➜ Container Runtime.
+       ([kubelet]: "Надо бы создать контейнер(ы)")
+
+     [Container Runtime]:
+       ➜ выполняет указание kubelet;
+       ➜ отдаёт информацию обратно kubelet
+
+     kubelet ➜{отдает информацию}➜ kube-api-server
+
+     kube-api-server ➜{записывает информацию в}➜ etcd
+
+
+********************************************************************
+* Чем в это время занимаются kube-controller-manager и kube-proxy? *
+********************************************************************
+
+[kube-controller-manager]:
+  ➜ так же отслеживает изменения в кластере через kube-api-server
+    (как в примере выше);
+  ➜ вносит необходимые изменения в кластере.
+
+(Например:)
+
+  количество реплик у Pod'a:
+    - должно быть 3,
+    - запушено всего 2.
+
+  Тогда kube-controller-manager создаст недостающий Pod
+  (по схожей логике, что и в примере выше)
+
+
+[kube-proxy]:
+  отвечает за сеть.
+  Он 
+  ➜ отслеживает состояние кластера (как и все) через kube-api-server и
+  ➜ поддерживает актуальное состояние сети с помощью правил iptables,
+    которые отправляют трафик в «правильные» Pod'ы.
+[+]➜ он ещё занимается балансировкой трафика.
+
+
+
+###########################################################
+# Дополнительные (необязательные) компоненты kube add-ons #
+###########################################################
+
+  Кластер Kubernetes редко запускается без аддонов.
+  Аддоны добавляют удобства работы с Kubernetes.
+
+---< Installing Addons >---
+https://kubernetes.io/docs/concepts/cluster-administration/addons/
+---
+
+[Примеры самых популярных:]
+
+  * DNS-сервис (часто используется CoreDNS)
+      ➜ обеспечивает внутреннее разрешение имён для компонентов кластера и развёртываемых приложений.
+
+  * Kubernetes Dashboard
+      ➜ панель управления, позволяющая
+         + отображать в веб-интерфейсе информацию о состоянии кластера
+         + производить некоторые действия с ресурсами.
+
+
+##############################
+# Сети в кластере Kubernetes #
+##############################
+
+Можно выделить три уровня сети в кластере Kubernetes:
+  1) HostNetwork
+       - это обычная сеть рабочей ноды.
+       С её помощью УЗЛЫ КЛАСТЕРА общаются с Control Plane
+       и по адресу в этой сети можно подключиться к рабочей ноде по ssh.
+       Приложение можно сделать доступным на каком-либо порту одной или всех рабочих нод.
+
+  2) PodNetwork
+       - внутрення сеть для Pod'ов, которая создаётся помимо обычной сети на каждой рабочей ноде.
+       Каждый Pod на ноде получает в этой сети IP-адрес и способен видеть соседние Pod-ы.
+       При этом доступ к контейнеру внутри ноды будет осуществляться через IP-адрес Pod-а + порт контейнера.
+       Можно настраивать доступ к приложению, используя адрес внутренней сети.
+
+  3) ServiceNetwork
+       Service — это сущность Kubernetes,
+       которая позволяет на более высоком (логическом) уровне настраивать ДОСТУПЫ к приложениям.
+       С помощью сервисов можно, например:
+         -> открыть порт на ВСЕХ нодах, по которому будет доступно приложение,
+            или использовать балансировку
+
+[!] Но в реальном мире доступ к приложениям в контейнерах настраивается сложнее:
+    -> доступ к сервисам настраивается через ingress-контроллер.
+
+***< Практика в теории >***
+
+Шаблон kubeconfig выглядит следующим образом: 
+---<kubeconfig>---
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority-data: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUM1ekNDQWMrZ0F3SUJBZ0lCQURBTkJna3Foa2lHOXcwQkFRc0ZBREFWTVJNd0VRWURWUVFERXdwcmRXSmwKY201bGRHVnpNQjRYRFRJeU1ETXhPVEE1TkRVeE9Gb1hEVE15TURNeE5qQTVORFV4T0Zvd0ZURVRNQkVHQTFVRQpBeE1LYTNWaVpYSnVaWFJsY3pDQ0FTSXdEUVlKS29aSWh2Y05BUUVCQlFBRGdnRVBBRENDQVFvQ2dnRUJBTDZWCmNXUmVxVkk4TFFhS3pwV0hXRWd3ZGw4SGtPaEJOZGIxbFZWdmxPUWY5eWhQRFo2Zk5YZzlQc09PdEN2aDVqQ0EKOEFxVHFuY0hTTFZCWjRQZ3d3M3lSZVVjSWkwZWhSbThPMkNMQlJMU3RhS1N1eG1vUmdWaE1xOEh2aWptc1FFOApyM2dlckRaQXlCekcvRk9nUWI3OEhISXJxdE93TmVmQllSaFRSYXNMa0VLcHRpOXhrZmNwQkdYZ2pxVUFQZEZECmJJYmNINmVOY0NzeGRham01KzdwYVFLbzVGUzZGVmlpbW50MHlTaXR0RjFVVTlTdlluTVQvRmcvNXZKVmJiNUQKRGxvKzhzbWZ0a2RydXIyR0hQd1BLazNBTWc5Qk9GOVNzbWZjVjB0M3I5aWg4ZGY0bzJUZmVzZGU0TlhRbWl5Nwo2SmRiQTVvNkF6a3ZmTVhUaTRrQ0F3RUFBYU5DTUVBd0RnWURWUjBQQVFIL0JBUURBZ0trTUE4R0ExVWRFd0VCCi93UUZNQU1CQWY4d0hRWURWUjBPQkJZRUZHTEYxWEVkZ3hlWW54TDkxRUdkODdsNTFXRmxNQTBHQ1NxR1NJYjMKRFFFQkN3VUFBNElCQVFCQ25nZURjY2JzUzRhQlBqbWZCcmpNbjAwTW5VR1dKUjdBelpqUXFOMzZUdlhBQXl6dgpESkVDWHpJWFJITVEzYlBiWTVvU3NZRFhRckdPaVBPNGZYV2cyazBVb2hpUDNoaUlycm5nLzBMMzRuOWV4bm1CCnRac3plVnNqMnNkY2ptNWNVV2E4S1VtbXpIQVBRcWUrMzh6N2VJalJPa2ZpWUJ3emJxbnlWUXdvYzRZUU5mdW0KdG1lMDY1NE45am1RYzFraTlJMVJYbUpRaHBZUmdONk95V3dUbndIVHJuTXozYnVSQXF5MzBpZjIzMUlGbk1NbQpwZjFkVlN5NHhRd04rcEN1dlFKTytmMkNwL0piOW5CRDBJTXBzK1V1RnlSOXRaaDlzeDRyMjhkRXN2ZVlsRExtCmEzRnFEUkVhbEZQSlZod0RlZDErOThwd1VlQ1dvQTQ4aUJzaQotLS0tLUVORCBDRVJUSUZJQ0FURS0tLS0tCg==
+    server: https://84.201.153.31
+  name: yc-managed-k8s
+contexts:
+- context:
+    cluster: yc-managed-k8s
+    namespace: <namespace_из_письма>
+    user: <namespace_из_письма>
+  name: student-context
+current-context: student-context
+kind: Config
+preferences: {}
+users:
+- name: <namespace_из_письма>
+  user:
+    token: <Токен_из_письма>
+---
+
+# Установите текущий контекст:
+---
+$ kubectl config use-context <contextname> --kubeconfig=<your_kubeconfig_file>
+===
+kubectl config use-context student-context --kubeconfig=~/.kube/kubeconfig
+kubectl config use-context std-017-033@yc-managed-k8s --kubeconfig=/home/student/.kube/kubeconfig
+---
+---[OUTPUT]---
+error: no context exists with the name: "student-context"
+---
+# При явном указании файла kubeconfig выводится ошибка
+# Без опции --kubeconfig работает нормально и выводит:
+---[OUTPUT]---
+Switched to context "std-017-033@yc-managed-k8s".
+---
+
+# Теперь можно вывести список Pod'ов
+---
+$ kubectl get pods
+---
+
+---[OUTPUT]---
+No resources found in std-017-033 namespace.
+---
+
+########################
+# Ключевые мысли урока #
+########################
+  * Работу кластера Kubernetes поддерживают управляющие компоненты.
+  * На рабочих нодах кластера запускаются процессы, обеспечивающие работу развёртываемых приложений.
+  * Minikube — хороший инструмент для ЛОКАЛЬНОГО тестирования и разработки,
+    в то время как надёжный отказоустойчивый кластер Kubernetes можно ЗАПУСТИТЬ В ОБЛАКЕ.
+  * Для этого есть Managed Kubernetes, а о сложности уже позаботились облачные провайдеры.
+
+[ Полезные материалы: ]
+-> Kubernetes Cluster Architecture
+(https://kubernetes.io/docs/concepts/architecture/)
+
+-> Kubernetes In Action [book]
+(https://www.oreilly.com/library/view/kubernetes-in-action/9781617293726/)
+
+-> OpenShift
+(https://docs.openshift.com/)
+
+-> Managed Service for Kubernetes
+(https://yandex.cloud/ru/docs/managed-kubernetes/?utm_referrer=https%3A%2F%2Fpracticum.yandex.ru%2F)
+

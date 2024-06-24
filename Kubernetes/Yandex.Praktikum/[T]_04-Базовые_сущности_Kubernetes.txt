@@ -1,0 +1,1320 @@
+Базовые сущности Kubernetes
+
+Из этого урока вы научитесь:
+  * Использовать основные сущности Kubernetes.
+  * С помощью утилиты kubectl:
+    -> просматривать базовые сущности на кластере   и
+    -> получать о них детальную информацию.
+  * Узнавать, как через kubectl получать ЛОГИ и попадать ВНУТРЬ КОНТЕЙНЕРА.
+
+
+[*] Когда мы подключаемся к кластеру, мы видим,
+     что есть Node, на которых запускаются сущности Kubernetes —
+     — хосты (виртуалки, железки и остальное)
+     с установленным софтом, чтобы запускать на них контейнеры.
+
+[!] Используя kubectl с атрибутом get, мы можем узнать, какие Node использует наш кластер:
+---
+$ kubectl get nodes
+#[OUTPUT:]
+
+NAME                        STATUS   ROLES    AGE   VERSION
+cl17it1ti54cda2q2d0h-evow   Ready    <none>   22d   v1.20.11
+cl17it1ti54cda2q2d0h-iciw   Ready    <none>   22d   v1.20.11
+cl17it1ti54cda2q2d0h-ukyh   Ready    <none>   22d   v1.20.11
+cl17it1ti54cda2q2d0h-ykyk   Ready    <none>   22d   v1.20.11
+---
+
+***********************************************************
+* Node, указанные в kubectl,                              *
+* — это больше область физически представленных ресурсов, *
+* ничего не говорящая о приложении, которое мы запускаем. *
+***********************************************************
+
+[!] появилась возможность сокращать названия сущностей, с которыми мы хотим работать.
+[>] Чтобы посмотреть шпаргалку, а точнее поддерживаемые API ресурсы кластера, надо ввести
+
+**************************
+*$ kubectl api-resources *
+**************************
+
+[Пример:>>]
+---< $ kubectl api-resources >---
+#[OUTPUT:]
+
+NAME                              SHORTNAMES   APIVERSION                             NAMESPACED   KIND
+endpoints                         ep           v1                                     true         Endpoints
+events                            ev           v1                                     true         Event
+namespaces                        ns           v1                                     false        Namespace
+nodes                             no           v1                                     false        Node
+persistentvolumeclaims            pvc          v1                                     true         PersistentVolumeClaim
+persistentvolumes                 pv           v1                                     false        PersistentVolume
+pods                              po           v1                                     true         Pod
+serviceaccounts                   sa           v1                                     true         ServiceAccount
+services                          svc          v1                                     true         Service
+apiservices                                    apiregistration.k8s.io/v1              false        APIService
+storageclasses                    sc           storage.k8s.io/v1                      false        StorageClass
+volumeattachments                              storage.k8s.io/v1                      false        VolumeAttachment
+---
+
+## Persistent volume claim = постоянное требование тома
+## persistent volumes = постоянные тома
+
+#=> не нужно каждый раз писать `$ kubectl get nodes`; достаточно указать:
+$ kubectl get no
+
+
+*******
+* Pod *
+*******
+
+  Pod — это минимальная сущность, с которой работает Kubernetes.
+  Один Pod = один инстанс приложения, включающий один или несколько Docker-контейнеров.
+
+  1 Pod = 1...n [Docker Container(s)]
+
+[!] Все контейнеры, запущенные в рамках Pod'а:
+    => имеют общую сеть
+      <и>
+    => располагаются на одной Node. 
+
+[!] Чаще всего «вторым» контейнером в Pod'е запускается prometheus-exporter,
+    чтобы собирать метрики с приложения в Pod'е
+("Prometheus. Exporters and Integrations": https://prometheus.io/docs/instrumenting/exporters/)
+
+
+[Паттерны для построения групп контейнеров:]
+
+  1) sidecar container
+     — если дополнительный контейнер должен быть запущен рядом с основным,
+       sidecar расширяет функциональность основного контейнера, не изменяя его.
+       Все контейнеры в Pod'е работают ПАРАЛЛЕЛЬНО.
+       - можно запускать несколько sidecar'ов,
+       - сам sidecar чаще всего запускает:
+         * prometheus-exporter =>
+           => для сборки метрик с приложения в Pod'е
+             <или>
+         * сборщик логов (про метрики и логи будет позже).
+#[замечание от себя:] поведение похоже на декоратор функции в Python
+
+  2) init container
+     — если нужно выполнить какие-то действия ДО ЗАПУСКА ОСНОВНОГО КОНТЕЙНЕРА.
+    { Init-container:
+       -> запускается,
+       -> что-то делает
+       -> и завершается
+    }
+     и только после этого запускается ОСНОВНОЙ КОНТЕЙНЕР.
+
+     Можно запустить СКОЛЬКО УГОДНО init-container'ов,
+     но основной запустится ТОЛЬКО ПОСЛЕ ТОГО, как отработают все init'ы.
+     В init выносятся:
+       -> различные таски для инициализации приложения
+          <или>
+       -> проверки доступности внешних зависимостей.
+
+---< Пример использования init: >---
+В init можно расположить
+  -> миграции БД
+     <или>
+  -> проверку доступности внешней БД
+
+В K8s много разных путей для проверки доступности внешних зависимостей
+  => нужно всегда выбирать более подходящий для задачи вариант. 
+
+(!) НЕ СТОИТ:
+    - в проверки живучести контейнера выносить проверку доступности БД
+      <или>
+    - в init контейнеры уносить проверку доступности внешних сервисов,
+      от которых зависит работа приложения напрямую.
+---
+
+  3) adapter container
+     — нужен, чтобы адаптировать существующие приложения к требуемому интерфейсу.
+       Как и sidecar, РАСШИРЯЕТ ФУНКЦИОНАЛЬНОСТЬ ОСНОВНОГО КОНТЕЙНЕРА.
+      -<:разбор:>-
+        a) есть приложение, которое предоставляет какой-то интерфейс для внешних пользователей.
+        b) некоторым пользователям он не нравится, и они хотят другой интерфейс.
+        Чтобы не переписывать приложение, можно
+          ->  соорудить ЛЕГКОВЕСНЫЙ СЕРВИС и
+          --> запаковать его в adapter container.
+
+  4) ambassador container
+     — специальный тип sidecar контейнеров, куда запаковывают «кусочки», которые
+       + упрощают доступ к сервисам за пределами Pod'а   и
+       + предоставляют единый интерфейс для взаимодействия с этими внешними сервисами.
+
+---< Пример использования ambassador container: >---
+#(Изначально):
+[Наше_основное_приложение]<=={данные-в-неизвестном-приложению-формате}<==[ВНЕШНИЙ СЕРВИС]
+
+#(С ambassador container):
+[Наше_основное_приложение]<=={данные-в-известном-формате}
+                                          ↑
+                                (ambassador_container)
+                                          ↑
+                        {данные-в-неизвестном-приложению-формате}<==[ВНЕШНИЙ СЕРВИС]
+---
+
+[!] Управление любыми объектами (сущностями) в Kubernetes осуществляется с помощью МАНИФЕСТА
+
+
+##################
+# Манифест в K8s #
+##################
+  Манифест — это YAML или JSON файл, описывающий объекты, которые нужно запустить в Kubernetes.
+
+[>] Если мы хотим запустить наше приложение (Docker-контейнеры) в Pod'е Kubernetes,
+    то нужно написать манифест для сущности Pod.
+
+## Манифест для Pod, в котором запускают Nginx:
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     imagePullPolicy: IfNotPresent
+
+
+"---" = разделитель, который нужен, чтобы описать несколько разных сущностей в одном манифесте.
+--- отделяет НАЧАЛО YAML документа,
+
+(!) внутри одного YAML файла может быть несколько YAML документов.
+[Подробности:] https://yaml.org/spec/1.2.2/#22-structures
+
+
+***********************
+* Структура манифеста *
+***********************
+
+  ● kind
+    = тип объекта, который мы хотим создать
+      - Pod,
+      - Service,
+      - Namespace,
+      - Persistent Volume
+      и т. д.
+      (см. $(kubectl api-resources).NAME );
+
+  ● apiVersion
+    — версия API, которая используется для взаимодействия с ресурсом
+    (v1alpha1 - alpha, v1beta1 - beta, v1 - stable).
+    (!) Для разных ресурсов могут быть разные apiVersion.
+      Чем ближе к v1, тем больше вероятности, что синтаксис сущности (вернее, её API) не будет меняться.
+    (!) с развитием Kubernetes версии v1beta1 ПЕРЕСТАЮТ ПОДДЕРЖИВАТЬСЯ
+        -> стоит за этим поглядывать;
+
+  ● metadata — различная мета-информация,
+      например, в этом разделе указывается
+        - имя ресурса,
+        - его namespace
+        и прочее.
+      ОБЯЗАТЕЛЬНЫМ является только имя.
+
+  ● блок spec:
+    => в блоке spec указывают СПЕЦИФИЧНЫЕ для конкретной сущности АТРИБУТЫ:
+
+  [атрибуты для Pod'а:]
+    - containers (контейнеры)
+        (которые мы хотим запустить в нём)
+    - images (образы)
+        (на основе которых будут создаваться эти контейнеры)
+
+    - imagePullPolicy
+      ─ определяет для kubelet ПОЛИТИКУ СКАЧИВАНИЯ ОБРАЗА контейнера:
+        = IfNotPresent
+            ─ скачивать образ контейнера, если отсутствует на Node.
+        = Always
+            ─ скачивать образ каждый раз, когда kubelet запускает контейнер.
+        = Never
+            ─ использовать только те образы, которые присутствуют на Node;
+              если образа нет — контейнер не запустится.
+          #(!) Чтобы контейнеры появились на Node, их нужно туда «скачать» самостоятельно.
+
+    - resources
+       = можно ограничивать ресурсы, которые выделяются для Pod'а.
+         это нужно для того, чтобы Pod «знал», на каких Node он сможет запуститься.
+         # В этом ему активно помогает kube-scheduler.
+         => Т.о., на Node не будет запущено Pod'ов больше,
+            чем суммарно ресурсов им всем требуется.
+
+      -- ephemeral-storage
+         ─ для ограничения Pod по ресурсам HDD
+
+# атрибут namespace (если указать его в манифесте Pod в metadata.namespace)
+# нужен для указания, в каком окружении будет запускаться Pod =>
+# => чтобы изолировать окружения друг от друга
+
+---[!Нюанс!]---
+  у Docker есть сущность digest = хеш Docker-образа, который используется для «проверки» образа.
+## ("Registry. Проверка образа": https://docs.docker.com/registry/#future)
+  kubelet::
+    -> считывает digest для образа контейнера из манифеста,
+    -> проверяет, если ли такой же digest в его кэше digest'ов
+    --> если его там нет, тогда скачивает образ;
+    --> если же есть — использует из локального кэша.
+## Подробнее: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+---
+
+[Концепция Pod:]
+
+  Концепция Pod'а предполагает, что контейнеры должны
+    * легко создаваться,
+    * умирать  (вместо "лечения")
+    * заново создаваться.
+
+## жизненный цикл Pod'ов предполагает не лечение в случае плохого самочувствия, а гибель и создание нового Pod'а.
+   Всё это вместе со своими внутренними IP адресами, на которые идёт трафик наших клиентов.
+
+(!) При этом несколько Pod'ов могут выполнять одну и ту же задачу 
+  = как раз для ГОРИЗОНТАЛЬНОГО МАСШТАБИРОВАНИЯ.
+
+
+[Что ещё можно указать в манифесте:]
+
+  * Можно ограничивать ресурсы (Requests), которые выделяются для Pod'а.
+    #> это нужно для того, чтобы Pod «знал», на каких Node он сможет запуститься.
+    # В этом ему активно помогает kube-scheduler.
+    => Т.о., на Node не будет запущено Pod'ов больше,
+       чем суммарно ресурсов им всем требуется.
+
+---<Указание_Requests>---
+resources:
+ requests:
+   memory: "64Mi"
+   cpu: "100m"
+---
+
+  resources.requests = ограничить ресурсы, необходимые для старта Pod
+  resources.limits = ограничить максимальное количество ресурсов, которые может использовать Pod.
+
+# spec.containers.resources.
+##                         .requests
+##                         .limits
+#[Любопытно:] 
+#  как только процесс «съест» столько памяти, сколько указано в resources.limits,
+#  его Pod будет «убит» и снова запущен
+#  (за уничтожение отвечает    oom killer,
+#   а за рестарт  —  kubelet
+#  )
+
+---<Указание_Limits>---
+resources:
+  limits:
+    memory: "128Mi"
+    cpu: "200m"
+---
+
+Особенности метрики процессорного времени:
+  можно указать 0.1 или 0.5, запрашивающие часть ядра,
+  или 1 для его полного использования,
+НО так же можно использовать окончание m (мили).
+Например, 100m CPU == 0.1 CPU.
+Можно с удобством указать 1m, а не 0.001
+
+
+(!)  ephemeral-storage = для ограничения Pod по ресурсам HDD
+
+(?)  Что произойдёт с Pod, если указать в resources.requests.memory значение больше,
+     чем есть на любой из Node?
+     А если в кластере несколько Node, то ресурсов хватит? 
+
+(->) Pod покажет предупреждение, что не может запуститься,
+     и будет ждать, пока ресурсы освободятся.
+
+
+---<Дополненный_манифест:>---
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     imagePullPolicy: IfNotPresent  
+     resources:
+      requests:
+        memory: "64Mi"
+        cpu: "100m"
+      limits:
+        memory: "128Mi"
+        cpu: "200m"
+---<EOF>---
+
+[!] Манифесты:
+    -> сохраняются в файл с расширением yml
+    -> деплоятся на кластер Kubernetes с помощью того же kubectl
+       через атрибут create или apply:
+       ● create — создаёт ресурс, НО не может изменить уже созданный;
+       ● apply — изменяет ресурс и создаёт его, если не был создан ранее.
+
+(>) Задеплоим манифест Nginx (перед этим сохранили его в pod.yaml):
+-->
+$ kubectl apply -f pod.yaml
+<--
+
+
+namespace => для разделения окружений в Kubernetes.
+  При создании любого объекта в Kubernetes можно указать namespace,
+  где будет задеплоен этот объект, в том числе Pod.
+
+  Namespace можно
+    -> задать ключом -n в команде kubectl
+      <или>
+    -> прописать в манифесте аттрибут metadata.namespace
+
+
+[!] если вообще не задать ограничений, Pod может «съесть» все ресурсы на Node
+    => ограничения ОБЯЗАТЕЛЬНЫ!
+
+[Limit Ranges:]
+(https://kubernetes.io/docs/concepts/policy/limit-range/)
+
+  LimitRanges:= по сути, мы задаём на весь наш namespace дефолтные limits и requests
+
+# Мониторинг состояния Pod'а в кластере:
+-->
+$ kubectl get pods
+#[OUTPUT:]
+
+NAME    READY   STATUS    RESTARTS   AGE
+nginx   1/1     Running   0          5h1m
+<--
+
+#[Что мы тут видим?]
+
+  - имя Pod'а (указали его в metadata);
+  - готовность Pod к работе
+      (механизмы для проверки доступности приложения рассматирвается далее);
+  - текущий статус Pod'а.
+      В жизненном цикле Pod'а они могут быть таких видов:
+        * Pending           # начальная фаза
+        * Running           # переходит в эту фазу, если хотя бы один из его первичных контейнеров запускается нормально
+        * Succeeded         # все контейнеры успешно стартанули
+        * Failed            # запуск одного || нескольких контейнеров завершился неудачей 
+        * Unknown
+    ## (Более подробно -> в официальной документации:
+    -> https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/
+       )
+  - количество перезагрузок Pod'а.
+  - время жизни Pod'а.
+
+
+##############################
+# kubectl explain <сущность> #
+##############################
+  = показывает документацию прямо в консоли
+
+#> получить информацию по всем верхнеуровневым полям в Pod:
+-->
+kubectl explain pod
+
+#[OUTPUT:]
+IND:     Pod
+VERSION:  v1
+
+DESCRIPTION:
+     Pod is a collection of containers that can run on a host. This resource is
+     created by clients and scheduled onto hosts.
+
+FIELDS:
+   apiVersion    <string>
+     APIVersion defines the versioned schema of this representation of an
+     object. Servers should convert recognized schemas to the latest internal
+     value, and may reject unrecognized values. More info:
+     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+
+   kind    <string>
+     Kind is a string value representing the REST resource this object
+     represents. Servers may infer this from the endpoint the client submits
+     requests to. Cannot be updated. In CamelCase. More info:
+     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+
+   metadata    <Object>
+     Standard object's metadata. More info:
+     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#metadata
+
+   spec    <Object>
+     Specification of the desired behavior of the pod. More info:
+     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status
+
+   status    <Object>
+     Most recently observed status of the pod. This data may not be up to date.
+     Populated by the system. Read-only. More info:
+     https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#spec-and-status 
+<--
+
+#: Можно увидеть:
+     - какая API версия используется для этой сущности,
+     - какие поля есть и для чего они нужны.
+
+**********************************
+* про готовность Pod'a к работе: *
+**********************************
+
+  Статус: "Running" и "Ready 1/1" в выводе команды в данном случае для нас условность.
+
+  Kubernetes считает, что Pod готов к работе, если хотя бы один контейнер в Pod'е запущен.
+  При этом он никак не учитывает состояние приложения.
+
+---< Пример: >---
+Приложение в Pod'е должно выполнить начальную инициализацию:
+  (прогреть кэш, накатить миграцию на базу данных и другое),
+  прежде чем начать работу с клиентами,
+  но Kubernetes считает, Pod готов к работе (ведь Pod стартанул) и отправляет в него клиентов.
+  => В результате у пользователей будут сыпаться ошибки.
+---
+
+(!) Для того чтобы сделать какие-то выводы о работоспособности Nginx,
+    постараемся получить от Pod'а максимальное количество информации:
+
+  1) Команда describe выдаст дополнительную информацию о нашей сущности
+
+-->
+$ kubectl describe pod nginx
+
+#[OUTPUT:]
+Name:         nginx
+Namespace:    default
+Priority:     0
+Node:         cl17it1ti54cda2q2d0h-evow/10.129.0.11
+Start Time:   Tue, 15 Feb 2022 22:32:29 +0300
+Labels:       app=nginx
+Annotations:  cni.projectcalico.org/podIP: 172.16.128.17/32
+Status:       Running
+IP:           172.16.128.17
+IPs:
+  IP:  172.16.128.17
+Containers:
+  nginx:
+    Container ID:   docker://313ab136da1b6acd7a4304fc5e665d2e43455af5df6c9dd3a7c30f5eecd7cd51
+    Image:          nginx:1.21.6
+    Image ID:       docker-pullable://nginx@sha256:2834dc507516af02784808c5f48b7cbe38b8ed5d0f4837f16e78d00deb7e7767
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Tue, 15 Feb 2022 22:32:30 +0300
+    Ready:          True
+    Restart Count:  0
+    Limits:
+      cpu:     200m
+      memory:  128Mi
+    Requests:
+      cpu:        100m
+      memory:     64Mi
+    Environment:  <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from kube-api-access-2zwx7 (ro)
+Conditions:
+  Type              Status
+  Initialized       True
+  Ready             True
+  ContainersReady   True
+  PodScheduled      True
+Volumes:
+  kube-api-access-2zwx7:
+    Type:                    Projected (a volume that contains injected data from multiple sources)
+    TokenExpirationSeconds:  3607
+    ConfigMapName:           kube-root-ca.crt
+    ConfigMapOptional:       <nil>
+    DownwardAPI:             true
+QoS Class:                   Burstable
+Node-Selectors:              <none>
+Tolerations:                 node.kubernetes.io/not-ready:NoExecute op=Exists for 300s
+                             node.kubernetes.io/unreachable:NoExecute op=Exists for 300s
+Events:                      
+  Type    Reason     Age   From               Message
+  ----    ------     ----  ----               -------
+  Normal  Scheduled  4s    default-scheduler  Successfully assigned default/nginx to cl17it1ti54cda2q2d0h-evow
+  Normal  Pulled     3s    kubelet            Container image "nginx:1.21.6" already present on machine
+  Normal  Created    3s    kubelet            Created container nginx
+  Normal  Started    3s    kubelet            Started container nginx
+<--
+# Команда отображает расширенную информацию о нашем Pod'е.
+
+## Из знакомого: 
+   * image, который мы используем
+   * Node, на которой запустилось наше приложение
+   * Limits и Requests — ограничения по ресурсам
+
+[блок Events:]
+## здесь выведен ряд событий, которые произошли в жизни Pod'а:
+  1. Pod назначен на конкретную Node
+  2. Проверка, что образ nginx:1.21.6, на основе которого поднимается контейнер внутри Pod, есть на Node.
+     Если образа нет, то он скачается на Node
+  3. Создание контейнера
+  4. Старт контейнера
+
+
+<!_ Если запросить детальную информацию о Node, можно получить следующую информацию: _!>
+
+  * Pod, которые запущенны на Node с указанием запрашиваемых ресурсов
+      ($ kubectl describe nodes )
+
+
+  * Версия kubelet, установленная на Node
+      ($ kubectl describe nodes )
+
+  * Версия OS
+
+  * Среда исполнения контейнера
+      ($ kubectl describe nodes )
+
+  * Количество выделенных ресурсов для Node
+      ($ kubectl describe nodes )
+
+  * IP адреса (внешний и внутренний), доменное имя от виртуальной машины, используемой для Node
+      ($ kubectl describe nodes )
+
+
+## Зона ответственности Kubernetes = контейнеры. Ему нет дела до приложеня
+
+(?) А что если нужно посмотреть на само приложение в Kubernetes,
+    когда например, понадобились логи приложения?
+
+(!) Для просмотра логов используем команду:
+  $ kubectl logs
+
+---[kubectl logs nginx]---
+
+/docker-entrypoint.sh: /docker-entrypoint.d/ is not empty, will attempt to perform configuration
+/docker-entrypoint.sh: Looking for shell scripts in /docker-entrypoint.d/
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/10-listen-on-ipv6-by-default.sh
+10-listen-on-ipv6-by-default.sh: info: Getting the checksum of /etc/nginx/conf.d/default.conf
+10-listen-on-ipv6-by-default.sh: info: Enabled listen on IPv6 in /etc/nginx/conf.d/default.conf
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/20-envsubst-on-templates.sh
+/docker-entrypoint.sh: Launching /docker-entrypoint.d/30-tune-worker-processes.sh
+/docker-entrypoint.sh: Configuration complete; ready for start up
+2022/02/16 01:03:15 [notice] 1#1: using the "epoll" event method
+2022/02/16 01:03:15 [notice] 1#1: nginx/1.21.6
+2022/02/16 01:03:15 [notice] 1#1: built by gcc 10.2.1 20210110 (Debian 10.2.1-6)
+2022/02/16 01:03:15 [notice] 1#1: OS: Linux 5.10.47-linuxkit
+2022/02/16 01:03:15 [notice] 1#1: getrlimit(RLIMIT_NOFILE): 1048576:1048576
+2022/02/16 01:03:15 [notice] 1#1: start worker processes
+2022/02/16 01:03:15 [notice] 1#1: start worker process 32
+2022/02/16 01:03:15 [notice] 1#1: start worker process 33
+2022/02/16 01:03:15 [notice] 1#1: start worker process 34
+---
+
+# kubectl logs по умолчанию выводит все логи приложения.
+#! Если их много, то для удобства чтения пригодятся дополнительные аргументы:
+  --tail 10,
+  -f --since=1
+## (подробности можно посмотреть в справке kubectl logs --help).
+
+#(?) Выберите атрибуты, которые надо добавить к команде kubectl logs,
+#    чтобы получить логи Nginx за последние 10 часов и сохранить их в /tmp/kuber.log
+##-> https://kubernetes.io/docs/reference/kubectl/generated/kubectl_logs/
+
+  -l app=nginx
+    = Возвращает журналы моментальных снимков из всех контейнеров в Pod'ах, определенных меткой app=nginx
+
+  --since=600m
+    = Показать все логи pod nginx, записанные за последние 10 часов (600 минут)
+
+  > /tmp/kuber.log
+    = эта команда необходима для перенаправления вывода в файл
+
+#(?) что если приложение пишет свои логи в файл и мне нужно их почитать?
+---
+$ kubectl exec -it nginx -- bash
+---
+
+(!) Чтобы разработчик мог получить доступ к Pod снаружи и наконец-то попробовать «ткнуть» в заветный UI,
+    надо воспользоваться командой с проксированием портов на локальную машину,
+    откуда запускается команда kubectl:
+-->
+$ kubectl port-forward nginx 8080:80
+<--
+
+# Заходим в браузере на адрес http://127.0.0.1:8080 и видим заветное «Welcome to Nginx!».
+
+[!] посмотреть дополнительные аргументы команды kubectl port-forward можно вот тут:
+#  "kubectl-port-forward - Man Page":
+#-> https://www.mankier.com/1/kubectl-port-forward
+
+
+###########
+# Service #
+###########
+
+  Для эффективного взаимодействия с контейнерами в K8s существует специальная сущность = 
+  = Service
+
+# == По сути, это некая абстракция, с помощью которой описываем конфигурацию доступа к Pod.
+
+**************************
+* Для чего нужен Service *
+**************************
+
+  -> для балансировки запросов к разным инстансам (Pod'ам) одного приложения.
+
+[Пример:]
+  -> есть несколько Pod'ов c Nginx, которые могут «играть в ящик» и перезапускаться.
+  Чтобы нам не следить самим за тем:
+    -  какие Pod'ы сейчас живы,
+    - на каком IP они подняты,
+    - доступны ли они для обработки запросов,
+  =>можно спрятать Pod'ы за Service.
+  
+  Service будет:
+    + сам следить за доступностью и готовностью Pod'ов
+    + распределять входящий трафик между ними.
+
+*************************
+* Как создавать Service *
+*************************
+
+-->
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: nginx
+   labels:
+     app: nginx
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      protocol: TCP
+      targetPort: 80
+  selector:
+    app: nginx
+<--
+
+[Атрибуты spec:]
+
+● spec.type
+    — указывает тип нашего Service и реализует определённую логику работы подключения к Pod'у.
+      (ClusterIP — дефолтный тип, который будет использоваться, если ничего не указывать).
+
+● spec.ports.port
+    — отвечает за то, какие порты надо пробросить В КОНТЕЙНЕР
+      ( = то есть на какие порты мы хотим обращаться);
+
+● spec.ports.targetPort
+    — указываем внутренний порт в контейнере, на который будут приходить запросы.
+      Если приложение "живёт" на port: 80, его и следует указать.
+
+● spec.selector
+    — указываем, с каким Pod'ом хотим работать.
+
+[Сходство с Docker Compose:]
+## Связка port/targetPort может напоминать атрибут ports из docker compose.
+
+#>Деплоим!
+-->
+$ kubectl apply -f service.yaml
+<--
+
+#> Смотрим состояние нашего сервиса:
+-->
+$ kubectl get services
+[OUTPUT:]
+NAME    TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE
+nginx   ClusterIP   10.64.228.245   <none>        80/TCP    4h58m
+<--
+
+#(Что видим:)
+  наш Service создался и получил внутренний IP в рамках кластера
+  Отображается информация:
+    - сколько времени назад создан Service,
+    - какой порт слушает
+    - тип = Service.
+    - имя, тип и порт ( = такие, как мы указали в манифесте)
+
+[!] (так же как и в случае с Pod'ом)
+    можем пробросить порт для сервиса,
+    а он уже будет распределять запросы на различные Pod'ы,
+    если у нас их будет больше, чем один:
+-->
+kubectl port-forward service/nginx 8080:80
+<--
+
+**********************************************
+* как Service перенаправляет трафик к Pod'ам *
+**********************************************
+
+  Контроллер для Service:
+    1) сканирует Pod объекты и
+    2) ищет соответствие заданному нами selector label app=nginx и port 80,
+    3) после обнаружения начинает перенаправлять на него трафик.
+  Делает это через добавление IP Pod в список Endpoints
+
+---<Рассмотрим Service подробнее>---
+$ kubectl describe services nginx
+
+#[OUTPUT:]
+Name:              nginx
+Namespace:         default
+Labels:            app=nginx
+Annotations:       <none>
+Selector:          app=nginx
+Type:              ClusterIP
+IP Families:       <none>
+IP:                10.0.134.210
+IPs:               10.0.134.210
+Port:              <unset>  80/TCP
+TargetPort:        80/TCP
+Endpoints:         172.16.128.17:80
+Session Affinity:  None
+Events:            <none>
+---
+
+# наш selector — app=nginx.
+# Также у нас появился Endpoints,
+# который ведёт на IP нашего Pod (172.16.128.17) и его порт 80.
+
+[!] Endpoints в Kubernetes — это отдельные объекты,
+    которые тоже можно
+      * создать,
+      * удалять,
+      * просматривать
+-->
+$ kubectl get endpoints nginx
+
+#[OUTPUT:]
+NAME    ENDPOINTS          AGE
+nginx   172.16.128.17:80   7m28s
+<--
+
+-->
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: nginx # тут ИМЯ ДОЛЖНО СОВПАДАТЬ с именем Service для связки
+subsets:
+  - addresses:
+        - ip: 172.16.128.17
+    ports:
+      - port: 80
+        name: nginx
+<--
+
+[!] УДОБНЕЕ пользоваться selector, чем настраивать кастомные Endpoints.
+
+[!] (так же как и в случае с Pod'ом)
+  можем пробросить порт для сервиса,
+  а он уже будет распределять наши запросы на различные Pod'ы,
+  если у нас их будет больше, чем один:
+
+-->
+$ kubectl port-forward service/nginx 80:80
+<--
+
+
+######################
+# Persistent Volumes #
+######################
+
+  Способы подмонтировать Volume в K8s:
+    1) Монтировать конкретную папку из файловой системы
+    2) Создать централизованное хранилище и обращаться к нему
+
+[>] Примонтируем пустую директорию, существующую в рамках запущенного Pod
+    и возрождающуюся из падения, пока Pod не будет убит:
+
+-->
+volumeMounts:
+  - name: nginx-cache-volume
+    mountPath: /usr/share/nginx/html/
+
+volumes:
+  - name: nginx-cache-volume
+    emptyDir: {}
+<--
+
+● volumeMounts
+  — путь до директории ВНУТРИ Pod, к которой будет смонтирован volume.
+
+● volumes
+  — создание локального volume, живущего в рамках жизни Pod'а.
+
+● volumes.emptyDir
+  — пустая директория, которая
+    * создаётся на Node
+      <и>
+    * удаляется вместе c удалением Pod'а.
+
+[Особенности такого монтирования:]
+  -> переживает падения Pod'а,
+  -> НО не выдержит, если вы пересоздадите Pod.
+  -> оно бесполезно с точки зрения проброса каких-либо файлов внутрь контейнера (или из контейнера).
+
+
+[Примонтируем хостовую директорию в контейнер:]
+-->
+volumeMounts:
+  - name: nginx-mount-path
+    mountPath: /usr/share/nginx/html/
+
+volumes:
+  - name: nginx-mount-path
+    hostPath:
+      path: /opt/
+<--
+
+
+*****************************************************************
+* Необходимость в создании внешнего хранилища. PersistentVolume *
+*****************************************************************
+
+  Обычно в кластере больше, чем одна Node;
+  -> при перезапуске Pod может запуститься на любой Node,
+  (!) НЕОБЯЗАТЕЛЬНО ТАМ ЖЕ, где был раньше.
+
+  => на новой Node может не оказаться нужных для работы файлов.
+
+  ==> Поэтому правильнее будет создать внешнее хранилище,
+      которое НЕ ПОТЕРЯЕТСЯ
+      - после остановки Pod
+        <или>
+      - выключения всех Node.
+
+  Для описания ВНЕШНЕГО ХРАНИЛИЩА в Kubernetes используется сущность под названием PersistentVolume.
+
+[Пример, как можно создать внешнее хранилище:]
+
+  как внешнее хранилище можно использовать HDD-диск в Яндекс.Облаке.
+  Для этого нужно его примонтировать к нашему Pod'у.
+[!] для этой связки блочный диск и воркер нода Kubernetes кластера должны быть 
+    В ОДНОМ КАТАЛОГЕ И ОДНОЙ ЗОНЕ.
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Мы рассказываем про PersistentVolume и PersistentVolumeClaim В ТЕОРИИ, !
+! но НЕ ИСПОЛЬЗУЕМ В ПРАКТИЧЕСКИХ ЗАДАНИЯХ.                              !
+! Пожалуйста, не повторяйте это в своей инфраструктуре.                  !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  1. Создадим диск в Яндекс.Облаке:
+---
+$ yc compute disk create --name k8s-disk-for-nginx --size 4 --description "k8s disk for nginx"
+---
+
+  2. После создания мы берём полученный id и используем в нашем манифесте для создания PersistentVolume:
+-->
+---
+kind: PersistentVolume
+apiVersion: v1
+metadata:
+  name: nginx-pv
+spec:
+  capacity:
+    storage: 4Gi
+  storageClassName: "yc-network-hdd"
+  accessModes:
+    - ReadWriteOnce
+  csi:
+    driver: disk-csi-driver.mks.ycloud.io
+    fsType: ext4
+    volumeHandle: epdt13t41isrit225vdv
+<--
+
+● apiVersion metadata    # нам уже знакомые.
+
+● kind
+  = соответствует типу новой сущности.
+
+● spec.capacity.storage
+  = показывающий Kubernetes, сколько именно места будет в данном хранилище.
+
+● spec.accessModes
+  = режим доступа к диску.
+
+● spec.csi
+  = специфичный блок, отвечающий за выбранный тип volume.
+  В нашем случае для подключения к HDD-диску Яндекс.Облака:
+    * используется специальный драйвер,
+    * указывается тип файловой системы
+    * указывается id диска.
+  # Подробнее про управление хранилищами в Яндекс.Облаке:
+  -> https://yandex.cloud/ru/docs/managed-kubernetes/operations/volumes/manage-storage-class?utm_referrer=https%3A%2F%2Fpracticum.yandex.ru%2F
+
+● PersistentVolume
+  = похожи на обычные Volume, но имеют различные режимы доступа:
+
+  * ReadWriteOnce — volume смонтирован для чтения и записи одним узлом
+  * ReadOnlyMany — только чтение несколькими узлами
+  * ReadWriteMany — чтение и запись несколькими узлами
+  * ReadWriteOncePod — читать и писать может только один Pod
+  #! (только для CSI и Kubernetes версии 1.22+)
+
+[!] Могут использоваться НЕ ВСЕ режимы и НЕ ДЛЯ КАЖДОГО ТИПА Volume:
+-> https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+
+#(Что произошло после установки:)
+-->
+$ kubectl get persistentvolume
+
+NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM   STORAGECLASS   REASON   AGE
+nginx-pv   4Gi        RWO            Retain           Available                                   95s
+<--
+
+Сейчас статус Available, но это не всегда так.
+[Статусы:]
+
+  ● Available — доступен, не смонтирован
+  ● Bound — смонтирован
+  ● Released — размонтирован
+  ● Failed — что-то сломалось при запросе
+
+Также бывают разные Reclaim Policy:
+---[RECLAIM POLICY]---
+  ● Retain — не удалять
+  ● Recycle — переиспользовать (deprecated)
+  ● Delete (default) — удалять
+
+
+[!] Persistent Volume — это сущность, которая
+      - НЕ ЗАВИСИТ от namespace   и
+      - создаётся НА ВЕСЬ Kubernetes КЛАСТЕР,
+    => поэтому стоит быть аккуратней с именованием Persistent Volume.
+
+
+###########################
+# Persistent Volume Claim #
+###########################
+
+  Мы подключаем к кластеру дисковое хранилище — это одна сущность Persistent Volume;
+  НО ещё нужно
+    -> научить приложение общаться с хранилищем
+    -> + выделить ему часть ресурса.
+
+  Для запроса на выделение порции дискового хранилища используется другая сущность =
+  = Persistent Volume Claim.
+
+[!] Claim представляет собой ТОЛЬКО ЗАПРОС, а НЕ саму ЧАСТЬ ХРАНИЛИЩА:
+
+---<YAML>---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nginx-pvc
+  labels:
+    app: nginx
+spec:
+  storageClassName: "yc-network-hdd"
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+  volumeName: nginx-pv
+---
+
+  ● spec.storageClassName
+    — тип нашего storage, УНИКАЛЬНЫЙ для каждого используемого провайдера.
+
+  ● spec.volumeName
+    — имя persistentVolume, к которому мы будем подключаться.
+
+[!]  Как и основные сущности в Kubernetes, взаимодействующие с приложением,
+     PersistentVolumeClaim работает в namespace.
+
+#(Посмотрим, что вышло:)
+-->
+$ kubectl get persistentvolumeclaim
+
+[OUTPUT:]
+NAME        STATUS   VOLUME     CAPACITY   ACCESS MODES   STORAGECLASS     AGE
+nginx-pvc   Bound    nginx-pv   4Gi        RWO            yc-network-hdd   3m21s
+<--
+
+#(Посмотрим состояние PersistentVolume:)
+-->
+$ kubectl get persistentvolume
+
+[OUTPUT:]
+NAME       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                STORAGECLASS     REASON   AGE
+nginx-pv   4Gi        RWO            Retain           Bound    default/nginx-pvc    yc-network-hdd            6s
+<--
+
+#! Колонка CLAIM теперь имеет значение.
+
+
+[Пример добавления обращения из Pod'а к созданному нами PersistentVolumeClaim:]
+-->
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     volumeMounts:
+       - name: nginx-pvc-volume
+         mountPath: /usr/share/nginx/html/
+  volumes:
+    - name: nginx-pvc-volume
+      persistentVolumeClaim:
+        claimName: nginx-pvc
+<--
+
+[Особенности перенастрйки конфигурации:]
+  Иногда, чтобы перенастроить конфигурацию для некоторых сущностей, команды
+$ kubectl apply
+  не хватает, и тогда нужно:
+  1) сначала удалить с помощью
+$ kubectl delete
+
+  2) а затем только
+$ kubectl apply.
+
+#(Итог манипуляций:)
+  => наша директория /usr/share/nginx/html/
+  + будет сохранена на диске   и
+  + останется, даже если мы удалим Pod.
+
+[Как эффективно посмотреть все сущности:]
+
+$ kubectl get all
+## = выдаст все используемые нами компоненты (не все элементы, но большую часть)
+
+[РЕЗЮМЕ темы Volume:]
+
+  Мы  указали связку в четырёх местах:
+
+[Диск Яндекс.Облака]>—<[PersistentVolume]>—<[PersistentVolumeClaim]>—<[Pod]
+
+
+(?) Что будет, если мы укажем неверное соотношение между Диском Яндекс.Облака
+    и PersistentVolume в большую сторону для PersistentVolume?
+
+(!) PersistentVolume СОЗДАСТСЯ,
+    но в контейнере примонтированный раздел будет ТАКОГО ЖЕ ОБЪЁМА,
+    как на Яндекс.Диске
+
+[!]  Pod может использовать несколько типов Volume ОДНОВРЕМЕННО.
+  -> Монтируем в ту папку всё, что нам необходимо — и нет проблем.
+
+
+[!] Кроме облачных storage, можно также использовать и кастомные хранилища типа:
+      ● nfs:         https://github.com/kubernetes/examples/tree/master/staging/volumes/nfs
+      ● CephFS:      https://github.com/kubernetes/examples/tree/master/volumes/cephfs/
+      ● FC:          https://github.com/kubernetes/examples/tree/master/staging/volumes/fibre_channel
+      ● Весь список: https://kubernetes.io/docs/concepts/storage/volumes/
+
+
+[Помещение конфигурационных файлов в Pod:]
+  Использовать Ansible для этих целей неэффективно.
+  Добавлять config-файлы в Dockerfile при формировании образа -> неэффективно
+
+[!] В K8s есть отдельная сущность, позволяющая монтировать точечно файлы и разные key-value данные =
+    = ConfigMap
+
+[Пример:]
+
+-->
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nginx-conf
+data:
+  nginx.conf: |
+    user  nginx;
+    worker_processes  auto;
+    error_log  /var/log/nginx/error.log notice;
+    pid        /var/run/nginx.pid;
+    events {
+        worker_connections  1024;
+    }
+
+    http {
+        include       /etc/nginx/mime.types;
+        default_type  application/octet-stream;
+
+        log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                          '$status $body_bytes_sent "$http_referer" '
+                          '"$http_user_agent" "$http_x_forwarded_for"';
+
+        access_log  /var/log/nginx/access.log  main;
+
+        sendfile        on;
+        keepalive_timeout  65;
+        server {
+
+          listen       80;
+          listen  [::]:80;
+          server_name  localhost;
+
+          location / {
+              root   /usr/share/nginx/html;
+              index  index.html index.htm;
+          }
+
+          error_page   500 502 503 504  /50x.html;
+          location = /50x.html {
+              root   /usr/share/nginx/html;
+          }
+      }
+
+    }
+<--
+
+# Конфигурация значений идёт по такому синтаксу: data содержит в себе key и value значения.
+  У нас вот key = nginx.conf
+  содержит value — нужный нам конфиг Nginx.
+
+(Многострочное значение. Предназначение символа | )
+  Чтобы можно было передавать многострочное значение,
+  мы сначала value задаём | и тогда можно писать несколько строк.
+
+[Подключение конфига Nginx к Pod и в правильную директорию:]
+---<YAML>---
+...
+ volumeMounts:
+   - name: nginx-conf
+     mountPath: /etc/nginx/nginx.conf
+     subPath: nginx.conf
+     readOnly: true
+...
+ volumes:
+   - name: nginx-conf
+     configMap:
+       name: nginx-conf
+       items:
+         - key: nginx.conf
+           path: nginx.conf
+---
+
+
+***********************************************************
+* Хранение чувствительных данных: паролей, токенов и т.п. *
+***********************************************************
+
+  1) Создадим секреты для наших тестов:
+---
+$ kubectl create secret generic nginx \
+                 --from-literal=dbname=postgres \
+                 --from-literal=host=db-postgre \
+                 --from-literal=password=QWERTY123 \
+                 --from-literal=username=postgres
+---
+
+  2) Отобразим секреты, которые есть у нас в namespace:
+---
+$ kubectl get secrets
+---
+
+  3) Посмотрим, какие в рамках нашего хранилища секретов есть конфиденциальные данные:
+-->
+$ kubectl describe secrets nginx
+
+Name:         nginx
+Namespace:    betta-test
+Labels:       <none>
+Annotations:  <none>
+
+Type:  Opaque
+
+Data
+====
+host:      10 bytes
+password:  9 bytes
+username:  8 bytes
+dbname:    8 bytes
+<--
+
+  4) Чтобы получить непосредственно сам secret,
+     надо добавить в команду немного деталей о том, в каком виде забрать желаемое:
+---
+$ kubectl get secrets nginx -o jsonpath='{.data}'
+
+#[OUTPUT:]
+{"dbname":"cG9zdGdyZXM=","host":"ZGItcG9zdGdyZQ==","password":"UVdFUlRZMTIz","username":"cG9zdGdyZXM="}
+---
+# значения зашифрованы base64
+# Расшифруем!
+---
+$ echo 'cG9zdGdyZXM=' | base64 --decode
+
+#[OUTPUT:]
+postgres
+---
+
+  5)  удалим и создадим как положено:
+---
+$ kubectl delete secret nginx
+---
+
+[!] ТО ЖЕ САМОЕ, что мы делали в команде, опишем в манифесте:
+
+---<YAML>---
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+data:
+  host: ZGItcG9zdGdyZQ==
+  dbname: cG9zdGdyZXM=
+  username: cG9zdGdyZXM=
+  password: UVdFUlRZMTIz
+type: Opaque
+---<EOF>---
+
+# тут переменные передаются сразу в закодированном виде (base64).
+
+[Алгоритм передачи переменных в Pod:]
+
+  1. Как в общем случае передаются переменные в Pod:
+---<YAML>---
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     env:
+     - name: DB_NAME
+       value: postgres
+---<EOF>---
+
+  2. Теперь в рамках глобальных переменных есть новая переменная DB_NAME.
+     Обратимся к secrets:
+
+---<YAML>---
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     env:
+     - name: DB_HOST
+       valueFrom:
+         secretKeyRef:
+           name: nginx
+           key: host
+---<EOF>---
+
+---
+$ kubectl apply -f .
+
+pod/nginx created
+secret/nginx created
+service/nginx created
+
+$ kubectl exec -it nginx -- bash
+
+root@nginx:/# env | grep DB
+DB_HOST=db-postgre
+DB_NAME=postgres
+---
+# Результат: всё на месте
