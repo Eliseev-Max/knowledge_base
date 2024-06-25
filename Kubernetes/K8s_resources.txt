@@ -6,57 +6,57 @@ Namespace (Cluster-level resource (not namespaced))
   = Позволяет организовать ресурсы в непересекающиеся группы (например, для каждого арендатора).
 
 ---<Deploying workloads>---
-Pod (po)
+Pod (po) [v1]
   = Базовая развертываемая единица, содержащая один или несколько процессов в совместно расположенных контейнерах
 
-ReplicaSet (rs)
+ReplicaSet (rs) [apps/vbetta2**]
   = Поддерживает работу одной или нескольких реплик Pod
 
-ReplicationController (rc)
+ReplicationController (rc) [v1]
   = Более старый, менее мощный эквивалент ReplicaSet
 
-Job
+Job [batch/v1]
   = Запускает Pods, которые выполняют завершенную задачу
 
-CronJob
+CronJob [batch/v1betta1]
   = Однократный или периодический запуск запланированного задания
 
-DaemonSet (ds)
+DaemonSet (ds) [apps/vbetta2**]
   = Запускает одну реплику pod на каждом узле (node)
     (на всех узлах или только на тех, которые соответствуют селектору узлов).
 
-StatefulSet (sts)
+StatefulSet (sts) [apps/vbetta1**]
   = Запуск подов (Pods) с состоянием и стабильной идентификацией
 
-Deployment (deploy)
+Deployment (deploy) [apps/vbetta1**]
   = Декларативное развертывание и обновление подов
 
 
 ---<Services>---
-Service (svc)
+Service (svc) [v1]
   = Выставляет один или несколько Pods на единую и стабильную пару IP-адресов:портов.
 
-Endpoints (ep)
+Endpoints (ep) [v1]
   = Определяет, какие стручки (или другие серверы) будут доступны через службу
 
-Ingress (ing)
+Ingress (ing) [extensions/v1betta1]
   = Предоставляет одну или несколько служб внешним клиентам через один IP-адрес, доступный извне.
 
 
 ---<Config>---
-ConfigMap (cm)
+ConfigMap (cm) [v1]
   = Карта ключ-значение для хранения нечувствительных параметров конфигурации приложений и предоставления их им.
 
-Secret
+Secret [v1]
   = Как ConfigMap, но для конфиденциальных данных
 
 
 ---<Storage>---
-PersistentVolume (pv)
+PersistentVolume (pv) [v1]
   = Указывает на постоянное хранилище, которое может быть установлено в Pod через PersistentVolumeClaim
 
-PersistentVolumeClaim (pvc)
+PersistentVolumeClaim (pvc) [v1]
   = Запрос и требование на PersistentVolume
 
-StorageClass (sc)
+StorageClass (sc) [storage.k8s.io/v1]
   = Определяет тип динамически предоставляемого хранилища, который может быть заявлен в PersistentVolumeClaim.
