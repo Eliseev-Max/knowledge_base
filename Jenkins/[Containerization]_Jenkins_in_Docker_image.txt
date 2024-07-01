@@ -1,0 +1,161 @@
+[ Official Jenkins Docker image
+	https://github.com/jenkinsci/docker/blob/master/README.md
+]
+Запуск контейнера с Jenkins
+	$ docker run -p 8080:8080 -p 50000:50000 --restart=on-failure jenkins/jenkins:lts-jdk11
+
+Проект Jenkins рекомендует не включать исполнителей на контроллере.
+Для подключения build-агентов через входящее TCP-соединение нужно примапить порт 50000 Docker-хоста к порту 50000 docker-контейнера.
+[Контроллер Jenkins] ↔ <tcp-port 50000> ↔ [Агенты]
+[to map = сопоставлять]
+
+* Если используются только агенты сборки SSH (исходящие): маппинг портов не требуется (т.к. соединение устанавливается с контроллера)
+* Если вы подключаете агентов с помощью веб-сокетов (начиная с Jenkins 2.217), порт агента TCP также не используется.
+
+Рабочее пространство (workspace) Jenkins:
+	/var/jenkins_home/
+	ЗДЕСЬ хранятся все данные Jenkins, включая плагины и конфигурацию‼
+
+Использование bind mounts к томам при запуске контейнера с Jenkins:	
+	$ docker run -p 8080:8080 -p 50000:50000 --restart=on-failure -v jenkins_home:/var/jenkins_home jenkins/jenkins:lts-jdk11
+
+	+ появляется возможность управлять подключаемым томом 
+	+ появляется возможность подключаться к другому контейнеру для обновлений
+	
+‼ Тома Docker (Docker Volumes) сохраняют свое содержимое, даже когда контейнер останавливается, запускается или удаляется.
+‼‼ПРИМЕЧАНИЕ:
+	Избегайте использования bind mount из папки на хост-компьютере в /var/jenkins_home,
+    так как это может привести к проблемам с правами доступа к файлам:
+	пользователь, используемый внутри контейнера, может не иметь прав на папку на хост-компьютере.
+
+    Если вам действительно нужно выполнить bind mount для jenkins_home:
+		• убедитесь, что каталог на хосте доступен пользователю jenkins внутри контейнера (пользователь jenkins — uid 1000) 
+		или
+		• используйте параметр -u some_other_user с запуском докера.
+
+
+*********************
+* Connecting agents *
+*********************
+
+  Вы можете запускать сборки на контроллере из коробки.
+  Проект Jenkins рекомендует не включать никаких executors (исполнителей) на контроллере.
+
+  Чтобы подключить агентов через входящее TCP-соединение, пропишите порт: -p SSH (outbound) build agents:50000.
+  Этот порт будет использоваться при подключении агентов к контроллеру.
+
+  Если вы используете только SSH (исходящий) для сборки агентов
+  = (SSH (outbound) build agents) =
+  этот ПОРТ НЕ ТРЕБУЕТСЯ, так как соединения устанавливаются с контроллера.
+
+  Если вы подключаете агентов с помощью ВЕБ-СОКЕТОВ (начиная с Jenkins 2.217),
+  порт TCP агента (50000) также НЕ ИСПОЛЬЗУЕТСЯ.
+
+
+***************************
+* Передача параметров JVM *
+***************************
+
+  Вам может понадобиться настроить JVM, на которой запущен Jenkins,
+  обычно для регулировки системных свойств или настроек памяти кучи.
+  Для этого используйте переменные окружения:
+    JAVA_OPTS
+    //или//
+    JENKINS_JAVA_OPTS
+  
+---
+  docker run --name myjenkins \
+             -p 8080:8080 \
+             -p 50000:50000 \
+             --restart=on-failure \
+             --env JAVA_OPTS=-Dhudson.footerURL=http://mycompany.com \
+             jenkins/jenkins:lts-jdk17
+---
+
+[*] Параметры JVM для КОНТРОЛЛЕРА Jenkins следует задавать через JENKINS_JAVA_OPTS,
+    поскольку другие инструменты также могут реагировать на переменную окружения JAVA_OPTS.
+
+
+*************************
+* Настройка логирования *
+*************************
+
+  Ведение журнала Jenkins можно настроить с помощью
+    + файла свойств
+    //и
+    + Java-свойства java.util.logging.config.file Java.
+
+Например:
+---
+mkdir data
+cat > data/log.properties <<EOF
+handlers=java.util.logging.ConsoleHandler
+jenkins.level=FINEST
+java.util.logging.ConsoleHandler.level=FINEST
+EOF
+docker run --name myjenkins -p 8080:8080
+                            -p 50000:50000
+                            --restart=on-failure
+                            --env JAVA_OPTS="-Djava.util.logging.config.file=/var/jenkins_home/log.properties"
+                            -v `pwd`/data:/var/jenkins_home jenkins/jenkins:lts-jdk17
+---
+
+
+*****************************
+* Configuring reverse proxy *
+*****************************
+
+  Если вы хотите установить Jenkins за обратным прокси с префиксом,
+  например: mysite.com/jenkins,
+  вам нужно
+  1) добавить переменную окружения JENKINS_OPTS="--prefix=/jenkins",
+  2) а затем выполнить следующие процедуры для настройки обратного прокси,
+     которые зависят от того, какой у вас прокси - Apache или Nginx:
+     * Apache: https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-apache/
+     * Nginx: https://www.jenkins.io/doc/book/system-administration/reverse-proxy-configuration-nginx/
+
+
+*******************************
+* Docker Compose with Jenkins *
+*******************************
+
+  Чтобы использовать Docker Compose с Jenkins, вы можете определить файл docker-compose.yml,
+  включающий экземпляр Jenkins и все другие сервисы, от которых он зависит.
+
+[Пример:]
+## Определим контроллер Jenkins и агент Jenkins SSH:
+  
+---<docker-compose.yml>---
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+  ssh-agent:
+    image: jenkins/ssh-agent
+volumes:
+  jenkins_home:
+---
+
+Этот файл docker-compose.yml создает два контейнера:
+  1) Контроллер Jenkins
+  2) агент Jenkins SSH.
+
+Контейнер Jenkins основан на образе jenkins/jenkins:lts и открывает веб-интерфейс Jenkins на порту 8080.
+
+Том jenkins_home - это именованный том, который создается и управляется Docker.
+Он монтируется по адресу /var/jenkins_home в контейнере Jenkins
+и сохраняет конфигурацию и данные Jenkins.
+
+Контейнер ssh-agent основан на образе jenkins/ssh-agent
+и запускает SSH-сервер для выполнения агента сборки Jenkins SSH.
+
+Чтобы запустить экземпляр Jenkins и другие службы, определенные в файле docker-compose.yml,
+выполните команду docker compose up -d.
+Это приведет к извлечению необходимых образов из Docker Hub (если они еще не присутствуют в вашей системе)
+и запуску служб в фоновом режиме.
+
+После этого вы можете получить доступ к веб-интерфейсу Jenkins по адресу http://localhost:8080 на вашей хост-системе
+для настройки и управления экземпляром Jenkins (где localhost указывает на порт, опубликованный вашим движком Docker Engine).

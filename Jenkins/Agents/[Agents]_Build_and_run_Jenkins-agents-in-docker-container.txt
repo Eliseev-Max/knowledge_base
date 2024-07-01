@@ -2,8 +2,15 @@ Docker-Composed Jenkins agents
 
 1) "How to Install and Run Jenkins With Docker Compose":
 --> https://www.cloudbees.com/blog/how-to-install-and-run-jenkins-with-docker-compose
+
 2) "How to Setup Docker Containers as Build Agents for Jenkins":
 --> https://devopscube.com/docker-containers-as-build-slaves-jenkins/
+
+3) → "Configuring the SSH Build Agents plugin": ←
+--> https://github.com/jenkinsci/ssh-agents-plugin/blob/main/doc/CONFIGURE.md
+↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑↑
+
+3+) https://plugins.jenkins.io/ssh-slaves/
 
 [BASE] "Pipeline Syntax": https://www.jenkins.io/doc/book/pipeline/syntax/
 
@@ -190,3 +197,29 @@ networks:
 ---
 
 agent { node { label 'labelName' } }
+
+
+###########################################
+# Configuring the SSH Build Agents plugin #
+###########################################
+
+Этот плагин позволяет управлять агентом, запущенным на *nix-машинах, через SSH. Он добавляет новый тип метода запуска агента. Этот метод запуска будет
+
+Открыть SSH-соединение с указанным хостом от указанного имени пользователя.
+Проверьте версию java по умолчанию для этого пользователя.
+Скопировать последнюю версию remoting.jar через SFTP (если SFTP недоступен, можно вернуться к scp).
+Запустите процесс remoting.
+
+Предварительные условия
+Прежде чем начать использовать плагин с вашими агентами, необходимо подготовить агентов к запуску процесса remoting. Это означает, что вам необходимо установить JDK/JRE 8 на агентах, чтобы запустить процесс remoting.jar.
+
+Агент должен иметь достаточно памяти для запуска процесса remoting и сборок.
+
+Агент должен быть доступен из контроллера Jenkins. Вы должны быть уверены, что ваш экземпляр Jenkins может подключиться к агенту через порт SSH; вы можете проверить это в командной строке. Вам необходимо указать учетную запись, под которой можно войти в систему на целевой машине. Привилегии root не требуются.
+
+Наконец, агент должен иметь права на чтение и запись в рабочем каталоге, а также достаточно места на диске для хранения remoting.jar (~1 МБ), логов (~10 МБ должно быть достаточно) и рабочих пространств сборки (зависит от ваших сборок, возможно, несколько ГБ).
+
+*******************************************************
+* Configure a Node to use the SSH Build Agents plugin *
+*******************************************************
+

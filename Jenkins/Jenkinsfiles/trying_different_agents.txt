@@ -1,5 +1,6 @@
 pipeline {
 	agent any
+// более правильно определить agent none 
 	environment {
         IMAGE = "iec61850_testenv"
     }
