@@ -1,0 +1,18 @@
+SSH
+
+[sources:]
+
+  1) "Понимание файла SSH known_hosts": https://g-soft.info/linux/2498/ponimanie-fayla-ssh-known_hosts/
+  2) "What Is the SSH known_hosts File and How to Temporarily Ignore It":
+    -> https://www.baeldung.com/linux/ssh-known_hosts-ignore-temporarily
+  3) [OpenNET] "ssh(1)": https://www.opennet.ru/cgi-bin/opennet/man.cgi?topic=ssh&category=1
+  4) "19 Common SSH Commands in Linux With Examples": https://phoenixnap.com/kb/linux-ssh-commands
+  5) [stackoverflow.com] "What is actually in known_hosts? [closed]":
+    -> https://stackoverflow.com/questions/33243393/what-is-actually-in-known-hosts
+
+(linux.die.net) Linux man page: 
+  "ssh(1) - Linux man page": https://linux.die.net/man/1/ssh
+  "ssh-copy-id(1) - Linux man page": https://linux.die.net/man/1/ssh-copy-id
+  "ssh_config(5) - Linux man page": https://linux.die.net/man/5/ssh_config
+
+

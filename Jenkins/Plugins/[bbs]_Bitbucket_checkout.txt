@@ -1,0 +1,31 @@
+bbs_checkout branches: [[name: '*/master']],
+    credentialsId: 'Bitbucket_token',
+    id: 'a99adad5-e4b4-4198-99c0-695699d57b12',
+    projectName: 'ARIS',
+    repositoryName: 'config_api_generator',
+    serverId: 'cfc76849-2cf4-488d-8d2d-2f02fc450b4d',
+    sshCredentialsId: 'devops_SSH_Private_key'
+
+
+bbs_checkout branches: [[name: '*/master']],
+    credentialsId: 'Bitbucket_token',
+    id: 'ddf16ef0-7786-4896-a6ae-044bce1cf985',
+    projectName: 'ARIS_Autotesting',
+    repositoryName: 'config-api',
+    serverId: 'cfc76849-2cf4-488d-8d2d-2f02fc450b4d',
+    sshCredentialsId: 'devops_SSH_Private_key'
+
+
+---
+stage('Bitbucket_checkout') {
+		    steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: "${params.BRANCH}"]],
+                    userRemoteConfigs: [[
+                        credentialsId: 'devops_SSH_Private_key',
+                        url: 'ssh://git@srv-bucket:7999/aris/config_api_generator.git'
+                    ]]
+                ])
+            }
+        }

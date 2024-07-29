@@ -8,8 +8,9 @@ sources:
 	
 	Способ продолжить установку без интерактивного вмешательства пользователя:
 	Использовать параметр загрузки Debian: DEBIAN_FRONTEND=noninteractive
-	
-		RUN DEBIAN_FRONTEND=nointeractive apt-get -y install tshark
+    ARG ARG DEBIAN_FRONTEND=noninteractive
+	  <или>
+    RUN DEBIAN_FRONTEND=nointeractive apt-get -y install tshark
 
 2. Установка:
 	$ apt -y install wireshark				# for apt package system (debian-like)

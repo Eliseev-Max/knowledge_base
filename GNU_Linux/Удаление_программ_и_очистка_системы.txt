@@ -201,3 +201,7 @@ https://losst.pro/poisk-bolshih-fajlov-linux)
 [ подробнее об удалении старых ядер:
 	https://losst.pro/kak-udalit-starye-versii-yadra-v-ubuntu
 ]
+
+
+# Чистка /var/tmp + /var/cache
+#=> https://ru.stackoverflow.com/questions/838739/%D0%A7%D0%B8%D1%81%D1%82%D0%BA%D0%B0-var-tmp-var-cache

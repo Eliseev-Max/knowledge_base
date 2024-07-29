@@ -1,0 +1,3 @@
+Where Are Docker Container Logs Stored?
+(https://sematext.com/blog/docker-logs-location/)
+

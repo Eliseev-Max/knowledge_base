@@ -1,29 +1,39 @@
 Jenkins Agent Docker image
 
+[source:
+  "Jenkins Agent Docker image":
+-> https://github.com/jenkinsci/docker-agent/blob/master/README_agent.md
+]
+
   Это базовый образ для Docker, который включает:
   + Java
   + исполняемый файл агента Jenkins (agent.jar).
 
 [!] Этот исполняемый файл (agent.jar) представляет собой экземпляр библиотеки Jenkins Remoting:
     # (https://github.com/jenkinsci/remoting)
-  Версия Java зависит от образа и платформы, см. раздел "Конфигурации" ниже.
+  Версия Java зависит от образа и платформы,
+  (см. раздел "Конфигурации")
 
 
 *****************
 * Использование *
 *****************
   Этот образ используется в качестве основы для образа Docker Inbound Agent:
-# Inbound Agent = Входящий агент
-# "Docker image for inbound Jenkins agents":
-#  -> https://github.com/jenkinsci/docker-agent/blob/master/README_inbound-agent.md
-#
-# "Jenkins Agent Docker image":
-#  -> https://github.com/jenkinsci/docker-agent/blob/master/README_agent.md
+
+(*) Inbound Agent = Входящий агент
+(*) Inbound Agent
+    - это образ для агентов Jenkins, использующих TCP или WebSockets для установления входящего соединения с контроллером Jenkins.
+
+# Более подробную информацию смотрите в разделе Использование агентов.
 
   В этом образе контейнер запускается извне и подключается к Jenkins.
 
-[!] Вместо этого образ может быть использован для запуска агента с помощью метода Launch (Запуск агента через выполнение команды на контроллере).
-  Например, в Linux вы можете попробовать:
+[!] Вместо этого образ может быть использован для запуска агента с помощью метода запуска:
+[
+    Launch method: "Запуск агента через выполнение команды на контроллере"
+]
+
+# Например, в Linux вы можете попробовать:
 ---<CLI>---
 docker run -i --rm --name agent --init jenkins/agent java -jar /usr/share/jenkins/agent.jar
 ---
@@ -34,7 +44,7 @@ docker run -i --rm --name agent --init jenkins/agent java -jar /usr/share/jenkin
 * Agent Work Directories *
 **************************
 
-  Начиная с Remoting 3.8 появилась поддержка рабочих директорий,
+  Начиная с Remoting 3.8 появилась поддержка рабочих директорий (Work directories),
   которая обеспечивает протоколирование по умолчанию и изменяет поведение JAR Caching.
 
   Пример вызова для Linux:
@@ -58,68 +68,13 @@ docker run -d --rm \
 ---
 
 
-agent-deb-workdir
-
-
 ##################
 # Configurations #
 ##################
 
   Docker image имеет несколько поддерживаемых конфигураций,
-  доступ к которым можно получить с помощью следующих тегов:
+  доступ к которым можно получить с помощью тегов.
 
----
-Linux Images:
-
-  Java 17 (default):
-    jenkins/agent:latest: Based on debian:bookworm-${builddate}
-      Also tagged as:
-        jenkins/agent:jdk17
-        jenkins/agent:bookworm-jdk17
-        jenkins/agent:latest-bookworm
-        jenkins/agent:latest-bookworm-jdk17
-        jenkins/agent:latest-jdk17
-
-    alpine (Small image based on Alpine Linux, based on alpine:${version}):
-      jenkins/agent:jenkins/agent:alpine
-      jenkins/agent:alpine-jdk17
-      jenkins/agent:latest-alpine
-      jenkins/agent:latest-alpine-jdk17
-
-
-  Java 21:
-    bookworm (Based on debian:bookworm-${builddate}):
-      jenkins/agent:bookworm
-      jenkins/agent:bookworm-jdk21
-      jenkins/agent:jdk21
-      jenkins/agent:latest-bookworm-jdk21
-
-    alpine (Small image based on Alpine Linux, based on alpine:${version}):
-      jenkins/agent:alpine
-      jenkins/agent:alpine-jdk21
-      jenkins/agent:latest-alpine
-      jenkins/agent:latest-alpine-jdk21
-
-
-  Java 11:
-    bookworm (Based on debian:bookworm-${builddate}):
-      jenkins/agent:bookworm
-      jenkins/agent:bookworm-jdk11
-      jenkins/agent:jdk11
-      jenkins/agent:latest-bookworm-jdk11
-
-    alpine (Small image based on Alpine Linux, based on alpine:${version}):
-      jenkins/agent:alpine
-      jenkins/agent:alpine-jdk11
-      jenkins/agent:latest-alpine
-      jenkins/agent:latest-alpine-jdk11
-
-    archlinux (Image based on Arch Linux, based on archlinux:latest):
-      jenkins/agent:archlinux
-      jenkins/agent:archlinux-jdk11
-      jenkins/agent:latest-archlinux
-      jenkins/agent:latest-archlinux-jdk11
----
 
 # Файл docker-bake.hcl
 # (https://github.com/jenkinsci/docker-agent/blob/master/docker-bake.hcl)

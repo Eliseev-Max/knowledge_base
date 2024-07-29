@@ -1,0 +1,7 @@
+How to Configure Docker in Jenkins
+#(Как настроить Docker в Jenkins)
+
+[source:]
+  "How to Configure Docker in Jenkins": https://phoenixnap.com/kb/how-to-configure-docker-in-jenkins
+
+

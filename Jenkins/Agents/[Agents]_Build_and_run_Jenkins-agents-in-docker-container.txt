@@ -16,23 +16,24 @@ Docker-Composed Jenkins agents
 
 
 ***
-  Одна из самых мощных функций Jenkins = возможность распределять задания по нескольким nodes.
+  Одна из самых мощных функций Jenkins - возможность распределять задания по нескольким nodes.
   Контроллер Jenkins отправляет задания соответствующему агенту
   в зависимости от:
-    -> требований к заданию
-       и
-    -> доступных на данный момент ресурсов.
+    * требований к заданию
+    * доступных на данный момент ресурсов.
 
+  Хотя можно запускать задания на контроллере,
+[!] считается, что лучше ВСЕГДА СОЗДАВАТЬ ХОТЯ БЫ ОДНОГО АГЕНТА
+    и ЗАПУСКАТЬ задания НА НЁМ.
 
-  Хотя можно запускать задания на контроллере, считается,
-[!] что ЛУЧШЕ ВСЕГДА СОЗДАВАТЬ ХОТЯ БЫ ОДНОГО АГЕНТА и ЗАПУСКАТЬ задания НА НЁМ.
+  Используем Docker Compose для этого
 
-=> Поэтому мы будем использовать Docker Compose для этого
+# В УЧЕБНЫХ ЦЕЛЯХ для простоты контейнеры будут запускаться от имени root.
 
-# В учебных целях для простоты контейнеры будут запускаться от имени root.
-
-#[!] В production-среде вы добавите пользователя jenkins с UID 1000 в системы,
-#    на которых работают контроллеры и агенты Jenkins.
+*********************************_PRODUCTION_********************************
+* В production-среде вы добавите пользователя jenkins с UID 1000 в системы, *
+* на которых работают контроллеры и агенты Jenkins.                         *
+*****************************************************************************
 
 
 #######################################
@@ -62,10 +63,10 @@ version: '3.8'
 # Adding Jenkins Agent With Docker Compose #
 ############################################
 
-  1) Сгенерируем пару SSH ключей,
-     с помощью которых контроллер сможет получить доступ к агенту через SSH.
+1) Сгенерируем пару SSH ключей,
+   с помощью которых контроллер сможет получить доступ к агенту через SSH.
 
-  2)
+2) Создадим Compose-файл
 
 ---<Example: Compose file with agent>---
 version: '3.8'
@@ -81,20 +82,63 @@ services:
     volumes:
       - /home/${myname}/jenkins_compose/jenkins_configuration:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
+
   agent:
     image: jenkins/ssh-agent:jdk11
     privileged: true
     user: root
-    container_name: agent
+    container_name: ssh-agent
     expose:
       - 22
     environment:
-      - JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDrSF2XICucxX//hz0PVgDVv3EisY6C99u9sA1QoZSdHuXW/H5i/1BT3CtUzBAsCOJxdSuadKfJZnNDEL98lmagU79tAgNjVgCnUyoKEkaEOz4J416cUsF/hR/rKUeRimcox6BncwixYsfmmcZMo1ImKWqdYIDu6TJV0RjhdpZyfn1RTxV0VXP1cn5yLO4aGz8ZCPLmvxVONykc0FLBVz3XgbpFW9xY3O4iaSrpoYn9Ce0m+Txx0lPYlm5bt6C2F6hp0LaBACsekAZz0oAXCKAel9gj27l8vXNj0eN2J8fxQdsTDtZ6Pnnd73ATfK114ceLDHL2VyV8m1KxD5Cm+zFgB7AfZ0xBsN+KGBtPqha7971lZSUvjKvRNXnPk3xrzwTPGKL8vnJOUidsx+6KzSTPB/sk8L9YsEy9i023KZTQMXTv0IrLp8Bbm3V4wWGsdfmviLMq3x2QMSMXlpE00alCar2eSah0425POSpyEtLFEDj2tURVjP+LmKroc8bOILc= egoebelbecker@zaku
+      - JENKINS_AGENT_SSH_PUBKEY=<ssh-rsa public key>
 ---
-#[!] JENKINS_AGENT_SSH_PUBKEY:
-  >> Добавьте точное содержимое текстового файла, включая префикс ssh-rsa в начале.
-  >> Не заключайте его в кавычки.
 
+*************************************************************************************
+*                       [!] JENKINS_AGENT_SSH_PUBKEY:                               *
+* 1) Добавьте точное содержимое текстового файла, включая префикс ssh-rsa в начале. *
+* 2) НЕ ЗАКЛЮЧАЙТЕ ЕГО В КАВЫЧКИ.                                                   *
+*************************************************************************************
+
+!!!!!!!!!!!!!
+! ЗАМЕЧАНИЕ !
+!!!!!!!!!!!!!
+
+К агенту jenkins/ssh-agent:[TAG], запущенному с помощью docker compose вместе с контроллером Jenkins,
+НЕ УДАЛОСЬ подключиться с контроллера Jenkins
+#(Jenkins Dashboard -> Настроить Jenkins -> Nodes).
+Я пытался подключиться по сети docker: (docker container)<-->(docker container)
+expose <port> не сработал...
+
+[РЕШЕНИЕ:]
+Был запущен отдельный контейнер jenkins/ssh-agent
+# Команда запуска SSH-агента:
+---
+docker run -d --rm \
+            --name=ssh-agent \
+            --publish 2200:22 --network keeper_build_keeper-network \
+            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXhzpOTKJCvVoGaQQlTtDxux48t7jihg2NoKBrDlV7047vi9TdJ7tFZaSUMAzXz93jwT4ATS2KA46eEJgiIZrny8Npa4HLInDGgkzbqsgL1Zf6BG7AEt33q3GMCW7ERyp3ap8c20cV/lmRyYfO0utju29zMWaaDNA6MqIl5FRMTjHknHQ3cVwhDaYTdbU1Cl4PcydwBBEQIgF0aV84XFDzEhqD9K6uRErbGZGSkFJoQwTIOFRgpSuEQ4EIcoX2lcjqq5OLJDzcmKOyS8cnixqfYZVggF8iXlWZLi8bH8aKvbYF8cP9i8FL2hN1QzwUq+SaQnI7e8V+ydCT4/9MY91sZz6SrMta7aHQFFs+xG1VRFlFd8G0h2snn5eSWZpmP4f0LkE3KIGWbKJ1Euk40JXWCayFreq2pAycqdGFcr0pb8XhdGdYxwqjMLNT5t26MtKb1ewdimEtIIaeNn2C9euoCpnM/ROe5gSerMz7pxTAkAeFugFapiqh1/mMAmXUG8c= devops@srv-cicd" \
+            jenkins/ssh-agent:latest-debian-jdk17
+---
+## Комментарии:
+1) Контейнер был запущен в фоновом режиме (-d)
+2) После остановки (завершения процесса) контейнер должен быть удалён (--rm)
+3) Опубликован порт контейнера: (Container):22 -> (Host):2200
+4) На всякий случай попытался подключить контейнер к сети docker-compose
+5) При настройке узла/агента на стороне контроллера (JENKINS/Настроить_Jenkins/Nodes/ssh-agent) указал
+{
+  Удалённая корневая директория: /home/jenkins/agent
+  Способ запуска: Launch agents via SSH
+    [ Host: внешний IP-адрес сервера,
+      Credentials: ID приватного ключа SSH (заранее настроенного в Jenkins),
+      Host Key Verification Strategy: Non verifying Verification Strategy,
+      Расширенные {
+        Port: 2200
+      }
+    ]
+  Доступность: "Держать этот агент подключенным, насколько это возможно"
+}
+   
 
 ########################################################
 # Добавление нового агента в Jenkins UI на контроллере #
@@ -198,28 +242,4 @@ networks:
 
 agent { node { label 'labelName' } }
 
-
-###########################################
-# Configuring the SSH Build Agents plugin #
-###########################################
-
-Этот плагин позволяет управлять агентом, запущенным на *nix-машинах, через SSH. Он добавляет новый тип метода запуска агента. Этот метод запуска будет
-
-Открыть SSH-соединение с указанным хостом от указанного имени пользователя.
-Проверьте версию java по умолчанию для этого пользователя.
-Скопировать последнюю версию remoting.jar через SFTP (если SFTP недоступен, можно вернуться к scp).
-Запустите процесс remoting.
-
-Предварительные условия
-Прежде чем начать использовать плагин с вашими агентами, необходимо подготовить агентов к запуску процесса remoting. Это означает, что вам необходимо установить JDK/JRE 8 на агентах, чтобы запустить процесс remoting.jar.
-
-Агент должен иметь достаточно памяти для запуска процесса remoting и сборок.
-
-Агент должен быть доступен из контроллера Jenkins. Вы должны быть уверены, что ваш экземпляр Jenkins может подключиться к агенту через порт SSH; вы можете проверить это в командной строке. Вам необходимо указать учетную запись, под которой можно войти в систему на целевой машине. Привилегии root не требуются.
-
-Наконец, агент должен иметь права на чтение и запись в рабочем каталоге, а также достаточно места на диске для хранения remoting.jar (~1 МБ), логов (~10 МБ должно быть достаточно) и рабочих пространств сборки (зависит от ваших сборок, возможно, несколько ГБ).
-
-*******************************************************
-* Configure a Node to use the SSH Build Agents plugin *
-*******************************************************
 

@@ -1,0 +1,19 @@
+Linux:
+
+Добавление пакета SSTP:
+
+sudo apt-get update &&
+sudo apt-get upgrade &&
+sudo add-apt-repository -y ppa:eivnaes/network-manager-sstp &&
+sudo apt-get update && sudo apt-get install -y network-manager &&
+sudo apt-get install -y sstp-client&&
+sudo apt-get install -y network-manager-sstp &&
+sudo apt-get install -y network-manager-sstp-gnome &&
+sudo apt-get update
+
+Добавление маршрутов в Linux:
+
+route add -net 172.25.0.0 netmask 255.255.0.0 gw 10.128.0.1
+route add -net 172.29.0.0 netmask 255.255.0.0 gw 10.128.0.1
+route add -net 172.21.0.0 netmask 255.255.0.0 gw 10.128.0.1
+route add -net 172.19.0.0 netmask 255.255.0.0 gw 10.128.0.1

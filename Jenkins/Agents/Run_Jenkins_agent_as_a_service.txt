@@ -1,0 +1,133 @@
+Как запустить агент Jenkins в качестве службы Linux с помощью systemd
+(https://www.jenkins.io/blog/2022/12/27/run-jenkins-agent-as-a-service/)
+
+  При использовании Docker для агентов ввод правильных опций в командной строке должен привести к автоматическому перезапуску агентов.
+  Иногда, например, когда вы хотите использовать знаменитую опцию Dockerfile: true,
+  вам нужно запускать агента вручную с помощью java-команды, а не с помощью Docker (по различным причинам безопасности).
+  Затем вам нужно будет перезапустить его вручную,
+  -> если вам придется перезагрузиться
+    <или>
+  -> если вы забудете использовать nohup для запуска в фоновом режиме,
+  а затем закрыть терминал.
+
+Предварительные условия:
+  *  Java необходима для запуска процесса агента (agent.jar)
+  * Docker позволяет нам использовать контейнеры Docker для наших агентов вместо того,
+    чтобы устанавливать все непосредственно на машину.
+
+# Установка OpenJDK 17:
+sudo apt-get update
+sudo apt install -y --no-install-recommends openjdk-17-jdk-headless
+
+# создадим пользователя для Jenkins:
+sudo adduser --group --home /home/jenkins --shell /bin/bash jenkins
+
+# При создании агента не забудьте разделить права, разрешения и владение для пользователей.
+
+# + Установим Docker (docker-ce, ...)
+
+
+Create a new node in Jenkin
+[source: https://www.jenkins.io/doc/book/managing/nodes/]
+
+#: Nodes are the "machines" on which build agents run
+#: Агенты управляют выполнением задач от имени контроллера Jenkins с помощью исполнителей (executors).
+#: Агент - это небольшой (170 КБ один jar) клиентский процесс Java, который подключается к контроллеру Jenkins и СЧИТАЕТСЯ НЕНАДЕЖНЫМ.
+#: Агент может использовать любую операционную систему, поддерживающую Java.
+#: Инструменты, необходимые для сборки и тестирования, устанавливаются на узел (node), на котором работает агент;
+#: они могут быть установлены напрямую или в контейнере (Docker или Kubernetes).
+
+[!] На практике узлы и агенты - это, по сути, одно и то же,
+    НО полезно помнить, что концептуально они различаются.
+
+[Создание новой Node]
+(рассмотрим Launch method = Launch agent by connecting it to the controller)
+
+  = Это означает, что вам нужно будет
+    1) запустить агента на самом узле,
+    2) а затем он подключится к контроллеру.
+
+(*) Это довольно удобно, когда вы хотите создавать образы Docker
+    или когда ваш процесс будет использовать образы Docker...
+    Вы также могли бы заставить контроллер запускать агента напрямую через Docker удаленно,
+    но тогда вам пришлось бы использовать Docker-in-Docker (DIND), что сложно и небезопасно.
+
+
+[Node configuration]
+
+  Кнопка Save создаст узел в Jenkins и приведет вас на страницу "Manage nodes and clouds".
+  Ваш новый узел появится в списке коричневым цветом,
+  и вы можете щелкнуть на нем, чтобы просмотреть его детали.
+
+  На странице подробностей отображается командная строка java для запуска агента.
+
+# пример команды запуска агента:
+
+curl -sO http://my_ip:8080/jnlpJars/agent.jar
+java -jar agent.jar \
+     -jnlpUrl http://my_ip:8080/computer/My%20New%20Ubuntu%2022%2E04%20Node%20with%20Java%20and%20Docker%20installed/jenkins-agent.jnlp \
+     -secret my_secret \
+     -workDir "/home/jenkins"
+
+# Теперь вы можете вернуться в пользовательский интерфейс Jenkins,
+# выбрать пункт меню Back to List в левой части экрана
+# и увидеть, что ваш новый агент запущен.
+
+<!---!>
+(!) После запуска агента необходимо выполнить еще несколько действий.
+Когда вы закроете терминал, с которого запускали агента, АГЕНТ ОСТАНОВИТСЯ.
+Если вам когда-нибудь придется перезагрузить машину после обновления ядра, вам также придется перезапустить агента вручную.
+=> следует поддерживать работу агента, объявив его службой.
+<--->
+
+[Run your Jenkins agent as a service]
+
+  1) Создайте каталог с именем jenkins или jenkins-service в своем домашнем каталоге
+    (или в любом другом месте, где у вас есть доступ,   например /usr/local/jenkins-service)
+
+  Если новый каталог не принадлежит домашнему каталогу текущего пользователя,
+  после создания укажите ему правильного владельца и группу.
+  Пример:
+---
+sudo mkdir -p /usr/local/jenkins-service
+sudo chown jenkins /usr/local/jenkins-service
+---
+
+  2) Переместите в этот каталог файл agent.jar, который вы загрузили ранее с помощью команды curl:
+---
+mv agent.jar /usr/local/jenkins-service
+---
+
+  3) Теперь (в /usr/local/jenkins-service) создайте файл start-agent.sh
+     с командой Jenkins java, которую мы видели ранее в качестве содержимого файла.
+
+---<start-agent.sh>---
+#!/bin/bash
+cd /usr/local/jenkins-service
+# Just in case we would have upgraded the controller, we need to make sure that the agent is using the latest version of the agent.jar
+curl -sO http://my_ip:8080/jnlpJars/agent.jar
+java -jar agent.jar -jnlpUrl http://my_ip:8080/computer/My%20New%20Ubuntu%2022%2E04%20Node%20with%20Java%20and%20Docker%20installed/jenkins-agent.jnlp -secret my_secret -workDir "/home/jenkins"
+exit 0
+---
+
+  4) Сделаем скрипт исполняемым, выполнив:
+---
+chmod +x start-agent.sh
+---
+
+  5) Создадим Unit-файл ( = сервис/службу) /etc/systemd/system/jenkins-agent.service:
+---<jenkins-agent.service>---
+[Unit]
+Description=Jenkins Agent
+
+[Service]
+User=jenkins
+WorkingDirectory=/home/jenkins
+ExecStart=/bin/bash /usr/local/jenkins-service/start-agent.sh
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
+---
+
+# Нам все еще нужно включить демон с помощью следующей команды:

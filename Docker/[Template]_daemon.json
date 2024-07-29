@@ -1,0 +1,20 @@
+{
+  "proxies": {
+    "http-proxy": "http://m.eliseev:Dave2312Murray@172.25.200.200:3128",
+    "https-proxy": "http://m.eliseev:Dave2312Murray@172.25.200.200:3128",
+    "no-proxy": "*.test.example.com,.example.org,127.0.0.0/8"
+  },
+  "insecure-registries":["172.21.240.131:8123"]
+}
+
+{
+  "proxies": {
+    "http-proxy": "http://172.25.200.200:3128",
+    "https-proxy": "http://172.25.200.200:3128",
+    "no-proxy": "*.test.example.com,.example.org,127.0.0.0/8"
+  }
+}
+
+{
+    "insecure-registries":["172.21.240.131:8123"]
+}

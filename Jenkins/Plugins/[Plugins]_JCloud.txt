@@ -1,0 +1,2 @@
+JClouds
+{https://plugins.jenkins.io/jclouds-jenkins/}

@@ -1,0 +1,46 @@
+How to send commands to the docker container running on remote host
+You can send commands to a Docker container running on a remote host by using SSH to invoke a command on the remote daemon.
+The request gets forwarded to the /var/run/docker.sock Unix socket on the SSH host. Here is an example:
+
+$ docker -H ssh://user@192.168.64.5 ps
+You can optionally specify the location of the socket by appending a path component to the end of the SSH address.
+
+$ docker -H ssh://user@192.168.64.5/var/run/docker.sock ps
+To expose the Docker API socket through SSH, you need to make sure $DOCKER_HOST is set on the remote host.
+
+$ ssh -l <REMOTEUSER> <REMOTEHOST> 'echo $DOCKER_HOST'
+unix:///run/user/1001/docker.sock
+$ docker -H ssh://<REMOTEUSER>@<REMOTEHOST> run ...
+You can also use the --host option for remote debugging.
+The following example uses SSH to connect to a remote Docker instance at example.org as the root user, and get a shell into the my-container container.
+
+$ docker debug --host ssh://root@example.org my-container
+
+-->
+Вы можете отправлять команды контейнеру Docker, запущенному на удаленном хосте, используя SSH для вызова команды на удаленном демоне.
+Запрос пересылается на Unix-сокет /var/run/docker.sock на хосте SSH.
+Вот пример:
+$ docker -H ssh://user@192.168.64.5 ps
+
+При желании можно указать местоположение сокета, добавив к концу адреса SSH компонент path.
+$ docker -H ssh://user@192.168.64.5/var/run/docker.sock ps
+
+Чтобы открыть сокет Docker API через SSH, необходимо убедиться,
+что на удаленном хосте установлена переменная окружения $DOCKER_HOST.
+$ ssh -l <REMOTEUSER> <REMOTEHOST> 'echo $DOCKER_HOST'
+unix:///run/user/1001/docker.sock
+$ docker -H ssh://<REMOTEUSER>@<REMOTEHOST> run ...
+
+Вы также можете использовать опцию --host для удаленной отладки.
+В следующем примере используется SSH для подключения к удаленному экземпляру Docker по адресу example.org от имени пользователя root
+и получения оболочки для контейнера my-container.
+$ docker debug --host ssh://root@example.org my-container
+
+<--
+
+Sources:
+  "Using SSH sockets":https://docs.docker.com/engine/reference/commandline/cli/#using-ssh-sockets
+
+  "Expose Docker API socket through SSH": https://docs.docker.com/engine/security/rootless/#expose-docker-api-socket-through-ssh
+
+  "Remote debugging using the --host option": https://docs.docker.com/reference/cli/docker/debug/#remote-debugging-using-the---host-option

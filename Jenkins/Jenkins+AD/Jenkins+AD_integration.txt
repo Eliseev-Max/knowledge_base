@@ -81,7 +81,28 @@ keytool -importcert \
 	 -noprompt
 ---
 ## Таким способом не сработало
+####
+#+ "Как посмотреть сертификаты java": https://ru.hexlet.io/qna/java/questions/kak-posmotret-sertifikaty-java
+---
+keytool -list -v -keystore имя_хранилища
+## в нашем случае:
+имя_хранилища = $JENKINS_HOME/.keystore/
+---
 
+## Вывод в консоль будет иметь следующий формат:
+---<Console>---
+Type: X.509
+Issuer: CN=Example Root CA
+Subject: CN=Example Domain
+Valid from: Sat Jan 01 00:00:00 UTC 2022 until: Tue Jan 01 00:00:00 UTC 2024
+---
+Здесь:
+
+  * Type — указывает на тип сертификата,
+  * Issuer — на удостоверяющий центр, выдавший сертификат,
+  * Subject — на имя домена или IP-адрес, для которого выдан сертификат,
+  * Valid from и until — на даты начала и окончания действия сертификата соответственно.
+####
 
 
 [Step 1. Создаём хранилище сертификатов]

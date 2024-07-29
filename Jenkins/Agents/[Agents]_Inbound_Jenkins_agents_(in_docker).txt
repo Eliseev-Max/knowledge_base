@@ -1,0 +1,47 @@
+Docker image for inbound Jenkins agents
+(https://hub.docker.com/r/jenkins/inbound-agent/)
+{sources:
+  [
+    https://github.com/jenkinsci/docker-agent/blob/master/README_agent.md
+    https://github.com/jenkinsci/docker-agent/blob/master/README_inbound-agent.md
+    https://hub.docker.com/r/jenkins/agent
+  ]
+}
+
+---
+[Внимание!]
+Этот образ ранее публиковался как `jenkinsci/jnlp-slave` и  `jenkins/jnlp-slave`.
+[!] Эти образы УСТАРЕЛИ!
+Используйте  jenkins/inbound-agent.
+---
+
+Inbound Jenkins agents
+  - это образ для агентов Jenkins, использующих TCP или WebSockets
+    для установления входящего соединения с контроллером Jenkins.
+  Этот агент работает с библиотекой Jenkins Remoting, версия которой взята из базового образа Docker Agent.
+
+
+[!] Принципиальное отличие этого типа агентов от ssh-agent состоит в методе запуска
+# (механизме подключения и взаимодействия контроллера с агентом):
+Используется  Launch method: "Launch agent by connecting it to the controller"
+#('Запустить агент, подключив его к контроллеру')
+
+# для данного метода требуется задать следующие параметры (поля):
+
+  Disable WorkDir: checkbox
+
+  Custom WorkDir path: string
+
+  Internal data directory: string
+    = (by default: remoting)
+
+  Fail if workspace is missing: checkbox
+
+  Use WebSocket: checkbox
+    
+## В нашей версии Jenkins отсутствуют приведённые выше поля
+## Поэтому не будем использовать inbound-agents
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Существует Launch method: Launch agent via execution of command on the controller
+(нужно задать команду для запуска агента)

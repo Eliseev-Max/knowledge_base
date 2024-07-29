@@ -1,0 +1,17 @@
+apt. Searching for available packages
+
+[sources:]
+  1) "How do I search for available packages from the command-line?":
+  -> https://askubuntu.com/questions/160897/how-do-i-search-for-available-packages-from-the-command-line
+  2) "Using APT Search to Search for Packages on Ubuntu": https://pimylifeup.com/ubuntu-search-packages/
+
+
+Основным способом поиска пакетов в Ubuntu с помощью терминала является использование команды поиска APT.
+$ apt-cache search <keyword>
+, где <keyword> -  всё имя или часть имени пакета или любые слова, используемые в его описании.
+
+Например:
+  $ apt-cache search proxy
+  # включает оба этих пакета:
+  #tinyproxy - A lightweight, non-caching, optionally anonymizing HTTP proxy
+  #tircd - ircd proxy to the twitter API

@@ -1,0 +1,4 @@
+Docker. Configure the daemon to use proxy
+
+[sources:]
+  https://docs.docker.com/config/daemon/proxy/#systemd-unit-file
