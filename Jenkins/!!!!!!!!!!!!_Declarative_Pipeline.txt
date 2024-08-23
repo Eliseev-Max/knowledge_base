@@ -1,0 +1,503 @@
+Declarative Pipeline With Jenkins
+(https://dzone.com/refcardz/declarative-pipeline-with-jenkins)
+
+#########################
+# Pipeline Fundamentals #
+#########################
+
+В своей простейшей форме Pipeline:
+  * АВТОМАТИЧЕСКИ проверяет код в том же репозитории, что и Jenkinsfile,
+  * запускается на агенте
+    и группируется в stages, которые содержат steps, определяющие конкретные действия.
+
+  Все Declarative Pipelines должны начинаться с pipeline и включать эти 4 директивы,
+  чтобы быть синтаксически корректными:
+    agent,
+    stages,
+    stage
+    steps
+
+---<Minimal Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage(‘Build’) {
+            steps {
+                sh 'npm --version'
+            }
+        }
+    }
+}
+---
+
+
+####################
+# Steps and Stages #
+####################
+
+*********
+* Steps *
+*********
+
+  На самом базовом уровне Pipelines состоят из нескольких steps,
+  которые позволяют создавать, тестировать и развертывать приложения.
+
+  step ~ одна команда, которая выполняет одно действие.
+
+  При успешном выполнении step'а происходит переход к следующему step'у.
+
+(!) Steps объявляются в собственном stage, чтобы отличить их от параметров конфигурации.
+  Раздел step'ов может находиться ТОЛЬКО В ПРЕДЕЛАХ stage.
+
+---<Steps Example. Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                sh 'echo "Hello World"'
+                sh '''
+                    echo "Multiline shell steps"
+                    ls –lah
+                '''
+            }
+        }
+    }
+}
+---
+
+***************
+* Shell Steps *
+***************
+
+  Jenkins - это распределенная система, предназначенная для работы НА НЕСКОЛЬКИХ УЗЛАХ И ИСПОЛНИТЕЛЯХ (nodes and executors),
+  что позволяет Jenkins:
+    * масштабировать количество одновременно выполняемых Pipeline'ов    и
+    * оркестровать задачи на узлах с разными операционными системами, инструментами, окружениями и т. д.
+
+  Большинство Pipeline'ов лучше всего работают при запуске собственных команд CLI на разных исполнителях.
+  Это позволяет пользователям автоматизировать задачи, выполняемые на их локальных машинах,
+  путем копирования команд или скриптов непосредственно в Pipeline.
+
+  Pipeline поддерживает:
+    - sh = для Linux и macOS,
+    - bat или powershell = для Windows.
+
+****************************************
+* Timeouts, Retries and Other Wrappers *
+****************************************
+
+  Есть несколько мощных шагов, которые "оборачивают" другие steps, 
+  то позволяет легко решать такие проблемы, как
+    ✓ повторные попытки (retry) шагов до достижения успеха
+      <или>
+    ✓ выход, если шаг занимает слишком много времени (timeout).
+
+  Обертки (Wrappers) могут содержать несколько steps || могут быть рекурсивными и содержать другие обертки.
+  Мы можем комбинировать эти steps вместе.
+
+[Например:]
+  если мы хотим повторить развертывание 5 раз, но никогда не хотим тратить более 3 минут В ОБЩЕЙ СЛОЖНОСТИ,
+  прежде чем провалить stage:
+---<Wrappers. Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Deploy') {
+            steps {
+                timeout(time: 3, unit: 'MINUTES') {
+                    retry(5) {
+                        powershell '.\flakey-deploy.ps1'
+                    }
+                }
+            }
+        }
+    }
+}
+---
+
+**********
+* Stages *
+**********
+
+ Stage в Pipeline - это набор связанных steps, которые имеют ОБЩУЮ СРЕДУ ВЫПОЛНЕНИЯ (execution environment).
+[!]  Каждый stage должен:
+     ✓ иметь имя  и
+     ✓ содержать раздел steps.
+
+  Все stage'ы объявляются в разделе stages вашего Pipeline.
+
+---<Stages. Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            steps {
+                echo 'Building'
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing'
+            }
+        }
+        stage('Deploy') {
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+
+
+********
+* When *
+********
+
+  Stage может быть пропущен в Pipeline на основании критериев, определенных в разделе when stage'а.
+
+  Поддерживаются ключевые слова:
+    * branch
+    * environment
+  ,а выражение `expression` может использоваться для оценки любого выражения Groovy с булевым возвратом.
+
+---<when Usage. Declarative Pipeline>---
+pipeline {
+    agent any
+        stages {
+            stage('Build') {
+                when {
+                    expression {
+                        "foo" == "bar"
+                    }
+                }
+                steps {
+                    echo 'Building'
+                }
+            }
+        stage('Test') {
+            when {
+                environment name: 'JOB_NAME', value: 'foo'
+            }
+            steps {
+                echo 'Testing'
+            }
+        }
+        stage('Deploy') {
+            when {
+                branch 'master'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+
+  Несколько условий могут быть объединены в when с помощью
+    * anyOf
+    * allOf
+      <или>
+    * not
+  для создания сложных skip-условий.
+
+---
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            when {
+                allOf {
+                    not { branch 'master' }
+                    environment name: 'JOB_NAME', value: 'Foo'
+                }
+            }
+            steps {
+                echo 'Building'
+            }
+        }
+    }
+}
+---
+
+*******************
+* Parallel Stages *
+*******************
+
+  Для достижения максимальной эффективности вашего Pipeline некоторые stage'ы можно выполнять параллельно,
+  (!) если они не зависят друг от друга.
+
+  Тесты - хороший пример stages, которые могут выполняться параллельно.
+
+---<Parallel Stages. Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Browser Tests') {
+            parallel {
+                stage('Chrome') {
+                    steps {
+                        echo "Chrome Tests"
+                    }
+                }
+                stage('Firefox') {
+                    steps {
+                        echo "Firefox Tests"
+                    }
+                }
+            }
+        }
+    }
+}
+---
+
+******************
+* Stage settings *
+******************
+  ✓ environment,
+  ✓ post,
+  ✓ agent,
+    и
+  ✓ tools
+  могут быть опционально определены в stage.
+  Эти параметры подробно описаны ниже:
+
+
+##########
+# Agents #
+##########
+
+  Директива agent указывает Jenkins, где и как выполнять Pipeline или его подмножество.
+(!) agent требуется для всех Pipeline.
+
+  agent any = Pipeline может выполняться НА ЛЮБОМ ДОСТУПНОМ АГЕНТЕ.
+
+[!] Под капотом агента происходит несколько вещей:
+
+    * Все шаги, содержащиеся в блоке, ставятся в очередь на выполнение в Jenkins.
+      Как только executor будет доступен, steps начнут выполняться.
+
+    * Выделяется workspace, который будет содержать файлы, проверенные (checked out) из SCM,
+      а также любые дополнительные рабочие файлы для конвейера.
+
+  Один или несколько агентов в Jenkins группируются по метке (label).
+
+
+[!]  Указание метки для агента ограничит круг агентов,
+     которые могут быть использованы в Pipeline.
+
+---
+pipeline {
+    agent {
+        node { label 'my-agent' }
+    }
+}
+---
+
+Также можно использовать пользовательский каталог workspace на каждом агенте,
+используя относительную или абсолютную ссылку на путь для поддержания согласованного расположения файлов.
+
+---(custom workspace directory)---
+pipeline {
+    agent {
+        node {
+            label 'my-defined-label'
+            customWorkspace '/some/other/path'
+        }
+    }
+}
+---
+
+**********
+* Docker *
+**********
+
+  Pipeline разработан таким образом, чтобы легко использовать образы и контейнеры Docker.
+  Это позволяет Pipeline определять необходимое окружение и инструменты
+  без необходимости вручную настраивать различные системные инструменты и зависимости от агентов.
+
+  Такой подход позволяет использовать практически любой инструмент, который может быть упакован в контейнер Docker.
+
+---(Using Docker as build agent)---
+pipeline {
+    agent {
+        docker {
+            label 'docker'
+            image 'maven:3.5.0-jdk-8'
+        }
+    }
+}
+---
+
+Одно из преимуществ использования контейнеров:
+  = создание неизменяемой среды, в которой последовательно определяются только необходимые инструменты.
+
+[!] Вместо того чтобы создавать один большой образ с каждым инструментом, необходимым для Pipeline,
+    можно использовать РАЗНЫЕ КОНТЕЙНЕРЫ НА КАЖДОМ ЭТАПЕ (stage)
+    и ПОВТОРНО ИСПОЛЬЗОВАТЬ рабочее пространство ( = reuse the workspace),
+    СОХРАНЯЯ ВСЕ ФАЙЛЫ В ОДНОМ МЕСТЕ.
+
+
+---<Use Docker + Reuse Workspace>---
+pipeline {
+    agent {
+        node { label 'my-docker' }
+    }
+    stages {
+        stage("Build") {
+            agent {
+                docker {
+                reuseNode true
+                image 'maven:3.5.0-jdk-8'
+                }
+            }
+            steps {
+                sh 'mvn install'
+            }
+        }
+    }
+}
+---
+
+  Это позволит:
+    1. извлечь (checkout) исходный код на agent с label = 'my-docker'
+      <и>
+    2. ПОВТОРНО ИСПОЛЬЗОВАТЬ рабочее пространство при выполнении Build steps внутри выбранного Docker-контейнера.
+
+############
+#--[ALSO]--#
+[Environment Variables and Credentials]
+  [[Credentials in the Environment]]
+
+[Post Actions]
+  ...
+  [[Notifications]]
+  [[Human Input]]
+
+#---#
+
+
+##############################
+# Advanced Pipeline Settings #
+##############################
+
+  Для получения дополнительной информации по таким продвинутым темам, как
+    * Shared Libraries (общие библиотеки),
+    * Script Blocks (блоки сценариев),
+    * Pipeline Options (параметры конвейера)   или
+    * Parameterized Pipelines (параметризованные конвейеры),
+
+  => обратитесь к руководству и справочнику Jenkins на сайте.
+
+[!] Примеры конвейеров можно найти на Jenkins.io или поделиться ими на GitHub:
+#-> https://github.com/jenkinsci/pipeline-examples
+
+---{Advanced Declarative Pipeline. Example}---
+pipeline {
+
+  /*
+   * Run everything on an existing agent configured with a label 'docker'.
+   * This agent will need docker, git and a jdk installed at a minimum.
+   */
+  agent {
+    node {
+      label 'docker'
+    }
+  }
+
+  // using the Timestamper plugin we can add timestamps to the console log
+  options {
+    timestamps()
+  }
+
+  environment {
+    //Use Pipeline Utility Steps plugin to read information from pom.xml into env variables
+    IMAGE = readMavenPom().getArtifactId()
+    VERSION = readMavenPom().getVersion()
+  }
+
+  stages {
+    stage('Build') {
+      agent {
+        docker {
+          /*
+           * Reuse the workspace on the agent, defined at top-level of Pipeline, but run inside a container.
+           * In this case we are running a container with maven so we don't have to install specific versions
+           * of maven directly on the agent
+           */
+          reuseNode true
+          image 'maven:3.5.0-jdk-8'
+        }
+      }
+      steps {
+        // using the Pipeline Maven plugin we can set maven configuration settings, publish test results, and annotate the Jenkins console
+        withMaven(options: [findbugsPublisher(), junitPublisher(ignoreAttachments: false)]) {
+          sh 'mvn clean findbugs:findbugs package'
+        }
+      }
+      post {
+        success {
+          // we only worry about archiving the jar file if the build steps are successful
+          archiveArtifacts(artifacts: '**/target/*.jar', allowEmptyArchive: true)
+        }
+      }
+    }
+
+    stage('Quality Analysis') {
+      parallel {
+        // run Sonar Scan and Integration tests in parallel. This syntax requires Declarative Pipeline 1.2 or higher
+        stage ('Integration Test') {
+          agent any  //run this stage on any available agent
+          steps {
+            echo 'Run integration tests here...'
+          }
+        }
+        stage('Sonar Scan') {
+          agent {
+            docker {
+              // we can use the same image and workspace as we did previously
+              reuseNode true
+              image 'maven:3.5.0-jdk-8'
+            }
+          }
+          environment {
+            //use 'sonar' credentials scoped only to this stage
+            SONAR = credentials('sonar')
+          }
+          steps {
+            sh 'mvn sonar:sonar -Dsonar.login=$SONAR_PSW'
+          }
+        }
+      }
+    }
+
+    stage('Build and Publish Image') {
+      when {
+        branch 'master'  //only run these steps on the master branch
+      }
+      steps {
+        /*
+         * Multiline strings can be used for larger scripts. It is also possible to put scripts in your shared library
+         * and load them with 'libaryResource'
+         */
+        sh """
+          docker build -t ${IMAGE} .
+          docker tag ${IMAGE} ${IMAGE}:${VERSION}
+          docker push ${IMAGE}:${VERSION}
+        """
+      }
+    }
+  }
+
+  post {
+    failure {
+      // notify users when the Pipeline fails
+      mail to: 'team@example.com',
+          subject: "Failed Pipeline: ${currentBuild.fullDisplayName}",
+          body: "Something is wrong with ${env.BUILD_URL}"
+    }
+  }
+}
+---

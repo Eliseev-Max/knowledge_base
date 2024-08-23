@@ -1,0 +1,7 @@
+SSH Agent Plugin
+
+[sources:]
+1) "SSH Agent Plugin": https://www.jenkins.io/doc/pipeline/steps/ssh-agent/
+2) "SSH Agent": https://plugins.jenkins.io/ssh-agent/
+
+

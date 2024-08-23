@@ -1,0 +1,2 @@
+Jenkins. Warnings plugin
+(https://plugins.jenkins.io/warnings-ng/)

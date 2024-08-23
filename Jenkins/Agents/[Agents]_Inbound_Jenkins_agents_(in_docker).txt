@@ -2,6 +2,7 @@ Docker image for inbound Jenkins agents
 (https://hub.docker.com/r/jenkins/inbound-agent/)
 {sources:
   [
+    https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/cloudbees-ci-on-modern-cloud-platforms/launching-jenkins-inbound-agents
     https://github.com/jenkinsci/docker-agent/blob/master/README_agent.md
     https://github.com/jenkinsci/docker-agent/blob/master/README_inbound-agent.md
     https://hub.docker.com/r/jenkins/agent
@@ -45,3 +46,54 @@ Inbound Jenkins agents
 !!!!!!!!!!!!!!!!!!!!!!!!!!!
 Существует Launch method: Launch agent via execution of command on the controller
 (нужно задать команду для запуска агента)
+
+
+##############################################
+# Launching Jenkins Inbound Agents with Java #
+##############################################
+(https://docs.cloudbees.com/docs/cloudbees-ci-kb/latest/cloudbees-ci-on-modern-cloud-platforms/launching-jenkins-inbound-agents)
+[Проблема:]
+
+  * Я хочу запустить inbound ("входящие") агенты для подключения к контроллеру Jenkins
+  * При запуске inbound-агентов происходит сбой с ошибками передачи аргументов,
+    такими как:
+      '"<option>" не является действительной опцией',
+      '"<option>" required'
+      или 'option "<option1>" cannot be used with the option(s) <list of options>
+
+[Решение:]
+
+  В основном существует 2 рекомендуемых способа запуска inbound-агента с помощью Java,
+  и в зависимости от выбранного подхода можно использовать различные опции и аргументы:
+  * Более распространенный и простой подход заключается в загрузке файла JNLP и использовании Launcher (программы запуска),
+    обычно: java -jar agent.jar -jnlpUrl <jnlpUrl> ....
+
+  * Необработанный (raw) подход
+    = выполнение точки входа Remoting Main,
+      как правило: java -cp agent.jar hudson.remoting.jnlp.Main -headless ...
+
+[!] Нет никаких рекомендаций по выбору того или иного подхода.
+    Необработанный подход позволяет выполнять более тонкую настройку.
+
+************************
+* Launcher / JNLP File *
+************************
+
+  The most common way, that is also advertised in the Node page, is by using the remoting Launcher and pass the URL of the JNLP File:
+
+java -jar agent.jar -jnlpUrl "${JENKINS_URL}"/computer/"${AGENT_NAME}"/jenkins-agent.jnlp ....
+This command retrieve the jenkins-agent.jnlp file at "${JENKINS_URL}"/computer/"${AGENT_NAME}"/jenkins-agent.jnlp via HTTP/S. It is an XML file and can be read with cat or a text editor. That file contains the options and arguments that will be passed to the hudson.remoting.jnlp.Main class of remoting to start the agent (like the raw approach does).
+
+Use java -jar agent.jar -help to see the options.
+
+
+***********************************************
+* Raw approach with hudson.remoting.jnlp.Main *
+***********************************************
+
+  Another way, not advertised in the Node page, is to add agent.jar to the CLASSPATH and execute the hudson.remoting.jnlp.Main directly:
+
+java -cp agent.jar hudson.remoting.jnlp.Main ...
+This method is a raw command to which you need to provide all necessary arguments. This is the method used in the Inbound Agent images such as jenkins/inbound-agent and cloudbees/cloudbees-core-agent to launch the agent.
+
+Use java -cp agent.jar hudson.remoting.jnlp.Main -help to see the options.

@@ -1,0 +1,5 @@
+Publishing Plugins. HTML Publisher
+
+[sources:]
+1) "Publishing Plugins": https://www.jenkins.io/doc/developer/publishing/
+2) "HTML Publisher": https://plugins.jenkins.io/htmlpublisher/

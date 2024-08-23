@@ -1,0 +1,70 @@
+########################
+# ps aux |grep 1580099 #
+########################
+
+jenkins  1580099  100  2.4 472764 394744 ?       R    11:07   1:26 /usr/lib/llvm-10/bin/clang++ -cc1 -triple x86_64-pc-linux-gnu -analyze -disable-free -disable-llvm-verifier -discard-value-names -main-file-name kpr_target_test.cpp -analyzer-store=region -analyzer-opt-analyze-nested-blocks -analyzer-checker=core -analyzer-checker=apiModeling -analyzer-checker=unix -analyzer-checker=deadcode -analyzer-checker=cplusplus -analyzer-checker=security.insecureAPI.UncheckedReturn -analyzer-checker=security.insecureAPI.getpw -analyzer-checker=security.insecureAPI.gets -analyzer-checker=security.insecureAPI.mktemp -analyzer-checker=security.insecureAPI.mkstemp -analyzer-checker=security.insecureAPI.vfork -analyzer-checker=nullability.NullPassedToNonnull -analyzer-checker=nullability.NullReturnedFromNonnull -analyzer-output plist -w -setup-static-analyzer -mrelocation-model static -mthread-model posix -mframe-pointer=all -fmath-errno -fno-rounding-math -masm-verbose -mconstructor-aliases -munwind-tables -target-cpu x86-64 -dwarf-column-info -fno-split-dwarf-inlining -debugger-tuning=gdb -resource-dir /usr/lib/llvm-10/lib/clang/10.0.0 -D BOOST_ALL_NO_LIB -D BOOST_ATOMIC_DYN_LINK -D BOOST_DATE_TIME_DYN_LINK -D BOOST_FILESYSTEM_DYN_LINK -D BOOST_PROGRAM_OPTIONS_DYN_LINK -D BOOST_REGEX_DYN_LINK -D BOOST_SYSTEM_DYN_LINK -D BOOST_THREAD_DYN_LINK -D BOOST_UNIT_TEST_FRAMEWORK_DYN_LINK -D KPR_ACA_PRIVATE_KEY_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/aca_private_key.pem" -D KPR_ACA_PUBLIC_KEY_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/aca_public_key.pem" -D KPR_ACCESSRULES_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/rules.json" -D KPR_BACKUP_DIR="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/backup" -D KPR_BACKUP_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/backup/" -D KPR_BOOST_ENABLED -D KPR_EXTERNAL_PATHS="data.txt;/tmp/new_data.txt;another_data.txt;/tmp/another_data.txt" -D KPR_GROUPS_CONFIG_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/groups.json" -D KPR_JOURNAL_FILE="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/journal" -D KPR_JOURNAL_LIMIT_READ=50 -D KPR_JOURNAL_LIMIT_SESSIONS=10 -D KPR_JOURNAL_REC_COUNT=100 -D KPR_JOURNAL_SESSION_DOWNTIME=5 -D KPR_JOURNAL_SIGN_ENABLED -D KPR_KERNEL_READY="keeper_kernel_ready" -D KPR_LOCAL_TYPE_MESSAGE="локального доступа" -D KPR_LOCKEDTARGETS_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/lockedtargets.json" -D KPR_LOG_PATH="log/" -D KPR_LONG_PRIVATE_KEY="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/private_key_long.pem" -D KPR_MAX_DESCRIPTION_SIZE=32 -D KPR_MAX_ENCRYPTION_SIZE=32 -D KPR_MAX_GROUPS_CAPACITY=50 -D KPR_MAX_GROUP_NAME_SIZE=32 -D KPR_MAX_OAUTH_TOKENS_CAPACITY=10 -D KPR_MAX_PROCESSNAME_SIZE=32 -D KPR_MAX_PRT_FILES_CAPACITY=10 -D KPR_MAX_SESSIONS_CAPACITY=100 -D KPR_MAX_SESSION_KEYS_CAPACITY=3 -D KPR_MAX_TARGETS_CAPACITY=100 -D KPR_MAX_USERNAME_SIZE=32 -D KPR_MAX_USERS_CAPACITY=30 -D KPR_MERKLE_NODES_COUNT=10 -D KPR_MERKLE_TREE_ENABLED -D KPR_NAME="keepera0faee28-210e-3b4a-9797-c1af956312ad" -D KPR_OAUTH_ENABLED -D KPR_OAUTH_KEY_MAX_AGE=5 -D KPR_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/" -D KPR_POLICY_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/policy.json" -D KPR_POLICY_LIMIT_SESSIONS_MAX=999 -D KPR_POLICY_LIMIT_SESSIONS_MIN=0 -D KPR_POLICY_PRM_ERROR_MAX=999 -D KPR_POLICY_PRM_ERROR_MIN=0 -D KPR_POLICY_PRM_TIMEOUT_MAX=1505 -D KPR_POLICY_PRM_TIMEOUT_MIN=0 -D KPR_POLICY_PSWD_COUNT_MAX=24 -D KPR_POLICY_PSWD_COUNT_MIN=1 -D KPR_POLICY_PSWD_MAX_LFTM_MAX=999 -D KPR_POLICY_PSWD_MAX_LFTM_MIN=0 -D KPR_POLICY_PSWD_MIN_LFTM_MAX=998 -D KPR_POLICY_PSWD_MIN_LFTM_MIN=0 -D KPR_POLICY_PSWD_NOTIFY_TIME_MAX=999 -D KPR_POLICY_PSWD_NOTIFY_TIME_MIN=0 -D KPR_POLICY_SESSION_DOWNTIME_MAX=1440 -D KPR_POLICY_SESSION_DOWNTIME_MIN=0 -D KPR_PRIVATE_KEY="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/private_key.pem" -D KPR_PROCESSES_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/processes.json" -D KPR_PROTECTEDFILES_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/files.json" -D KPR_PUBLIC_KEY="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/public_key.pem" -D KPR_REMOTE_TYPE_MESSAGE="удаленного доступа" -D KPR_RSA_KEY_LENGTH=1024 -D KPR_SECURITY_KEY="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/security_key.pem" -D KPR_SESSION_ID_SIZE=64 -D KPR_SETTINGS -D KPR_SHORT_PRIVATE_KEY="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/private_key_short.pem" -D KPR_SNAPSHOT_DIR="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/snapshot" -D KPR_SNAPSHOT_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/snapshot/" -D KPR_SUPERUSER_ENABLED -D KPR_SUPERUSER_NAME="super" -D KPR_SUPERUSER_TIMEOUT=5 -D KPR_SYSTEMUSER_NAME="system" -D KPR_SYSTEMUSER_TIMEOUT=5 -D KPR_TARGETS_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/targets.json" -D KPR_TARGET_CASESENSITIVE -D KPR_TEST_ACA_PATH="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/aca.zip" -D KPR_TEST_ENABLED -D KPR_TFA_ENABLED -D KPR_TOOLS_ENABLED -D KPR_USERS_CONFIG="/var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests/users.json" -D STG_BOOST_ENABLED -I /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/keeper/api -I /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/. -I /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/./keeper/api -I /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/./storage -I /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/linenoise -U NDEBUG -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/x86_64-linux-gnu/c++/9 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/x86_64-linux-gnu/c++/9 -internal-isystem /usr/lib/gcc/x86_64-linux-gnu/9/../../../../include/c++/9/backward -internal-isystem /usr/local/include -internal-isystem /usr/lib/llvm-10/lib/clang/10.0.0/include -internal-externc-isystem /usr/include/x86_64-linux-gnu -internal-externc-isystem /include -internal-externc-isystem /usr/include -std=gnu++17 -fdeprecated-macro -fdebug-compilation-dir /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/scanbuild/tests -ferror-limit 19 -fmessage-length 0 -fsanitize=address,alignment,array-bounds,bool,builtin,enum,float-cast-overflow,function,integer-divide-by-zero,nonnull-attribute,null,pointer-overflow,return,returns-nonnull-attribute,shift-base,shift-exponent,signed-integer-overflow,unreachable,vla-bound,vptr -fsanitize-recover=alignment,array-bounds,bool,builtin,enum,float-cast-overflow,function,integer-divide-by-zero,nonnull-attribute,null,pointer-overflow,returns-nonnull-attribute,shift-base,shift-exponent,signed-integer-overflow,vla-bound,vptr -fsanitize-system-blacklist=/usr/lib/llvm-10/lib/clang/10.0.0/share/asan_blacklist.txt -fsanitize-address-use-after-scope -fno-assume-sane-operator-new -fgnuc-version=4.2.1 -fobjc-runtime=gcc -fcxx-exceptions -fexceptions -fdiagnostics-show-option -analyzer-opt-analyze-headers -analyzer-max-loop 8 -analyzer-output=html -faddrsig -o /tmp/scan-build-2024-04-11-221238-161-1 -x c++ /var/jenkins_home/workspace/per_feature_BUC-12245-scan-build/tests/kpr_target_test.cpp
+
+######################
+# sudo mpstat -P ALL #
+######################
+
+Linux 5.15.0-89-generic (srv-cicd)      04/12/2024      _x86_64_        (4 CPU)
+
+11:14:11 AM  CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+11:14:11 AM  all    7.52    0.00    0.63    0.14    0.00    0.03    0.00    0.00    0.00   91.67
+11:14:11 AM    0    7.35    0.00    0.64    0.14    0.00    0.07    0.00    0.00    0.00   91.81
+11:14:11 AM    1    7.65    0.00    0.62    0.13    0.00    0.02    0.00    0.00    0.00   91.57
+11:14:11 AM    2    7.42    0.00    0.63    0.16    0.00    0.02    0.00    0.00    0.00   91.76
+11:14:11 AM    3    7.67    0.00    0.62    0.15    0.00    0.02    0.00    0.00    0.00   91.54
+
+---<mpstat_comments:>---
+CPU =  Номер процессора.
+       Ключевое слово all (ALL) указывает на то, что статистика рассчитывается как среднее значение по всем процессорам.
+
+%usr = Показывает процент использования процессора при выполнении на уровне пользователя (приложения).
+
+%nice = Показывает процент загрузки процессора при выполнении на уровне пользователя с хорошим приоритетом.
+
+%sys = Показывает процент использования процессора во время выполнения на системном уровне (ядро).
+       (!) Обратите внимание, что сюда НЕ ВХОДИТ время, затраченное на обслуживание аппаратных и программных прерываний.
+
+%iowait = Показывает процент времени простоя процессора или процессоров,
+          в течение которого система имела невыполненный запрос ввода-вывода с диска.
+
+%irq = Показывает процент времени, затрачиваемого процессором или процессорами на обслуживание аппаратных прерываний.
+
+%soft = Показывает процент времени, затрачиваемого процессором или процессорами на обслуживание программных прерываний.
+
+%steal = Показывает процент времени, проведенного виртуальным процессором или процессорами в вынужденном ожидании,
+         пока гипервизор обслуживал другой виртуальный процессор.
+
+%guest = Показывает процент времени, затраченного центральным процессором или центральными процессорами на работу виртуального процессора.
+
+%gnice = 
+
+%idle = Показывает процент времени, в течение которого процессор или процессоры простаивали, а система не имела невыполненных запросов ввода-вывода с диска.
+---
+
+
+
+###########
+# free -h #
+###########
+               total        used        free      shared  buff/cache   available
+Mem:            15Gi       7.2Gi       1.0Gi        33Mi       7.4Gi       8.1Gi
+Swap:          4.0Gi       2.8Gi       1.2Gi
+
+
+############
+# sudo top #
+############
+
+top - 11:38:41 up 134 days, 17:05,  2 users,  load average: 1.02, 1.03, 1.05
+Tasks: 203 total,   2 running, 197 sleeping,   0 stopped,   4 zombie
+%Cpu(s): 25.1 us,  1.3 sy,  0.0 ni, 73.0 id,  0.2 wa,  0.0 hi,  0.4 si,  0.0 st
+MiB Mem :  15988.9 total,    731.2 free,   7452.7 used,   7804.9 buff/cache
+MiB Swap:   4096.0 total,   1208.0 free,   2888.0 used.   8168.2 avail Mem
+
+
+ PID    USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+1582853 jenkins   20   0  727684 592772  56080 R 100.0   3.6   4:26.10 clang++

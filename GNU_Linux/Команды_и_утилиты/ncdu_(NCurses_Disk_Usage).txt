@@ -1,0 +1,96 @@
+NCurses Disk Usage (ncdu)
+
+[sources:]
+  1) "ncdu(1) - Linux man page" https://linux.die.net/man/1/ncdu
+  2) "": https://www.linuxcertif.com/man/1/ncdu/
+
+
+
+[Синтаксис:]
+
+ncdu [-hqvx] [--exclude PATTERN] [-X FILE] dir
+
+[Описание:]
+
+  ncdu (NCurses Disk Usage) - это основанная на curses версия хорошо известного 'du',
+  предоставляющая быстрый способ узнать, какие каталоги используют ваше дисковое пространство.
+
+[Options:]
+  -h
+    = Print a small help message
+
+  -q
+    = Quiet mode.
+      While calculating disk space, ncdu will update the screen 10 times a second by default, this will be decreased to once every 2 seconds in quiet mode. Use this feature to save bandwidth over remote connections.
+
+  -v
+    = Print version.
+
+  -x
+    = Only count files and directories on the same filesystem as the specified dir.
+
+  --exclude PATTERN
+    = Exclude files that match PATTERN.
+      This argument can be added multiple times to add more patterns.
+
+  -X FILE, --exclude-from FILE
+    = Exclude files that match any pattern in FILE. Patterns should be separated by a newline.
+
+
+[Keys:]
+# после завершения анализа и вывода результата на консоль
+  ?
+  Show help + keys + about screen
+
+  up, down j, k
+    = Cycle through the items
+
+  right, enter, l
+    = Open selected directory
+
+  left, <, h
+    Go to parent directory
+  n  = Упорядочить по имени файла (нажмите еще раз, чтобы упорядочить по убыванию)
+
+  s  = Упорядочить по размеру файлов (нажмите еще раз, чтобы упорядочить по убыванию)
+
+  a  = Переключение между отображением использования диска и отображением видимого размера.
+
+  d  = Удалить выбранный файл или каталог.
+       Если содержимое каталога не совпадает или больше не существует в файловой системе,
+       будет показано сообщение об ошибке.
+
+  t  =  Переключать каталоги перед файлами при сортировке.
+
+  g  = Переключение между отображением процента, графика, обоих или ни одного.
+       Процент -> относительно размера текущего каталога,
+       график -> относительно самого большого элемента в текущем каталоге.
+
+  e  = Показать/скрыть «скрытые» или «исключенные» файлы и каталоги.
+       Обратите внимание, что даже если вы не видите скрытые файлы и каталоги,
+       они все равно существуют и учитываются в размерах каталога.
+       Если вы подозреваете, что итоговые значения, отображаемые в нижней части экрана, не соответствуют действительности,
+       убедитесь, что вы не включили эту опцию.
+
+  i  = Показать информацию о текущем выбранном элементе.
+
+  r  = Обновить/пересчитать текущий каталог.
+
+  q  = Quit
+
+
+[Hard Links:]
+Every disk usage analysis utility has its own way of (not) counting hard links. There does not seem to be any universally agreed method of handling hard links, and it is even inconsistent among different versions of ncdu. This section explains what each version of ncdu does.
+ncdu 1.5 and below does not support any hard link detection at all: each link is considered a separate inode and its size is counted for every link. This means that the displayed directory sizes are incorrect when analyzing directories which contain hard links.
+
+ncdu 1.6 has basic hard link detection: When a link to a previously encountered inode is detected, the link is considered to have a file size of zero bytes. Its size is not counted again, and the link is indicated in the browser interface with a 'H' mark. The displayed directory sizes are only correct when all links to an inode reside within that directory. When this is not the case, the sizes may or may not be correct, depending on which links were considered as "duplicate" and which as "original". The indicated size of the topmost directory (that is, the one specified on the command line upon starting ncdu) is always correct.
+
+ncdu 1.7 has improved hard link detection. Each file that has more than two links has the "H" mark visible in the browser interface. Each hard link is counted exactly once for every directory it appears in. The indicated size of each directory is therefore, correctly, the sum of the sizes of all unique inodes that can be found in that directory. Note, however, that this may not always be same as the space that will be reclaimed after deleting the directory, as some inodes may still be accessible from hard links outside it.
+
+Bugs
+Directory hard links are not supported. They will not be detected as being hard links, and will thus be scanned and counted multiple times.
+Some minor glitches may appear when displaying filenames that contain multibyte or multicolumn characters.
+
+Please report any other bugs you may find at the bug tracker, which can be found on the web site
+
+at http://dev.yorhel.nl/ncdu

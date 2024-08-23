@@ -1,0 +1,6 @@
+ОЗНАКОМИТЬСЯ!
+
+1) "Using Docker with Pipeline": https://www.jenkins.io/doc/book/pipeline/docker/
+2) "Docker": https://plugins.jenkins.io/docker-plugin/
+3) "Docker plugin": https://www.jenkins.io/doc/pipeline/steps/docker-plugin/
+4) "Configuration as Code": https://plugins.jenkins.io/configuration-as-code/

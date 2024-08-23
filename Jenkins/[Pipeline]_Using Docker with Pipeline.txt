@@ -1,0 +1,427 @@
+Using Docker with Pipeline
+(https://www.jenkins.io/doc/book/pipeline/docker/)
+
+Для чего используется Docker:
+  * для унификации сред сборки и тестирования на разных машинах,
+  * для обеспечения эффективного механизма деплоя приложений.
+
+Начиная с Pipeline версии 2.5 и выше, Pipeline имеет ВСТРОЕННУЮ ПОДДЕРЖКУ взаимодействия с Docker из файла Jenkins.
+
+******************************
+* Настройка среды выполнения *
+******************************
+Pipeline разработан таким образом, чтобы легко использовать образы Docker в КАЧЕСТВЕ СРЕДЫ ВЫПОЛНЕНИЯ
+  -> для отдельного stage
+  -> или всего Pipeline.
+
+=> что пользователь может определить инструменты, необходимые для его конвейера, без необходимости вручную настраивать агентов.
+Любой инструмент, который может быть упакован в контейнер Docker, можно легко использовать, внеся лишь незначительные правки в Jenkinsfile.
+
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent {
+        docker { image 'node:20.16.0-alpine3.20' }
+    }
+    stages {
+        stage('Test') {
+            steps {
+                sh 'node --version'
+            }
+        }
+    }
+}
+---
+
+Когда конвейер будет запущен, Jenkins автоматически запустит указанный контейнер и выполнит в нем определенные шаги:
+---[Logs]---
+[Pipeline] stage
+[Pipeline] { (Test)
+[Pipeline] sh
+[guided-tour] Running shell script
++ node --version
+v16.13.1
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+---
+
+
+***************************
+* Синхронизация WORKSPACE *
+***************************
+
+  Если важно, чтобы рабочее пространство (WORKSPACE) синхронизировалось с другими stages,
+  используйте значение:
+-->
+reuseNode true
+# это параметр блока docker {...}
+<--
+  В противном случае докеризованный stage может быть запущен НА ТОМ ЖЕ АГЕНТЕ или НА ЛЮБОМ ДРУГОМ АГЕНТЕ,
+  но во временном рабочем пространстве (temporary workspace).
+
+По умолчанию для контейнеризированного этапа Jenkins:
+  1) Выбирает агента.
+  2) Создает НОВЫЙ ПУСТОЙ WORKSPACE
+  3) Клонирует в него код pipeline'а.
+  4) МОНТИРУЕТ этот новый WORKSPACE в контейнер.
+
+(*) Если у вас НЕСКОЛЬКО АГЕНТОВ Jenkins, контейнерный stage может быть ЗАПУЩЕН НА ЛЮБОМ ИЗ НИХ.
+
+  Если для параметра `reuseNode` установлено значение true,
+  НОВЫЙ WORKSPACE создаваться НЕ БУДЕТ,
+  а в контейнер будет смонтирован текущий WORKSPACE из текущего агента.
+  После этого контейнер будет запущен НА ТОМ ЖЕ УЗЛЕ,
+  => поэтому ВСЕ ДАННЫЕ БУДУТ СИНХРОНИЗИРОВАНЫ.
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent any
+    stages {
+        stage('Build') {
+            agent {
+                docker {
+                    image 'gradle:8.2.0-jdk17-alpine'
+                    // Run the container on the node specified at the
+                    // top-level of the Pipeline, in the same workspace,
+                    // rather than on a new node entirely:
+                    reuseNode true
+                }
+            }
+            steps {
+                sh 'gradle --version'
+            }
+        }
+    }
+}
+---
+[Подробнее о reuseNode]
+  reuseNode
+    = boolean, по умолчанию false.
+      Если значение = true, контейнер будет запускаться на узле, указанном на верхнем уровне (top-level) Pipeline'а,
+      в том же WORKSPACE, а не на новом узле.
+      Эта опция действительна для docker и dockerfile
+      и имеет эффект только при использовании в agent'е для отдельного stage.
+
+**************************************
+* Кэширование данных для контейнеров *
+**************************************
+  Многие инструменты сборки (build tools)
+    + загружают внешние зависимости
+    + кэшируют их локально для последующего повторного использования.
+
+  Поскольку КОНТЕЙНЕРЫ ИЗНАЧАЛЬНО СОЗДАЮТСЯ С "ЧИСТЫМИ" ФАЙЛОВЫМИ СИСТЕМАМИ,
+  это может привести к замедлению работы pipeline'ов,
+  поскольку они НЕ МОГУТ ИСПОЛЬЗОВАТЬ ПРЕИМУЩЕСТВА ДИСКОВОГО КЭША между последующими запусками Pipeline.
+
+  Pipeline поддерживает добавление ПОЛЬЗОВАТЕЛЬСКИХ АРГУМЕНТОВ, которые передаются в Docker,
+  что позволяет пользователям указывать пользовательские тома Docker для монтирования,
+  которые могут быть использованы ДЛЯ КЭШИРОВАНИЯ ДАННЫХ НА АГЕНТЕ между запусками Pipeline.
+
+  Следующий пример кэширует ~/.m2 между запусками Pipeline, используя контейнер maven,
+  что избавляет от необходимости повторно загружать зависимости для последующих запусков Pipeline.
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent {
+        docker {
+            image 'maven:3.9.3-eclipse-temurin-17'
+            args '-v $HOME/.m2:/root/.m2'
+        }
+    }
+    stages {
+        stage('Build') {
+            steps {
+                sh 'mvn -B'
+            }
+        }
+    }
+}
+---
+
+
+****************************************
+* Использование нескольких контейнеров *
+****************************************
+
+# В последнее время все чаще кодовые базы опираются на несколько различных технологий.
+  Например:
+    репозиторий может иметь как
+    внутренняя реализация API в репозитории ( = back-end) на Java,
+    внешняя реализация в репозитории ( = front-end) на JavaScript.
+
+  Сочетание Docker и Pipeline позволяет Jenkinsfile использовать несколько типов технологий,
+  КОМБИНИРУЯ ДИРЕКТИВУ agent {} с различными stages.
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent none
+    stages {
+        stage('Back-end') {
+            agent {
+                docker { image 'maven:3.9.8-eclipse-temurin-21-alpine' }
+            }
+            steps {
+                sh 'mvn --version'
+            }
+        }
+        stage('Front-end') {
+            agent {
+                docker { image 'node:20.16.0-alpine3.20' }
+            }
+            steps {
+                sh 'node --version'
+            }
+        }
+    }
+}
+---
+
+
+**********************
+* Using a Dockerfile *
+**********************
+
+  Для проектов, требующих более индивидуальной среды выполнения,
+  Pipeline также поддерживает сборку и запуск контейнера из Dockerfile в исходном репозитории.
+  В отличие от предыдущего подхода, когда использовался "готовый" контейнер,
+  при использовании синтаксиса agent { dockerfile true } создается новый образ из Dockerfile,
+  а не извлекается готовый образ из Docker Hub.
+
+# Повторение примера, приведенного выше, с более пользовательским Dockerfile:
+
+---<Dockerfile>---
+FROM node:20.16.0-alpine3.20
+
+RUN apk add -U subversion
+---
+
+  Зафиксировав (commit) его в корне исходного репозитория, можно изменить Jenkinsfile,
+  чтобы собрать контейнер на основе этого Dockerfile,
+  а затем запустить определенные шаги с помощью этого контейнера:
+
+---<Jenkinsfile (Declarative Pipeline)>---
+pipeline {
+    agent { dockerfile true }
+    stages {
+        stage('Test') {
+            steps {
+                sh 'node --version'
+                sh 'svn --version'
+            }
+        }
+    }
+}
+---
+
+  Синтаксис агента { dockerfile true } поддерживает ряд других опций,
+  которые более подробно описаны в разделе "Pipeline Syntax": (https://www.jenkins.io/doc/book/pipeline/syntax#agent)
+
+*****************************
+* Specifying a Docker Label *
+*****************************
+
+  По умолчанию Pipeline предполагает, что ЛЮБОЙ СКОНФИГУРИРОВАННЫЙ АГЕНТ способен запускать pipelines на базе Docker.
+  В средах Jenkins, где есть macOS, Windows или другие агенты, не способные запускать демон Docker,
+  эта настройка по умолчанию может быть проблематичной.
+
+  Pipeline предоставляет глобальную опцию на странице Manage Jenkins и на уровне папок,
+  чтобы указать, какие агенты (по метке) использовать для запуска pipelines на базе Docker.
+
+
+*****************************************
+* Advanced Usage with Scripted Pipeline *
+*****************************************
+
+  Запуск контейнеров "sidecar"
+  Использование Docker в Pipeline - это эффективный способ запустить сервис,
+  от которого может зависеть сборка или набор тестов.
+  Подобно паттерну sidecar, Docker Pipeline может запускать один контейнер "в фоновом режиме", выполняя работу в другом.
+  Используя этот подход sidecar, Pipeline может иметь "чистый" контейнер, предоставляемый для каждого запуска Pipeline.
+
+  Рассмотрим гипотетический набор интеграционных тестов, который полагается на локальную базу данных MySQL.
+  Используя метод withRun, реализованный в плагине Docker Pipeline для поддержки Scripted Pipeline,
+  Jenkinsfile может запускать MySQL в качестве sidecar:
+---
+node {
+    checkout scm
+    /*
+     * Для связи с сервером MySQL этот Pipeline явно сопоставляет (maps) 
+     * порт (`3306`) с известным портом на хост-машине.
+     */
+    docker.image('mysql:8-oracle').withRun('-e "MYSQL_ROOT_PASSWORD=my-secret-pw"' +
+                                           ' -p 3306:3306') { c ->
+        /* Wait until mysql service is up */
+        sh 'while ! mysqladmin ping -h0.0.0.0 --silent; do sleep 1; done'
+        /* Run some tests which require MySQL */
+        sh 'make check'
+    }
+}
+---
+
+Этот пример можно развить, используя два контейнера одновременно:
+  * одном "sidecar"-контейнере работает MySQL,
+  * а другой обеспечивает среду выполнения с помощью ссылок на контейнеры Docker.
+
+---
+node {
+    checkout scm
+    docker.image('mysql:8-oracle').withRun('-e "MYSQL_ROOT_PASSWORD=my-secret-pw"') { c ->
+        docker.image('mysql:8-oracle').inside("--link ${c.id}:db") {
+            /* Wait until mysql service is up */
+            sh 'while ! mysqladmin ping -hdb --silent; do sleep 1; done'
+        }
+        docker.image('oraclelinux:9').inside("--link ${c.id}:db") {
+            /*
+             * Run some tests that require MySQL, and assume that it is
+             * available on the host name `db`
+             */
+            sh 'make check'
+        }
+    }
+}
+---
+
+  В приведенном выше примере используется ОБЪЕКТ, раскрываемый функцией withRun,
+  который имеет идентификатор запущенного контейнера, доступный через свойство id.
+  Используя ID контейнера, Pipeline может создать ссылку,
+  передав пользовательские аргументы Docker в метод inside().
+
+Свойство id также может быть полезно для проверки журналов из работающего контейнера Docker перед выходом из конвейера:
+
+-->
+sh "docker logs ${c.id}"
+<--
+
+
+***********************
+* Building containers *
+***********************
+
+  Для создания образа Docker плагин Docker Pipeline также предоставляет метод build()
+  для создания нового образа из Dockerfile в репозитории во время выполнения Pipeline.
+
+[!] Одним из основных преимуществ использования синтаксиса docker.build("my-image-name") является то,
+    что Scripted Pipeline может использовать возвращаемое значение для последующих вызовов Docker Pipeline!
+
+#Например:
+
+---<Jenkinsfile (Scripted Pipeline)>---
+node {
+    checkout scm
+
+    def customImage = docker.build("my-image:${env.BUILD_ID}")
+
+    customImage.inside {
+        sh 'make test'
+    }
+}
+---
+
+# Возвращаемое значение также может быть использовано для публикации образа Docker
+  -> в Docker Hub
+    <или>
+  -> пользовательском реестре
+
+(>) например, с помощью метода push():
+---<Jenkinsfile (Scripted Pipeline)>---
+node {
+    checkout scm
+    def customImage = docker.build("my-image:${env.BUILD_ID}")
+    customImage.push()
+}
+---
+
+  Одним из распространенных способов использования "тегов" образов
+  является указание тега latest для самой последней подтвержденной версии образа Docker.
+  Метод push() принимает необязательный параметр tag,
+  что позволяет Pipeline отправлять customImage с разными тегами, например:
+
+---<Jenkinsfile (Scripted Pipeline)>---
+node {
+    checkout scm
+    def customImage = docker.build("my-image:${env.BUILD_ID}")
+    customImage.push()
+
+    customImage.push('latest')
+}
+---
+
+#(!) По умолчанию метод build() создает Dockerfile в текущем каталоге.
+     Это можно переопределить, например, указав путь к директории,
+     содержащей Dockerfile, в качестве второго аргумента метода build():
+
+---
+node {
+    checkout scm
+    def testImage = docker.build("test-image", "./dockerfiles/test") //(1)
+
+    testImage.inside {
+        sh 'make test'
+    }
+}
+---
+
+#(1) Сборка test-image из Dockerfile, расположение: ./dockerfiles/test/Dockerfile.
+
+  Можно передать docker build и другие аргументы,
+  добавив их во второй аргумент метода build().
+  При передаче аргументов таким образом ПОСЛЕДНЕЕ ЗНАЧЕНИЕ в строке
+    * должно быть ПУТЕМ К ФАЙЛУ docker
+    * и заканчиваться директорией, которую следует использовать в качестве контекста сборки.
+
+Этот пример отменяет Dockerfile по умолчанию, передавая флаг -f:
+
+---<Jenkinsfile (Scripted Pipeline)>---
+node {
+    checkout scm
+    def dockerfile = 'Dockerfile.test'
+    def customImage = docker.build("my-image:${env.BUILD_ID}",
+                                   "-f ${dockerfile} ./dockerfiles") //(1)
+}
+---
+#(1) Собирает my-image:${env.BUILD_ID} из Dockerfile,
+#    найденного по пути ./dockerfiles/Dockerfile.test.
+
+
+********************************
+* Using a remote Docker server *
+********************************
+
+  По умолчанию плагин Docker Pipeline взаимодействует с локальным демоном Docker,
+  доступ к которому обычно осуществляется через (unix socket) /var/run/docker.sock.
+
+Чтобы выбрать сервер Docker НЕ по умолчанию,
+#!(например, Docker Swarm)
+  => используйте метод withServer().
+
+  В метод with можно передать:
+    * URI
+      <и, опционально,>
+    * Credentials ID  сертификата аутентификации сервера Docker,
+      ПРЕДВАРИТЕЛЬНО НАСТРОЕННОГО в Jenkins:
+
+---<Jenkinsfile (Scripted Pipeline)>---
+node {
+    checkout scm
+
+    docker.withServer('tcp://swarm.example.com:2376', 'swarm-certs') {
+        docker.image('mysql:8-oracle').withRun('-p 3306:3306') {
+            /* do things */
+        }
+    }
+}
+---
+
+[!] inside() и build() НЕ БУДУТ корректно работать с сервером Docker Swarm из коробки.
+
+  Для работы inside() сервер Docker и агент Jenkins должны использовать ОДНУ И ТУ ЖЕ ФАЙЛОВУЮ СИСТЕМУ,
+  чтобы можно было смонтировать WORKSPACE.
+
+  В настоящее время ни плагин Jenkins, ни Docker CLI не могут автоматически определить, что сервер запущен удаленно.
+  Типичным симптомом этого будут ошибки от вложенных команд sh, таких как:
+---
+cannot create /…@tmp/durable-…/pid: Directory nonexistent
+---
+
+  Когда Jenkins обнаружит, что агент запущен внутри контейнера Docker, он автоматически передаст аргумент --volumes-from внутреннему контейнеру, гарантируя, что тот сможет разделить рабочее пространство с агентом. Кроме того, некоторые версии Docker Swarm не поддерживают пользовательские реестры.

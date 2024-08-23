@@ -1,0 +1,99 @@
+Configure Access to Multiple Clusters
+
+[source:]
+  https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/
+
+
+[Имеем:]
+
+  1) кластер Kubernetes: ✓
+     # в кластере существует как минимум два узла, не выступающих в качестве Control Plane Nodes.
+
+  2) инструмент командной строки kubectl, настроенный для взаимодействия с нашим кластером: ✓
+
+# Если кластера пока нет:
+  1) Killercoda:=> https://killercoda.com/playgrounds/scenario/kubernetes
+  2) Play with Kubernetes:=> https://labs.play-with-k8s.com/
+
+
+****************************************
+* Define clusters, users, and contexts *
+****************************************
+
+Предположим, у вас есть два кластера:
+  1) один для разработки (development)
+  2) другой для тестирования (test)
+
+  В кластере разработки разработчики фронтенда работают в пространстве имен под названием frontend
+  #(namespace = frontend)
+  разработчики хранилища - в пространстве имен под названием storage.
+  #(namespace = storage)
+
+  В тестовом кластере разработчики работают
+    - в пространстве имен по умолчанию
+    <или>
+    - создают вспомогательные namespace'ы по своему усмотрению.
+
+[!]
+  Для доступа к КЛАСТЕРУ РАЗРАБОТКИ требуется АУТЕНТИФИКАЦИЯ ПО СЕРТИФИКАТУ.
+
+  Для доступа к ТЕСТОВОМУ КЛАСТЕРУ требуется АУТЕНТИФИКАЦИЯ ПО ИМЕНИ ПОЛЬЗОВАТЕЛЯ И ПАРОЛЮ.
+
+  1. Создайте каталог с именем /config-exercise.
+  2. В каталоге config-exercise создайте файл config-demo с таким содержимым:
+
+---<config-demo>---
+apiVersion: v1
+kind: Config
+preferences: {}
+
+clusters:
+- cluster:
+  name: development
+- cluster:
+  name: test
+
+users:
+- name: developer
+- name: experimenter
+
+contexts:
+- context:
+  name: dev-frontend
+- context:
+  name: dev-storage
+- context:
+  name: exp-test
+---
+
+/*
+[Файл конфигурации описывает:]
+  ✓ кластеры,
+  ✓ пользователей
+  ✓ и контексты.
+
+[Файл config-demo содержит структуру для описания:]
+  ✓ двух кластеров,
+  ✓ двух пользователей
+  ✓ и трех контекстов.
+*/
+
+
+  3. Перейдите в каталог config-exercise.
+  4. Введите эти команды, чтобы добавить сведения о кластере в файл конфигурации:
+---
+kubectl config --kubeconfig=config-demo set-cluster development --server=https://1.2.3.4 --certificate-authority=fake-ca-file
+kubectl config --kubeconfig=config-demo set-cluster test --server=https://5.6.7.8 --insecure-skip-tls-verify
+---
+
+  5. Добавьте данные о пользователе в файл конфигурации:
+# !Внимание!:
+# хранить пароли в конфигурации клиента Kubernetes РИСКОВАННО.
+# Лучшей альтернативой будет ИСПОЛЬЗОВАНИЕ ПЛАГИНА УЧЕТНЫХ ДАННЫХ и их отдельное хранение.
+# Смотрите: плагины учетных данных client-go:
+#-> https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins
+
+---
+kubectl config --kubeconfig=config-demo set-credentials developer --client-certificate=fake-cert-file --client-key=fake-key-seefile
+kubectl config --kubeconfig=config-demo set-credentials experimenter --username=exp --password=some-password
+---

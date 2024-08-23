@@ -1,0 +1,10 @@
+Ошибка при попытке смены пароля пользователя
+(passwd: Authentication token manipulation error)
+
+[sources:]
+  1) "Ошибка Authentication token manipulation error": https://losst.pro/oshibka-authentication-token-manipulation-error
+  2) "How to Fix “passwd: Authentication token manipulation error” in Linux":
+  ##-> https://www.geeksforgeeks.org/how-to-fix-passwd-authentication-token-manipulation-error-in-linux/
+  3) https://askubuntu.com/questions/57620/getting-an-authentication-token-manipulation-error-when-trying-to-change-my-us
+
+Authentication_token_manipulation_error

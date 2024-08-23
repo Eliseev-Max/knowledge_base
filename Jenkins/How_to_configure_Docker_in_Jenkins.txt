@@ -1,4 +1,4 @@
-#В этой статье мы расскажем вам, как настроить контейнеры Docker для работы в качестве агентов сборки Jenkins.
+#<?как настроить контейнеры Docker для работы в качестве агентов сборки Jenkins ?>
 [sources:
   "How to Configure Docker in Jenkins": https://phoenixnap.com/kb/how-to-configure-docker-in-jenkins]
 
