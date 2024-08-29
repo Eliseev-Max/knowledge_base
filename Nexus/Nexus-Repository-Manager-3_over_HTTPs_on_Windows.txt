@@ -1,0 +1,126 @@
+Nexus Repository Manager 3 over HTTPs on Windows
+(https://www.coveros.com/ssl-on-nexus-3/)
+
+
+  Важный термин, который следует иметь в виду, HTTPS означает HyperText Transfer Protocol (HTTP) + (Secure).
+  HTTP - это протокол, который использует практически каждый веб-сайт для отправки информации в ваш браузер.
+  В дополнение к HTTP существует еще один протокол, который шифрует отправляемые данные.
+  Эти протоколы называются:
+    * SSL (Secure Sockets Layer)
+      и
+    * TLS (Transport Layer Security).
+
+  Для простоты многие люди обычно объединяют оба этих протокола под зонтиком SSL, что я и буду делать ниже.
+
+  SSL обеспечивает возможность зашифрованного обмена данными между веб-браузером и сервером.
+  Чтобы убедиться в том, что сервер является тем, за кого себя выдает, и обеспечить средства шифрования, необходимо предоставить сертификат.
+  По сути, когда вы переходите на сайт HTTPS, сервер предоставляет вашему компьютеру сертификат,
+  в котором содержится ряд данных, в том числе идентификационная информация о сервере и открытый ключ, который браузер может использовать для шифрования.
+  У сервера также должен храниться закрытый ключ для целей дешифрования.
+  После этого ваш браузер и сервер договариваются о методе шифрования и шифре, который будет использоваться для сеанса,
+  и вы получаете сеанс, в котором все данные, которые вы отправляете туда и обратно, зашифрованы.
+
+  SSL provides the ability for encrypted communication between a web browser and a server.
+  To ensure the server is who is who is says it is, and to provide a means for encryption, a certificate needs to be provided.
+  Essentially, when you browse to an HTTPS site the server provides your computer with a certificate, which provides a number of things, among them, identification information about the server and a public key for your browser to use for encryption purposes.
+  The server must also have a private key stored for decryption purposes.
+  From there your browser and the server negotiate an encryption method and cipher to use for the session, and you then have a session where all data you send back and forth is encrypted.
+
+
+  Теперь, когда мы разобрались с этим, вот как установить Nexus Repository Manager 3 на Windows с учетом моих уроков.
+
+ 1. Следуем инструкциям по установке (https://www.sonatype.com/products/sonatype-nexus-oss-download)
+    = для установки в качестве службы.
+
+## проблемы с настройкой SSL:
+  Сеть была настроена так, что у них есть F5, отправляющий весь трафик, идущий на https://<nexus-url>,
+  на http://<имя машины в нашей сети>.
+
+  F5, кстати, является торговой маркой для балансировщиков нагрузки/обратных прокси,
+  которые могут направлять веб-запросы на внутренние серверы на основе полученных веб-запросов.
+
+  Таким образом, SSL-соединение на F5 будет «прервано» ("terminate"),
+  и информация будет передаваться в чистом виде, находясь внутри нашей внутренней сети.
+
+[!] Оказалось, что Sonatype Nexus Repository Manager 3 не поддерживает завершение внешнего SSL-соединения таким образом.
+    Поэтому нам придется
+    1) направлять интернет-трафик напрямую через F5   и
+    2) включать SSL непосредственно на сервере Nexus.
+
+
+[пошаговое руководство по установке службы nexus и включению SSL на Windows]
+  1) Получите последнюю версию установочного zip-файла nexus для windows с их сайта здесь
+  2) Распакуйте пакет в выбранное вами место установки nexus
+  3) Перейдите к бинарному файлу Nexus
+     (Откройте powershell от имени администратора): cd <nexus-install-location>/nexus-<version>/bin
+
+  4) Установите nexus как службу:
+nexus.exe /install
+
+#1 Запустите службу
+nexus.exe /start
+
+#2 Убедитесь, что служба «nexus» запущена.
+# Перейдите по адресу http://<nexus-machine-fqdn>.
+
+#3 Остановите службу:
+
+nexus.exe /stop
+
+  5) Убедитесь, что служба «nexus» остановлена, открыв программу «services» и обновив ее.
+
+  6) Получите сертификат/приватный/публичный ключ от вашей сетевой команды.
+  Вот несколько примеров того, как получить сертификат в нужном формате:
+
+ВАЖНОЕ ЗАМЕЧАНИЕ:
+  проприетарный формат PEM не очень совместим с командой keytool.
+  Вы не можете взять хранилище PEM с сертификатом и закрытым ключом и перейти непосредственно к хранилищу jks,
+  => инструмент «keytool» отбросит закрытый ключ.
+
+  Чтобы обойти это, нужно
+    1) сначала преобразовать хранилище ключей «pem» в промежуточный формат «pkcs12»,
+    2) а затем второй раз преобразовать его в формат JKS.
+
+
+    6a) If you are given a PEM formatted Certificate(cert.pem) that includes a private key, run the following openssl command on powershell:
+
+        i) $ openssl pkcs12 -export -out certificate.pkcs12 -in cert.pem
+
+        ii) Continue to step 7
+
+    6b) If you are given a PCKS12 formatted cert that includes a private key, your certificate is already in a keystore that is compatible with the java keytool command, continue to step 7
+
+    6c) If you are given a PFX formatted cert(certificate.pfx) that includes a private key, this is actually the same format as pkcs12, so you can just continue to step 7
+
+    6d) If you are given a Certificate(cert.crt) and Private key(private.key) separately, run the following openssl command on Powershell yo combine them insto a pkcs12 keystore:
+
+         i) $ openssl pkcs12 -export -out certificate.pkcs12 -inkey private.key -in cert.crt
+
+         ii) Continue to step 7
+
+ 
+
+7) Plug your certificate (certificate.pkcs12 or certificate.pfx) into a java keystore named keystore.jks at <nexus-install-location>/nexus-<version>/etc/ssl/keystore.jks, using the following keytool command:
+
+$ keytool -v -importkeystore -srckeystore certificate.pkcs12 -srcstoretype PKCS12 -destkeystore  <nexus-install-location>/nexus-<version>/etc/ssl/keystore.jks -deststoretype JKS
+
+NOTE: Generate and import your PCKS12 certificate into a keystore that uses the SAME password as your certificate.
+
+7)Edit nexus.properties, located at <nexus-install-location>/sonatype-work/nexus3/etc:
+
+a) add a property in a new line:  
+“application-port-ssl=443”
+
+b) uncomment the line starting with “nexus-args” and add “,${jetty.etc}/jetty-https.xml” (without the quotes) to the end of that line
+8) Edit <nexus-install-location>/nexus-<version>/etc/jetty/https-config.xml
+
+a) Change “password” to whatever your certificate’s password was, this needs to be changed in 3 places.
+9) Start “nexus” Service
+
+nexus.exe /start
+
+ 
+Приведенное выше пошаговое руководство делает установку и настройку SSL довольно простой,
+но ПОЖАЛУЙСТА следуйте приведенным выше «ПРИМЕЧАНИЯМ»,
+потому что для меня это были некоторые болевые точки при установке в первый раз.
+

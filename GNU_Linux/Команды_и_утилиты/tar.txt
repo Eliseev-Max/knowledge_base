@@ -1,6 +1,11 @@
 Утилита GNU tar
 (1. "tar. Linux man page": https://linux.die.net/man/1/tar)
 (2. "OpenNET. tar": https://www.opennet.ru/man.shtml?topic=tar&category=1)
+++
+(3. "Как извлечь или распаковать файл tar.xz в Linux":
+# https://andreyex.ru/linux/komandy-linux-i-komandy-shell/kak-izvlech-ili-raspakovat-fajl-tar-xz-v-linux/)
+(4. "Распаковка архива tar.xz":
+# https://ru.stackoverflow.com/questions/441/%D0%A0%D0%B0%D1%81%D0%BF%D0%B0%D0%BA%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%B0-tar-xz)
 
 tar
   = GNU версия утилиты архивирования;

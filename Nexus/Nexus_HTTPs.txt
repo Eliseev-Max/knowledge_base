@@ -1,0 +1,74 @@
+Настройка SSL для Sonatype Nexus
+
+[sources]
+  1) "SSL Certificate Guide": https://support.sonatype.com/hc/en-us/articles/213465768-SSL-Certificate-Guide
+  2) "Configuring SSL": https://help.sonatype.com/en/configuring-ssl.html
+
+
+#[!] Советую выставлять proxy_buffer off в nginx,
+#### иначе могут быть неожиданные обрывы скачивания крупных >1 гб артефактов.
+
+
+#########################
+# SSL Certificate Guide #
+#########################
+
+*********************************************************************
+* Самоподписные сертификаты безопасности транспортного уровня (TLS) *
+*      Transport Layer Security (TLS) Self-Signed Certificates      *
+*********************************************************************
+
+  Самоподписанные сертификаты TLS сервера полезны для тестирования конфигурации TLS сервера или для личного использования при шифровании связи по HTTP.
+  Эти типы сертификатов считаются НЕНАДЕЖНЫМИ, поскольку идентификатор сертификата не был подписан/проверен сторонним центром сертификации (CA).
+  В противном случае, самоподписанный сертификат все равно обеспечивает шифрование связи по HTTPS.
+  Для долгосрочного использования сервера Sonatype рекомендует получить сертификат, подписанный центром сертификации.
+
+[Generating Self Signed Server TLS Certificates]
+
+  Следующие шаги используют Oracle Java 7+ keytool (Unix/Windows) для генерации самоподписанных сертификатов сервера,
+  которые можно использовать с серверными продуктами Sonatype.
+
+  Openssl необходим только при создании сертификатов для использования в обратном прокси-сервере,
+  таком как Apache или nginx.
+
+  1) Сгенерируйте пару открытый-приватный ключ с помощью keytool:
+---
+keytool -genkeypair -keystore keystore.jks -storepass password -alias example.com \
+ -keyalg RSA -keysize 2048 -validity 5000 -keypass password \
+ -dname 'CN=*.example.com, OU=Sonatype, O=Sonatype, L=Unspecified, ST=Unspecified, C=US' \
+ -ext 'SAN=DNS:nexus.example.com,DNS:clm.example.com,DNS:repo.example.com,DNS:www.example.com'
+---
+[!] Output: keystore.jks
+
+  2) Сгенерируйте файл открытого сертификата в кодировке PEM с помощью keytool:
+---
+keytool -exportcert -keystore keystore.jks -alias example.com -rfc > example.cert
+---
+[!] Output: example.cert
+
+  3) Конвертируйте наш двоичный файл keystore".jks", специфичный для Java, в широко совместимый файл PKCS12 keystore ".p12":
+---
+keytool -importkeystore -srckeystore keystore.jks -destkeystore example.p12 -deststoretype PKCS12
+---
+[!] Output: example.p12
+
+  3+) (Необязательно) Перечислите (list) и проверьте содержимое нового файла keystore:
+---
+keytool -list -keystore example.p12 -storetype PKCS12
+---
+
+  4*) (Необязательно) Извлеките pem (сертификат) из файла хранилища ключей ".p12"
+      (это то же самое, что и шаг 2, но openssl выдает более подробное содержимое):
+---
+openssl pkcs12 -nokeys -in example.p12 -out example.pem
+---
+[!] Output: example.pem
+
+  5) Извлеките файл незашифрованного закрытого ключа из файла хранилища ключей ".p12":
+---
+openssl pkcs12 -nocerts -nodes -in example.p12 -out example.key
+---
+[!] Output: example.key
+
+
+[Configuring SSL Server Certificates]

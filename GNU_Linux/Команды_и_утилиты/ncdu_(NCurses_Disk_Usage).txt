@@ -21,13 +21,20 @@ ncdu [-hqvx] [--exclude PATTERN] [-X FILE] dir
 
   -q
     = Quiet mode.
-      While calculating disk space, ncdu will update the screen 10 times a second by default, this will be decreased to once every 2 seconds in quiet mode. Use this feature to save bandwidth over remote connections.
+      While calculating disk space, ncdu will update the screen 10 times a second by default, this will be decreased to once every 2 seconds in quiet mode.
+      Use this feature to save bandwidth over remote connections.
+      {
+        При расчете дискового пространства ncdu по умолчанию обновляет экран 10 раз в секунду,
+        в тихом режиме этот показатель уменьшается до одного раза в 2 секунды.
+        Используйте эту функцию для экономии пропускной способности удаленных соединений.
+      }
 
   -v
     = Print version.
 
   -x
     = Only count files and directories on the same filesystem as the specified dir.
+      {Учитывает только файлы и каталоги, находящиеся в той же файловой системе, что и указанный dir}
 
   --exclude PATTERN
     = Exclude files that match PATTERN.
@@ -80,12 +87,34 @@ ncdu [-hqvx] [--exclude PATTERN] [-X FILE] dir
 
 
 [Hard Links:]
-Every disk usage analysis utility has its own way of (not) counting hard links. There does not seem to be any universally agreed method of handling hard links, and it is even inconsistent among different versions of ncdu. This section explains what each version of ncdu does.
-ncdu 1.5 and below does not support any hard link detection at all: each link is considered a separate inode and its size is counted for every link. This means that the displayed directory sizes are incorrect when analyzing directories which contain hard links.
+Каждая утилита анализа использования диска по-своему считает (не считает) жесткие ссылки (hard links).
+По-видимому, не существует какого-либо общепринятого метода работы с жесткими ссылками, и он даже несовместим в разных версиях ncdu.
+В этом разделе объясняется, что делает каждая версия ncdu.
 
-ncdu 1.6 has basic hard link detection: When a link to a previously encountered inode is detected, the link is considered to have a file size of zero bytes. Its size is not counted again, and the link is indicated in the browser interface with a 'H' mark. The displayed directory sizes are only correct when all links to an inode reside within that directory. When this is not the case, the sizes may or may not be correct, depending on which links were considered as "duplicate" and which as "original". The indicated size of the topmost directory (that is, the one specified on the command line upon starting ncdu) is always correct.
+[ncdu 1.5]
+ncdu 1.5 и ниже вообще не поддерживает обнаружение жестких ссылок:
+  ➜ каждая ссылка считается отдельным inode,
+  ➜ ее размер подсчитывается для каждой ссылки.
 
-ncdu 1.7 has improved hard link detection. Each file that has more than two links has the "H" mark visible in the browser interface. Each hard link is counted exactly once for every directory it appears in. The indicated size of each directory is therefore, correctly, the sum of the sizes of all unique inodes that can be found in that directory. Note, however, that this may not always be same as the space that will be reclaimed after deleting the directory, as some inodes may still be accessible from hard links outside it.
+[!] Это означает, что при анализе каталогов, содержащих жесткие ссылки, отображаемые размеры каталогов будут неверными.
+
+[ncdu 1.6]
+В ncdu 1.6 реализовано базовое обнаружение жестких ссылок:
+  = когда обнаруживается ссылка на ранее встречавшийся inode, считается, что она имеет размер файла 0 байт.
+    Ее размер не учитывается повторно, а ссылка обозначается в интерфейсе браузера меткой 'H'.
+
+  Отображаемые размеры каталогов корректны только в том случае, если все ссылки на inode находятся в этом каталоге.
+  В противном случае размеры могут быть корректными, а могут и не быть, в зависимости от того,
+  какие ссылки считались «дублирующими», а какие «оригинальными».
+
+  Указанный размер самого верхнего каталога (то есть указанного в командной строке при запуске ncdu) всегда корректен.
+
+[ncdu 1.7]
+ncdu 1.7 has improved hard link detection.
+Each file that has more than two links has the "H" mark visible in the browser interface.
+Each hard link is counted exactly once for every directory it appears in.
+The indicated size of each directory is therefore, correctly, the sum of the sizes of all unique inodes that can be found in that directory.
+Note, however, that this may not always be same as the space that will be reclaimed after deleting the directory, as some inodes may still be accessible from hard links outside it.
 
 Bugs
 Directory hard links are not supported. They will not be detected as being hard links, and will thus be scanned and counted multiple times.

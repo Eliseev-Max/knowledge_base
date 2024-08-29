@@ -5,6 +5,16 @@
 [https://itsecforu.ru/2021/11/17/%F0%9F%93%9C-%D1%81%D0%B0%D0%BC%D0%BE%D1%83%D1%87%D0%B8%D1%82%D0%B5%D0%BB%D1%8C-%D0%BF%D0%BE-yaml-%D0%BD%D0%B0%D1%87%D0%B0%D0%BB%D0%BE-%D1%80%D0%B0%D0%B1%D0%BE%D1%82%D1%8B-%D1%81-yaml/]
 ---  # document start
 
+"How do I break a string in YAML over multiple lines?":
+#-> https://stackoverflow.com/questions/3790454/how-do-i-break-a-string-in-yaml-over-multiple-lines
+## Кратко о символах >, >-, |, |-
+
+"YAML Multiline": https://yaml-multiline.info/
+
+"YAML Syntax": https://docs.ansible.com/ansible/latest/reference_appendices/YAMLSyntax.html
+
+## https://www.cloudbees.com/blog/yaml-tutorial-everything-you-need-get-started
+
 # Комментарии в YAML выглядят так
 
 ################

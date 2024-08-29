@@ -1,0 +1,224 @@
+Nexus
+
+sources:
+  1. "Sonatype Nexus Repository Docker: sonatype/nexus3": https://hub.docker.com/r/sonatype/nexus3/
+  2. "Установка приватного Docker репозитория": https://cloud.croc.ru/blog/about-technologies/ustanovka-docker-repozitoriya/
+  3. "Sonatype Nexus Repository": https://help.sonatype.com/en/sonatype-nexus-repository.html
+  4. "Nexus Container Registry": https://octopus.com/docs/packaging-applications/package-repositories/guides/container-registries/nexus-container-registry
+
+
+Запуск Nexus в Docker контейнере:
+  $ docker run -d -p 8081:8081 --name nexus sonatype/nexus3
+
+[!] При остановке обязательно дайте базам данных достаточно времени для полного отключения:
+
+  $ docker stop --time=120 <CONTAINER_NAME>
+
+Тестирование работы Web UI:
+  $ curl http://localhost:8081/
+
+[Chef Solo for Runtime and Application]
+
+Chef Solo используется для создания среды выполнения и приложений в образе Docker.
+Используемая "поваренная книга" (cookbook) Chef доступна на GitHub по адресу:
+https://github.com/sonatype/chef-nexus-repository-manager
+
+
+########################
+# Системные требования #
+########################
+(учесть при создании контейнера)
+
+  * Пользователем по умолчанию является admin;
+  * уникальный пароль можно найти в файле admin.password внутри volume.
+  ## Информацию о томе см. в разделе Persistent Data (Постоянные данные) == ниже 
+
+  * Запуск службы в новом контейнере может занять некоторое время (2-3 минуты).
+    (по журналу (логам) можно определить, когда Nexus будет готов:
+      $ docker logs -f nexus
+    )
+  * Установка Nexus производится в /opt/sonatype/nexus.
+
+  * Постоянный каталог /nexus-data используется для:
+      + конфигурации,
+	  + логов
+	  + хранения данных.
+
+[!] Этот каталог должен быть доступен для записи процессу Nexus, который запускается под UID 200.
+
+  * Существует переменная окружения, которая используется для передачи аргументов JVM стартовому скрипту:
+  INSTALL4J_ADD_VM_PARAMS
+    -> передается сценарию запуска Install4J. По умолчанию -Xms2703m -
+  -Xmx2703m -XX:MaxDirectMemorySize=2703m
+  -Djava.util.prefs.userRoot=${NEXUS_DATA}/javaprefs.
+
+    Это можно настроить во время выполнения:
+	$ docker run -d -p 8081:8081 --name nexus \
+	-e INSTALL4J_ADD_VM_PARAMS="-Xms2703m -Xmx2703m -XX:MaxDirectMemorySize=2703m -Djava.util.prefs.userRoot=/some-other-dir" sonatype/nexus3
+	
+[Особо следует отметить:]
+-Djava.util.prefs.userRoot=/some-other-dir
+  может быть задан постоянный путь, который сохранит установленную лицензию Sonatype Nexus Repository License при перезапуске контейнера.
+
+[!]  Обязательно проверьте требования к памяти, когда будете решать, сколько кучи и прямой памяти выделить.
+
+[!] Для управления Nexus Context Path можно использовать еще одну переменную окружения:
+
+NEXUS_CONTEXT, по умолчанию /
+
+Это можно указать во время выполнения:
+---
+$ docker run -d -p 8081:8081 --name nexus -e NEXUS_CONTEXT=nexus sonatype/nexus3
+---
+
+
+#####################
+# Постоянные данные #
+# (Persistent Data) #
+#####################
+
+  Существует два общих подхода к работе с постоянными данными в Docker.
+  (Дополнительные сведения см. в разделе Управление данными в контейнерах:
+    {https://docs.docker.com/storage/volumes/}
+  )
+
+********************************
+* Использование docker volumes *
+********************************
+
+  Поскольку тома docker являются постоянными, можно создать том специально для этой цели.
+  Это рекомендуемый подход.
+---
+$ docker volume create --name nexus-data
+$ docker run -d -p 8081:8081 --name nexus -v nexus-data:/nexus-data sonatype/nexus3
+---
+
+  Смонтируйте каталог хоста в качестве volume.
+  Это не переносимо, поскольку зависит от наличия каталога с правильными разрешениями на хосте.
+  Однако он может быть полезен в некоторых ситуациях, когда этот volume должен быть назначен определенному базовому хранилищу.
+---
+$ mkdir /some/dir/nexus-data && chown -R 200 /some/dir/nexus-data
+$ docker run -d -p 8081:8081 --name nexus -v /some/dir/nexus-data:/nexus-data sonatype/nexus3
+---
+
+
+####################
+# Получение помощи #
+####################
+
+  Хотите внести свой вклад в наш образ Docker, но нуждаетесь в помощи?
+  Есть несколько способов получить информацию или привлечь наше внимание:
+
+  -> Chat with us on Gitter
+  -> File an issue on our public JIRA
+  -> Check out the Nexus3 tag on Stack Overflow
+  -> Check out the Sonatype Nexus Repository User List
+
+License Disclaimer
+Sonatype Nexus Repository OSS распространяется вместе с Sencha Ext JS в соответствии с FLOSS Exception,
+согласованным между Sonatype, Inc. и Sencha Inc. Sencha Ext JS распространяется по лицензии GPL v3 
+и не может быть распространен как часть работы с закрытым исходным кодом.
+
+##########################
+#************************#
+#* От теории к практике *#
+#************************#
+##########################
+[2] (https://cloud.croc.ru/blog/about-technologies/ustanovka-docker-repozitoriya/)
+
+  Какую версию Nexus используем?
+Sonatype Nexus Repository Manager 3.0 OSS
+
+  Каким образом запускаем?
+Docker Compose
+
+>> Автор статьи предлагает создать специальную директорию на хосте (nexus3/data).
+  -> ./nexus3 будет корневой директорией, где мы расположим compose.yml файл;
+  -> директорию ./nexus3/data предлагается монтировать к директории /nexus-data Docker контейнера nexus3
+     для сохранения состояния контейнера при его перезапусках + возможности доступа с хоста.
+
+[!]  Вместо этого примапим директорию /nexus-data к специально созданному volume: nexus-data
+
+####_Compose-файл из примера:_####
+---
+nexus:
+    image: sonatype/nexus3:latest
+    ports:
+        - "8081:8081"
+        - "8123:8123"
+    volumes:
+        - ./data:/nexus-data
+---
+
+####_Мой Compose-файл:_####
+---
+version: "3.3"
+
+services:
+  nexus:
+    image: sonatype/nexus3:3.65.0
+    container_name: nexus3
+    restart: always
+    ports:
+      - "8081:8081"
+      - "8123:8123"
+    volumes:
+      - nexus-data:/nexus-data
+    networks:
+      - microservices
+
+networks:
+  microservices:
+
+volumes:
+  nexus-data:
+---
+## порт 8081 - Web UI
+## порт 8123 - Repository port
+
+(Процесс настройки Nexus описан в [2])
+
+Первый вход в Nexus
+  1. Необходимо пройти процедуру аутентификации:
+    логин: admin
+	пароль: $(docker exec -it -u root nexus3 cat /nexus-data/admin.password)
+
+  2. После успешной аутентификации будет предложено создать новый пароль
+
+  3. После создания нового пароля и успешной авторизации создадим новый репозиторий для docker-образов:
+---
+Server administration and configuration (*) -> Repository -> Repositories -> Create repository: docker (hosted)
+
+######################################################
+# Подключение (авторизация) в приватном репозитории: #
+######################################################
+
+   $ docker login -u admin -p <MyPassword> 127.0.0.1:8123
+# Если хотим выполнить push/pull с удалённого сервера:
+# (srv-cicd: IP: 172.21.240.131)
+  docker login -u admin -p <MyPassword> 172.21.240.131:8123
+
+###########################################################
+# Маркировка образа для загрузки в приватный репозиторий: #
+###########################################################
+
+  $ docker tag keeper-tester:latest 127.0.0.1:8123/keeper-tester:latest
+
+####****####****####****####****####****####****####****####
+[4]
+****************************************************************************************
+* Добавление репозитория Nexus Docker в качестве внешней закладки Octopus FeedBookmark *
+****************************************************************************************
+
+Создайте новую ленту Octopus Feed:
+  перейти в Library ➜ External Feeds ➜ выбрать тип "Docker Container Registry Feed"
+
+  Зададим фиду имя, в поле URL вставьте URL вашего сервера Nexus с соответствующим портом.
+  Он должен выглядеть примерно так:
+---
+https://your.nexus.url:[repository port]
+---
+## Наш случай:
+http://172.21.240.131:8081/
+
+По желанию добавьте учетные данные, если они необходимы.
