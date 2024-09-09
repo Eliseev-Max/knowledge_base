@@ -4,8 +4,12 @@
 ++
 (3. "Как извлечь или распаковать файл tar.xz в Linux":
 # https://andreyex.ru/linux/komandy-linux-i-komandy-shell/kak-izvlech-ili-raspakovat-fajl-tar-xz-v-linux/)
+(3+. "What command do I need to unzip/extract a .tar.gz file?": 
+  #-> https://askubuntu.com/questions/25347/what-command-do-i-need-to-unzip-extract-a-tar-gz-file)
 (4. "Распаковка архива tar.xz":
 # https://ru.stackoverflow.com/questions/441/%D0%A0%D0%B0%D1%81%D0%BF%D0%B0%D0%BA%D0%BE%D0%B2%D0%BA%D0%B0-%D0%B0%D1%80%D1%85%D0%B8%D0%B2%D0%B0-tar-xz)
+
+(5. https://ruvds.com/ru/helpcenter/kak-izvlekat-i-razarhivirovat-tar-gz/)
 
 tar
   = GNU версия утилиты архивирования;
@@ -109,3 +113,20 @@ $ tar -c -f doc-backup.tar /home/aleksander/Documents
 
 $ tar -r -f doc-backup.tar /home/peter/Documents
 #= добавить файлы, содержащиеся в директории /home/peter/Documents, в конец архива doc-backup.tar
+
+$ tar -xvzf community_images.tar.gz
+# подробнее:
+  1) tar собрал все файлы в один пакет, community_images.tar.
+  2) программа gzip применила сжатие, отсюда и расширение gz.
+
+Таким образом, команда делает несколько вещей:
+  -f: это должен быть последний флаг команды, а tar-файл - сразу после него.
+      Он сообщает tar имя и путь к сжатому файлу.
+  -z: указывает tar распаковать архив с помощью gzip.
+  -x: tar может собирать файлы или извлекать их. `-x` делает последнее.
+  -v: подробный (многословный) вывод; показывает все извлекаемые файлы
+
+# Чтобы распаковать в пользовательскую папку, добавьте параметр -C с именем папки по вашему выбору:
+$ tar -xvzf community_images.tar.gz -C some_custom_folder_name
+
+[!] https://ruvds.com/ru/helpcenter/kak-izvlekat-i-razarhivirovat-tar-gz/ [!]

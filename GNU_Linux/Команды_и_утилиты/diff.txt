@@ -1,0 +1,9 @@
+Сравнение файлов. Утилита diff
+
+[sources:]
+  1) "diff(1) - Linux man page": https://linux.die.net/man/1/diff
+  2) "Сравнение файлов в Linux": https://losst.pro/sravnenie-fajlov-v-linux
+  3) "diff Command": https://www.ibm.com/docs/ru/aix/7.2?topic=d-diff-command
+     + https://www.ibm.com/docs/ru/aix/7.2?topic=files-comparing-diff-command
+
+
