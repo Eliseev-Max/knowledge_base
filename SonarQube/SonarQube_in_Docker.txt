@@ -13,7 +13,8 @@ SonarQube in Docker
   * настройке дескрипторов файлов:
    (https://www.elastic.co/guide/en/elasticsearch/reference/current/file-descriptors.html)
 
-Например, в Linux можно установить рекомендуемые значения для текущей сессии, выполнив следующие команды от имени root на хосте:
+Например, в Linux можно установить рекомендуемые значения для текущей сессии,
+выполнив следующие команды от имени root на хосте:
 sysctl -w vm.max_map_count=524288
 sysctl -w fs.file-max=131072
 ulimit -n 131072

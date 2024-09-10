@@ -312,20 +312,35 @@ $ sudo sysctl fs.file-max
 • Редактирование значений: •
 ••••••••••••••••••••••••••••
 
-  Можно задать их динамически для текущего сеанса,
-  выполнив следующие команды от имени root:
-    $ sysctl -w vm.max_map_count=524288
-    $ sysctl -w fs.file-max=131072
-    $ ulimit -n 131072
-    $ ulimit -u 8192
 
-[‼] Чтобы установить эти значения на более длительное время,
-  необходимо обновить файл
-  /etc/sysctl.d/99-sonarqube.conf
-    или
-  /etc/sysctl.conf
-  (по своему усмотрению), чтобы они отражали эти значения.
-  /etc/sysctl.conf  - постоянная модификация
+1) для текущего сеанса (динамически):
+#[!] выполнять команды от имени root:
+
+--[COMMAND]--
+sysctl -w vm.max_map_count=524288
+sysctl -w fs.file-max=131072
+ulimit -n 131072
+ulimit -u 8192
+---
+
+2) установка значений на более длительное время:
+#  => необходимо обновить файл:
+
+#:>
+/etc/sysctl.d/99-sonarqube.conf
+  <или>
+#:>
+/etc/sysctl.conf
+
+# (по своему усмотрению)
+# чтобы они отражали эти значения.
+
+---
+# /etc/sysctl.conf = Configuration file for setting system variables
+# See /etc/sysctl.d/ for additional system variables.
+---
+
+#[!]  `/etc/sysctl.conf` = постоянная модификация
 
   Если пользователь, запускающий SonarQube (в данном примере sonarqube),
   не имеет права иметь не менее 131072 открытых дескрипторов,
