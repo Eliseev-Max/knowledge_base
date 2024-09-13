@@ -1,0 +1,8 @@
+Nexus3 official documentation
+
+[sources:]
+1) "Sonatype Nexus Repository Reference Architectures": https://help.sonatype.com/en/sonatype-nexus-repository-reference-architectures.html
+2) "Tasks": https://help.sonatype.com/en/tasks.html#configuring-and-executing-tasks
+3) "Nexus Repository Database Options": https://help.sonatype.com/en/database-options.html
+4) "Configure and Run the Backup Task": https://help.sonatype.com/en/configure-and-run-the-backup-task.html
+

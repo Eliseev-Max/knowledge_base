@@ -1,0 +1,29 @@
+curl -sX --header "Content-Type: application/json"
+
+curl -X 'GET' \
+  'http://172.21.240.131:8081/service/rest/v1/repositories/docker/hosted/docker-images' \
+  -H 'accept: application/json' \
+  -H 'NX-ANTI-CSRF-TOKEN: 0.3789214180289624' \
+  -H 'X-Nexus-UI: true'
+
+curl -X 'GET' \
+  'http://172.21.240.131:8081/service/rest/v1/repositories/docker-images' \
+  -H 'accept: application/json' \
+  -H 'NX-ANTI-CSRF-TOKEN: 0.3789214180289624' \
+  -H 'X-Nexus-UI: true'
+
+#Request URL: http://172.21.240.131:8081/service/rest/v1/repositories/docker-images
+---
+{
+  "name": "string",
+  "format": "string",
+  "type": "string",
+  "url": "string",
+  "attributes": {
+    "additionalProp1": {},
+    "additionalProp2": {},
+    "additionalProp3": {}
+  }
+}
+---
+

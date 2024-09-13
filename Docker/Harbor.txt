@@ -1,0 +1,20 @@
+Open source registry Harbor
+
+"""
+  Harbor - это реестр с открытым исходным кодом, который
+    ✓ обеспечивает безопасность артефактов с помощью политик и ролевого управления доступом,
+    ✓ гарантирует сканирование образов и отсутствие в них уязвимостей,
+    ✓ также подписывает образы как доверенные.
+
+  Harbor, проект CNCF Graduated, обеспечивает соответствие требованиям, производительность и совместимость,
+  чтобы помочь вам последовательно и безопасно управлять артефактами на облачных вычислительных платформах, таких как Kubernetes и Docker.
+"""
+
+[sources:]
+
+1) "Harbor Installation and Configuration": https://goharbor.io/docs/2.11.0/install-config/
+2) "Harbor Administration": https://goharbor.io/docs/2.11.0/administration/
+3) "Обзор Harbor. Реестр Docker образов с организацией прав доступа и сканированием образов на наличие угроз":
+   -> https://habr.com/ru/companies/first/articles/706774/
+4) "Harbor — реестр для Docker-контейнеров с безопасностью «из коробки»": https://habr.com/ru/companies/flant/articles/419727/
+5) "bitnami/harbor-registry": https://hub.docker.com/r/bitnami/harbor-registry/
