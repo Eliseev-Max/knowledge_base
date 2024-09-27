@@ -1,0 +1,10 @@
+Sysctl
+
+[sources:]
+1) "sysctl(8) - Linux man page": https://linux.die.net/man/8/sysctl
+2) "sysctl(2) — Linux manual page": https://man7.org/linux/man-pages/man2/sysctl.2.html
+3) "How to reload sysctl.conf variables in Linux": https://www.cyberciti.biz/faq/reload-sysctl-conf-on-linux-using-sysctl/
+4) sysctl: (https://wiki.archlinux.org/title/Sysctl_(%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9))||
+           (https://wiki.archlinux.org/title/Sysctl)
+5) "Chapter 2. Working with sysctl and kernel tunables": 
+#-> https://docs.redhat.com/en/documentation/red_hat_enterprise_linux/7/html/kernel_administration_guide/working_with_sysctl_and_kernel_tunables#what_is_a_kernel_tunable

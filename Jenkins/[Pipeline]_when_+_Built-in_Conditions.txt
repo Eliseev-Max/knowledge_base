@@ -1,0 +1,127 @@
+Блок when. Встроенные условия (Built-in Conditions)
+
+[source:]
+  "when": https://www.jenkins.io/doc/book/pipeline/syntax/#when
+  "Built-in Conditions": https://www.jenkins.io/doc/book/pipeline/syntax/#built-in-conditions
+
+
+Директива when позволяет Pipeline'у определить, должен ли stage быть выполнен в зависимости от заданного условия.
+
+Директива when должна содержать ХОТЯ БЫ ОДНО условие.
+
+[!] Если директива when содержит более одного условия, то для выполнения этапа все дочерние условия должны вернуть true.
+    Это то же самое, как если бы дочерние условия были вложены в условие allOf (см. примеры ниже).
+
+---<Single Condition, Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+####
+---<Multiple Condition, Declarative Pipeline>---
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'                                 // condition #1
+                environment name: 'DEPLOY_TO', value: 'production'  // condition #2
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+####
+---<Nested condition (same behavior as previous example)>---
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                allOf {
+                    branch 'production'
+                    environment name: 'DEPLOY_TO', value: 'production'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+
+[anyOf]
+[!] обратите внимание, что условие ПРОПУСКАЕТ ОСТАЛЬНЫЕ ПРОВЕРКИ, как только найдено первое "истинное" условие.
+
+
+Более сложные условные структуры могут быть построены с использованием условий вложенности:
+  * not
+    // выполняет этап, когда вложенное условие ложно. Должно содержать ОДНО условие.
+  * allOf
+    <или>
+  * anyOf
+    // stage выполняется, когда хотя бы одно из вложенных условий будет истинным.
+    // должно содержать ХОТЯ БЫ ОДНО условие.
+    // условие пропускает остальные проверки, как только найдено первое "истинное" условие.
+
+(!) Вложенные условия могут быть вложены на любую произвольную глубину.
+
+---<Multiple condition + nested condition>---
+pipeline {
+    agent any
+    stages {
+        stage('Example Build') {
+            steps {
+                echo 'Hello World'
+            }
+        }
+        stage('Example Deploy') {
+            when {
+                branch 'production'
+                anyOf {
+                    environment name: 'DEPLOY_TO', value: 'production'
+                    environment name: 'DEPLOY_TO', value: 'staging'
+                }
+            }
+            steps {
+                echo 'Deploying'
+            }
+        }
+    }
+}
+---
+
+
+#######################
+# Built-in Conditions #
+#######################
+

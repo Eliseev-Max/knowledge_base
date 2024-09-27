@@ -1,0 +1,5 @@
+Workspace Cleanup
+
+[source:]
+https://plugins.jenkins.io/ws-cleanup/
+

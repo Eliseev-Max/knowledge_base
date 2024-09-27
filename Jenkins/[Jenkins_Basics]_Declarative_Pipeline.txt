@@ -1,6 +1,21 @@
 Declarative Pipeline With Jenkins
 (https://dzone.com/refcardz/declarative-pipeline-with-jenkins)
 
+
+Пайплайн Jenkins (или просто Pipeline с заглавной P)
+  — это набор подключаемых модулей, поддерживающих реализацию и интеграцию конвейеров (pipelines) непрерывной доставки
+    (Continuous delivery pipelines) в Jenkins.
+#=>(https://www.jenkins.io/doc/book/pipeline/)
+
+Пайплайн (Pipeline), конвейер - это определяемая пользователем модель конвейера непрерывной поставки.
+Код Пайплайна определяет весь процесс вашей сборки, который обычно включает этапы (stages):
+	• сборка приложения					# build
+	• тестирование сборки 				# test
+	• последующая доставка				# delivery
+
+Кроме того, блок pipeline (конвейера) является ключевой частью синтаксиса декларативного конвейера. 
+
+
 #########################
 # Pipeline Fundamentals #
 #########################
@@ -125,6 +140,11 @@ pipeline {
      ✓ иметь имя  и
      ✓ содержать раздел steps.
 
+[!] stage должен содержать ОДИН И ТОЛЬКО ОДИН из steps, stages, блоков parallel или matrix.
+    Невозможно вложить parallel или matrix блок в директиву stage,
+    если эта директива stage вложена в сам parallel или matrix блок.
+    Однако директива stage внутри parallel или matrix блока может использовать всю остальную функциональность stage, включая agent, tools, when и т. д.
+
   Все stage'ы объявляются в разделе stages вашего Pipeline.
 
 ---<Stages. Declarative Pipeline>---
@@ -144,6 +164,58 @@ pipeline {
         stage('Deploy') {
             steps {
                 echo 'Deploying'
+            }
+        }
+    }
+}
+---
+
+####
+
+---< Sequential Stages, Declarative Pipeline >---
+pipeline {
+    agent none
+    stages {
+        stage('Non-Sequential Stage') {
+            agent {
+                label 'for-non-sequential'
+            }
+            steps {
+                echo "On Non-Sequential Stage"
+            }
+        }
+        stage('Sequential') {
+            agent {
+                label 'for-sequential'
+            }
+            environment {
+                FOR_SEQUENTIAL = "some-value"
+            }
+            stages {                                //!!! stages inside the stage
+                stage('In Sequential 1') {
+                    steps {
+                        echo "In Sequential 1"
+                    }
+                }
+                stage('In Sequential 2') {
+                    steps {
+                        echo "In Sequential 2"
+                    }
+                }
+                stage('Parallel In Sequential') {
+                    parallel {
+                        stage('In Parallel 1') {
+                            steps {
+                                echo "In Parallel 1"
+                            }
+                        }
+                        stage('In Parallel 2') {
+                            steps {
+                                echo "In Parallel 2"
+                            }
+                        }
+                    }
+                }
             }
         }
     }

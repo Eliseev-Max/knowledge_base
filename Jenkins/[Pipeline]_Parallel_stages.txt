@@ -1,0 +1,146 @@
+Параллельное выполнение этапов. Parallel. Matrix
+
+[sources:]
+1) "Parallel": https://www.jenkins.io/doc/book/pipeline/syntax/#parallel
+2) "Matrix": https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix
+3) "Parallel Stages": https://www.jenkins.io/blog/2017/09/25/declarative-1/
+
+
+Этапы (stages) в Declarative Pipeline могут иметь секцию parallel,
+содержащую список вложенных этапов, которые будут ВЫПОЛНЯТЬСЯ ПАРАЛЛЕЛЬНО.
+
+[!] stage должен содержать один и только один из блоков:
+    * steps,
+    * stages,
+    * parallel
+      или
+    * matrix.
+
+  Невозможно вложить параллельный или матричный блок в директиву stage,
+  если эта директива stage вложена в сам блок parallel или matrix.
+  Однако директива stage внутри параллельного или матричного блока может использовать всю остальную функциональность stage,
+  включая
+    agent,
+    tools,
+    when
+  и т. д.
+
+
+[Прервать все параллельные stages при сбое любого из них:]
+  1) добавить `failFast true` к stage'у, содержащему параллель.
+  2) добавить опцию в определение pipeline:
+     parallelsAlwaysFailFast().
+
+[1]
+---< Parallel Stages, Declarative Pipeline >---
+pipeline {
+    agent any
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            failFast true
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+---
+# Nested = Вложенный
+
+[2]
+---< parallelsAlwaysFailFast >---
+
+pipeline {
+    agent any
+    options {
+        parallelsAlwaysFailFast()
+    }
+    stages {
+        stage('Non-Parallel Stage') {
+            steps {
+                echo 'This stage will be executed first.'
+            }
+        }
+        stage('Parallel Stage') {
+            when {
+                branch 'master'
+            }
+            parallel {
+                stage('Branch A') {
+                    agent {
+                        label "for-branch-a"
+                    }
+                    steps {
+                        echo "On Branch A"
+                    }
+                }
+                stage('Branch B') {
+                    agent {
+                        label "for-branch-b"
+                    }
+                    steps {
+                        echo "On Branch B"
+                    }
+                }
+                stage('Branch C') {
+                    agent {
+                        label "for-branch-c"
+                    }
+                    stages {
+                        stage('Nested 1') {
+                            steps {
+                                echo "In stage Nested 1 within Branch C"
+                            }
+                        }
+                        stage('Nested 2') {
+                            steps {
+                                echo "In stage Nested 2 within Branch C"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+---
