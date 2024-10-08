@@ -10,9 +10,10 @@ Docker image for inbound Jenkins agents
 }
 
 ---
-[Внимание!]
-Этот образ ранее публиковался как `jenkinsci/jnlp-slave` и  `jenkins/jnlp-slave`.
-[!] Эти образы УСТАРЕЛИ!
+[Внимание!УСТАРЕВШИЕ ОБРАЗЫ!]
+  jenkinsci/jnlp-slave
+  jenkins/jnlp-slave
+
 Используйте  jenkins/inbound-agent.
 ---
 

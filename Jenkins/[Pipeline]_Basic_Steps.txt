@@ -138,19 +138,29 @@ pipeline {
 }
 ---
 
-readFile: Read file from workspace
+############
+# readFile #
+############
+
+  Read file from workspace
   Reads a file from a relative path (with root in current directory, usually workspace) and returns its content as a plain string.
 file : String
 Relative (/-separated) path to file within a workspace to read.
-encoding : String (optional)
-The encoding to use when reading the file. If left blank, the platform default encoding will be used. Binary files can be read into a Base64-encoded string by specifying "Base64" as the encoding.
-retry: Retry the body up to N times
+  encoding : String (optional)
+    The encoding to use when reading the file. If left blank, the platform default encoding will be used. Binary files can be read into a Base64-encoded string by specifying "Base64" as the encoding.
+
+
+# retry #
+  Retry the body up to N times
+
 Retry the block (up to N times) if any exception happens during its body execution. If an exception happens on the final attempt then it will lead to aborting the build (unless it is caught and processed somehow). User aborts of the build are not caught.
 count : int
+
 conditions (optional)
 Conditions under which the block should be retried. If none match, the block will fail. If there are no specified conditions, the block will always be retried except in case of user aborts.
 Array / List of Nested Choice of Objects
 agent
+
 kubernetesAgent
 nonresumable
 sleep: Sleep
@@ -172,37 +182,60 @@ step: General Build Step
 
 Чтобы использовать этот шаг, необходимо указать класс делегата, например step([$class: 'A3Builder']).
 
-Переведено с помощью DeepL.com (бесплатная версия)
-timeout: Enforce time limit
-Executes the code inside the block with a determined time out limit. If the time limit is reached, an exception (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) is thrown, which leads to aborting the build (unless it is caught and processed somehow).
+###########
+# timeout #
+###########
+
+  Enforce time limit
+  Executes the code inside the block with a determined time out limit. If the time limit is reached, an exception (org.jenkinsci.plugins.workflow.steps.FlowInterruptedException) is thrown, which leads to aborting the build (unless it is caught and processed somehow).
 time : int
 The length of time for which this step will wait before cancelling the nested block.
 activity : boolean (optional)
 Timeout after no activity in logs for this block instead of absolute duration. Defaults to false.
+
 unit (optional)
+
 The unit of the time parameter. Defaults to 'MINUTES' if not specified.
 Values: NANOSECONDS, MICROSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS, DAYS
-tool: Use a tool from a predefined Tool Installation
+
+########
+# tool #
+########
+
+  Use a tool from a predefined Tool Installation
 Binds a tool installation to a variable (the tool home directory is returned). Only tools already configured in Configure System are available here. If the original tool installer has the auto-provision feature, then the tool will be installed as required.
-name : String
-The name of the tool. The tool name must be pre-configured in Jenkins under Manage Jenkins → Global Tool Configuration.
-type : String (optional)
-Select the type from the available built-in tool providers.
-unstable: Set stage result to unstable
+
+  name : String
+    = The name of the tool. The tool name must be pre-configured in Jenkins under Manage Jenkins → Global Tool Configuration.
+
+  type : String (optional)
+    = Select the type from the available built-in tool providers.
+
+############
+# unstable #
+############
+
+  Set stage result to unstable
 Prints a message to the log and sets the overall build result and the stage result to UNSTABLE. The message will also be associated with the stage result and may be shown in visualizations.
-message : String
+
+  message : String
 A message that will be logged to the console. The message will also be associated with the stage result and may be shown in visualizations.
-unstash: Restore files previously stashed
+
+# unstash #
+
+  Restore files previously stashed
 Restores a set of files previously stashed into the current workspace.
 name : String
 Name of a previously saved stash.
-waitUntil: Wait for condition
+
+  waitUntil: Wait for condition
 Runs its body repeatedly until it returns true. If it returns false, waits a while and tries again. (Subsequent failures will slow down the delay between attempts up to a maximum of 15 seconds.) There is no limit to the number of retries, but if the body throws an error that is thrown up immediately.
 initialRecurrencePeriod : long (optional)
 Sets the initial wait period, in milliseconds, between retries. Defaults to 250ms.
 Each failure will slow down the delay between attempts up to a maximum of 15 seconds.
-quiet : boolean (optional)
+  quiet : boolean (optional)
 If true, the step does not log a message each time the condition is checked. Defaults to false.
+
 warnError: Catch error and set build and stage result to unstable
 Executes its body, and if an exception is thrown, sets the overall build result and the stage result to UNSTABLE, prints a specified message and the thrown exception to the build log, and associates the stage result with the message so that it can be displayed by visualizations.
 Equivalent to catchError(message: message, buildResult: 'UNSTABLE', stageResult: 'UNSTABLE').

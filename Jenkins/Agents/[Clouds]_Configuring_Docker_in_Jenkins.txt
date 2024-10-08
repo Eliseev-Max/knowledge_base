@@ -5,3 +5,31 @@ How to Configure Docker in Jenkins
   "How to Configure Docker in Jenkins": https://phoenixnap.com/kb/how-to-configure-docker-in-jenkins
 
 
+Главный узел в установке Jenkins (контроллер Jenkins) балансирует параллельные задания от нескольких агентов сборки.
+Агенты подключаются:
+  -> либо локально
+  -> либо через облако.
+
+Рекомендуется внести следующие правки в docker.service
+#(/lib/systemd/system/docker.service)
+---
+ExecStart=/usr/bin/dockerd -H tcp://0.0.0.0:4243 -H unix:///var/run/docker.sock
+---
+
+$ sudo systemctl daemon-reload
+$ sudo service docker restart
+#($ sudo systemctl restart docker.service)
+
+# Test the connection with the curl command:
+---
+curl http://localhost:4243/version
+---
+
+
+[Создание docker image для агента:]
+Образы Docker требуют настройки для работы в качестве агентов сборки в Jenkins.
+Образ должен содержать:
+  * все зависимости сборки, такие как Git или Java.
+  * Учетные данные для входа в систему Jenkins.
+  * Службу sshd, подключенная к порту 22 для связи по SSH.
+

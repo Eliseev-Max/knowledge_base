@@ -4,6 +4,7 @@
 1) "Parallel": https://www.jenkins.io/doc/book/pipeline/syntax/#parallel
 2) "Matrix": https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-matrix
 3) "Parallel Stages": https://www.jenkins.io/blog/2017/09/25/declarative-1/
+{https://www.jenkins.io/blog/2017/09/25/declarative-1/#parallel-stages}
 
 
 Этапы (stages) в Declarative Pipeline могут иметь секцию parallel,

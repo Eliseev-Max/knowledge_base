@@ -1,0 +1,96 @@
+Enable HTTPS in Jenkins
+
+[sources:]
+1) "Enable HTTPS in Jenkins": https://www.baeldung.com/ops/jenkins-enable-https
+2) ***
+
+
+
+Рассмотрим процесс включения HTTPS на сервере Jenkins путем настройки SSL.
+
+********************************************
+* Использование конфигурации SSL в Jenkins *
+********************************************
+
+Чтобы использовать HTTPS, мы должны внести изменения во внутренние настройки SSL нашего сервера Jenkins.
+
+1. Generate the SSL Certificate
+  Сначала нам нужно сгенерировать SSL-сертификат и хранилище ключей (keystore).
+  Для их создания мы будем использовать OpenSSL.
+
+  1.1. Установка OpenSSL хост с ОС CentOS:
+# ($ sudo yum install openssl)
+
+  1.2. сгенерируем открытый и закрытый ключи SSL с помощью инструмента OpenSSL:
+---
+$ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
+---
+
+  Здесь сгенерированы:
+    * ключ key.pem   и
+    * самоподписанные сертификаты certificate.pem
+
+  1.3. Далее давайте ОБЪЕДИНИМ оба этих файла, преобразовав их в хранилище ключей .p12:
+---
+$ openssl pkcs12 -inkey key.pem -in certificate.pem -export -out certificate.p12
+---
+
+[!] Мы можем использовать эти два .pem-файла позже, поэтому их стоит СОХРАНИТЬ.
+
+  1.4. Теперь импортируем файл .p12 с помощью keytool и преобразуем его в хранилище ключей .jks (.jks keystore):
+---
+$ keytool -importkeystore \
+          -srckeystore ./certificate.p12 \
+          -srcstoretype pkcs12 \
+          -destkeystore jenkinsserver.jks \
+          -deststoretype JKS
+
+##_OUTPUT_##
+Entry for alias 1 successfully imported.
+Import command completed:  1 entries successfully imported, 0 entries failed or cancelled
+Warning:
+---
+
+  Теперь мы можем использовать jenkinsserver.jks в нашей установке Jenkins.
+
+
+***********************************
+* 2. Add JKS File to Jenkins Path *
+***********************************
+
+[!] Важно убедиться, что файл jenkinsserver.jks находится в месте, где Jenkins может получить к нему доступ.
+    Хорошим выбором будет JENKINS_HOME (обычно /var/lib/jenkins)
+
+---
+$ sudo cp jenkinsserver.jks /var/lib/jenkins/
+---
+# /var/lib/jenkins доступна пользователю jenkins по умолчанию,
+# однако нам следует изменить владельца нашего файла .jks 
+---
+$ sudo chown jenkins:jenkins /var/lib/jenkins/jenkins.jks
+---
+
+[!] Теперь Jenkins настроен на правильный файл keystore для безопасной SSL-аутентификации.
+
+
+**********************************************
+* 3. Configure Jenkins for SSL Communication *
+**********************************************
+
+  Чтобы настроить Jenkins с SSL, нам нужно использовать:
+    * HTTPS keystore,
+    * HTTPS порт
+    * и пароль.
+
+  Давайте воспользуемся переменными в файле /etc/systemd/system/jenkins.service для установки каждого из них:
+---
+Environment="JENKINS_HTTPS_PORT=8443"
+Environment="JENKINS_HTTPS_KEYSTORE=/var/lib/jenkins/jenkinsserver.jks"
+Environment="JENKINS_HTTPS_KEYSTORE_PASSWORD=baeldung"
+---
+# На данный момент HTTPS настроен в Jenkins.
+
+*******************************
+* Restart the Jenkins Service *
+*******************************
+

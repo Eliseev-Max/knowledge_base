@@ -1,16 +1,17 @@
 Блок when. Встроенные условия (Built-in Conditions)
 
 [source:]
-  "when": https://www.jenkins.io/doc/book/pipeline/syntax/#when
-  "Built-in Conditions": https://www.jenkins.io/doc/book/pipeline/syntax/#built-in-conditions
+➜ "when": https://www.jenkins.io/doc/book/pipeline/syntax/#when
+➜ "Built-in Conditions": https://www.jenkins.io/doc/book/pipeline/syntax/#built-in-conditions
 
 
 Директива when позволяет Pipeline'у определить, должен ли stage быть выполнен в зависимости от заданного условия.
 
 Директива when должна содержать ХОТЯ БЫ ОДНО условие.
 
-[!] Если директива when содержит более одного условия, то для выполнения этапа все дочерние условия должны вернуть true.
-    Это то же самое, как если бы дочерние условия были вложены в условие allOf (см. примеры ниже).
+[!] Если директива when содержит БОЛЕЕ ОДНОГО условия,
+    то для выполнения этапа все дочерние условия должны вернуть true.
+    == как если бы дочерние условия были вложены в условие allOf (см. примеры ниже).
 
 ---<Single Condition, Declarative Pipeline>---
 pipeline {
@@ -82,13 +83,12 @@ pipeline {
 [anyOf]
 [!] обратите внимание, что условие ПРОПУСКАЕТ ОСТАЛЬНЫЕ ПРОВЕРКИ, как только найдено первое "истинное" условие.
 
-
 Более сложные условные структуры могут быть построены с использованием условий вложенности:
-  * not
+  ● not
     // выполняет этап, когда вложенное условие ложно. Должно содержать ОДНО условие.
-  * allOf
+  ● allOf
     <или>
-  * anyOf
+  ● anyOf
     // stage выполняется, когда хотя бы одно из вложенных условий будет истинным.
     // должно содержать ХОТЯ БЫ ОДНО условие.
     // условие пропускает остальные проверки, как только найдено первое "истинное" условие.
@@ -120,8 +120,129 @@ pipeline {
 }
 ---
 
+Оценка when перед моментом входа agent в stage
+  По умолчанию условие when для stage будет оцениваться ПОСЛЕ ВХОДА в agent для этого stage,
+  (если agent определен).
+
+<? Как изменить это поведение ?>
+  = указать опцию beforeAgent в блоке when
+---
+...
+  when {
+    beforeAgent true
+    branch 'production'
+  }
+---
+  Если параметр beforeAgent имеет значение true, условие when БУДЕТ ОЦЕНИВАТЬСЯ ПЕРВЫМ,
+(!) и вход в agent будет осуществляться ТОЛЬКО В ТОМ СЛУЧАЕ,
+    если условие when будет иметь значение true.
+
+
+[Оценка when перед директивой input]
+  По умолчанию условие when для stage не будет оцениваться перед input, если он определен.
+<? Как изменить это поведение ?>
+  = указать опцию beforeInput в блоке when.
+---
+...
+  when {
+    beforeInput true
+    branch 'production'
+  }
+---
+(!) Если параметр beforeInput имеет значение true, условие when БУДЕТ ОЦЕНИВАТЬСЯ ПЕРВЫМ,
+    а ввод (input) будет осуществляться только в том случае, если условие when == true.
+
+[!] beforeInput true имеет приоритет над beforeAgent true.
+
+
+[Оценка when перед директивой options]
+  По умолчанию условие when для stage будет оцениваться после ввода options {...} для этого stage, если они определены.
+<? Как изменить это поведение ?>
+  = указать опцию beforeOptions в блоке when.
+
+---
+  when {
+    beforeOptions true
+    branch 'testing'
+  }
+  options {...}
+---
+
+  Если beforeOptions == true, то
+  1) сначала будет оцениваться условие when,
+  2) а options будут вводиться только в том случае, если условие when == true.
+
+[!] beforeOptions true имеет приоритет над beforeInput true и beforeAgent true
+
 
 #######################
 # Built-in Conditions #
 #######################
 
+  branch
+    
+
+  buildingTag
+  changelog
+  changeset
+  changeRequest
+  environment
+  equals
+  expression
+  tag
+    = выполнить stage, если переменная TAG_NAME соответствует заданному шаблону.
+  [Например:]
+---
+  when { tag "release-*" }
+---
+
+  Если указан пустой шаблон, stage будет выполнен, если переменная TAG_NAME существует (как и в функции buildTag()).
+  Необязательный параметр comparator может быть добавлен после атрибута, чтобы указать, как оцениваются любые шаблоны на предмет совпадения:
+
+    = Выполняет этап, когда текущая сборка была запущена по заданному параметру.
+#->[*]
+
+  [Например:]
+---
+when { triggeredBy 'SCMTrigger' }
+// Триггер, который периодически проверяет наличие обновлений SCM.
+
+when { triggeredBy 'TimerTrigger' }
+
+when { triggeredBy 'BuildUpstreamCause' }
+
+when { triggeredBy cause: "UserIdCause", detail: "vlinde" }
+---
+
+************
+* triggers *
+************
+
+  Директива triggers определяет автоматические способы, с помощью которых Pipeline должен быть повторно запущен.
+(!) Для Pipeline'ов, ИНТЕГРИРОВАННЫХ с такими источниками, как GitHub или BitBucket, триггеры могут не понадобиться,
+    поскольку интеграция на основе webhooks, скорее всего, уже присутствует.
+
+  В настоящее время доступны следующие триггеры:
+    ● cron
+      = Принимает строку в стиле cron для определения регулярного интервала,
+        через который Pipeline должен быть повторно запущен,
+    [например:]
+      triggers { cron('H */4 * * 1-5')}.
+
+    ● pollSCM
+      = Принимает cron-style string для определения регулярного интервала,
+        через который Jenkins должен проверять наличие новых изменений в источнике.
+        Если новые изменения есть, Pipeline будет перезапущен.
+      # (only available in Jenkins 2.22 or later.)
+    [например:]
+      triggers { pollSCM('H */4 * * 1-5') }
+
+    ● upstream
+      = Принимает строку заданий (jobs), разделенных запятыми, и пороговое значение (threshold).
+        Когда любое задание в строке завершится с минимальным порогом, Pipeline будет повторно запущен.
+    [например:]
+      triggers { upstream(upstreamProjects: 'job1,job2', threshold: hudson.model.Result.SUCCESS) }
+
+/*
+#4MORE: [Pipeline]_Execution-flow_+_Triggers.txt
+*/

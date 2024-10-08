@@ -35,13 +35,13 @@ docker run -d --rm \
 docker run -d --rm \
            --name=ssh-agent-cag \
            --publish 2202:22 \
-           --publish 8765:80 \
            -v /var/run/docker.sock:/var/run/docker.sock \
            --memory="2048m" \
            --memory-swap="2048m" \
            --cpus="1.0" \
            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDv/ci0/2QRLRw9JnVaWIeiOef1Xw+y0coY3ze2Po0+s48n8Ets/Ozk767aPW76zyUwwr0LFJiCNLPJx1twFULmf9o93iipPgA3aJJcGqlRWUEvwjlqBIT7B5bBZD16kiseqrm2T8a+T0Gl0PKbOlGneDHm4zkiAcNBvQQVgUn40Q== devops@srv-cicd" \
-           127.0.0.1:8123/agents/jenkins/ssh-agent:latest-debian-jdk17
+           docker.prosyst.ru/jenkins/ssh-agent:debian-jdk17-latest
+
 ---
 Jenkins.Clouds: docker-agents
 Docker Agent templates:
