@@ -1,0 +1,78 @@
+Kubectl
+
+[sources:]
+1) "Полезные команды и советы при работе с Kubernetes через консольную утилиту kubectl": https://habr.com/ru/companies/flant/articles/333956/
+2) "Шпаргалка по kubectl": https://kubernetes.io/ru/docs/reference/kubectl/cheatsheet/
+2+) https://kubernetes.io/ru/docs/tasks/tools/install-kubectl/
+3.1)[ru] "kubectl CLI": https://kubernetes.io/ru/docs/reference/kubectl/
+||
+3.2) [en] "Command line tool (kubectl)": https://kubernetes.io/docs/reference/kubectl/
+4) "Обзор kubectl": https://kubernetes.io/ru/docs/reference/kubectl/overview/
+5) "kubectl": https://kubernetes.io/ru/docs/reference/kubectl/kubectl/
+#+more+: "Install Tools": https://kubernetes.io/docs/tasks/tools/#enabling-shell-autocompletion
+
+Kubectl — это инструмент командной строки для управления кластерами Kubernetes.
+kubectl ищет файл config в директории $HOME/.kube.
+Можно указать другие файлы kubeconfig:
+  ✓ установив переменную окружения KUBECONFIG
+    <или>
+  ✓ флаг --kubeconfig.
+
+[Синтаксис]
+
+kubectl [command] [TYPE] [NAME] [flags]
+
+  command:
+    = определяет выполняемую операцию с одним или несколькими ресурсами
+      (например: create, get, describe, delete)
+
+  TYPE:
+    = определяет тип ресурса.
+      Типы ресурсов НЕ ЧУВСТВИТЕЛЬНЫ к регистру,
+      Кроме этого вы можете использовать
+        + единственную (pod) 
+        + множественную (pods)
+          или
+        + сокращенную (po)
+        форму
+
+# следующие команды выведут одно и то же.
+--<SH>--
+kubectl get pod pod1
+# ===
+kubectl get pods pod1
+# ===
+kubectl get po pod1
+--__--
+
+
+  NAME:
+    = определяет имя ресурса.
+      Имена чувствительны к регистру.
+      Если ИМЯ НЕ УКАЗАНО, то отображаются подробности по всем ресурсам
+      (например: kubectl get pods)
+
+  # При выполнении операции с несколькими ресурсами можно
+    * выбрать каждый ресурс по ТИПУ и ИМЕНИ
+    * либо сделать это в одном или нескольких файлов:
+
+    [Выбор ресурсов по типу и имени:]
+      Сгруппировать ресурсы, если все они одного типа: TYPE1 name1 name2 name<#>.
+      # Пример: $ kubectl get pod example-pod1 example-pod2
+
+    [Выбор нескольких типов ресурсов по отдельности:]
+      TYPE1/name1 TYPE1/name2 TYPE2/name3 TYPE<#>/name<#>.
+      # Пример: $ kubectl get pod/example-pod1 replicationcontroller/example-rc1
+
+    [Выбор ресурсов по одному или нескольким файлам:]
+      -f file1 -f file2 -f file<#>
+
+(!) Используйте YAML вместо JSON
+  # так как YAML удобнее для пользователей, особенно в конфигурационных файлах.
+
+Пример: kubectl get pod -f ./pod.yaml
+
+
+  flags:
+    = определяет дополнительные флаги.
+      # Например, флаги -s или --server => указать адрес и порт API-сервера Kubernetes.

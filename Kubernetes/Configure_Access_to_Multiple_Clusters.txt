@@ -1,4 +1,5 @@
 Configure Access to Multiple Clusters
+(Настройка доступа к нескольким кластерам)
 
 [source:]
   https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/

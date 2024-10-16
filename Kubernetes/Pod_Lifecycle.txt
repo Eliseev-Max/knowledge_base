@@ -1,0 +1,246 @@
+Жизненный цикл Пода
+(Pod Lifecycle)
+
+(source: https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/)
+
+Pod'ы следуют определенному жизненному циклу,
+  1) начиная с фазы Pending,
+  2) переходя в фазу Running, если хотя бы один из их первичных контейнеров запускается нормально,
+  3) и затем переходя в фазу Succeeded или Failed в зависимости от того, завершился ли какой-либо контейнер в Pod'е неудачей.
+
+
+[Pending]➜<хотя бы один из их первичных контейнеров запускается нормально>➜[Running]➜...
+...┏➜<Приложения в контейнерах запущены>➜[Succeeded]
+...┗➜<какой-либо контейнер в Pod'е завершился неудачей>➜[Failed]
+
+
+  Как и отдельные контейнеры приложений, Pod'ы считаются относительно эфемерными (а не долговечными) сущностями.
+'''
+(*) Эфемерный - скоропреходящий, непрочный, мимолётный, временный
+'''
+
+  ✓ Pod'ы создаются,
+  ✓ им присваивается уникальный идентификатор (UID),
+  ✓ и они планируются к запуску на Node'ах,
+  ✓ где остаются до
+    ● завершения (в соответствии с политикой перезапуска)
+    ● или удаления.
+
+  Если Node умирает, Pod'ы,
+    ✓ работающие на этом Node
+    ✓ (или запланированные для работы на нем)
+    ➜ помечаются на удаление.
+
+  Control plane помечает Pod'ы на удаление по истечении таймаута.
+
+
+*********************
+* Срок службы Pod'а *
+*********************
+
+  Во время работы Pod'а, kubelet может перезапускать контейнеры для устранения тех или иных неполадок.
+  Внутри Pod'а Kubernetes:
+    ✓ отслеживает различные состояния контейнеров
+    ✓ определяет, какие действия необходимо предпринять, чтобы Pod снова стал здоровым.
+
+  В Kubernetes API Pod'ы имеют
+    как спецификацию (specification, spec),
+    так и фактический статус (actual status).
+
+  Статус объекта Pod состоит из набора условий Pod (Pod conditions).
+  Вы также можете вводить пользовательскую информацию о готовности (custom readiness information) в данные условий для Pod'а,
+  если это полезно для вашего приложения.
+
+(!) Pod'ы планируются (scheduled) ТОЛЬКО ОДИН РАЗ за все время их существования;
+
+  назначение Pod'а на определенный Node называется привязкой (binding),
+  а процесс выбора Node'ы для использования - планированием (scheduling).
+
+  После того как Pod был запланирован (scheduled) и привязан к Node (bound),
+  Kubernetes пытается запустить этот Pod на этом Node.
+  Pod работает на этом Node до тех пор
+    ➜ пока не остановится
+    ➜ или пока Pod не будет завершен;
+
+
+[!] если Kubernetes не сможет запустить Pod на выбранном узле
+    (например, если узел рухнет до запуска Pod),
+     то этот конкретный Pod никогда не запустится.
+
+  Вы можете использовать Pod Scheduling Readiness, чтобы отложить планирование для Pod до тех пор,
+  пока все его ворота планирования (scheduling gates) не будут удалены.
+  Например, вы можете определить набор Pod'ов, но запустить планирование только после того, как все Pod'ы будут созданы.
+
+
+**************************************
+* Pod'ы и восстановление после сбоев *
+*      Pods and fault recovery       *
+**************************************
+
+  Если один из контейнеров в Pod не работает, Kubernetes может попытаться перезапустить именно этот контейнер.
+#Подробнее:
+#"How Pods handle problems with containers": https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#container-restarts
+
+  Однако Pod'ы могут выйти из строя таким образом, что кластер не сможет восстановиться.
+  => в этом случае Kubernetes не пытается лечить Pod дальше;
+     Вместо этого Kubernetes удаляет Pod и полагается на другие компоненты для обеспечения автоматического восстановления
+
+[Ситуация:]
+  1) Pod запланирован на Node (scheduled);
+  2) затем этот Node выходит из строя;
+  => Pod считается нездоровым.
+  3)  Kubernetes в конечном итоге удаляет Pod.
+
+  Pod НЕ ПЕРЕЖИВЕТ "выселения" (eviction) из-за нехватки ресурсов или обслуживания Node.
+
+[Контроллеры Kubernetes:]
+  Kubernetes использует абстракцию более высокого уровня, называемую контроллером,
+  которая выполняет работу по управлению относительно одноразовыми экземплярами Pod.
+
+  Данный Pod (определяемый UID) никогда не «перепланируется» (rescheduled) на другой Node;
+  вместо этого он может быть заменен новым, почти идентичным Pod'ом.
+  Если вы создадите заменяющий Pod, он даже может иметь то же имя (как в .metadata.name), что и старый Pod,
+  НО у заменяющего будет ДРУГОЙ .metadata.uid, чем у старого Pod.
+
+  Kubernetes НЕ ГАРАНТИРУЕТ, что замена существующего Pod будет запланирована на том же Node, что и старый Pod, который заменялся.
+
+
+*******************************
+* Ассоциированное время жизни *
+*     Associated lifetimes    *
+*******************************
+
+  Когда говорят, что у какого-либо объекта (= сущности) время жизни такое же, как у Pod,
+  (например у volume)
+  это означает, что этот объект существует до тех пор, пока существует этот конкретный Pod (с таким же UID).
+  Если этот Pod по какой-либо причине удаляется,
+  (даже если создается идентичная замена) -> связанная с ним сущность
+  (в данном примере - volume) также уничтожается и создается заново.
+
+  
+**************
+* Фаза Pod'а *
+*  Pod phase *
+**************
+  
+  Поле статуса Pod'а - это объект PodStatus, который имеет поле phase.
+
+  Фаза Pod = это простое, высокоуровневое резюме того, на каком этапе жизненного цикла находится Pod.
+
+  Фаза НЕ ПРЕДНАЗНАЧЕНА для того
+    -> чтобы быть полным сводом наблюдений за состоянием контейнера или Pod,
+    -> чтобы быть полной state machine.
+
+  Количество и значения значений фазы Pod строго охраняются.
+
+(!) Кроме того, что задокументировано здесь, не следует ничего предполагать о Pod'ах, имеющих данное значение фазы.
+
+Ниже представлены возможные значения phase:
+
+Pending     Pod был принят кластером Kubernetes, но один || несколько контейнеров не были настроены и готовы к запуску.
+            Сюда входит
+              + время, которое Pod проводит в ожидании планирования
+              + время, потраченное на загрузку образов контейнеров по сети.
+
+Running     The Pod has been bound to a node, and all of the containers have been created.
+            At least one container is still running, or is in the process of starting or restarting.
+
+Succeeded   All containers in the Pod have terminated in success, and will not be restarted.
+
+Failed      All containers in the Pod have terminated, and at least one container has terminated in failure.
+            That is, the container either exited with non-zero status or was terminated by the system, and is not set for automatic restarting.
+
+Unknown     For some reason the state of the Pod could not be obtained.
+            This phase typically occurs due to an error in communicating with the node where the Pod should be running.
+
+
+When a pod is failing to start repeatedly, CrashLoopBackOff may appear in the Status field of some kubectl commands. Similarly, when a pod is being deleted, Terminating may appear in the Status field of some kubectl commands.
+
+Make sure not to confuse Status, a kubectl display field for user intuition, with the pod's phase. Pod phase is an explicit part of the Kubernetes data model and of the Pod API.
+
+---
+ NAMESPACE               NAME               READY   STATUS             RESTARTS   AGE
+  alessandras-namespace   alessandras-pod    0/1     CrashLoopBackOff   200        2d9h
+---
+
+A Pod is granted a term to terminate gracefully, which defaults to 30 seconds. You can use the flag --force to terminate a Pod by force.
+
+
+Since Kubernetes 1.27, the kubelet transitions deleted Pods, except for static Pods and force-deleted Pods without a finalizer, to a terminal phase (Failed or Succeeded depending on the exit statuses of the pod containers) before their deletion from the API server.
+
+If a node dies or is disconnected from the rest of the cluster, Kubernetes applies a policy for setting the phase of all Pods on the lost node to Failed.
+
+
+********************
+* Container states *
+********************
+
+  Помимо фазы Pod'а в целом, Kubernetes отслеживает состояние КАЖДОГО КОНТЕЙНЕРА внутри Pod.
+  Вы можете использовать lifecycle hooks контейнера для запуска событий в определенные моменты жизненного цикла контейнера.
+
+  Как только планировщик назначает Pod узлу, kubelet начинает создавать контейнеры для этого Pod с container runtime.
+  Существует три возможных состояния контейнера:
+    ● Waiting (Ожидание)
+    ● Running (Выполнение)
+    ● Terminated (Завершение)
+
+  Чтобы проверить состояние контейнеров в Pod, можно использовать команду:
+--[COMMAND]--
+kubectl describe pod <имя Pod'а>
+---
+# В выводе будет показано состояние каждого контейнера в этом Pod.
+
+Каждое состояние имеет определенное значение:
+
+  Waiting
+    If a container is not in either the Running or Terminated state, it is Waiting.
+    A container in the Waiting state is still running the operations it requires in order to complete start up:
+    for example, pulling the container image from a container image registry, or applying Secret data.
+    When you use kubectl to query a Pod with a container that is Waiting, you also see a Reason field to summarize why the container is in that state.
+
+  Running
+    The Running status indicates that a container is executing without issues.
+    If there was a postStart hook configured, it has already executed and finished.
+    When you use kubectl to query a Pod with a container that is Running, you also see information about when the container entered the Running state.
+
+  Terminated
+    A container in the Terminated state began execution and then either ran to completion or failed for some reason. When you use kubectl to query a Pod with a container that is Terminated, you see a reason, an exit code, and the start and finish time for that container's period of execution.
+
+If a container has a preStop hook configured, this hook runs before the container enters the Terminated state.
+
+
+How Pods handle problems with containers
+Kubernetes manages container failures within Pods using a restartPolicy defined in the Pod spec. This policy determines how Kubernetes reacts to containers exiting due to errors or other reasons, which falls in the following sequence:
+
+Initial crash: Kubernetes attempts an immediate restart based on the Pod restartPolicy.
+Repeated crashes: After the initial crash Kubernetes applies an exponential backoff delay for subsequent restarts, described in restartPolicy. This prevents rapid, repeated restart attempts from overloading the system.
+CrashLoopBackOff state: This indicates that the backoff delay mechanism is currently in effect for a given container that is in a crash loop, failing and restarting repeatedly.
+Backoff reset: If a container runs successfully for a certain duration (e.g., 10 minutes), Kubernetes resets the backoff delay, treating any new crash as the first one.
+In practice, a CrashLoopBackOff is a condition or event that might be seen as output from the kubectl command, while describing or listing Pods, when a container in the Pod fails to start properly and then continually tries and fails in a loop.
+
+In other words, when a container enters the crash loop, Kubernetes applies the exponential backoff delay mentioned in the Container restart policy. This mechanism prevents a faulty container from overwhelming the system with continuous failed start attempts.
+
+The CrashLoopBackOff can be caused by issues like the following:
+
+Application errors that cause the container to exit.
+Configuration errors, such as incorrect environment variables or missing configuration files.
+Resource constraints, where the container might not have enough memory or CPU to start properly.
+Health checks failing if the application doesn't start serving within the expected time.
+Container liveness probes or startup probes returning a Failure result as mentioned in the probes section.
+To investigate the root cause of a CrashLoopBackOff issue, a user can:
+
+Check logs: Use kubectl logs <name-of-pod> to check the logs of the container. This is often the most direct way to diagnose the issue causing the crashes.
+Inspect events: Use kubectl describe pod <name-of-pod> to see events for the Pod, which can provide hints about configuration or resource issues.
+Review configuration: Ensure that the Pod configuration, including environment variables and mounted volumes, is correct and that all required external resources are available.
+Check resource limits: Make sure that the container has enough CPU and memory allocated. Sometimes, increasing the resources in the Pod definition can resolve the issue.
+Debug application: There might exist bugs or misconfigurations in the application code. Running this container image locally or in a development environment can help diagnose application specific issues.
+Container restart policy
+The spec of a Pod has a restartPolicy field with possible values Always, OnFailure, and Never. The default value is Always.
+
+The restartPolicy for a Pod applies to app containers in the Pod and to regular init containers. Sidecar containers ignore the Pod-level restartPolicy field: in Kubernetes, a sidecar is defined as an entry inside initContainers that has its container-level restartPolicy set to Always. For init containers that exit with an error, the kubelet restarts the init container if the Pod level restartPolicy is either OnFailure or Always:
+
+Always: Automatically restarts the container after any termination.
+OnFailure: Only restarts the container if it exits with an error (non-zero exit status).
+Never: Does not automatically restart the terminated container.
+When the kubelet is handling container restarts according to the configured restart policy, that only applies to restarts that make replacement containers inside the same Pod and running on the same node. After containers in a Pod exit, the kubelet restarts them with an exponential backoff delay (10s, 20s, 40s, …), that is capped at 300 seconds (5 minutes). Once a container has executed for 10 minutes without any problems, the kubelet resets the restart backoff timer for that container.
+Sidecar containers and Pod lifecycle explains the behaviour of init containers when specify restartpolicy field on it.
