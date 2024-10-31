@@ -1,0 +1,25 @@
+nginx documentation pages
+
+1. Модуль ngx_http_core_module. Директива listen:
+→ https://nginx.org/ru/docs/http/ngx_http_core_module.html#listen
+
+2. Имена сервера
+→ https://nginx.org/ru/docs/http/server_names.html
+
+3. Модуль ngx_http_upstream_module
+→ https://nginx.org/ru/docs/http/ngx_http_upstream_module.html
+
+4. HTTP Load Balancing
+→ https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/
+
+5. Как nginx обрабатывает запросы
+→ https://nginx.org/ru/docs/http/request_processing.html
+
+6. Модуль ngx_http_proxy_module. Директива proxy_set_header
+→ https://nginx.org/ru/docs/http/ngx_http_proxy_module.html#proxy_set_header
+
+7. Accepting the PROXY Protocol
+→ https://docs.nginx.com/nginx/admin-guide/load-balancer/using-proxy-protocol/
+
+8. NGINX Reverse Proxy
+→ https://docs.nginx.com/nginx/admin-guide/web-server/reverse-proxy/

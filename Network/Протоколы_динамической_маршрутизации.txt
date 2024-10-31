@@ -1,0 +1,4 @@
+Теория протоколов динамической маршрутизации
+
+[sources:]
+1) https://linkmeup.gitbook.io/sdsm/6.-dinamic-routing/00-teoriya-protokolov-dinamic-marshrutizaciyi

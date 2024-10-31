@@ -1,0 +1,454 @@
+1. HTTP Load Balancing
+  https://docs.nginx.com/nginx/admin-guide/load-balancer/http-load-balancer/
+
+2. Модуль ngx_http_upstream_module
+  https://nginx.org/ru/docs/http/ngx_http_upstream_module.html
+
+3. Об Nginx
+  https://www.youtube.com/watch?v=b8ObIf1YR18&list=PLhgRAQ8BwWFa7ulOkX0qi5UfVizGD_-Rc&index=3
+
+4. Difference between X-Forwarded-For and X-Real-IP headers
+  https://stackoverflow.com/questions/72557636/difference-between-x-forwarded-for-and-x-real-ip-headers
+
+more:
+  Объектные хранилища S3: https://www.youtube.com/watch?v=pO0YpFNVoog
+  Вебинар «Где хранить данные: S3-хранилище vs Databases»: https://www.youtube.com/watch?v=W-gNiStYwrI
+
+
+##############################
+# Балансировка нагрузки HTTP #
+##############################
+
+  Балансировка нагрузки HTTP-трафика между группами веб-серверов или серверов приложений
+  с использованием нескольких алгоритмов и дополнительных функций, таких как
+    • Slow-Start (медленный старт)
+      <и>
+    • сохранение сеансов.
+
+#########
+# Обзор #
+#########
+
+Балансировка нагрузки между несколькими экземплярами приложений - это широко используемый метод
+  → оптимизации использования ресурсов,
+  → максимизации пропускной способности,
+  → снижения задержек   и
+  → обеспечения отказоустойчивости конфигураций.
+
+# Смотрите вебинар "NGINX Plus для балансировки нагрузки и масштабирования" по запросу,
+# чтобы получить подробную информацию о методах, применяемых пользователями NGINX для создания
+# крупномасштабных и высокодоступных веб-сервисов.
+
+NGINX и NGINX Plus могут использоваться в различных сценариях развертывания в качестве очень эффективного балансировщика нагрузки HTTP.
+
+#################################################
+# Проксирование HTTP-трафика на группу серверов #
+#################################################
+
+Чтобы начать использовать NGINX Plus или NGINX Open Source для балансировки нагрузки HTTP-трафика на группу серверов,
+сначала необходимо определить группу с помощью директивы upstream.
+Директива размещается в контексте http.
+
+Серверы в группе конфигурируются с помощью директивы server
+‼ (НЕ ПУТАТЬ с блоком server, определяющим виртуальный сервер, работающий на NGINX).
+Например, следующая конфигурация:
+  - определяет группу с именем backend   и
+  - состоит из трех конфигураций серверов
+    (которые могут разрешаться в более чем три реальных сервера):
+
+---
+http {
+    upstream backend {
+        server backend1.example.com weight=5;
+        server backend2.example.com;
+        server 192.0.0.1 backup;
+    }
+}
+---
+
+Для передачи запросов группе серверов имя группы указывается в директиве proxy_pass
+(или в директивах fastcgi_pass, memcached_pass, scgi_pass или uwsgi_pass для этих протоколов).
+
+В следующем примере виртуальный сервер, работающий на NGINX, передает все запросы группе backend upstream,
+определенной в предыдущем примере:
+
+---
+server {
+    location / {
+        proxy_pass http://backend;
+    }
+}
+---
+
+Следующий пример объединяет два приведенных выше фрагмента и показывает,
+как проксировать HTTP-запросы к группе внутренних серверов.
+Группа состоит из трех серверов:
+  • на двух из них запущены экземпляры одного и того же приложения;
+  • третий является резервным сервером.
+
+Поскольку в блоке upstream не указан алгоритм балансировки нагрузки,
+NGINX использует алгоритм по умолчанию - Round Robin:
+
+---
+http {
+    upstream backend {
+        server backend1.example.com;
+        server backend2.example.com;
+        server 192.0.0.1 backup;
+    }
+    
+    server {
+        location / {
+            proxy_pass http://backend;
+        }
+    }
+}
+---
+
+######################################
+# Выбор метода балансировки нагрузки #
+######################################
+
+NGINX Open Source поддерживает четыре метода балансировки нагрузки, а NGINX Plus добавляет еще два метода:
+  1) Round Robin
+    - запросы равномерно распределяются между серверами, при этом учитывается вес сервера.
+      Этот метод используется по умолчанию (директива для его включения отсутствует):
+---
+upstream backend {
+   # no load balancing method is specified for Round Robin
+   server backend1.example.com;
+   server backend2.example.com;
+}
+---
+
+  2) Least Connections (Наименьшее количество соединений)
+  # https://nginx.org/en/docs/http/ngx_http_upstream_module.html#least_conn
+    - запрос отправляется на сервер с наименьшим количеством активных соединений, опять же с учетом веса сервера:
+---
+upstream backend {
+    least_conn;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+---
+
+  3) IP Hash
+    - сервер, на который отправляется запрос, определяется по IP-адресу клиента.
+      В этом случае для вычисления хэш-значения используются либо первые три октета IPv4-адреса,
+      либо весь IPv6-адрес.
+      Этот метод гарантирует, что запросы с одного и того же адреса попадут на один и тот же сервер, если только он не будет недоступен.
+---   
+upstream backend {
+    ip_hash;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+---
+
+    Если один из серверов необходимо временно вывести из ротации балансировки нагрузки,
+    его можно пометить параметром down, чтобы сохранить текущее хеширование клиентских IP-адресов.
+    Запросы, которые должны были обрабатываться этим сервером, автоматически пересылаются на следующий сервер в группе:
+---
+upstream backend {
+    server backend1.example.com;
+    server backend2.example.com;
+    server backend3.example.com down;
+}
+---
+
+  4) Generic Hash (Общий хэш)
+    - Сервер, на который отправляется запрос, определяется по заданному пользователем ключу,
+      который может представлять собой:
+        * текстовую строку,
+        * переменную   или
+        * их комбинацию.
+      Например, ключом может быть парный IP-адрес и порт источника или URI, как в данном примере:
+
+---
+upstream backend {
+    hash $request_uri consistent;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+---
+    
+    Необязательный параметр consistent в директиве hash обеспечивает балансировку нагрузки ketama consistent-hash.
+    Запросы равномерно распределяются между всеми вышестоящими серверами на основе заданного пользователем значения хэш-ключа.
+    При добавлении или удалении сервера из группы upstream происходит перераспределение только нескольких ключей, что минимизирует пропуски кэша в случае кэш-серверов с балансировкой нагрузки или других приложений, накапливающих состояние.
+
+  5) Least Time (NGINX Plus only)
+      –> Для каждого запроса NGINX Plus выбирает сервер с наименьшей средней задержкой и наименьшим количеством активных соединений,
+        где наименьшая средняя задержка рассчитывается на основе того, какой из следующих параметров директивы least_time включен:
+      * header – Time to receive the first byte from the server
+      * last_byte – Time to receive the full response from the server
+      * last_byte inflight – Time to receive the full response from the server, taking into account incomplete requests
+
+upstream backend {
+    least_time header;
+    server backend1.example.com;
+    server backend2.example.com;
+}
+
+
+  6) Random (Метод случайной балансировки нагрузки)
+      -> Каждый запрос будет передан на случайно выбранный сервер.
+         Если указан параметр two, то сначала NGINX случайным образом выбирает два сервера с учетом веса серверов,
+         а затем выбирает один из них указанным методом:
+          * least_conn – The least number of active connections
+          * least_time=header (NGINX Plus) – The least average time to receive the response header from the server ($upstream_header_time)
+          * least_time=last_byte (NGINX Plus) – The least average time to receive the full response from the server ($upstream_response_time)
+
+    upstream backend {
+        random two least_time=last_byte;
+        server backend1.example.com;
+        server backend2.example.com;
+        server backend3.example.com;
+        server backend4.example.com;
+    }
+
+    Метод случайной балансировки нагрузки следует использовать в распределенных средах,
+    где несколько балансировщиков нагрузки передают запросы одному и тому же набору бэкендов.
+
+    В средах, где балансировщик нагрузки имеет полный обзор всех запросов,
+    используйте другие методы балансировки нагрузки, такие как
+      * Round Robin,
+      * least connections (наименьшее количество соединений)
+        <и>
+      * least time (наименьшее время)
+
+[!Примечание:]
+  При настройке любого метода, отличного от Round Robin,
+  поместите соответствующую директиву: 
+    * hash,
+    * ip_hash,
+    * least_conn,
+    * least_time
+    * или random
+  над списком директив сервера в блоке upstream {}.
+
+
+##################################################
+# Server Weights (Весовые коэффициенты серверов) #
+##################################################
+
+  По умолчанию NGINX распределяет запросы между серверами в группе в соответствии с их весами по методу Round Robin.
+  Параметр weight в директиве server задает вес сервера;
+  по умолчанию он равен 1:
+
+---
+upstream backend {
+    server backend1.example.com weight=5;
+    server backend2.example.com;
+    server 192.0.0.1 backup;
+}
+---
+
+  # В примере backend1.example.com имеет вес 5;
+  # два других сервера имеют вес по умолчанию (1),
+  # но сервер с IP-адресом 192.0.0.1 помечен как резервный и не получает запросов, если оба других сервера недоступны.
+  ! При такой конфигурации весов из каждых 6 запросов:
+    - 5 отправляются на backend1.example.com 
+    - 1 отправляется на backend2.example.com.
+
+###########################
+#    Server Slow-Start    # 
+#(Медленный старт сервера)#
+###########################
+
+  Функция замедленного запуска сервера предотвращает перегрузку недавно восстановленного сервера соединениями, которые могут прерваться и привести к повторной пометке сервера как отказавшего.
+
+  В NGINX Plus slow-start позволяет постепенно восстанавливать вес сервера после его восстановления или получения доступа с 0 до номинального значения.
+  Это можно сделать с помощью параметра slow_start в директиве server:
+
+---
+upstream backend {
+    server backend1.example.com slow_start=30s;
+    server backend2.example.com;
+    server 192.0.0.1 backup;
+}
+---
+
+  # Значение времени (здесь 30 секунд) задает время,
+  # в течение которого NGINX Plus увеличивает количество соединений с сервером до полного значения.
+
+  Обратите внимание, что если в группе только один сервер, то параметры:
+    max_fails,
+    fail_timeout   и
+    slow_start
+  директивы server игнорируются, и сервер никогда не будет считаться недоступным.
+
+
+Включение постоянства сеансов (Session Persistence)
+
+  Постоянство сеанса означает, что NGINX Plus:
+    1) идентифицирует пользовательские сеансы  и
+    2) направляет все запросы в данном сеансе на один и тот же вышестоящий сервер (upstream server).
+
+  NGINX Plus поддерживает три метода сохранения сеансов.
+  Методы задаются с помощью директивы sticky.
+  (Для сохранения сеансов в NGINX Open Source используйте директиву hash или ip_hash, как описано выше).
+
+  Sticky cookie - NGINX Plus добавляет сессионный cookie к первому ответу от восходящей группы
+  и идентифицирует сервер, отправивший этот ответ.
+
+  Следующий запрос клиента содержит значение cookie, и NGINX Plus направляет запрос на сервер upstream, ответивший на первый запрос:
+
+---
+upstream backend {
+    server backend1.example.com;
+    server backend2.example.com;
+    sticky cookie srv_id expires=1h domain=.example.com path=/;
+}
+---
+
+  # В примере параметр srv_id задает имя cookie.
+  • expires (необязательный параметр)
+      - задает время, в течение которого браузер будет хранить cookie (здесь - 1 час).
+  • domain (необязательный параметр)
+      - задает домен, для которого устанавливается cookie, а необязательный параметр path - путь, для которого устанавливается cookie
+  
+  # Это самый простой метод сохранения сессии.
+
+  Sticky route (Липкий маршрут):
+    - NGINX Plus назначает клиенту "маршрут" при получении первого запроса.
+      Все последующие запросы сравниваются с параметром route директивы server для определения сервера, к которому проксируется запрос.
+      Информация о маршруте берется:
+      -> либо из cookie,
+      -> либо из URI запроса.
+
+---
+upstream backend {
+    server backend1.example.com route=a;
+    server backend2.example.com route=b;
+    sticky route $route_cookie $route_uri;
+}
+---
+
+
+Метод Sticky learn:
+  – NGINX Plus сначала находит идентификаторы сеансов, изучая запросы и ответы.
+    Затем NGINX Plus "узнает", какой из вышестоящих серверов соответствует тому или иному идентификатору сессии.
+    (Как правило, эти идентификаторы передаются в HTTP-cookies).
+    Если запрос содержит уже "выученный" идентификатор сессии, NGINX Plus перенаправляет запрос на соответствующий сервер:
+
+---<Sticky learn method>---
+upstream backend {
+   server backend1.example.com;
+   server backend2.example.com;
+   sticky learn
+       create=$upstream_cookie_examplecookie
+       lookup=$cookie_examplecookie
+       zone=client_sessions:1m
+       timeout=1h;
+}
+---
+
+  В примере один из вышестоящих серверов создает сессию, устанавливая в ответе cookie EXAMPLECOOKIE.
+
+  * Обязательный параметр create:
+     - задает переменную, которая указывает, как создается новая сессия.
+       В примере новые сессии создаются на основе cookie EXAMPLECOOKIE, отправленного вышестоящим сервером.
+
+  * Обязательный параметр lookup:
+      - указывает, как искать существующие сессии.
+        В нашем примере поиск существующих сессий осуществляется в cookie EXAMPLECOOKIE, отправленном клиентом.
+
+  * Обязательный параметр zone:
+      - задает зону общей памяти, в которой хранится вся информация о липких сессиях.
+        В нашем примере зона называется client_sessions и имеет размер 1 мегабайт.
+
+[!] Это более сложный метод сохранения сессий, чем два предыдущих,
+    поскольку он НЕ ТРЕБУЕТ хранения куки НА СТОРОНЕ КЛИЕНТА:
+    => вся информация хранится НА СТОРОНЕ СЕРВЕРА В ЗОНЕ ОБЩЕЙ ПАМЯТИ.
+
+Если в кластере есть несколько экземпляров NGINX, использующих метод "sticky learn", можно синхронизировать содержимое их зон общей памяти при следующих условиях:
+
+    - зоны имеют одинаковые имена;
+    - функциональность zone_sync настроена на каждом экземпляре;
+    - указан параметр синхронизации
+---
+    {
+       sticky learn
+           create=$upstream_cookie_examplecookie
+           lookup=$cookie_examplecookie
+           zone=client_sessions:1m
+           timeout=1h
+           sync;
+    }
+
+    See Runtime State Sharing in a Cluster for details.
+
+Limiting the Number of Connections
+
+With NGINX Plus, it is possible to limit the number of active connections to an upstream server by specifying the maximum number with the max_conns parameter.
+
+If the max_conns limit has been reached, the request is placed in a queue for further processing, provided that the queue directive is also included to set the maximum number of requests that can be simultaneously in the queue:
+
+upstream backend {
+    server backend1.example.com max_conns=3;
+    server backend2.example.com;
+    queue 100 timeout=70;
+}
+
+If the queue is filled up with requests or the upstream server cannot be selected during the timeout specified by the optional timeout parameter, the client receives an error.
+
+Note that the max_conns limit is ignored if there are idle keepalive connections opened in other worker processes. As a result, the total number of connections to the server might exceed the max_conns value in a configuration where the memory is shared with multiple worker processes.
+
+Configuring Health Checks
+
+NGINX can continually test your HTTP upstream servers, avoid the servers that have failed, and gracefully add the recovered servers into the load‑balanced group.
+
+See HTTP Health Checks for instructions how to configure health checks for HTTP.
+
+Sharing Data with Multiple Worker Processes
+
+If an upstream block does not include the zone directive, each worker process keeps its own copy of the server group configuration and maintains its own set of related counters. The counters include the current number of connections to each server in the group and the number of failed attempts to pass a request to a server. As a result, the server group configuration cannot be modified dynamically.
+
+When the zone directive is included in an upstream block, the configuration of the upstream group is kept in a memory area shared among all worker processes. This scenario is dynamically configurable, because the worker processes access the same copy of the group configuration and utilize the same related counters.
+
+The zone directive is mandatory for active health checks and dynamic reconfiguration of the upstream group. However, other features of upstream groups can benefit from the use of this directive as well.
+
+For example, if the configuration of a group is not shared, each worker process maintains its own counter for failed attempts to pass a request to a server (set by the max_fails parameter). In this case, each request gets to only one worker process. When the worker process that is selected to process a request fails to transmit the request to a server, other worker processes don’t know anything about it. While some worker process can consider a server unavailable, others might still send requests to this server. For a server to be definitively considered unavailable, the number of failed attempts during the timeframe set by the fail_timeout parameter must equal max_fails multiplied by the number of worker processes. On the other hand, the zone directive guarantees the expected behavior.
+
+Similarly, the Least Connections load‑balancing method might not work as expected without the zone directive, at least under low load. This method passes a request to the server with the smallest number of active connections. If the configuration of the group is not shared, each worker process uses its own counter for the number of connections and might send a request to the same server that another worker process just sent a request to. However, you can increase the number of requests to reduce this effect. Under high load requests are distributed among worker processes evenly, and the Least Connections method works as expected.
+
+Setting the Zone Size
+
+It is not possible to recommend an ideal memory‑zone size, because usage patterns vary widely. The required amount of memory is determined by which features (such as session persistence, health checks, or DNS re‑resolving) are enabled and how the upstream servers are identified.
+
+As an example, with the sticky_route session persistence method and a single health check enabled, a 256‑KB zone can accommodate information about the indicated number of upstream servers:
+
+    128 servers (each defined as an IP‑address:port pair)
+    88 servers (each defined as hostname:port pair where the hostname resolves to a single IP address)
+    12 servers (each defined as hostname:port pair where the hostname resolves to multiple IP addresses)
+
+Configuring HTTP Load Balancing Using DNS
+
+The configuration of a server group can be modified at runtime using DNS.
+
+For servers in an upstream group that are identified with a domain name in the server directive, NGINX Plus can monitor changes to the list of IP addresses in the corresponding DNS record, and automatically apply the changes to load balancing for the upstream group, without requiring a restart. This can be done by including the resolver directive in the http block along with the resolve parameter to the server directive:
+
+http {
+    resolver 10.0.0.1 valid=300s ipv6=off;
+    resolver_timeout 10s;
+    server {
+        location / {
+            proxy_pass http://backend;
+        }
+    }
+    upstream backend {
+        zone backend 32k;
+        least_conn;
+        # ...
+        server backend1.example.com resolve;
+        server backend2.example.com resolve;
+    }
+}
+
+In the example, the resolve parameter to the server directive tells NGINX Plus to periodically re‑resolve the backend1.example.com and backend2.example.com domain names into IP addresses.
+
+The resolver directive defines the IP address of the DNS server to which NGINX Plus sends requests (here, 10.0.0.1). By default, NGINX Plus re‑resolves DNS records at the frequency specified by time‑to‑live (TTL) in the record, but you can override the TTL value with the valid parameter; in the example it is 300 seconds, or 5 minutes.
+
+The optional ipv6=off parameter means only IPv4 addresses are used for load balancing, though resolving of both IPv4 and IPv6 addresses is supported by default.
+
+If a domain name resolves to several IP addresses, the addresses are saved to the upstream configuration and load balanced. In our example, the servers are load balanced according to the Least Connections load‑balancing method. If the list of IP addresses for a server has changed, NGINX Plus immediately starts load balancing across the new set of addresses.

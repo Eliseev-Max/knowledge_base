@@ -1,0 +1,7 @@
+NetworkManager and netplan
+
+[sources:]
+1) "NetworkManager and netplan": https://ubuntu.com/core/docs/networkmanager/networkmanager-and-netplan
+2) "Как задать ip адрес в Linux": https://losst.pro/kak-zadat-ip-adres-v-linux
+3) "Настройка IP-адреса в Ubuntu": https://hostkey.ru/documentation/technical/ip_setting/ubuntu_ip/
+4) "Netplan и как его правильно приготовить": https://habr.com/ru/articles/448400/

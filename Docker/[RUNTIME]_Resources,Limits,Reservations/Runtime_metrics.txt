@@ -1,0 +1,142 @@
+Runtime metrics
+
+[source:]
+1) https://docs.docker.com/engine/containers/runmetrics/
+2) "docker container stats": https://docs.docker.com/reference/cli/docker/container/stats/
+
+
+################
+# Docker stats #
+################
+
+  Вы можете использовать команду docker stats для просмотра метрик Runtime контейнера в реальном времени.
+  Команда поддерживает:
+    ✓ метрики процессора,
+    ✓ использования памяти,
+    ✓ лимита памяти
+    ✓ и сетевого ввода-вывода.
+
+(*) Команда docker stats возвращает поток данных о запущенных контейнерах в реальном времени.
+    Чтобы ограничить данные одним или несколькими конкретными контейнерами,
+    укажите список имен или ids контейнеров, разделенных пробелом.
+
+(!) остановленные контейнеры не возвращают никаких данных.
+
+(!) Для более подробной информации об использовании ресурсов контейнера:
+    => использовать конечную точку API /containers/(id)/stats.
+
+[пример вывода команды docker stats]
+---
+ docker stats redis1 redis2
+
+CONTAINER           CPU %               MEM USAGE / LIMIT     MEM %               NET I/O             BLOCK I/O
+redis1              0.07%               796 KB / 64 MB        1.21%               788 B / 648 B       3.568 MB / 512 KB
+redis2              0.07%               2.746 MB / 64 MB      4.29%               1.266 KB / 648 B    12.4 MB / 0 B
+---
+[Описание полей:]
+  CONTAINER ID и Name
+    = ID и имя контейнера;
+
+  CPU % and MEM %
+    = процент процессора и памяти хоста, используемый контейнером
+
+  MEM USAGE / LIMIT
+    = общий объем памяти, используемый контейнером, / общий объем памяти, который ему разрешено использовать
+
+  NET I/O
+    = Количество данных, полученных и отправленных контейнером через его сетевой интерфейс
+
+  BLOCK I/O
+    = Объем данных, записанных контейнером на блочные устройства / считанных с них на хосте.
+
+  PIDs
+    = количество процессов или потоков, созданных контейнером
+
+[Опции:]
+  --format
+    = Format output using a custom template:
+      'table': Печать вывода в формате таблицы с заголовками столбцов (по умолчанию)
+      'table TEMPLATE': напечатать вывод в формате таблицы, используя заданный шаблон Go
+        # for all (running and stopped) containers:
+        # docker stats --all --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}" fervent_panini
+
+      'json': Print in JSON format
+        # docker stats nginx --no-stream --format "{{ json . }}"
+
+      'TEMPLATE': Print output using the given Go template.
+
+    # Refer to https://docs.docker.com/go/formatting/ for more information about formatting output with templates
+
+  --no-stream		Disable streaming stats and only pull the first result
+
+  --no-trunc		не усекать вывод
+
+
+  В Linux Docker CLI сообщает об использовании памяти, вычитая использование кэша из общего объема памяти.
+  (memory = [total memory usage] - cache)
+  API НЕ ПРОИЗВОДИТ таких вычислений, а предоставляет ОБЩЕЕ ИСПОЛЬЗОВАНИЕ ПАМЯТИ и ОБЪЕМ ИЗ КЭША,
+  чтобы клиенты могли использовать данные по мере необходимости.
+
+[На хостах cgroup v1:]
+  -> использование кэша определяется как значение поля total_inactive_file в файле memory.stat.
+
+[На хостах Docker 19.03 и старше:]
+  -> использование кэша определялось как значение поля cache.
+
+[На хостах cgroup v2:]
+  -> использование кэша определяется как значение поля inactive_file.
+
+Столбец PIDS содержит количество процессов и потоков ядра, созданных этим контейнером.
+# Потоки (Threads) - это термин, используемый ядром Linux.
+# Другие эквивалентные термины:
+##  "легкий процесс" ("lightweight process")
+##или
+##  "задача ядра" ("kernel task") и т. д.
+
+(!) Большое число в столбце PIDS в сочетании с небольшим количеством процессов (как сообщают ps или top) может указывать на то,
+    что что-то в контейнере создает много потоков.
+
+
+************
+* --format *
+************
+
+Опция форматирования (--format) позволяет печатать вывод контейнера по шаблону Go.
+Ниже перечислены допустимые заполнители для шаблона Go:
+
+  .Container
+    = Container name or ID (user input)
+  .Name
+    = Container name
+  .ID
+    = Container ID
+  .CPUPerc
+    = CPU percentage
+  .MemUsage
+    = Memory usage
+  .NetIO
+    = Network IO
+  .BlockIO
+    = Block IO
+  .MemPerc
+    = Memory percentage (Not available on Windows)
+  .PIDs
+    = Number of PIDs (Not available on Windows)
+
+# При использовании параметра --format команда stats:
+#   либо выводит данные точно в том виде, в котором они объявлены в шаблоне,
+#   либо, при использовании директивы table, включает заголовки столбцов.
+# В следующем примере используется шаблон БЕЗ ЗАГОЛОВКОВ и выводятся записи Container и CPUPerc, разделенные двоеточием (:),
+# для всех образов:
+---
+docker stats --format "{{.Container}}: {{.CPUPerc}}"
+
+09d3bb5b1604: 6.61%
+9db7aa4d986d: 9.19%
+3f214c61ad1d: 0.00%
+---
+
+# в табличном виде с кастомизированным шаблоном:
+---
+ docker stats --format "table {{.Container}}\t{{.CPUPerc}}\t{{.MemUsage}}"
+ ---

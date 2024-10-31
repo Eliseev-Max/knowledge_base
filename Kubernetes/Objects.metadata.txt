@@ -1,0 +1,69 @@
+Kubernetes. Objects. Metadata
+
+[sources:]
+1) "kubernetes/community. Objects.Metadata":
+    https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#metadata
+
+2) "Objects In Kubernetes": https://kubernetes.io/docs/concepts/overview/working-with-objects/
+
+
+Каждый тип объекта ДОЛЖЕН иметь следующие метаданные во вложенном поле объекта под названием "metadata":
+
+  ● namespace:
+      Пространство имен (namespace) - это совместимая с DNS метка, на которую подразделяются объекты.
+      По умолчанию используется пространство имен 'default'.
+      Подробнее см. в документации: (https://kubernetes.io/docs/concepts/overview/working-with-objects/namespaces/)
+
+  ● name:
+      строка, уникально идентифицирующая данный объект в текущем пространстве имен
+      (см. документацию по идентификаторам: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/).
+      Это значение используется в пути при извлечении отдельного объекта.
+
+  ● uid:
+      уникальное во времени и пространстве значение
+      (обычно это сгенерированный идентификатор RFC 4122,
+       см. документацию по идентификаторам: https://kubernetes.io/docs/concepts/overview/working-with-objects/names/
+      ),
+       используемое для различения объектов с одинаковым именем, которые были удалены и созданы заново
+
+Каждому объекту СЛЕДУЕТ (SHOULD) содержать следующие метаданные во вложенном поле объекта под названием «metadata»:
+  ● resourceVersion:
+      строка, идентифицирующая внутреннюю версию этого объекта, которая может использоваться клиентами для определения изменений в объектах.
+      Это значение ДОЛЖНО рассматриваться клиентами как непрозрачное и передаваться обратно на сервер без изменений.
+      Клиенты не должны полагать, что версия ресурса имеет значение в разных namespaces, для разных видов ресурсов или разных серверов.
+      (Более подробную информацию см. в разделе «Контроль параллелизма»:
+       https://github.com/kubernetes/community/blob/master/contributors/devel/sig-architecture/api-conventions.md#concurrency-control-and-consistency
+      ).
+
+  ● generation:
+      порядковый номер, представляющий конкретное поколение желаемого состояния.
+      Устанавливается системой и монотонно возрастает для каждого ресурса.
+      Может сравниваться, например, для согласованности RAW и WAW.
+
+  ● creationTimestamp:
+      a string representing an RFC 3339 date of the date and time an object was created
+
+  ● deletionTimestamp:
+      строка, представляющая RFC 3339 дату и время, после которых данный ресурс БУДЕТ УДАЛЕН.
+      Это поле УСТАНАВЛИВАЕТСЯ СЕРВЕРОМ,
+        когда пользователь запрашивает льготное удаление,
+      и НЕ МОЖЕТ БЫТЬ УСТАНОВЛЕНО КЛИЕНТОМ напрямую.
+      Ресурс будет удален (больше не будет виден в списках ресурсов и недоступен по имени) по истечении времени, указанного в этом поле,
+      за исключением случаев, когда у объекта установлен финализатор.
+      Если финализатор установлен, удаление объекта откладывается, по крайней мере, до тех пор, пока финализатор не будет удален.
+      После установки deletionTimestamp это значение не может быть отменено или установлено в будущем,
+      хотя оно может быть сокращено или ресурс может быть удален до этого времени.
+
+  ● labels:
+      список (map) строковых ключей и значений,
+      которые можно использовать для организации и категоризации объектов
+      (см. документацию по labels: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/)
+
+  ● annotations:
+      a map of string keys and values that can be used by external tooling to store and retrieve arbitrary metadata about this object (see the annotations docs)
+
+Ярлыки предназначены для организационных целей конечных пользователей (выберите Pod'ы, соответствующие этому запросу на label).
+#(select the pods that match this label query)
+
+Annotations позволяют сторонним средствам автоматизации и инструментам декорировать объекты дополнительными метаданными для собственного использования.
+
