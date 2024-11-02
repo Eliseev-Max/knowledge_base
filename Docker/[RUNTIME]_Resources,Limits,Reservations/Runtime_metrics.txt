@@ -2,7 +2,9 @@ Runtime metrics
 
 [source:]
 1) https://docs.docker.com/engine/containers/runmetrics/
-2) "docker container stats": https://docs.docker.com/reference/cli/docker/container/stats/
+2) "Сбор метрик для мониторинга работы контейнеров в среде Docker":
+    https://bitworks.software/2018-12-03-docker-runtime-metrics.html
+3) "docker container stats": https://docs.docker.com/reference/cli/docker/container/stats/
 
 
 ################
