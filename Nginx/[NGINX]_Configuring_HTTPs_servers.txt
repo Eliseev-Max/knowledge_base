@@ -1,0 +1,196 @@
+Configuring HTTPS servers
+(https://nginx.org/en/docs/http/configuring_https_servers.html)
+
+Чтобы настроить HTTPS-сервер, необходимо включить параметр ssl для прослушивающих сокетов
+("listening sockets": https://nginx.org/en/docs/http/ngx_http_core_module.html#listen)
+в блоке server (https://nginx.org/en/docs/http/ngx_http_core_module.html#server),
+а также указать местоположение файлов:
+  сертификата ("server certificate": https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_certificate)
+  и закрытого ключа ("private key": https://nginx.org/en/docs/http/ngx_http_ssl_module.html#ssl_certificate_key)
+сервера:
+---
+server {
+    listen              443 ssl;
+    server_name         www.example.com;
+    ssl_certificate     www.example.com.crt;
+    ssl_certificate_key www.example.com.key;
+    ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+    ssl_ciphers         HIGH:!aNULL:!MD5;
+    ...
+}
+/--/
+
+Сертификат сервера (server certificate)
+  - это публичная сущность.
+  Он отправляется каждому клиенту, который подключается к серверу.
+
+Закрытый ключ (private key)
+  является безопасной сущностью и должен храниться в ФАЙЛЕ С ОГРАНИЧЕННЫМ ДОСТУПОМ,
+  однако он должен быть ДОСТУПЕН ДЛЯ ЧТЕНИЯ главному процессу nginx.
+
+  В качестве альтернативы закрытый ключ может храниться в том же файле, что и сертификат:
+---
+    ssl_certificate     www.example.com.cert;
+    ssl_certificate_key www.example.com.cert;
+/--/
+[!] в этом случае права доступа к файлам также должны быть ограничены.
+
+(!) Хотя сертификат и ключ хранятся в одном файле, клиенту отправляется ТОЛЬКО СЕРТИФИКАТ.
+
+(!) Директивы ssl_protocols и ssl_ciphers могут быть использованы для ограничения соединений,
+    чтобы включить только сильные версии и шифры SSL/TLS.
+
+По умолчанию nginx использует
+-->
+"ssl_protocols TLSv1 TLSv1.1 TLSv1.2 TLSv1.3"
+<--
+  и
+-->
+"ssl_ciphers HIGH:!aNULL:!MD5"
+<--
+, поэтому настраивать их ЯВНО обычно НЕ ТРЕБУЕТСЯ.
+
+Обратите внимание, что значения по умолчанию этих директив были изменены несколько раз:
+#(https://nginx.org/en/docs/http/configuring_https_servers.html#compatibility)
+
+
+*****************************
+* Оптимизация HTTPs-сервера *
+*****************************
+
+[!] Операции SSL потребляют дополнительные ресурсы процессора.
+  На многопроцессорных системах следует запускать несколько рабочих процессов (worker processes),
+#-> https://nginx.org/en/docs/ngx_core_module.html#worker_processes
+  не меньше, чем количество доступных ядер CPU.
+
+(!) Наиболее затратной для процессора операцией является рукопожатие SSL.
+
+  Есть два способа минимизировать количество этих операций на одного клиента:
+  (1) - это включение keepalive-соединений для отправки нескольких запросов через одно соединение,
+  (2) - повторное использование параметров SSL-сессии, чтобы избежать SSL handshake для параллельных и последующих соединений.
+
+  Сессии хранятся в кэше SSL-сессий, разделяемом между workers и настраиваемом директивой ssl_session_cache.
+  Один мегабайт кэша содержит около 4000 сессий.
+
+  По умолчанию таймаут кэша составляет 5 минут.
+  Его можно увеличить с помощью директивы ssl_session_timeout.
+
+  Вот пример конфигурации, оптимизированной для многоядерной системы с 10 мегабайтами общего кэша сессий:
+
+---<nginx-HTTPS-server.conf>---
+worker_processes auto;
+
+http {
+    ssl_session_cache   shared:SSL:10m;
+    ssl_session_timeout 10m;
+
+    server {
+        listen              443 ssl;
+        server_name         www.example.com;
+        keepalive_timeout   70;
+
+        ssl_certificate     www.example.com.crt;
+        ssl_certificate_key www.example.com.key;
+        ssl_protocols       TLSv1 TLSv1.1 TLSv1.2 TLSv1.3;
+        ssl_ciphers         HIGH:!aNULL:!MD5;
+        ...
+/--/
+...
+
+
+**********************
+* Server certificate *
+**********************
+
+[
+  Syntax:	ssl_certificate file;
+  Default:	—
+  Context:	http, server
+]
+
+  = Указывает файл с сертификатом в формате PEM для данного виртуального сервера.
+  Если в дополнение к первичному сертификату необходимо указать промежуточные сертификаты,
+  они должны быть указаны в том же файле в следующем порядке:
+    1) сначала идет первичный сертификат,
+    2) затем промежуточные сертификаты.
+
+  В этот же файл можно поместить секретный ключ (secret key) в формате PEM.
+
+  Начиная с версии 1.11.0, эту директиву можно указывать несколько раз для загрузки сертификатов разных типов,
+  например RSA и ECDSA:
+
+---
+server {
+    listen              443 ssl;
+    server_name         example.com;
+
+    ssl_certificate     example.com.rsa.crt;
+    ssl_certificate_key example.com.rsa.key;
+
+    ssl_certificate     example.com.ecdsa.crt;
+    ssl_certificate_key example.com.ecdsa.key;
+
+    ...
+}
+/--/
+
+[
+  Только OpenSSL 1.0.2 и выше поддерживает ОТДЕЛЬНЫЕ ЦЕПОЧКИ СЕРТИФИКАТОВ для разных сертификатов.
+  В более ранних версиях можно использовать только одну цепочку сертификатов.
+]
+
+[
+  Начиная с версии 1.15.9, переменные можно использовать в имени файла при использовании OpenSSL 1.0.2 или выше
+---
+ssl_certificate     $ssl_server_name.crt;
+ssl_certificate_key $ssl_server_name.key;
+/--/
+]
+
+(!) Обратите внимание:
+  использование переменных подразумевает загрузку сертификата для каждого SSL-шлюза,
+  что может негативно сказаться на производительности.
+  Вместо файла может быть указано значение data:$variable (1.15.10),
+  которое загружает сертификат из переменной БЕЗ ИСПОЛЬЗОВАНИЯ ПРОМЕЖУТОЧНЫХ ФАЙЛОВ.
+
+(!) Обратите внимание:
+  неправильное использование этого синтаксиса может иметь свои последствия для безопасности,
+  например, запись данных секретного ключа в журнал ошибок.
+
+  Следует иметь в виду, что из-за ограничений протокола HTTPS
+  для максимальной совместимости виртуальные серверы должны ПРОСЛУШИВАТЬ РАЗНЫЕ IP-адреса.
+#more: "Name-based HTTPS servers": https://nginx.org/en/docs/http/configuring_https_servers.html#name_based_https_servers
+
+
+***********************
+*    Закрытый ключ    *
+* ssl_certificate_key *
+***********************
+
+[
+  Syntax:	ssl_certificate_key file;
+  Default:	—
+  Context:	http, server
+]
+
+  = Указывает файл с секретным ключом в формате PEM для данного виртуального сервера.
+
+  Вместо file может быть указано значение
+-->
+engine:name:id
+<--
+#(1.7.9),
+  которое загружает секретный ключ с указанным id из name движка OpenSSL.
+  Вместо file может быть указано значение
+-->
+data:$variable
+<--
+#(1.15.10),
+  которое загружает секретный ключ из переменной БЕЗ ИСПОЛЬЗОВАНИЯ ПРОМЕЖУТОЧНЫХ ФАЙЛОВ.
+
+[Обратите внимание:]
+  неправильное использование этого синтаксиса может иметь свои последствия для безопасности,
+  например, запись данных секретного ключа в журнал ошибок (error_log).
+#-> https://nginx.org/en/docs/ngx_core_module.html#error_log
+
+  Начиная с версии 1.15.9, переменные можно использовать в имени файла при использовании OpenSSL 1.0.2 или выше.

@@ -1,0 +1,9 @@
+Configuring Content Security Policy
+
+[sources:]
+1) https://www.jenkins.io/doc/book/security/configuring-content-security-policy/
+2) "sandboxing flag set": https://html.spec.whatwg.org/multipage/browsers.html#sandboxing-flag-set
+#https://html.spec.whatwg.org/multipage/browsers.html#sandboxed-scripts-browsing-context-flag
+
+3) https://stackoverflow.com/questions/37618892/jenkins-content-security-policy
+

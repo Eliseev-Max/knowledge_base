@@ -1,0 +1,7 @@
+
+[sources:]
+1) "Как управлять коллекциями MongoDB?": https://serverspace.ru/support/help/kak-upravlyat-kollekcziyami-mongodb/?utm_source=google.com&utm_medium=organic&utm_campaign=google.com&utm_referrer=google.com
+2) "MongoDB - управление коллекциями": https://gearmobile.github.io/mongodb/mongodb-collections/
+3) "Connecting to MongoDB databases": https://www.prisma.io/dataguide/mongodb/connecting-to-mongodb#basic-information-about-the-mongo-client
+4) "How to connect to MongoDB": https://www.ibm.com/support/pages/how-connect-mongodb
+5) "3T Connection Manager": https://studio3t.com/knowledge-base/articles/connect-to-mongodb/

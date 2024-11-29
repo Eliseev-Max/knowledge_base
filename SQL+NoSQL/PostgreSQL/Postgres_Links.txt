@@ -1,0 +1,6 @@
+Postgres Links
+
+1) "Official PostgreSQL Documentation": https://www.postgresql.org/docs/12/index.html
+2) "Frictionless Local Postgres with Docker Compose": https://github.com/asaikali/docker-compose-postgres/blob/master/README.md
+3) "postgres/9.6/docker-entrypoint.sh": https://github.com/docker-library/postgres/blob/e4942cb0f79b61024963dc0ac196375b26fa60dd/9.6/docker-entrypoint.sh
+4) "How to set the default user password in PostgreSQL": https://www.atlassian.com/data/admin/how-to-set-the-default-user-password-in-postgresql

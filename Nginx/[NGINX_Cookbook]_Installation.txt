@@ -1,0 +1,158 @@
+Create  a  file  named:
+/etc/apt/sources.list.d/nginx.list
+, that  contains  the  following contents:
+--</etc/apt/sources.list.d/nginx.list>--
+deb http://nginx.org/packages/mainline/OS/ CODENAME nginx
+deb-src http://nginx.org/packages/mainline/OS/ CODENAME nginx
+---
+
+Измените файл, заменив OS в конце URL на ubuntu или debian, в зависимости от вашего дистрибутива.
+Замените CODENAME на кодовое имя вашего дистрибутива;
+  jessie   or  stretch = for  Debian,
+  or  trusty ,  xenial ,  artful ,  or  bionic = for Ubuntu.
+
+Then, run the following commands:
+---
+wget http://nginx.org/keys/nginx_signing.key
+apt-key add nginx_signing.key
+apt-get update
+apt-get install -y nginx
+/etc/init.d/nginx start
+---
+
+[Обсуждение:]
+
+Файл, который вы только что создали, предписывает системе управления пакетами Advanced Package Tool (APT)
+использовать официальный репозиторий пакетов NGINX.
+
+Модификация файла с указанием правильной конечной точки и кодового имени вашего дистрибутива гарантирует,
+что утилита APT получит правильные пакеты .deb для вашей системы.
+
+Следующие команды загружают ключ подписи пакетов NGINX GPG и импортируют его в APT.
+
+Предоставление APT ключа подписи позволяет системе APT проверять пакеты из репозитория.
+
+Команда apt-get update предписывает системе APT обновить список пакетов из известных репозиториев.
+После обновления списка пакетов вы можете установить NGINX Open Source из официального репозитория NGINX.
+После установки последняя команда запускает NGINX.
+
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! 1.5 Key Files, Directories, and Commands !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+NGINX files and directories:
+
+■ /etc/nginx/
+
+Каталог /etc/nginx/ является корнем конфигурации сервера NGINX по умолчанию.
+В этом каталоге вы найдете конфигурационные файлы, которые указывают NGINX, как себя вести (how to behave).
+
+■ /etc/nginx/nginx.conf
+
+Файл /etc/nginx/nginx.conf - это стандартная точка входа в конфигурацию, используемая службой NGINX.
+Этот конфигурационный файл задает ГЛОБАЛЬНЫЕ НАСТРОЙКИ для таких параметров, как
+  ● worker process (рабочий процесс);       # https://nginx.org/en/docs/ngx_core_module.html#worker_processes
+  ● tuning (настройка);
+  ● logging (ведение журнала);
+  ● loading  dynamic  modules (загрузка динамических модулей);
+  ● и ссылки на другие конфигурационные файлы NGINX (include).
+
+  В конфигурации по умолчанию файл /etc/nginx/nginx.conf содержится
+    + http-блок верхнего уровня,
+    + или контекст, который включает в себя все конфигурационные файлы в директории, описанной далее.
+
+■ /etc/nginx/conf.d/
+
+  Каталог /etc/nginx/conf.d/ содержит файл конфигурации HTTP-сервера по умолчанию (default.conf).
+  Файлы (*.conf) в этом каталоге включаются в блок http верхнего уровня из файла /etc/nginx/nginx.conf.
+[best  practice]
+  использовать операторы include и организовывать конфигурацию таким образом,
+  чтобы сохранить ЛАКОНИЧНОСТЬ конфигурационных файлов.
+/*
+# В некоторых репозиториях папка называется sites-enabled,
+# а конфигурационные файлы связаны с папкой site-available;
+*/
+  = это соглашение устарело.
+
+
+■ /var/log/nginx/
+
+  Каталог /var/log/nginx/ является местом хранения журналов (логфайлов) по умолчанию для NGINX.
+  В этой директории вы найдете файл access.log и файл error.log.
+  Журнал доступа (access log) содержит запись для каждого запроса, обслуживаемого NGINX.
+  Файл журнала ошибок (error log) содержит
+    + события об ошибках
+    + и отладочную информацию (если включен модуль отладки).
+
+******************
+* NGINX commands *
+******************
+
+nginx -h
+  = shows the NGINX help menu.
+
+nginx -v
+  = Shows the NGINX version.
+
+nginx -V
+  = показывает
+      ✓ версию NGINX,
+      ✓ информацию о сборке
+      ✓ и аргументы конфигурации, которые показывают модули, встроенные в бинарный файл NGINX.
+
+nginx -t
+  = проверяет конфигурацию NGINX.
+
+nginx -T
+  = Проверяет конфигурацию NGINX и выводит подтвержденную конфигурацию на экран.
+    Эта команда полезна при обращении за поддержкой.
+
+nginx -s signal
+  = Флаг -s посылает сигнал главному процессу NGINX.
+    Вы можете отправить такие сигналы, как
+      stop,
+      quit,
+      reload
+      и reopen.
+
+    Сигнал stop
+      => немедленно прекращает работу процесса NGINX.
+
+    Сигнал quit
+      => останавливает процесс NGINX после того, как он закончит обработку входящих запросов.
+
+    Сигнал reload
+      => перезагружает конфигурацию.
+
+    Сигнал reopen
+      => указывает NGINX на повторное открытие лог-файлов.
+
+---
+#  location / {
+#      sendfile off;
+#      proxy_pass         http://jenkins;
+#      proxy_redirect     default;              # https://stackoverflow.com/questions/59852217/nginx-proxy-pass-or-proxy-redirect
+#                                               # https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_redirect
+#      proxy_http_version 1.1;
+
+      # Required for Jenkins websocket agents
+     # proxy_set_header   Connection        $connection_upgrade;
+     # proxy_set_header   Upgrade           $http_upgrade;
+
+#      proxy_set_header   Host              $http_host;
+#      proxy_set_header   X-Real-IP         $remote_addr;
+#      proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+#      proxy_set_header   X-Forwarded-Proto $scheme;
+#      proxy_max_temp_file_size 0;
+
+      #this is the maximum upload size
+#      client_max_body_size       10m;
+#      client_body_buffer_size    128k;
+
+#      proxy_connect_timeout      90;
+#      proxy_send_timeout         90;
+#      proxy_read_timeout         90;
+#      proxy_request_buffering    off; # Required for HTTP CLI commands
+#  }
+---

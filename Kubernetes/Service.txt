@@ -1,0 +1,255 @@
+Kubernetes. Service
+(https://kubernetes.io/docs/concepts/services-networking/service/)
+
+
+Представляет приложение, работающее в вашем кластере, через единую внешнюю конечную точку (outward-facing endpoint),
+даже если рабочая нагрузка (workload) распределена между несколькими бэкендами.
+
+В Kubernetes Service - это метод раскрытия сетевого приложения, работающего в кластере в виде одного или нескольких Pod'ов.
+
+[Ключевая цель Services в Kubernetes:]
+  = не нужно самому модифицировать существующее приложение, чтобы использовать незнакомый механизм обнаружения сервисов.
+  Мы можем запускать код в Pod'ах.
+# (будь то код, разработанный для cloud-native мира, или старое приложение, которое вы контейнеризировали).
+
+  Service используется, чтобы сделать набор Pod'ов доступным в сети, чтобы клиенты могли взаимодействовать с ним.
+
+
+Если вы используете Deployment для запуска приложения, Deployment может динамически создавать и уничтожать Pod'ы.
+
+От одного мгновения к другому мы не знаем:
+  -> сколько из этих Pod'ов работают и здоровы;
+  -> как называются эти здоровые Pod'ы.
+
+Pod'ы Kubernetes создаются и уничтожаются в соответствии с желаемым состоянием вашего кластера.
+Pod'ы - это ЭФЕМЕРНЫЕ РЕСУРСЫ (ephemeral resources).
+(не стоит ожидать, что отдельный Pod будет надежным и долговечным).
+
+
+Каждый Pod получает свой собственный IP-адрес
+(Kubernetes ожидает, что сетевые плагины обеспечат это).
+
+Для данного Deployment в вашем кластере:
+  * [набор Pod'ов, работающих в один момент времени]
+  может отличаться от
+  * [набора Pod'ов, выполняющих это приложение, мгновением позже].
+
+=> ПРОБЛЕМА:
+  если некоторый набор Pod'ов (назовем их «бэкендами») -(предоставляет функциональность)->
+  -> другим Pod'ам (назовем их «фронтендами») в вашем кластере,
+
+  (?) как фронтенды узнают и отслеживают, к какому IP-адресу подключаться,
+      чтобы фронтенд мог использовать часть рабочей нагрузки бэкенда?
+
+Enter Services
+
+
+##########################
+# Services in Kubernetes #
+##########################
+
+The Service API, являющийся частью Kubernetes, представляет собой абстракцию, помогающую вам предоставлять доступ к группам Pod'ов по сети.
+
+Каждый объект Service определяет логический набор endpoints (обычно эти конечные точки - Pod'ы) вместе с политикой, как сделать эти pod'ы доступными.
+
+[ПРИМЕР:]
+  рассмотрим бэкенд обработки изображений без статических данных, который работает с 3 репликами.
+  Эти реплики являются взаимозаменяемыми - фронтендам все равно, какой бэкенд они используют.
+
+  Хотя фактические Pod'ы, составляющие набор бэкендов, могут меняться,
+  клиенты фронтенда НЕ ДОЛЖНЫ ЗНАТЬ ОБ ЭТОМ, равно как и не должны следить за набором бэкендов.
+
+(!) Абстракция Service обеспечивает такое разделение.
+
+Набор Pod'ов, на которые нацелен Service, обычно определяется селектором (selector), который вы определяете.
+
+# узнать о других способах определения Service endpoints:
+# см. раздел "Services without selectors": https://kubernetes.io/docs/concepts/services-networking/service/#services-without-selectors
+
+
+Если рабочая нагрузка использует HTTP (workload speaks HTTP):
+  можно использовать Ingress для управления тем, как веб-трафик достигает этой рабочей нагрузки.
+#(https://kubernetes.io/docs/concepts/services-networking/ingress/)
+
+  Ingress не является типом службы, но он действует как точка входа (entry point) в кластер.
+  Ingress позволяет объединить правила маршрутизации в одном ресурсе,
+  чтобы появилась возможность представить несколько компонентов workload, выполняющихся в кластере по отдельности, за одним слушателем.
+
+
+Gateway API для Kubernetes предоставляет дополнительные возможности, помимо Ingress и Service.
+Вы можете
+  1) добавить Gateway в свой кластер
+     (это семейство API расширений, реализованных с помощью CustomResourceDefinitions)
+  2) и затем использовать их для настройки доступа к сетевым сервисам, запущенным в вашем кластере.
+
+
+**Обнаружение облачных сервисов**
+(Cloud-native service discovery)
+
+  Если вы можете использовать API Kubernetes для обнаружения сервисов в своем приложении, вы можете запросить у сервера API подходящие EndpointSlices.
+  Kubernetes обновляет EndpointSlices для сервиса при каждом изменении набора Pod'ов в сервисе.
+
+  Для неродных приложений (non-native applications) Kubernetes предлагает разместить сетевой порт или балансировщик нагрузки между вашим приложением и внутренними Pod'ами.
+  В любом случае ваша рабочая нагрузка может использовать эти механизмы обнаружения сервисов для поиска цели, к которой она хочет подключиться.
+
+
+**Defining a Service**
+
+  Service  - это объект (точно так же, как Pod или ConfigMap - это объекты).
+
+  Вы можете
+  ✓ создавать,
+  ✓ просматривать
+  ✓ или изменять
+  определения Service'ов с помощью Kubernetes API.
+
+  Обычно для этого используется такой инструмент, как kubectl, который выполняет вызовы API.
+
+Например:
+  предположим, что у вас есть набор Pod'ов, каждый из которых
+    ✓ прослушивает TCP-порт 9376
+    ✓ и обозначен как app.kubernetes.io/name=MyApp.
+
+  Вы можете определить Service для публикации этого TCP-слушателя:
+
+#--<Service.Example>--
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  selector:
+    app.kubernetes.io/name: MyApp
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 9376
+
+# Применение этого манифеста создает новый Service
+    с именем "my-service"
+    и типом службы по умолчанию ClusterIP.
+
+  Service нацелен на TCP-порт 9376 на любом Pod с меткой app.kubernetes.io/name: MyApp.
+
+Kubernetes назначает этой службе кластерный IP-адрес (cluster IP), который используется механизмом виртуальных IP-адресов.
+
+# Подробнее об этом механизме читайте в статье "Virtual IPs and Service Proxies":
+#-> https://kubernetes.io/docs/reference/networking/virtual-ips/
+
+Контроллер этого Service постоянно сканирует Pod'ы, соответствующие её селектору,
+и затем вносит необходимые обновления в набор EndpointSlices этого Service.
+
+(!) Имя объекта Service должно быть действительным именем метки RFC 1035.
+
+
+[Note:]
+  Service может сопоставить любой входящий порт (port) с целевым портом (targetPort)
+  По умолчанию и для удобства targetPort устанавливается в то же значение, что и поле port.
+
+
+[Определения портов:]
+
+  Определения портов в Pod'ах имеют имена,
+  и вы можете ссылаться на эти имена в атрибуте targetPort Service'а.
+
+  Например, мы можем связать targetPort службы с портом Pod следующим образом:
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx
+  labels:
+    app.kubernetes.io/name: proxy
+spec:
+  containers:
+  - name: nginx
+    image: nginx:stable
+    ports:
+      - containerPort: 80
+        name: http-web-svc
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+spec:
+  selector:
+    app.kubernetes.io/name: proxy
+  ports:
+  - name: name-of-service-port
+    protocol: TCP
+    port: 80
+    targetPort: http-web-svc
+
+####****####
+
+  Это работает даже в том случае, если в Service есть несколько Pod'ов, использующих одно сконфигурированное имя,
+  с одним и тем же сетевым протоколом, доступным через разные номера портов.
+
+  Это обеспечивает большую гибкость при развертывании и развитии ваших Service'ов.
+
+Например:
+  вы можете изменить номера портов, открываемых Pod'ами, в следующей версии вашего внутреннего программного обеспечения,
+  не нарушая при этом работу клиентов.
+
+Протокол по умолчанию для Service = TCP;
+вы также можете использовать любой другой поддерживаемый протокол.
+
+Поскольку многие Service'ы должны открывать более одного порта,
+Kubernetes поддерживает несколько определений портов для одного Service.
+Каждое определение порта может иметь один и тот же протокол или другой.
+
+
+Services without selectors
+Services most commonly abstract access to Kubernetes Pods thanks to the selector, but when used with a corresponding set of EndpointSlices objects and without a selector, the Service can abstract other kinds of backends, including ones that run outside the cluster.
+
+For example:
+
+You want to have an external database cluster in production, but in your test environment you use your own databases.
+You want to point your Service to a Service in a different Namespace or on another cluster.
+You are migrating a workload to Kubernetes. While evaluating the approach, you run only a portion of your backends in Kubernetes.
+In any of these scenarios you can define a Service without specifying a selector to match Pods.
+
+For example:
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: my-service
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80
+      targetPort: 9376
+
+Поскольку у этого Service нет селектора, соответствующие объекты EndpointSlice (и унаследованные Endpoints) НЕ СОЗДАЮТСЯ АВТОМАТИЧЕСКИ.
+Вы можете сопоставить Service с сетевым адресом и портом, на котором она работает, добавив объект EndpointSlice вручную.
+
+Например:
+
+---
+apiVersion: discovery.k8s.io/v1
+kind: EndpointSlice
+metadata:
+  name: my-service-1 # by convention, use the name of the Service
+                     # as a prefix for the name of the EndpointSlice
+  labels:
+    # You should set the "kubernetes.io/service-name" label.
+    # Set its value to match the name of the Service
+    kubernetes.io/service-name: my-service
+addressType: IPv4
+ports:
+  - name: http # should match with the name of the service port defined above
+    appProtocol: http
+    protocol: TCP
+    port: 9376
+endpoints:
+  - addresses:
+      - "10.4.5.6"
+  - addresses:
+      - "10.1.2.3"
+

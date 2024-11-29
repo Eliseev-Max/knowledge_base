@@ -1,0 +1,9 @@
+Bash. Поиск по шаблону. extglob
+
+{
+  https://rus-linux.net/nlib.php?name=/MyLDP/BOOKS/Bash-Guide-1.12-ru/bash-guide-04-3.html
+  https://askubuntu.com/questions/889744/what-is-the-purpose-of-shopt-s-extglob
+  https://habr.com/ru/articles/452522/
+  https://www.linuxjournal.com/content/bash-extended-globbing
+  https://www.npmjs.com/package/extglob
+}

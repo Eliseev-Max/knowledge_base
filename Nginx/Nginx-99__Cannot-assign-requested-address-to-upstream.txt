@@ -1,0 +1,2 @@
+Nginx 99: Cannot assign requested address to upstream
+(https://it-lux.ru/nginx-99-cannot-assign-requested-address-to-upstream/)

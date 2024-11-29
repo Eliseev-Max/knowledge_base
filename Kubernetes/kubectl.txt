@@ -1,13 +1,19 @@
 Kubectl
 
 [sources:]
+
+0) [en] "Command line tool (kubectl)": https://kubernetes.io/docs/reference/kubectl/
+## [ru] "kubectl CLI": https://kubernetes.io/ru/docs/reference/kubectl/
+   
+
 1) "Полезные команды и советы при работе с Kubernetes через консольную утилиту kubectl": https://habr.com/ru/companies/flant/articles/333956/
+
 2) "Шпаргалка по kubectl": https://kubernetes.io/ru/docs/reference/kubectl/cheatsheet/
+
 2+) https://kubernetes.io/ru/docs/tasks/tools/install-kubectl/
-3.1)[ru] "kubectl CLI": https://kubernetes.io/ru/docs/reference/kubectl/
 ||
-3.2) [en] "Command line tool (kubectl)": https://kubernetes.io/docs/reference/kubectl/
 4) "Обзор kubectl": https://kubernetes.io/ru/docs/reference/kubectl/overview/
+
 5) "kubectl": https://kubernetes.io/ru/docs/reference/kubectl/kubectl/
 #+more+: "Install Tools": https://kubernetes.io/docs/tasks/tools/#enabling-shell-autocompletion
 
@@ -76,3 +82,54 @@ kubectl get po pod1
   flags:
     = определяет дополнительные флаги.
       # Например, флаги -s или --server => указать адрес и порт API-сервера Kubernetes.
+
+
+****************
+* kubectl logs *
+****************
+
+  = печать логов для контейнера в Pod'е или указанном ресурсе.
+    Если в Pod есть только один контейнер, имя контейнера необязательно.
+
+[Usage:]
+
+$ kubectl logs [-f] [-p] (POD | TYPE/NAME) [-c CONTAINER]
+
+[Flags:]
+  --all-containers
+    = получить логи всех контейнеров в Pod'е (Pod'ах)
+
+  --follow, -f
+    = указывает, что следует передавать логи в потоковом режиме.
+
+  --prefix
+    = префикс каждой строки лога с указанием источника лога (имя Pod'а и контейнера).
+
+  --previous, -p
+    = если true, вывести логи для предыдущего экземпляра контейнера в Pod'е,
+      если он существует.
+
+  --selector, -l
+    = Селектор (запрос метки) для фильтрации
+
+  --since <int>s
+    = Возвращает только логи, более новые, чем относительная продолжительность,
+      например 5s, 2m, or 3h
+      По умолчанию - все логи.
+      Может использоваться только одно из значений since-time / since.
+
+  --since-time
+    = возвращает только логи после определенной даты (RFC3339).
+      По умолчанию - все журналы.
+      Может использоваться только одно из значений since-time / since.
+
+  --tail
+    = Строки последнего файла журнала для отображения.
+      (По умолчанию -1 при отсутствии селектора, показывает все строки журнала,
+       иначе 10, если селектор указан).
+
+  --timestamps (default = false)
+    = включить временные метки в каждую строку журнала
+
+#(примеры разобраны в правой колонке: https://kubernetes.io/docs/reference/generated/kubectl/kubectl-commands#logs)
+

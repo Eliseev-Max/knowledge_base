@@ -1,0 +1,5 @@
+Shell. The Shopt Builtin
+
+[sources:]
+  1) "4.3.2 The Shopt Builtin": https://www.gnu.org/software/bash/manual/html_node/The-Shopt-Builtin.html
+  2) "shopt": http://xgu.ru/wiki/shopt

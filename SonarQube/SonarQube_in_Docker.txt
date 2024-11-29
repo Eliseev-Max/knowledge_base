@@ -155,6 +155,7 @@ volumes:
   
   ‼ Чтобы избежать уничтожения экземпляра SonarQube демоном Docker через 10 секунд,
   лучше всего настроить таймаут для остановки контейнера с помощью параметра --stop-timeout.
+[!] Для Docker Compose этот параметр называется stop_grace_period: <int>s   
   Например:
 ---
 $ docker run --stop-timeout 3600 sonarqube

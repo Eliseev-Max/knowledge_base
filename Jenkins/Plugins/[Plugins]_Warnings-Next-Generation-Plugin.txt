@@ -1,0 +1,5 @@
+Jenkins Next Generation Warnings plugin
+
+[sources:]
+1) "Warnings. Documentation": https://plugins.jenkins.io/warnings-ng/
+2) "Jenkins Warnings Next Generation Plugin": https://github.com/jenkinsci/warnings-ng-plugin/blob/main/doc/Documentation.md

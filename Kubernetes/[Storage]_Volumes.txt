@@ -1,0 +1,192 @@
+Kubernetes Storage. Volumes
+(https://kubernetes.io/docs/concepts/storage/volumes/)
+
+#✓✔➜✕✖●
+
+Файлы на диске внутри контейнера (on-disk files) являются эфемерными, что создает некоторые проблемы для нетривиальных приложений при запуске в контейнерах.
+
+Container crashed || stopped => Проблема
+
+Состояние контейнера не сохраняется,
+  => все файлы, которые были созданы или изменены в течение жизни контейнера, теряются.
+
+Во время сбоя kubelet перезапускает контейнер с чистым состоянием (clean state).
+
+Другая проблема возникает, когда
+  ✔ несколько контейнеров запущены в Pod
+  ✔ и нуждаются в совместном использовании файлов.
+
+Настроить общую FS для всех контейнеров и получить к ней доступ может быть непросто.
+
+Абстракция volume Kubernetes решает ОБЕ эти проблемы.
+
+
+*************************
+* Справочная информация *
+*       Background      *
+*************************
+
+  Kubernetes поддерживает множество типов volumes (томов).
+  Pod может использовать любое количество типов томов одновременно.
+
+  Эфемерные типы томов (Ephemeral Volumes)
+  #(https://kubernetes.io/docs/concepts/storage/ephemeral-volumes/)
+    = имеют время жизни Pod'а;
+
+  Постоянные тома (Persistent Volumes)
+  #(https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+    = существуют больше времени жизни Pod'а.
+
+(!) Когда Pod прекращает свое существование, Kubernetes:
+    -> уничтожает ephemeral volumes;
+    -> НЕ УНИЧТОЖАЕТ  persistent volumes.
+
+[!]  Для любого типа volume в данном Pod'е данные сохраняются при ПЕРЕЗАПУСКЕ контейнера.
+
+
+По своей сути volume = это каталог, возможно, с некоторыми данными в нем, который доступен контейнерам в Pod'е.
+
+  Конкретным типом используемого тома определяются:
+    ● то, как эта директория появляется,
+    ● носитель, на котором она хранится,
+    ● содержимое директории.
+
+Чтобы использовать volume:
+  1) укажите тома, которые необходимо предоставить для Pod'а,
+     ➜ в .spec.volumes
+  2) и объявите, где монтировать эти тома в контейнеры,
+     ➜ в .spec.containers[*].volumeMounts.
+
+  Процесс в контейнере видит представление FS, составленное из
+    + начального содержимого образа контейнера,
+    + а также томов (если они определены), смонтированных внутри контейнера.
+
+  Процесс видит корневую FS (root filesystem), которая изначально соответствует содержимому образа контейнера.
+  Любые записи в иерархию этой FS, если они разрешены, влияют на то, что процесс видит при последующем обращении к файловой системе.
+
+  Тома монтируются по указанным путям в образе: https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath
+  Для КАЖДОГО КОНТЕЙНЕРА, определенного в Pod, необходимо независимо указать, где монтировать каждый том, используемый контейнером.
+
+[!] Тома НЕ МОГУТ монтироваться внутри других томов
+#(но см. раздел "Использование подпутей для связанного механизма": https://kubernetes.io/docs/concepts/storage/volumes/#using-subpath).
+Кроме того, том не может содержать жесткую ссылку (hard link) на что-либо в другом томе.
+
+
+********************
+*   Типы  томов    *
+* Types of volumes *
+********************
+
+  - awsElasticBlockStore (deprecated);
+  - azureDisk (deprecated);
+  - azureFile (deprecated);
+  - azureFile CSI migration;
+  - azureFile CSI migration complete;
+  - cephfs (removed);
+  - cinder (deprecated);
+
+
+[configMap]
+  = ConfigMap обеспечивает способ введения конфигурационных данных в Pod'ы.
+    На данные, хранящиеся в ConfigMap, можно ссылаться в volume типа configMap,
+    а затем потреблять их контейнерными приложениями, запущенными в Pod'е.
+
+    При ссылке на ConfigMap вы указываете имя ConfigMap в volume.
+    Можно настроить путь, который будет использоваться для конкретной записи в ConfigMap.
+
+    В следующей конфигурации показано, как смонтировать log-config ConfigMap в Pod под названием configmap-pod:
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-pod
+spec:
+  containers:
+    - name: test
+      image: busybox:1.28
+      command: ['sh', '-c', 'echo "The app is running!" && tail -f /dev/null']
+      volumeMounts:
+        - name: config-vol
+          mountPath: /etc/config
+  volumes:
+    - name: config-vol
+      configMap:
+        name: log-config
+        items:
+          - key: log_level
+            path: log_level
+
+####****####
+
+  ConfigMap 'log-config' монтируется как volume,
+  а все содержимое, хранящееся в ее записи log_level, монтируется в Pod по пути /etc/config/log_level.
+[Обратите внимание:]
+  этот путь образуется из пути mountPath тома + path с ключом log_level
+  (PATH = spec.containers.volumeMounts.mountPath + spec.volumes.configMap.items.path)
+
+[Примечание:]
+  * Перед использованием ConfigMap необходимо создать ее.
+  * ConfigMap ВСЕГДА монтируется как readOnly.
+  * Контейнер, использующий ConfigMap в качестве монтируемого тома subPath, НЕ БУДЕТ ПОЛУЧАТЬ ОБНОВЛЕНИЯ ConfigMap.
+  * Текстовые данные представляются в виде файлов, использующих кодировку UTF-8.
+    Для других кодировок используйте binaryData.
+
+
+[emptyDir]
+#(https://kubernetes.io/docs/concepts/storage/volumes/#emptydir)
+  Для Pod'а, в которой определен том emptyDir, том создается, когда Pod назначается узлу.
+  Как следует из названия, том emptyDir изначально пуст.
+  Все контейнеры в Pod'е могут читать и записывать одни и те же файлы в томе emptyDir,
+  хотя этот том может быть смонтирован по одному и тому же или разным путям в каждом контейнере.
+  Когда Pod по какой-либо причине удаляется с узла, данные в emptyDir удаляются навсегда.
+
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: registry.k8s.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /cache
+      name: cache-volume
+  volumes:
+  - name: cache-volume
+    emptyDir:
+      sizeLimit: 500Mi
+
+####****####
+
+[Примечание:]
+  Сбой контейнера не приводит к удалению Pod'а с узла.
+  Данные в томе emptyDir НЕ ПОВРЕЖДАЮТСЯ при сбоях контейнеров.
+
+emptyDir можно использовать следующим образом:
+  ● место для хранения данных (scratch space),
+      например, для дисковой сортировки слиянием (disk-based merge sort);
+
+  ● создание контрольных точек при длительных вычислениях для восстановления после сбоев
+
+  ● хранение файлов, которые контейнер менеджера контента получает, пока контейнер веб-сервера обслуживает данные
+
+The emptyDir.medium field controls where emptyDir volumes are stored.
+By default emptyDir volumes are stored on whatever medium that backs the node such as disk, SSD, or network storage, depending on your environment.
+If you set the emptyDir.medium field to "Memory", Kubernetes mounts a tmpfs (RAM-backed filesystem) for you instead.
+While tmpfs is very fast be aware that, unlike disks, files you write count against the memory limit of the container that wrote them.
+
+A size limit can be specified for the default medium, which limits the capacity of the emptyDir volume.
+The storage is allocated from node ephemeral storage.
+If that is filled up from another source (for example, log files or image overlays), the emptyDir may run out of capacity before this limit.
+
+Note:
+You can specify a size for memory backed volumes, provided that the SizeMemoryBackedVolumes feature gate is enabled in your cluster (this has been beta, and active by default, since the Kubernetes 1.22 release). If you don't specify a volume size, memory backed volumes are sized to node allocatable memory.
+
+Caution:
+Please check here for points to note in terms of resource management when using memory-backed emptyDir.
+  
+[hostPath]
+!! Сопряжено с рисками безопасности!
+!! Лучше не использовать!

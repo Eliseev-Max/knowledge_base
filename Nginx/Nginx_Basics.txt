@@ -17,6 +17,35 @@ nginx
   • настройка прокси-сервера на nginx;
   • как связать nginx с приложением FastCGI.
 
+---
+***********************
+* Расположение файлов *
+***********************
+
+1) конфигурационный файл nginx: (nginx.conf)
+     /usr/local/nginx/conf
+     /etc/nginx
+     /usr/local/etc/nginx
+# в docker-образе Nginx путь до конфигурационного файла такой:
+# /etc/nginx/nginx.conf
+#(https://hub.docker.com/_/nginx)
+#! "Mount your configuration file":
+-->
+docker run --name my-custom-nginx-container -v /host/path/nginx.conf:/etc/nginx/nginx.conf:ro -d nginx
+<--
+
+[!] Директива  `include /etc/nginx/conf.d/*.conf;` в конфигурационном файле /etc/nginx/nginx.conf
+    позволяет не изменять содержимое конфигурационного файла по умолчанию, а дополнять его конфигурациями из директории ./conf.d/*.conf
+
+2) файл nginx.pid (содержит ID главного процесса nginx)
+     /usr/local/nginx/logs
+     /var/run
+
+3) Файлы журналов (access.log и error.log)
+     /usr/local/nginx/logs
+     /var/log/nginx
+---
+
 
 *******************
 * Процессы nginx: *
@@ -233,6 +262,13 @@ http {
 
 Контекст: 	server
 ---
+listen 443 ssl => nginx будет прослушивать все ipv4 адреса на сервере, на порту 443 (0.0.0.0:443)
+
+while
+
+listen [::]:443 ssl : nginx будет прослушивать все ipv6 адреса на сервере, на порту 443 (:::443)
+
+
 ## Имена сервера: https://nginx.org/ru/docs/http/server_names.html
 
   Определив, какой server будет обрабатывать запрос,
@@ -411,23 +447,6 @@ server {
 #   - и отображать их на каталог /data/images (добавлением URI к параметру директивы root)
 #   - перенаправлять все остальные запросы на проксируемый сервер, сконфигурированный выше
 
-
-***********************
-* Расположение файлов *
-***********************
-
-1) конфигурационный файл nginx: (nginx.conf)
-     /usr/local/nginx/conf
-     /etc/nginx
-     /usr/local/etc/nginx
-
-2) файл nginx.pid (содержит ID главного процесса nginx)
-     /usr/local/nginx/logs
-     /var/run
-
-3) Файлы журналов (access.log и error.log)
-     /usr/local/nginx/logs
-     /var/log/nginx
 
 ###########
 # FastCGI #

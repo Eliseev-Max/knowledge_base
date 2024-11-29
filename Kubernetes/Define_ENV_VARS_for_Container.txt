@@ -1,0 +1,73 @@
+Define Environment Variables for a Container
+(Определение переменных среды для контейнера)
+
+[sources:]
+1) https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
+
+
+Когда вы создаете Pod, вы можете задать переменные окружения для контейнеров, которые запускаются в Pod.
+Чтобы задать переменные окружения, включите в конфигурационный файл (манифест) поле env || envFrom.
+
+[!] Поля env и envFrom имеют разные эффекты:
+  env
+    = позволяет задавать переменные окружения для контейнера,
+      указывая значение непосредственно для каждой переменной, которую вы называете.
+
+  envFrom
+    позволяет установить переменные окружения для контейнера,
+    ссылаясь либо на ConfigMap, либо на Secret.
+    При использовании envFrom все пары ключ-значение в ссылающейся (referenced) ConfigMap || Secret
+    будут установлены в качестве переменных окружения для контейнера.
+    Вы также можете указать общую строку префикса.
+
+[Пример:]
+  Pod, в котором будет запущен один контейнер.
+  В конфигурационном файле для Pod'а определена переменная окружения (DEMO_GREETING = "Hello from the environment").
+
+---<pods/inject/envars.yaml>---
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: envar-demo
+  labels:
+    purpose: demonstrate-envars
+spec:
+  containers:
+    - name: envar-demo-container
+      image: gcr.io/google-samples/hello-app:2.0
+      env:
+        - name: DEMO_GREETING
+          value: "Hello from the environment"
+        - name: DEMO_FAREWELL
+          value: "Such a sweet sorrow"
+####
+
+1) Create a Pod based on that manifest:
+--[CMD]--
+kubectl apply -f https://k8s.io/examples/pods/inject/envars.yaml
+
+
+2) List the running Pods:
+--[CMD]--
+kubectl get pods -l purpose=demonstrate-envars
+
+##[OUTPUT:]
+NAME            READY     STATUS    RESTARTS   AGE
+envar-demo      1/1       Running   0          9s
+>--<
+
+3) List the Pod's container environment variables:
+--[CMD]--
+kubectl exec envar-demo -- printenv
+#kubectl exec <Pod's_name> -- [COMMAND]
+>--<
+
+
+[!] Переменные окружения, заданные с помощью поля env или envFrom,
+    ПЕРЕОПРЕДЕЛЯЮТ ЛЮБЫЕ переменные окружения, указанные в образе контейнера.
+
+[!] Переменные окружения могут ссылаться друг на друга, однако ПОРЯДОК СЛЕДОВАНИЯ ВАЖЕН.
+    Переменные, использующие другие, определенные в том же контексте, должны идти позже в списке.
+    Аналогично, избегайте круговых ссылок (circular references).
+

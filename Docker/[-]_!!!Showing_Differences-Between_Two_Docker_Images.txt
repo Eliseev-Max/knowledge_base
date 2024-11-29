@@ -1,0 +1,7 @@
+Showing Differences Between Two Docker Images
+(https://www.baeldung.com/ops/docker-differences-between-images)
+
+[Additional sources:]
+1) "GoogleContainerTools/container-diff": https://github.com/GoogleContainerTools/container-diff
+2) "wagoodman/dive": https://github.com/wagoodman/dive
+

@@ -1,0 +1,137 @@
+###############
+# Nginx-proxy #
+###############
+
+1) nginxproxy/nginx-proxy Docker image
+(https://hub.docker.com/r/nginxproxy/nginx-proxy)
+(https://github.com/nginx-proxy/nginx-proxy)
+
+  nginx-proxy устанавливает контейнер под управлением nginx и docker-gen.
+
+  docker-gen:
+    * генерирует конфигурации обратного (reverse) прокси для nginx;
+	* перезагружает nginx при запуске и остановке контейнеров.
+
+## О том, зачем это нужно, читайте в статье: "Автоматизированный обратный прокси Nginx для Docker"
+  -> http://jasonwilder.com/blog/2014/03/25/automated-nginx-reverse-proxy-for-docker/ <-
+# (Конспект статьи: ./Automated-Nginx-Reverse-Proxy4Docker.txt)
+
+
+Команда запуска:
+---
+docker run --detach \
+    --name nginx-proxy \
+    --publish 80:80 \
+    --volume /var/run/docker.sock:/tmp/docker.sock:ro \
+    nginxproxy/nginx-proxy:1.4
+---
+
+# Затем запустите все контейнеры (здесь контейнер nginx), которые вы хотите проксировать,
+# с помощью переменной окружения VIRTUAL_HOST=subdomain.yourdomain.com.
+
+---
+docker run --detach \
+    --name your-proxied-app \
+    --env VIRTUAL_HOST=foo.bar.com \
+    nginx
+---
+
+  Если ваш DNS настроен на разрешение (=setup to resolve) foo.bar.com на хост, на котором запущен nginx-proxy,
+[!]  то запрос на http://foo.bar.com будет направлен на контейнер с переменной VIRTUAL_HOST env, установленной на foo.bar.com
+  (в данном случае на контейнер your-proxied-app).
+
+Проксируемые контейнеры должны :
+  * открыть порт для проксирования,
+    ** либо с помощью директивы EXPOSE в своем Dockerfile,
+	** либо с помощью флага --expose в docker run или docker create.
+
+  * разделять с контейнером nginx-proxy хотя бы одну сеть Docker:
+      по умолчанию, если вы НЕ ПЕРЕДАДИТЕ ФЛАГ --net при создании контейнера nginx-proxy,
+	  он будет подключен ТОЛЬКО К СЕТИ bridge по умолчанию.
+	=> Это означает, что он НЕ СМОЖЕТ ПОДКЛЮЧАТЬСЯ к контейнерам в сетях, отличных от bridge.
+
+[Примечание:]
+  указание номера порта в VIRTUAL_HOST  НЕ ПОДДЕРЖИВАЕТСЯ!
+  Пожалуйста, смотрите виртуальные порты или пользовательские внешние HTTP/HTTPS порты
+  в зависимости от того, чего вы хотите добиться.
+
+
+********************
+* Варианты образов *
+********************
+
+Образы nginx-proxy доступны в двух вариантах:
+
+  1) Версия на основе Debian
+     Этот образ основан на образе nginx:mainline, который сам основан на образе debian slim.
+---
+docker pull nginxproxy/nginx-proxy:1.4
+---
+
+  2) Версия на основе Alpine (суффикс -alpine)
+     Этот образ основан на образе nginx:alpine.
+---
+docker pull nginxproxy/nginx-proxy:1.4-alpine
+---
+
+############################################
+# [Предупреждение:]                        #
+# [!] замечание по поводу latest и alpine: #
+############################################
+
+  НЕ РЕКОМЕНДУЕТСЯ
+    -> использовать тег latest
+  (nginxproxy/nginx-proxy, nginxproxy/nginx-proxy:latest)
+    -> или alpine
+  (nginxproxy/nginx-proxy:alpine)
+  для установок в production
+
+  Эти теги указывают НА ПОСЛЕДНИЙ КОММИТ в основной ветке.
+  Они не дают никаких гарантий стабильности!
+  Их использование, вероятно, подвергнет вашу установку nginx-proxy РИСКУ НЕКОНТРОЛИРУЕМОГО ОБНОВЛЕНИЯ до версий,
+  не совместимых с обратной связью (или версий с разрывными изменениями).
+
+[!]  Вы ВСЕГДА ДОЛЖНЫ ЯВНО УКАЗЫВАТЬ ВЕРСИЮ, которую хотите использовать,
+     чтобы убедиться, что ваша установка не сломается при обновлении образа.
+
+
+******************************
+* docker-compose.yml example *
+******************************
+(https://github.com/nginx-proxy/nginx-proxy/blob/main/docker-compose.yml)
+
+---<docker-compose.yml>---
+version: "2"
+
+services:
+  nginx-proxy:
+    image: nginxproxy/nginx-proxy
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+    volumes:
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+
+    # Если вы хотите проксировать на основе портов хоста, вам нужно использовать сеть хоста:
+    # network_mode: "host"
+
+  whoami:
+    image: jwilder/whoami
+#	expose:
+#	  - "8000"
+    environment:
+      - VIRTUAL_HOST=whoami.example
+#	  - VIRTUAL_PORT=8000
+# Закомментированные инструкции встретились в примере по адресу:
+# https://github.com/nginx-proxy/nginx-proxy/tree/main/docs#docker-compose
+---
+
+Additional documentation
+  -> Чекни это: https://github.com/nginx-proxy/nginx-proxy/tree/main/docs
+
+{ sources:
+https://github.com/nginx-proxy/nginx-proxy/tree/main/docs
+https://github.com/nginx-proxy/nginx-proxy/blob/main/nginx.tmpl
+https://github.com/nginx-proxy/nginx-proxy/blob/main/README.md
+https://github.com/nginx-proxy/docker-gen
+}

@@ -1,0 +1,11 @@
+USE shop;
+SELECT product.id, brands.brand, product_type.`name`, category.`name` FROM product
+	INNER JOIN brands ON brands.id = product.brand_id
+    INNER JOIN category ON category.id = product.category_id
+    INNER JOIN product_type ON product_type.id = product.product_type_id;
+
+USE shop;
+SELECT * FROM `order`
+	INNER JOIN `order_products` ON `order_products`.order_id = `order`.id
+	INNER JOIN `product` ON `order_products`.product_id = `order`.id
+	INNER JOIN `brands` ON `brands`.id = `product`.brand_id;

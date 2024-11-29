@@ -24,8 +24,11 @@ SonarQube. Opened pages
 7. sonar-cxx releases
   https://github.com/SonarOpenCommunity/sonar-cxx/releases
 
+************************
 8. Environment variables
   https://docs.sonarsource.com/sonarqube/latest/setup-and-upgrade/configure-and-operate-a-server/environment-variables/#postgresql-96-or-greater
+  https://docs.sonarsource.com/sonarqube-server/9.9/setup-and-upgrade/configure-and-operate-a-server/environment-variables/
+************************
 
 9. How easily run Sonar Qube and PostgresSQL with Docker Containers
   https://gist.github.com/ceduliocezar/b3bf93125024482b5f2f479696842046

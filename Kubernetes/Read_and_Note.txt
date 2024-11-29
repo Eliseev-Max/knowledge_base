@@ -1,0 +1,9 @@
+Kubernetes. Ознакомиться и законспектировать
+
+1) "Images": https://kubernetes.io/docs/concepts/containers/images/
+2) "Liveness, Readiness, and Startup Probes": https://kubernetes.io/docs/concepts/configuration/liveness-readiness-startup-probes/
+3) "Managing Secrets using Configuration File": https://kubernetes.io/docs/tasks/configmap-secret/managing-secret-using-config-file/
+4) "Configure a Pod to Use a ConfigMap": https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
+5) "A few common k8s secret types examples": https://external-secrets.io/latest/guides/common-k8s-secret-types/
+6) "Creating imagePullSecrets for a specific namespace": https://www.ibm.com/docs/en/cloud-private/3.2.x?topic=images-creating-imagepullsecrets-specific-namespace
+7) "Pull an Image from a Private Registry": https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
