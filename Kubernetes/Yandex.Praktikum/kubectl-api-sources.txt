@@ -1,0 +1,104 @@
+bindings                                                   v1                                        true         Binding
+componentstatuses                  cs                      v1                                        false        ComponentStatus
+configmaps                         cm                      v1                                        true         ConfigMap
+endpoints                          ep                      v1                                        true         Endpoints
+events                             ev                      v1                                        true         Event
+limitranges                        limits                  v1                                        true         LimitRange
+namespaces                         ns                      v1                                        false        Namespace
+nodes                              no                      v1                                        false        Node
+persistentvolumeclaims             pvc                     v1                                        true         PersistentVolumeClaim
+persistentvolumes                  pv                      v1                                        false        PersistentVolume
+pods                               po                      v1                                        true         Pod
+podtemplates                                               v1                                        true         PodTemplate
+replicationcontrollers             rc                      v1                                        true         ReplicationController
+resourcequotas                     quota                   v1                                        true         ResourceQuota
+secrets                                                    v1                                        true         Secret
+serviceaccounts                    sa                      v1                                        true         ServiceAccount
+services                           svc                     v1                                        true         Service
+challenges                                                 acme.cert-manager.io/v1                   true         Challenge
+orders                                                     acme.cert-manager.io/v1                   true         Order
+mutatingwebhookconfigurations                              admissionregistration.k8s.io/v1           false        MutatingWebhookConfiguration
+validatingwebhookconfigurations                            admissionregistration.k8s.io/v1           false        ValidatingWebhookConfiguration
+customresourcedefinitions          crd,crds                apiextensions.k8s.io/v1                   false        CustomResourceDefinition
+apiservices                                                apiregistration.k8s.io/v1                 false        APIService
+controllerrevisions                                        apps/v1                                   true         ControllerRevision
+daemonsets                         ds                      apps/v1                                   true         DaemonSet
+deployments                        deploy                  apps/v1                                   true         Deployment
+replicasets                        rs                      apps/v1                                   true         ReplicaSet
+statefulsets                       sts                     apps/v1                                   true         StatefulSet
+applications                       app,apps                argoproj.io/v1alpha1                      true         Application
+applicationsets                    appset,appsets          argoproj.io/v1alpha1                      true         ApplicationSet
+appprojects                        appproj,appprojs        argoproj.io/v1alpha1                      true         AppProject
+argocdextensions                                           argoproj.io/v1alpha1                      true         ArgoCDExtension
+tokenreviews                                               authentication.k8s.io/v1                  false        TokenReview
+localsubjectaccessreviews                                  authorization.k8s.io/v1                   true         LocalSubjectAccessReview
+selfsubjectaccessreviews                                   authorization.k8s.io/v1                   false        SelfSubjectAccessReview
+selfsubjectrulesreviews                                    authorization.k8s.io/v1                   false        SelfSubjectRulesReview
+subjectaccessreviews                                       authorization.k8s.io/v1                   false        SubjectAccessReview
+horizontalpodautoscalers           hpa                     autoscaling/v2                            true         HorizontalPodAutoscaler
+verticalpodautoscalercheckpoints   vpacheckpoint           autoscaling.k8s.io/v1                     true         VerticalPodAutoscalerCheckpoint
+verticalpodautoscalers             vpa                     autoscaling.k8s.io/v1                     true         VerticalPodAutoscaler
+cronjobs                           cj                      batch/v1                                  true         CronJob
+jobs                                                       batch/v1                                  true         Job
+certificaterequests                cr,crs                  cert-manager.io/v1                        true         CertificateRequest
+certificates                       cert,certs              cert-manager.io/v1                        true         Certificate
+clusterissuers                                             cert-manager.io/v1                        false        ClusterIssuer
+issuers                                                    cert-manager.io/v1                        true         Issuer
+certificatesigningrequests         csr                     certificates.k8s.io/v1                    false        CertificateSigningRequest
+clustersecrets                     csec                    clustersecret.io/v1                       true         ClusterSecret
+leases                                                     coordination.k8s.io/v1                    true         Lease
+endpointslices                                             discovery.k8s.io/v1                       true         EndpointSlice
+dragonflies                                                dragonflydb.io/v1alpha1                   true         Dragonfly
+events                             ev                      events.k8s.io/v1                          true         Event
+clusterexternalsecrets             ces                     external-secrets.io/v1beta1               false        ClusterExternalSecret
+clustersecretstores                css                     external-secrets.io/v1beta1               false        ClusterSecretStore
+externalsecrets                    es                      external-secrets.io/v1beta1               true         ExternalSecret
+pushsecrets                                                external-secrets.io/v1alpha1              true         PushSecret
+secretstores                       ss                      external-secrets.io/v1beta1               true         SecretStore
+flowschemas                                                flowcontrol.apiserver.k8s.io/v1beta3      false        FlowSchema
+prioritylevelconfigurations                                flowcontrol.apiserver.k8s.io/v1beta3      false        PriorityLevelConfiguration
+acraccesstokens                    acraccesstoken          generators.external-secrets.io/v1alpha1   true         ACRAccessToken
+ecrauthorizationtokens             ecrauthorizationtoken   generators.external-secrets.io/v1alpha1   true         ECRAuthorizationToken
+fakes                              fake                    generators.external-secrets.io/v1alpha1   true         Fake
+gcraccesstokens                    gcraccesstoken          generators.external-secrets.io/v1alpha1   true         GCRAccessToken
+passwords                          password                generators.external-secrets.io/v1alpha1   true         Password
+vaultdynamicsecrets                vaultdynamicsecret      generators.external-secrets.io/v1alpha1   true         VaultDynamicSecret
+kubevirts                          kv,kvs                  kubevirt.io/v1alpha3                      true         KubeVirt
+nodes                                                      metrics.k8s.io/v1beta1                    false        NodeMetrics
+pods                                                       metrics.k8s.io/v1beta1                    true         PodMetrics
+alertmanagers                                              monitoring.coreos.com/v1                  true         Alertmanager
+podmonitors                                                monitoring.coreos.com/v1                  true         PodMonitor
+prometheuses                                               monitoring.coreos.com/v1                  true         Prometheus
+prometheusrules                                            monitoring.coreos.com/v1                  true         PrometheusRule
+servicemonitors                                            monitoring.coreos.com/v1                  true         ServiceMonitor
+thanosrulers                                               monitoring.coreos.com/v1                  true         ThanosRuler
+ingressclasses                                             networking.k8s.io/v1                      false        IngressClass
+ingresses                          ing                     networking.k8s.io/v1                      true         Ingress
+networkpolicies                    netpol                  networking.k8s.io/v1                      true         NetworkPolicy
+runtimeclasses                                             node.k8s.io/v1                            false        RuntimeClass
+poddisruptionbudgets               pdb                     policy/v1                                 true         PodDisruptionBudget
+clusterrolebindings                                        rbac.authorization.k8s.io/v1              false        ClusterRoleBinding
+clusterroles                                               rbac.authorization.k8s.io/v1              false        ClusterRole
+rolebindings                                               rbac.authorization.k8s.io/v1              true         RoleBinding
+roles                                                      rbac.authorization.k8s.io/v1              true         Role
+priorityclasses                    pc                      scheduling.k8s.io/v1                      false        PriorityClass
+volumesnapshotclasses              vsclass,vsclasses       snapshot.storage.k8s.io/v1                false        VolumeSnapshotClass
+volumesnapshotcontents             vsc,vscs                snapshot.storage.k8s.io/v1                false        VolumeSnapshotContent
+volumesnapshots                    vs                      snapshot.storage.k8s.io/v1                true         VolumeSnapshot
+csidrivers                                                 storage.k8s.io/v1                         false        CSIDriver
+csinodes                                                   storage.k8s.io/v1                         false        CSINode
+csistoragecapacities                                       storage.k8s.io/v1                         true         CSIStorageCapacity
+storageclasses                     sc                      storage.k8s.io/v1                         false        StorageClass
+volumeattachments                                          storage.k8s.io/v1                         false        VolumeAttachment
+backuprepositories                                         velero.io/v1                              true         BackupRepository
+backups                                                    velero.io/v1                              true         Backup
+backupstoragelocations             bsl                     velero.io/v1                              true         BackupStorageLocation
+deletebackuprequests                                       velero.io/v1                              true         DeleteBackupRequest
+downloadrequests                                           velero.io/v1                              true         DownloadRequest
+podvolumebackups                                           velero.io/v1                              true         PodVolumeBackup
+podvolumerestores                                          velero.io/v1                              true         PodVolumeRestore
+resticrepositories                                         velero.io/v1                              true         ResticRepository
+restores                                                   velero.io/v1                              true         Restore
+schedules                                                  velero.io/v1                              true         Schedule
+serverstatusrequests               ssr                     velero.io/v1                              true         ServerStatusRequest
+volumesnapshotlocations            vsl                     velero.io/v1                              true         VolumeSnapshotLocation

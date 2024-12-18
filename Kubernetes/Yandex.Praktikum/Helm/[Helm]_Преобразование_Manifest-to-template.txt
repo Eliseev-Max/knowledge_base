@@ -1,0 +1,59 @@
+#nginx-test/templates/deployments.yaml
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx                               # заменим на {{ .Release.Name }}
+  labels:
+    app: nginx                              # заменим на {{ .Chart.Name }}
+spec:
+  replicas: 2                               # заменим на {{ .Values.replicas }}
+  selector:
+    matchLabels:
+      app: nginx                            # заменим на {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: nginx                          # заменим на {{ .Chart.Name }}
+    spec:
+      containers:
+      name: nginx
+        image: nginx:1.21.6                 # заменим на "{{ .Values.image.repository }}:{{.Values.image.tag }}"
+        imagePullPolicy: IfNotPresent       # заменим на {{ .Values.imagePullPolicy }}
+        ports:
+          containerPort: 80                 # заменим на {{.Values.service.port }}
+        resources:
+          requests:                         ##
+            memory: "64Mi"                  ##
+            cpu: "100m"                     ## заменим на
+          limits:                           ## {{ toYaml .Values.resources | indent 10 }}
+            memory: "128Mi"                 ## (indent <отступ в кол-ве пробелов>)
+            cpu: "200m"                     ##
+
+
+##_Chart.yaml_##
+
+apiVersion: v1                                          # версия api чарта
+appVersion: "1.0"                                       # версия приложения внутри чарта
+description: A Helm chart for Kubernetes                # Описание приложения в одном предложении
+name: nginx                                             # имя чарта
+version: 0.0.1                                         # версия чарта, должна быть по SemVer2
+
+________________
+
+##_values.yaml_##
+
+image:
+  repository: nginx
+  tag: 1.21.6
+imagePullPolicy: IfNotPresent
+replicas: 2
+service:
+  port: 8080
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: "100m"
+  limits:
+    memory: "128Mi"
+    cpu: "200m"

@@ -1,0 +1,7 @@
+Horizontal Pod Autoscaling
+
+[sources:]
+1) "Horizontal Pod Autoscaling": https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+2) "HorizontalPodAutoscaler Walkthrough": https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
+3) "Модуль prometheus-metrics-adapter: примеры конфигурации": https://deckhouse.ru/products/kubernetes-platform/documentation/v1.65/modules/prometheus-metrics-adapter/usage.html
+
