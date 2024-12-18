@@ -1,0 +1,17 @@
+ENVSUBST
+
+# https://linux.die.net/man/1/envsubst
+envsubst [OPTION] [SHELL-FORMAT]
+
+Description:
+  Substitutes the values of environment variables.
+
+
+In normal operation mode, standard input is copied to standard output, with references to environment variables of the form $VARIABLE or ${VARIABLE} being replaced with the corresponding values. If a SHELL-FORMAT is given, only those environment variables that are referenced in SHELL-FORMAT are substituted; otherwise all environment variables references occurring in standard input are substituted.
+When --variables is used, standard input is ignored, and the output consists of the environment variables
+
+
+В обычном режиме работы стандартный ввод копируется в стандартный вывод, при этом ссылки на переменные окружения вида $VARIABLE или ${VARIABLE} заменяются соответствующими значениями.  Если задан SHELL-FORMAT, будут заменены только те переменные окружения, на которые есть ссылки в SHELL-FORMAT. заменяются; в противном случае заменяются все ссылки на переменные окружения, встречающиеся в стандартном вводе.
+Если используется параметр --variables, стандартный ввод игнорируется, а вывод состоит из из переменных окружения, на которые есть ссылки в SHELL-FORMAT, по одной в строке.
+
+Переведено с помощью DeepL.com (бесплатная версия)

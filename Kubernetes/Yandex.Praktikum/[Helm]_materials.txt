@@ -1,0 +1,8 @@
+Список материалов по теме "Helm":
+Чарты Bitnami: https://github.com/bitnami/charts/tree/main/bitnami
+Структура чартов: https://helm.sh/docs/chart_template_guide/getting_started/#charts
+Оф сайт: https://helm.sh/
+Примеры с set в helm: https://itnext.io/helm-chart-install-advanced-usage-of-the-set-argument-3e214b69c87a
+Чарты промета: https://github.com/prometheus-community/helm-charts
+артифакт хаб: https://artifacthub.io/
+хельм дифф: https://github.com/databus23/helm-diff?tab=readme-ov-file

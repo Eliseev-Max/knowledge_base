@@ -235,7 +235,6 @@ SLA (Service Level Agreement)
 configured to use "minikube" cluster and "default" namespace by default
 ---
 
-
 **********************
 * Анализ kubeconfig: *
 **********************
@@ -282,6 +281,9 @@ users:
     -> для работы с несколькими кластерами
       <или>
     -> для работы разными неймспейсами внутри одного кластера.
+
+[!] Для смены контекста используется команда:
+kubectl config use-context <context-name> 
 
 *[_Namespace_]*
 

@@ -1,0 +1,54 @@
+Как удалить устаревшие сборки (очистить историю сборок)
+
+fuzzing farm/feature%2FCICD-38-regular-coverage == 'fuzzing farm'/feature/CICD-38-regular-coverage 
+# символ "/" в имени ветки преобразуется в "%2F"
+
+---
+import hudson.model.*
+
+def jobName = 'fuzzing farm/feature%2FCICD-38-regular-coverage'
+def buildsToDelete = [1, 2, 3, 4, 5] // Список номеров сборок
+
+def job = Jenkins.instance.getItemByFullName(jobName)
+if (job != null) {
+    buildsToDelete.each { buildNumber ->
+        def build = job.getBuildByNumber(buildNumber.toInteger())
+        if (build != null) {
+//            build.delete()
+            println "Build #${buildNumber} deleted."
+        } else {
+            println "Build #${buildNumber} does not exist."
+        }
+    }
+} else {
+    println "Job ${jobName} not found."
+}
+
+---
+import hudson.model.*
+
+def jobName = 'fuzzing farm/feature%2FCICD-38-regular-coverage'
+def startBuildNumber = 1
+def endBuildNumber = 66
+
+def job = Jenkins.instance.getItemByFullName(jobName)
+if (job != null) {
+    for (int i = startBuildNumber; i <= endBuildNumber; i++) {
+        def build = job.getBuildByNumber(i)
+        if (build != null) {
+//            build.delete()
+            println "Build #${i} deleted."
+        } else {
+            println "Build #${i} does not exist."
+        }
+    }
+} else {
+    println "Job ${jobName} not found."
+}
+
+
+[sources:]
+1) https://stackoverflow.com/questions/33570179/how-to-remove-old-builds-in-jenkins
+2) "Jenkins: remove old builds with command line": https://stackoverflow.com/questions/13052390/jenkins-remove-old-builds-with-command-line
+3) "Jenkins Purge Job History Plugin": https://plugins.jenkins.io/purge-job-history/#plugin-content-jenkins-purge-job-history-plugin
+4) "Clear Jenkins build history ( clear build yesterday )": https://superuser.com/questions/1418885/clear-jenkins-build-history-clear-build-yesterday

@@ -1,0 +1,1123 @@
+Продвинутые сущности Kubernetes
+
+# k9s - "инструмент поудобнее"
+
+[!] Установим k9s
+  Чтобы установить k9s, необходимо предварительно установить snapd.
+  snapd - это пакетный менеджер, через который поставляется k9s.
+
+--[Установка:]--
+
+$ sudo apt install snapd
+$ sudo snap install k9s
+
+##(↓) можно добавить в .bashrc,
+## если хотим, чтобы всегда была переменная KUBECONFIG (↓)
+$ export KUBECONFIG=$HOME/.kube/config
+$ mkdir ~/.k9s
+
+#EOF
+
+Kubernetes нужен не только для создания Pod'ов. 
+K8s может управлять всем жизненным циклом проекта!
+  + есть контроллеры репликации (Replication Controller),
+  + есть контроллер развёртывания (Deployment)
+  и ещё много чего
+
+[!] Если основной процесс в контейнере Pod'а завершится ->
+    -> kubelet перезапустит "упавший" контейнер.
+
+[->] в контейнере запущено Java-приложение;
+    в один момент приложение начинает очень медленно отвечать и потреблять очень много memory
+    (!) при этом приложение не лежит!
+    :=> kubelet не станет перезапускать контейнер;
+
+
+******************
+* livenessProbe: *
+******************
+  В Kubernetes существует такой инструмент, как livenessProbe
+    — проверка живучести приложения в контейнере.
+
+("Тычешь палкой в контейнер, чтобы узнать, живо приложение в нем или нет.
+  "Тыкать" можно разными способами:)
+
+[Проверки:]
+  ● HTTP GET
+    = если код ответа 2xx или 3xx, то проверка выполнена успешно;
+      во всех иных случах — нет.
+
+  ● Проверка TCP-сокета
+    = пытается открыть подключение к сокету:
+      если вышло — проверка выполнена успешно,
+      а иначе — увы.
+
+  ● Проверка Exec
+    = (выполняет произвольную команду внутри контейнера)
+      если код выхода = 0  => то проверка выполнена успешно.
+
+
+Отладка после запуска
+
+# Посмотреть, почему упал предыдущий контейнер (при его наличии)
+
+-->
+$ kubectl logs <имя Pod'а > --previous
+<--
+
+# более детально:
+
+-->
+$ kubectl describe po <Pod name>
+#||
+k9s
+<--
+
+
+##################################
+# LivenessProbe и ReadinessProbe #
+##################################
+
+Чтобы дать приложению немного времени на старт,
+  нужно указать настройку:
+---
+initialDelaySeconds: <int>
+---
+
+#=  через сколько (<int>) секунд после старта контейнера начать проверки
+
+Для того чтобы сделать проверки живучести более гибкими, можно задать ряд параметров,
+например:
+  * периоды проверок,
+  * количество попыток
+    и т.д.
+
+
+#Подробнее:
+#-> $ kubectl explain pod.spec.containers.livenessProbe
+
+
+[livenessProbe]
+  livenessProbe должны быть
+    ✓ быстрыми
+      &&
+    ✓ довольно примитивными.
+
+[!] мегасложные проверки с тоннами детализации НЕ НУЖНЫ
+
+  Проверка livenessProbe лишь говорит, жив сервис или нет:
+    жив ➜ идём дальше;
+    нет ➜ рестарт Pod'а.
+
+
+[Пример:]
+  если сервис внутри Pod'а зависит от другого внешнего сервиса;
+  этот внешний сервис недоступен;
+  => рестарт не спасёт:
+    ✓ наше приложение стартануло,
+    ✓ обслуживать клиентов всё равно не может.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! livenessProbe НЕ ДРУЖИТ С АВТОРИЗАЦИЕЙ !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+  => поэтому endpoint с healthcheck'ом должен быть БЕЗ АВТОРИЗАЦИИ, иначе проверка не сработает!
+
+
+  Для того чтобы проверить, ГОТОВО ЛИ ПРИЛОЖЕНИЕ К РАБОТЕ С КЛИЕНТАМИ в Кубере, есть второй набор проверок:
+  = readinessProbe. 
+
+******************
+* readinessProbe *
+******************
+  Синтаксис у них точно такой же, как и у livenessProbe.
+(!) Главное отличие:
+    ➜ livenessProbe:  смотрит за тем, поднялся ли контейнер,
+    ➜ readinessProbe: смотрит, готово ли приложение принимать и обрабатывать запросы.
+
+Представим:
+  1) наше приложение зависит от других сервисов,
+  2) перед обслуживанием клиентов хочется проверить, что все внешние сервисы доступны и работают.
+  => Тогда проверки внешних сервисов можно написать в readinessProbe.
+
+
+****************
+* startupProbe *
+****************
+
+[!] Не стоит забывать про startupProbe для проверки совсем медленных приложений.
+
+  Если приложению после старта необходимо сделать ряд действий:
+    ✓ прогреть кэши
+    ✓ накатить миграции на базу данных
+  прежде чем начать обслуживать клиентов
+  ➜ используется startupProbe.
+
+  Синтаксис у startupProbe такой же, как и у остальных проверок.
+
+[!] Если указана startupProbe,
+    то ЗАПУСК livenessProbe и readinessProbe БЛОКИРУЕТСЯ до тех пор,
+    ПОКА НЕ ПРОЙДЕТ startupProbe.
+
+
+[!] Проверки живучести выполняет kubelet
+    и делает это ПЕРИОДИЧЕСКИ.
+
+  Если startupProbe или livenessProbe не пройдёт —> Pod будет перезапущен.
+  Если же не пройдёт readinessProbe —> Pod останется живым, но запросы клиентов в него НЕ БУДУТ ОТПРАВЛЯТЬСЯ.
+
+  Как только пройдут все проверки — трафик будет перераспределён и на этот Pod.
+  Если проверки снова не пройдут, трафик динамически перераспределится среди живых Pod'ов.
+
+
+[Что проверяют пробы:]
+  ● livenessProbe       = ЗАПУЩЕН ЛИ контейнер?
+  ● startupProbe        = ЗАПУЩЕНО ЛИ ПРИЛОЖЕНИЕ внутри контейнера?
+  ● readinessProbe      = ГОТОВО ЛИ приложение РАБОТАТЬ с пользователями и можно ли пускать трафик?
+
+[РЕЗЮМЕ]
+  $ kubectl describe pod <Pod>  = Выдаёт детальную информацию по Pod'у
+  $ kubectl get po  = Показывает список Pod'ов в текущем namespace (версия для ленивых)
+  $ kubectl edit  = Редактирует манифест развёртывания наживую
+  $ kubectl get pod  = Показывает список Pod'ов в текущем namespace
+
+
+[!] Если создать Pod с помощью манифестов и $ kubectl apply, то
+    в случае падения нода заберёт Pod с собой к праотцам.
+    Это так называемые НЕУПРАВЛЯЕМЫЕ POD'ы
+
+
+
+#########################
+#  УПРАВЛЯЕМЫЕ POD'ы    #
+#########################
+
+*************************
+* ReplicationController *
+*************************
+
+  Чтобы приступить к управляемым Pod'ам, понадобится ещё одна сущность Кубера — 
+  ReplicationController,
+
+  ПРЕДНАЗНАЧЕН ДЛЯ   горизонтального масштабирования и поддержания постоянной работы Pod'а.
+
+[Примечание:]
+/*
+  ReplicationController (rc) [v1]  = Более старый, менее мощный эквивалент ReplicaSet
+*/
+
+
+# Перепишем манифест backend.yaml с Pod'а на ReplicationController:
+
+---<Backend's Manifest>---
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: backend
+spec:
+  # желаемое количество реплик Pod'а   
+  replicas: 3
+  # селектор, который выбирает Pod'ы, попадающие под управление RC (Replication Controller)  
+  selector:
+    app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    # шаблон для создания Pod'ов        
+    spec:
+      containers:
+        ... - остальное так же 
+---
+
+
+[Отличие неуправляемых Pod'ов от тех, что управляются контроллером репликации]
+
+[!] ReplicationController обеспечивает постоянную работу заданного количества Pod'ов;
+
+  == в ReplicationController мы декларативно задаём, сколько инстанций Pod'а хотим видеть,
+     и K8s пытается поднять желаемое количество реплик сервиса.
+
+  Kubernetes поддерживает контейнеры в рабочем состоянии путём перезапуска:
+    ➜ если они терпят аварию,
+    ➜ если проверка живучести не отрабатывает.
+
+  Этот перезапуск делает kubelet на Node, где размещён Pod.
+
+(!) Если сама Node'а выходит из строя,
+    ➜ ReplicationController контролирует создание требуемого количества Pod'ов на другой ноде.
+
+
+[!] Если ИЗМЕНИТЬ ШАБЛОН (template) создания Pod'ов и увеличить количество реплик, то
+    ➜ НОВЫЕ ИНСТАНЦИИ Pod'ов будут создаваться уже из НОВОГО ШАБЛОНА,
+    ➜ СТАРЫЕ никуда не денутся.
+
+  => если нужно обновить все Pod'ы:
+     то лучше от них избавиться,
+     чтобы затем ReplicationController поднял новые Pod'ы по новому шаблону.
+
+[РЕЗЮМЕ]
+  ReplicationController:
+    ✓ Всегда будет необходимое количество реплик Pod'а.
+    ✓ Если Node выйдет из строя, то ReplicationController создаст реплики на другой Node.
+    ✓ ReplicationController обеспечивает простое горизонтальное масштабирование.
+
+# ПРАКТИКА:>
+/*
+# Посмотреть Pod'ы через kubectl, либо воспользоваться k9s 
+$ kubectl get po
+
+$ kubectl delete pod <имя одного из Pod'ов>
+
+# Посмотреть контроллеры репликации через kubectl, либо воспользоваться k9s
+$ kubectl get rc 
+
+# Чтобы посмотреть детальнее, можно воспользоваться командой
+$ kubectl describe rc backend
+*/
+
+# Изменить число реплик:
+$ kubectl scale rc backend --replicas=5
+
+
+[НЕ НАДО РЕПЛИЦИРОВАТЬ ВСЁ ПОДРЯД:]
+
+  Сервис должен быть написан так, чтобы его можно было масштабировать без таких побочных эффектов,
+  когда 2 инстанса полезут писать в одну базу.
+
+[➜] Масштабируем сервисы, которые НЕ ХРАНИТ СОСТОЯНИЕ (stateless).
+    А если хранит (statefull), то тут нужно подумать и спроектировать так, чтобы избежать неприятностей
+
+--[COMMANDS]--
+# Удалить ReplicationController
+$ kubectl delete rc backend 
+
+#удалить ReplicationController, НО ОСТАВИТЬ Pod'ы
+$ kubectl delete rc backend --cascade=false
+
+
+**************
+* ReplicaSet *
+**************
+#(https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/)
+
+  — более свежий контроллер репликации;
+
+  ✓ имеет похожий синтаксис
+  + позволяет использовать более гибкий selector
+    (разные правила:
+      matchLabels,
+      maychExpressions
+      и другие).
+
+# Почти всё то же самое, меняются лишь apiVersion и selector:
+
+ReplicationController  |  ReplicaSet
+───────────────────────┿──────────────────────
+apiVersion: v1         |  apiVersion: apps/v1
+
+selector:              |  selector:
+  app: backend         |    matchLabels:        # || matchExpressions
+                       |      app: backend
+
+# возможные проблемы с matchExpressions:
+"""
+  Service resources do not support matchExpressions in spec.selector.
+"""
+#-> https://discuss.kubernetes.io/t/why-kubernetes-services-do-not-support-matchexpressions/23971
+
+
+---<replicaset-backend.yaml>---
+---
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: backend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+  ... остальное то же самое, что в RC
+
+[!] В ReplicaSet .spec.template.metadata.labels должен совпадать с spec.selector
+    иначе он будет отклонён API
+
+(!) Для двух ReplicaSet, указывающих
+      один и тот же .spec.selector,
+      но разные
+        .spec.template.metadata.labels
+      <и>
+        .spec.template.spec
+      поля, каждый ReplicaSet игнорирует Pods, созданные другим ReplicaSet.
+
+
+[Второй сюжет:]
+ нужно обновить приложение.
+  1) Допустим, с помощью ReplicaSet || ReplicationController развернули 3 реплики сосисочного бэкенда версии v1.
+  2) Потом в сосисочную завезли фич
+  3) и теперь мы решаем заменить Pod'ы с версией v1 на Pod'ы с версией v2.
+
+(?) Что делать?
+
+<вриант №1>: Поменять шаблон в ReplicaSet?
+(результат): "Рояль убрали, а неработающий холодильник остался. Зачем трогали рояль?"
+<правильный вариант>: удалить старые Pod'ы, чтобы ReplicaSet их заменил на Pod'ы, созданные по новому шаблону!
+
+(?) удалить все Pod'ы сразу или удалять по одному?
+
+
+**************
+* Deployment *
+**************
+
+  - опирается на ReplicaSet;
+  - позволяет обновлять декларативные обновления приложений.
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Deployment отвечает за жизненный цикл приложения. !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+---<backend.yaml with Deployment>---
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  replicas: 3
+  # Стратегия развёртывания.
+  # Recreate — удалит сначала все старые Pod'ы 
+  # Есть и более гибкая стратегии, например, RollingUpdate, которая будет обновлять Pod'ы порциями  
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: gitlab.praktikum-services.ru:5050/<свой репо образа>/sausage-store/sausage-backend:<тег>
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: VAULT_HOST
+              value: 51.250.8.146
+            - name: VAULT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vault
+                  key: vault_token
+          ports:
+            - name: backend
+              containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 1
+            failureThreshold: 6
+      imagePullSecrets:
+        - name: docker-config-secret
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  labels:
+    app: backend
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+  selector:
+    app: backend
+
+
+--[COMMAND]--
+$ kubectl apply -f backend.yaml
+$ k9s
+<-->
+
+
+#1) отредактируем версию образа, заменив тег текущей версии на более свежий,
+#2) откроем k9s, дабы посмотреть, как заменяются Pod'ы.
+
+[!] ЛУЧШЕ изменять файл руками, а не с помощью edit (если нужно по-быстрому поправить).
+    Гораздо правильнее изменять файл и потом сохранять его в системе контроля версий
+
+
+<? Подходит ли Deployment для развёртывания кластера БД в Kubernetes? ?>
+  НЕТ.
+У Deployment'ов
+  - имена Pod'ов создаются случайным образом,
+  - и все Pod'ы запускаются одновременно,
+➜ поэтому настройка кластера может стать проблемой — понадобятся имена нод.
+
+=> Deployment подойдёт, только если «доработать напильником».
+   Более удобный инструмент — StatefulSet
+
+
+***************
+* StatefulSet *
+***************
+#("StatefulSets":→ https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/)
+
+
+  StatefulSet
+    = ещё одна абстракция в Kubernetes,
+      которая обычно используется для запуска приложений С СОХРАНЕНИЕМ СОСТОЯНИЯ.
+
+/*
+(*) Stateful applications.
+  Разница между stateful и stateless applications заключается в том,
+  что stateful applications сохраняют информацию о прошлом и настоящем,
+  stateless applications - нет.
+
+[more: https://www.redhat.com/en/topics/cloud-native-apps/stateful-vs-stateless]
+*/
+
+Пример Stateful applications: Базы данных (MongoDB, PostgreSQL).
+
+!!!!!!!!!!!!!!!!!!!
+! БД в Kubernetes !
+!!!!!!!!!!!!!!!!!!!
+
+[!] Не стоит запускать высоконагруженные production-базы в K8s!
+    НО StatefulSet отлично подойдёт для разворачивания БД в dev- и test-средах.
+
+
+[!] StatefulSet гарантирует уникальность имён:
+    = при запуске Pod'ов, принадлежащих StatefulSet, каждому Pod'у назначается имя с цифровым индексом
+      (sticky unique identity) от 0 и далее по порядку.
+
+    Имя Pod'а имеет форму <statefulset name>-<ordinal index>.
+#*ordinal = порядковый
+
+  Если в StatefulSet фактор репликации 3 и имя test
+  —> надо запустить 3 Pod'а, которые будут называться
+     test-0,
+     test-1,
+     test-2.
+
+[Запуск Pod'ов в StatefulSet:]
+  StatefulSet запускает все свои Pod'ы ПОСЛЕДОВАТЕЛЬНО:
+    1) StatefulSetController запускает Pod с индексом 0,
+    2) дожидается, когда состояние [ Pod'а = Ready ] || [ Container'а = Running ]
+    3) и только после этого запускает Pod с индексом 1 и далее.
+
+    # Можно включить одновременный запуск всех подов, но обычно так не делают.
+
+[Процесс обновления]
+
+  1) Сначала обновляется самый «старший» Pod, у которого НАИБОЛЬШИЙ индекс
+  2) → Pod с чуть меньшим индексом
+  3) → и так далее.
+
+#Пример:
+  Если 3 реплики:
+    сперва обновится Pod с индексом 2,
+      потом 1
+        и потом 0.
+
+
+++++++++++++++++++++
++ Хранение данных: +
+++++++++++++++++++++
+
+  В кластере Kubernetes данные хранятся на PersistentVolume (PV).
+  Ссылка на PersistentVolumeClaim (PVC) в манифесте Pod'а укажет, какой именно PV хранит данные.
+
+*Особенность хранения данных в Deployment*
+
+    манифесты всех Pod'ов в Deployment одинаковые
+    → все Pod'ы в Deployment могут ссылаться на один и тот же PVC, который связан с одним PV
+    → во всех Pod'ах Deployment'а подключён один и тот же PV.
+
+  <Как решена проблема в StatefulSet>
+    В StatefulSet проблема решена так:
+      в описании манифеста Pod'а есть специальный раздел PVC-template,
+      в котором описывается template для PVC,
+
+    => для КАЖДОГО Pod'а будет создан свой PVC
+      #(например, data-test-1),
+      который будет связан со своим уникальным PV.
+
+    => в каждом Pod'е получим свой собственный том для хранения данных.
+
+
+###########################
+# Сбор метрик из кластера #
+###########################
+
+#("Prometheus. Exporters and integrations": https://prometheus.io/docs/instrumenting/exporters/)
+## = собирает метрики приложений.
+
+(?) Что насчёт метрик компонентов Кубера?
+(?) А как быть с метриками хостов, которые добавляем в кластер?
+(!) Хотелось бы видеть состояние хоста, прежде чем запускать Pod'ы.
+
+<--ЗАДАНИЕ-->
+  Используя Deployment для запуска агента мониторинга, мы можем столкнуться со следующими проблемами:
+  1) Не забывать при добавлении новой ноды поднимать Pod (менять фактор репликации)
+  2) Нельзя гарантировать, что агент мониторинга будет запущен раньше других Pod'ов
+
+[А ТЕПЕРЬ ПРАВИЛЬНЫЙ ОТВЕТ:]
+
+  В Kubernetes специально для задач такого рода существует контроллер:
+  DaemonSet
+
+
+*************
+* DaemonSet *
+*************
+#("DaemonSet": https://kubernetes.io/docs/concepts/workloads/controllers/daemonset/)
+  DaemonSet гарантирует, что на всех (или нужных) хостах будет запущена копия Pod'а.
+
+# Cluster: +Host:
+  Когда в кластер добавляется ещё один хост,
+  DaemonSet controller автоматически запускает копию Pod'а НА ВСЕХ ХОСТАХ кластера.
+
+# Cluster: -Node:
+  При удалении ноды из кластера DaemonSet удаляет все созданные им Pod'ы.
+
+Если же нужно обновить Pod, есть 2 стратегии:
+  -> OnDelete
+       = После обновления манифеста DaemonSet
+         новые Pod'ы создадутся только ПОСЛЕ РУЧНОГО УДАЛЕНИЯ старых Pod'ов DaemonSet.
+
+  -> RollingUpdate:     #(default)
+       = После обновления манифеста старые Pod'ы будут уничтожены, а новые создадутся автоматически.
+         Гарантируется, что в течение всего процесса обновления на каждой ноде будет работать НЕ БОЛЕЕ ОДНОГО Pod'а DaemonSet.
+
+
+  Описание манифеста DaemonSet'а почти такое же, как у Deployment'а:
+  kind: DaemonSet.
+  Дальше по аналогии с Deployment:
+    selector,
+    template,
+    Pod template,
+  (!) НО НЕТ РАЗДЕЛА replicas
+      — мы не указываем количество реплик, равное количеству нод в кластере.
+        Однако можно использовать nodeSelector, чтобы ограничивать ноды для развёртывания.
+
+
+<-- Задание-резюме -->
+
+DaemonSet
+  = Для автоматического запуска Pod'ов во всём кластере или определённом (nodeSelector) подмножестве узлов.
+    Pod'ы не имеют постоянного идентификатора и необязательно имеют постоянное хранилище.
+
+StatefulSet
+  = Для запуска Pod'ов с постоянным идентификатором и постоянным хранилищем,
+    подходящим для приложения с отслеживанием состояния.
+
+Deployment
+  = Для Pod'ов с гибкой конфигурацией (количество реплик, шаблон развёртывания, хранилище).
+
+
+[Как в K8s решаются задачи, выполняемые по расписанию?]
+[>] для этого в Kubernetes существуют сущности:
+    * Job
+    * CronJob
+
+
+********
+* Jobs *
+********
+
+  Job — сущность в кластере K8s, предназначенная для выполнения задач ТОЛЬКО ОДИН РАЗ.
+
+# Jobs представляют собой одноразовые задачи, которые выполняются до завершения и затем останавливаются
+
+####
+Job создает один или несколько Pod'ов и будет повторять их выполнение до тех пор,
+пока определенное количество Pod'ов не завершится успешно.
+По мере успешного завершения Pod'ов Job отслеживает их успешное завершение.
+
+По достижении заданного числа успешных завершений задание (т. е. Job) будет завершено.
+
+Удаление Job'ы -> приведет к очистке созданных им Pod'ов.
+
+Приостановка Job'ы -> приведет к удалению его активных Pod'ов до тех пор, пока Job'а не будет возобновлена
+
+
+A simple case is to create one Job object in order to reliably run one Pod to completion.
+The Job object will start a new Pod if the first Pod fails or is deleted
+(for example due to a node hardware failure or a node reboot).
+
+You can also use a Job to run multiple Pods in parallel.
+If you want to run a Job (either a single task, or several in parallel) on a schedule, see CronJob.
+####
+
+  Job создаёт Pod, в котором выполняется какая-то задача, после этого Job считается завершённым,
+  например
+    > задача настройки окружения    или
+    > происходит запуск специфичного скрипта.
+
+[Рамки жизненного цикла Job]
+  Job поднимает контейнер и выполняет в нём задачу до тех пор,
+  пока Pod не завершится с УСПЕШНЫМ РЕЗУЛЬТАТОМ (exit code == 0).
+
+  Если в Pod'e, который выполняется в рамках Job, есть ошибка, и он завершается с exit code != 0
+  —> Job будет перезапускать Pod до бесконечности.
+
+  Чтобы такого не было, в секции Job есть описание таймаутов:
+    ✓ activeDeadlineSeconds
+    ✓ backoffLimit
+
+[activeDeadlineSeconds]
+  = сколько всего секунд даётся Job на его работу.
+    Если
+      Pod падает через 30 секунд,
+      а activeDeadlineSeconds = 120,
+    то Job успеет перезапустить Pod 4 раза.
+
+[backoffLimit]
+  = количество попыток.
+    Неважно через сколько падает Job:
+      если прописали backoffLimit = 3,
+      то Job запустит Pod 3 раза и потом больше не будет пытаться его запускать.
+
+---<job.yaml>---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-with-timeout
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: testjob
+        image: busybox
+        args:
+        - /bin/sh
+        - -c
+        - date; echo Hello!
+      restartPolicy: Never
+---
+
+# backoffLimit + activeDeadlineSeconds = пытаться выполнить этот Job:
+  ✓ не более 2 раз
+    &&
+  ✓ в общей сложности не более 100 секунд.
+
+Применяем и смотрим, что происходит:
+
+--[COMMAND]--
+$ kubectl apply -f job.yaml
+$ kubectl get po 
+##_OUTPUT_##
+
+NAME                            READY   STATUS              RESTARTS   AGE
+hello-with-timeout-4jfkl        0/1     Completed          0           6s
+---
+
+# Статус Completed, так как Job выполнился и завершился:
+
+--[COMMAND]--
+$ kubectl get job                                  
+
+##_OUTPUT_##
+NAME                 COMPLETIONS   DURATION   AGE
+hello-with-timeout   1/1           3s         3m12s
+---
+
+(!) Если Job содержит ошибки/работает некорректно,
+    нужно удалить его вручную,
+    иначе Pod и Job будут висеть в кластере всегда,
+    и kubelet их не почистит
+
+--[Потенциальные проблемы при создании в кластере большого количества Job]--
+  -> появятся никому не нужные абстракции, которые занимают место!
+  Pod даже в состоянии Completed продолжает существовать на хосте.
+
+  При этом данный Pod не учитывается в списке запущенных на хосте контейнеров,
+  (ведь у него статус не Running),
+  => поэтому фактически на хосте остаются неиспользуемые Pod.
+--[END]--
+
+
+-< ПРО АВТОМАТИЧЕСКОЕ УДАЛЕНИЕ JOB >-
+  В K8s с версии 1.23 работает автоматическое удаление Job со статусом Complete или Failed через заданный TTL.
+  Настраивается при помощи  .spec.ttlSecondsAfterFinished
+  # подробности: "Cleanup for finished Jobs":
+  #-> https://kubernetes.io/docs/concepts/workloads/controllers/ttlafterfinished/#cleanup-for-finished-jobs
+---
+
+---<job-exit_1.yaml>---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello-with-timeout
+spec:
+  backoffLimit: 2
+  activeDeadlineSeconds: 100
+  template:
+    spec:
+      containers:
+      - name: testjob
+        image: busybox
+        args:
+        - /bin/sh
+        - -c
+        - date; echo Hello!; exit 1
+      restartPolicy: Never
+---
+
+--[COMMAND]--
+$ kubectl apply -f job.yaml
+
+$ kubectl get po -w                                                                        
+
+##_OUTPUT_##
+NAME                       READY   STATUS              RESTARTS   AGE
+hello-with-timeout-b5th2   0/1     ContainerCreating   0          2s
+hello-with-timeout-b5th2   0/1     Error               0          4s
+hello-with-timeout-2bvv4   0/1     Pending             0          0s
+hello-with-timeout-2bvv4   0/1     Pending             0          0s
+hello-with-timeout-2bvv4   0/1     ContainerCreating   0          0s
+hello-with-timeout-2bvv4   0/1     Error               0          3s
+hello-with-timeout-kxhdj   0/1     Pending             0          0s
+hello-with-timeout-kxhdj   0/1     Pending             0          0s
+hello-with-timeout-kxhdj   0/1     ContainerCreating   0          0s
+hello-with-timeout-kxhdj   0/1     Error               0          3s
+
+##END##
+
+
+##_ Статус Pod'ов _##
+$ kubectl get po
+
+##_OUTPUT_##
+NAME                       READY   STATUS   RESTARTS   AGE
+hello-with-timeout-2bvv4   0/1     Error    0          47s
+hello-with-timeout-b5th2   0/1     Error    0          51s
+hello-with-timeout-kxhdj   0/1     Error    0          37s
+----END----
+
+----[Статус Job]----
+$ kubectl get jobs.batch                                                                      
+
+##_OUTPUT_##
+NAME                 COMPLETIONS   DURATION   AGE
+hello-with-timeout   0/1           77s        77s
+
+# COMPLETIONS 0/1 == Job не отработал
+
+----[Events]----
+$ kubectl describe job hello-with-timeout
+
+##_OUTPUT_##
+....
+Events:
+  Type     Reason                Age    From            Message
+  ----     ------                ----   ----            -------
+  Normal   SuccessfulCreate      2m31s  job-controller  Created pod: hello-with-timeout-b5th2
+  Normal   SuccessfulCreate      2m27s  job-controller  Created pod: hello-with-timeout-2bvv4
+  Normal   SuccessfulCreate      2m17s  job-controller  Created pod: hello-with-timeout-kxhdj
+  Warning  BackoffLimitExceeded  117s   job-controller  Job has reached the specified backoff limit
+
+----END----
+
+# Было создано три Pod'а и Job завершился, так как исчерпан backoff limit
+
+(?) Почему три Pod'а, если backoffLimit = 2 (?)
+(!) Это особенность K8s.
+    Иногда он создаёт ровно столько Pod'ов, сколько указано в backoffLimit,
+    а иногда backoffLimit + 1
+
+
+[Проверка работы activeDeadlineSeconds:]
+---<fragment: job.yaml>---
+...
+args:
+  - /bin/sh
+  - -c
+  - while true; do date; echo Hello!; sleep 1; done
+...
+---
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! Не забываем удалять Job !
+!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+иначе при попытке применить template получим ошибку,
+что Job в статусе Completed -> и мы не можем в нём менять никакие поля.
+
+----[Статус Pod'а и логи]----
+
+$ kubectl get po 
+
+##_OUTPUT_##
+NAME                       READY   STATUS              RESTARTS   AGE
+hello-with-timeout-k9m5t   1/1     Running             0          7s
+
+# Проверим логи:
+$ kubectl logs -f hello-with-timeout-k9m5t                                             
+
+##_OUTPUT_##
+Sun Feb  5 10:37:39 UTC 2023
+Hello!
+Sun Feb  5 10:37:40 UTC 2023
+Hello!
+---
+
+## Спустя t > activeDeadlineSeconds
+$ kubectl get po                                                                      
+
+##_OUTPUT_##
+NAME                       READY   STATUS        RESTARTS   AGE
+hello-with-timeout-67vw7   1/1     Terminating   0          107s
+
+  AGE 107s
+  :: Обычно Pod живёт чуть дольше, чем мы прописали в activeDeadlineSeconds,
+     так как есть накладные расходы.
+
+  Статус Terminating
+  :: потому что некому реагировать на завершение Pod'а.
+     При остановке контейнера Kubernetes
+       1) посылает ему сигнал SIGTERM
+       2) и ждёт определённое время,
+          чтобы приложение внутри контейнера могло обработать этот сигнал и корректно завершиться.
+
+/*
+  У нас простой bash-скрипт и нет обработки сигнала, поэтому K8s
+    1) ждёт время, выставленное в terminationGracePeriodSeconds
+       (по умолчанию 30 секунд),
+    2) и (если нет реакции на SIGTERM)  посылает SIGKILL.
+
+==> Следовательно, процесс с pid 1 «убивается» в контейнере
+  => контейнер завершает своё выполнение.
+*/
+
+[Результат:]
+  ✓ Pod завершился
+  ✓ статус Pod'а = Terminating
+
+  Затем приходит Kubelet и удаляет все Pod'ы в этом статусе.
+  Не осталось ни Pod'а, ни логов
+
+--[COMMAND]--
+$ kubectl get po                                                                          
+
+No resources found in <namespace> namespace.
+---
+
+# Смотрим, что написано в describe Job:
+--[COMMAND]--
+$ kubectl describe job hello-with-timeout
+...
+Events:
+  Type     Reason            Age    From            Message
+  ----     ------            ----   ----            -------
+  Normal   SuccessfulCreate  2m35s  job-controller  Created pod: hello-with-timeout-k9m5t
+  Normal   SuccessfulDelete  55s    job-controller  Deleted pod: hello-with-timeout-k9m5t
+  Warning  DeadlineExceeded  55s    job-controller  Job was active longer than specified deadline
+---
+#!! Job was active longer than specified deadline
+
+[Пояснение про restartPolicy: Never]
+
+  В манифесте написано restartPolicy: Never, при этом Pod'ы у нас пересоздавались.
+  (?) Почему?
+
+>> `restartPolicy: Never` относится к spec контейнера, который запускается внутри Pod, а не к Job.
+[kind: Jop] spec.template.spec.restartPolicy говорит Kubelet,
+   что делать с контейнером внутри Pod'а после того, как контейнер завершился с ошибкой
+
+  ДЕФОЛТНОЕ ПОВЕДЕНИЕ OnFailure выглядит так:
+    если контейнер в Pod'е завершился с ошибкой → перезапусти контейнер,
+    Pod при этом остаётся,
+    и все остальные контейнеры в нём продолжают работать,
+    (перезапустится только упавший контейнер)
+
+  Если применить такое поведение к Job:
+    JobController не сможет получить информацию о том, что Pod был завершён с ошибкой,
+    (с его точки зрения Pod будет выполняться очень долго),
+    и он не будет знать, что Kubelet перезагружает контейнер.
+
+
+(?) если в манифесте:
+    -> указать backoffLimit,  но
+    -> не указать restartPolicy
+    -> не указать activeDeadlineSeconds
+
+(->)  Job будет выполняться бесконечно!!!
+
+
+***********
+* CronJob *
+***********
+
+  CronJob создают Job'ы по расписанию.
+
+  Основные важные параметры CronJob (кроме самого расписания):
+
+    * concurrencyPolicy
+      — отвечает за одновременное выполнение Job.
+        Значения: 
+          ● Allow (default)
+              = одновременно могут выполняться несколько Job'ов.
+                Например, есть Job, который выполняется 2 минуты,
+                и расписание, которое говорит: «Запускай Job раз в минуту».
+                => Одновременно будут работать 2 Job, выполняющих одну и ту же работу в кластере.
+
+          ● Forbid
+              = запрещает запускать новую задачу, если предыдущая задача ещё не завершилась.
+                Можем быть, уверены, что всегда запущен только один экземпляр Job.
+                Наиболее часто используемая политика.
+
+          ● Replace
+              = заменяет запущенный Job.
+                Не самый лучший вариант, когда мы прерываем текущую Job и начинаем её выполнение заново с 0.
+                * successfulJobsHistoryLimit
+                * failedJobsHistoryLimit
+                    = отвечают за то, сколько хранить в истории.
+
+  Job CronJob не только создаёт Job, но и удаляет старые.
+  По умолчанию они установлены в 3 и 1 соответственно.
+  0 = не сохранять информацию о Job после их завершения.
+
+---<CronJob manifest>---
+---
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: hello-with-cron
+spec:
+  schedule: "*/1 * * * *"
+  concurrencyPolicy: Allow
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 100
+      template:
+        spec:  
+          containers:
+          - name: testcronjob
+            image: busybox
+            args:
+              - /bin/sh
+              - -c
+              -  date; echo Hello CronJob!
+          restartPolicy: Never
+
+---
+
+# schedule — расписание в виде строки, которая имеет обычный Cron формат:
+# minute | hour | DoM | month | DoW
+
+# "*/1 * * * *"   —> Job должен выполняться раз в минуту.
+# .spec.jobTemplate.spec — заимствовали у Job.
+
+{# Применим:
+  $ kubectl apply -f cronjob.yaml
+
+  $ kubectl get cronjobs.batch
+
+  NAME              SCHEDULE      SUSPEND   ACTIVE   LAST SCHEDULE   AGE
+  hello-with-cron   */1 * * * *   False     0        39s             58s
+}
+
+#Overview:
+  NAME — имя CronJob.
+  SCHEDULE — его расписание.
+  SUSPEND — CronJob выполняется.
+            Можем отредактировать манифест и поставить в False
+            → временно перестанет выполняться, пока не вернём True.
+  ACTIVE — сколько Job в данный момент создано.
+  LAST SCHEDULE — когда в последний раз Job выполнился.
+
+{# Посмотрим, на Job'ы:
+  $ kubectl get jobs
+
+  NAME                         COMPLETIONS   DURATION   AGE
+  hello-with-cron-1675611960   1/1           3s         47s
+}
+# NAME = имя CronJob и текущая дата в Unix формате.
+
+{# Посмотрим на Pod'ы:
+  $ kubectl get po
+
+  NAME                               READY   STATUS      RESTARTS   AGE
+  hello-with-cron-1675612140-7mxcj   0/1     Completed   0          2m29s
+}
+
+#[LifeCycle]
+# CronJob создал Job → 
+## → Job создал Pod →
+### → Pod сделал что-то полезное и завершился со статусом Completed.
+
+
+#Ещё раз посмотрим на CronJob, Job и Pod.
+# У нас уже несколько Job'ов и несколько Pod'ов:
+
+{
+  $ kubectl get jobs.batch
+  NAME                         COMPLETIONS   DURATION   AGE
+  hello-with-cron-1675611960   1/1           3s         2m47s
+  hello-with-cron-1675612020   1/1           3s         107s
+  hello-with-cron-1675612080   1/1           3s         47s
+
+  $ kubectl get po
+  NAME                               READY   STATUS      RESTARTS   AGE
+  hello-with-cron-1675612140-7mxcj   0/1     Completed   0          2m29s
+  hello-with-cron-1675612200-vrf58   0/1     Completed   0          88s
+  hello-with-cron-1675612260-z5wnf   0/1     Completed   0          28s
+}
+
+[!] Количество сохранённых Job не превысит (successfulJobsHistoryLimit + failedJobsHistoryLimit)
+
+
+##################
+# ОСНОВНЫЕ МЫСЛИ #
+##################
+
+  ● Kubernetes — оркестратор, и для оркестрации в нём есть гибкие способы проверки контейнеров:
+    liveness, readiness и startup probe.
+
+  ● 2 вида Pod'ов: управляемые и неуправляемые.
+
+  ● Чтобы развернуть управляемые Pod'ы, можно воспользоваться
+    -> Replication Controller   или
+    -> более новым механизмом — ReplicaSet.
+
+  ● С помощью RS или RC можно ГОРИЗОНТАЛЬНО МАСШТАБИРОВАТЬ контейнеры.
+
+  ● Масштабировать надо ТОЛЬКО ТЕ СЕРВИСЫ, которые готовы к горизонтальному масштабированию
+    (например, те сервисы, что не хранят состояние ( = stateless-сервисы) );
+    в противном случае сервисы должны быть написаны так,
+    чтобы не было инцидентов при совместной обработке данных несколькими инстансами сервиса.
+
+  ● Для управления развёртыванием Pod'ов (например, обновлениями) существует более высокоуровневая сущность — Deployment.
+    Deployment управляет RS и позволяет настроить стратегию обновления Pod'ов.
+
+
+[Полезные материалы:]
+ 1) Книга Марко Лукша «Kubernetes в действии».
+ 2) Liveness и Readiness пробы.
+     "Лучшие практики для контейнеров Kubernetes: проверки работоспособности": https://habr.com/ru/companies/slurm/articles/467155/
+
+  3) Настройка Liveness, Readiness и Startup проб:
+     (https://kubernetes.io/ru/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/)
+  4) Основы Kubernetes:
+     ("K8S для начинающих. Первая часть": https://habr.com/ru/articles/589415/)

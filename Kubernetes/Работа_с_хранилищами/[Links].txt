@@ -1,0 +1,14 @@
+Kubernetes + Storages
+
+[sources:]
+
+1) "Хранение данных в кластере Kubernetes": https://slurm.io/blog/tpost/m67sopj21m-hranenie-dannih-v-klastere-kubernetes
+2) "Работа с хранилищами в Kubernetes: руководство для инженеров": https://habr.com/ru/companies/T1Holding/articles/781368/
+3) "Storage": https://kubernetes.io/docs/concepts/storage/
+4) "Работа с хранилищами в Kubernetes": https://habr.com/ru/companies/otus/articles/717486/
+5) "Kubernetes Storage 101: Concepts and Best Practices": https://cloudian.com/guides/kubernetes-storage/kubernetes-storage-101-concepts-and-best-practices/
+
+---
+[Videos:]
+"Хранение данных в Kubernetes: Volumes, Storages, Stateful-приложения":
+https://www.youtube.com/watch?v=SGhIC-n4IZQ

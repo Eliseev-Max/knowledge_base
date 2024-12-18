@@ -1,0 +1,664 @@
+Deploy и Rollback в Kubernetes
+
+(!)  внутри Kubernetes существует система версионирования деплоя:
+
+-->
+# посмотрим на примере backend-report:
+
+$ kubectl rollout history deployment/backend-report
+
+##_OUTPUT_##
+deployment.apps/backend-report
+REVISION  CHANGE-CAUSE
+1         <none>
+<--
+
+# Для эксперимента, поменяем в нашем yaml требуемые ресурсы — requests и limits:
+--<Manifest.backend-report>--
+spec:
+  template:
+    spec:
+      containers:
+        — name: backend-report
+          image: gitlab.praktikum-services.ru:5050/<имя репозитория backend-report>:<версия, которую будем устанавливать>
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: 0.1
+            limits:
+              memory: "1025Mi"
+              cpu: 0.2
+#--/END/--
+
+# Обновим конфигурацию:
+-->
+$ kubectl apply -f backend-report.yaml                               
+<--
+
+# Можем проведать наш последний деплой:
+-->
+$ kubectl rollout status deployment/backend-report
+
+##_OUTPUT_##
+deployment "backend-report" successfully rolled out
+<--
+# SUCCESS!
+
+"""
+  По умолчанию 'rollout status' будет следить за состоянием последнего развертывания, пока оно не завершится.
+"""
+
+# проверим, что всё в общем списке deployment и все Pod'ы находятся в статусе Ready и Available:
+-->
+$ kubectl get deployments
+
+##_OUTPUT_##
+NAME             READY   UP-TO-DATE   AVAILABLE   AGE
+backend          1/1     1            1           12h
+backend-report   1/1     1            1           12h
+frontend         1/1     1            1           12h
+<--
+
+#(!) В списке версий деплойментов для backend-report появилась новая запись:
+-->
+$ kubectl rollout history deployment/backend-report
+
+##_OUTPUT_##
+deployment.apps/backend-report
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+<--
+
+
+# Проверка поведения при FAILURE:
+# Испортим backend-report, указав неверный health check:
+
+--<Manifest.backend-report>--
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8081
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  failureThreshold: 2
+<--
+
+# Подождём некоторое время и увидим, как размножаются перезапуски:
+-->
+$ kubectl get pod
+
+##_OUTPUT_##
+NAME                              READY   STATUS    RESTARTS   AGE
+backend-799f4c9d6b-7kmw8          1/1     Running   0          35m
+backend-report-556b974d6c-895pf   1/1     Running   3          4m6s
+frontend-57df9cf6c4-shgzn         1/1     Running   0          3h54m
+<--
+
+# Чтобы узнать причину падений, надо взглянуть в логи Pod'а, который уже перезапустился
+# —> поможет дополнительный атрибут --previous:
+
+-->
+$ kubectl logs --previous backend-report-556b974d6c-895pf
+<--
+
+# убедимся, что новый деплой попал в историю:
+-->
+$ kubectl rollout history deployment/backend-report
+
+##_OUTPUT_##
+deployment.apps/backend-report
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+3         <none>
+<--
+
+#[!] Откатываемся к предыдущему деплою!
+
+-->
+$ kubectl rollout undo deployment/backend-report --to-revision=2
+
+##_OUTPUT_##
+deployment.apps/backend-report rolled back
+<--
+
+[!] по умолчанию хранятся лишь 10 деплоев!
+    если требуется увеличить, то понадобится подкрутить параметр
+spec.revisionHistoryLimit.
+
+'''
+-> https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#clean-up-policy
+
+  Вы можете установить поле .spec.revisionHistoryLimit в Deployment,
+  чтобы указать, сколько старых ReplicaSets для этого Deployment вы хотите сохранить.
+  Остальные будут собираться в фоновом режиме ( = The rest will be garbage-collected in the background.).
+
+  По умолчанию это значение равно 10.
+[Примечание:]
+  Если явно установить .spec.revisionHistoryLimit=0, это приведет к очистке всей истории развертывания,
+  поэтому развертывание нельзя будет откатить.
+'''
+
+
+(*) В какой-то момент может возникнуть необходимость ПРИТОРМОЗИТЬ процессы rollout командой:
+-->
+$ kubectl rollout pause deployment/backend-report
+##
+deployment.apps/backend-report paused 
+<--
+
+  «Отжать» паузу всегда можно через:
+-->
+$ kubectl rollout resume deployment/backend-report
+<--
+
+(!) Пока не отожмём паузу, любая попытка откатиться на предыдущую версию будет сваливаться с ошибкой:
+-->
+$ kubectl rollout undo deployment/backend-report --to-revision=17
+##
+error: you cannot rollback a paused deployment; resume it first with 'kubectl rollout resume deployment/backend-report' and try again
+<--
+
+[Резюме:]
+# Просмотр предыдущих редакций (revisions) и конфигураций (configurations) развертывания:
+
+kubectl rollout history <k8s-object>
+
+#>(https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_history/)
+
+# Отобразить статус развертывания
+
+kubectl rollout status
+
+#>(https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/kubectl_rollout_status/)
+
+# Откат к предыддущей ревизии
+
+kubectl rollout undo <k8s-object> --to-revision=<revision-number>
+
+# Приостановить процесс rollout
+
+kubectl rollout pause <k8s-object>
+
+# Возобновить процесс rollout
+
+kubectl rollout resume <k8s-object>
+
+# kubectl rollout: https://kubernetes.io/docs/reference/kubectl/generated/kubectl_rollout/
+
+
+##################
+# Vertical Scale #
+##################
+
+#(https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler#installation)
+
+Вертикальное масштабирование = изменение предоставляемых ресурсов (memory, cpu)
+
+---
+resources:
+  requests:
+    memory: "64Mi"
+    cpu: 0.1
+  limits:
+    memory: "128Mi"
+    cpu: 0.2
+#END#
+
+Вертикальное масштабирование в Kubernetes == это Vertical Pod Autoscaler (VPA)
+# requests: = минимальное гарантированное количество выделяемых ресурсов
+# limits: = максимальное возможное значение ресурсов.
+
+VPA может двигаться и расширять промежуток (requests:limits) в угоду не просто нашим ограничениям,
+но и реальным запросам приложения.
+
+(!) работа с вертикальным масштабированием сопровождается
+
+# Пример манифеста VPA
+---
+apiVersion: autoscaling.k8s.io/v1
+kind: VerticalPodAutoscaler
+metadata:
+  name: backend
+spec:
+  targetRef:
+    apiVersion: "apps/v1"
+    kind: Deployment
+    name: backend
+  updatePolicy:
+    updateMode: "Initial"
+  resourcePolicy:
+    containerPolicies:
+      - containerName: "*"
+        minAllowed:
+          cpu: 0m
+          memory: 0Mi
+        maxAllowed:
+          cpu: 1
+          memory: 500Mi
+        controlledResources: ["cpu", "memory"]
+        controlledValues: RequestsAndLimits
+####
+
+[!] targetRef  ссылается на отслеживаемый ресурс
+
+[!] блок updatePolicy содержит ограничительные атрибуты
+
+updateMode:
+  ● Off
+      — VPA не меняет ничего, ТОЛЬКО ЗАПИСЫВАЕТ рекомендации в статус объекта VerticalPodAutoscaler.
+
+  ● Initial
+      — VPA устанавливает запросы на ресурсы только при создании Pod'а и записывает рекомендации.
+
+  ● Recreate
+      — VPA устанавливает запросы на ресурсы для новых Pod'ов
+        и обновляет для существующих, путём их пересоздания.
+        Обновление происходит в тот момент, когда установленные запросы на ресурсы СИЛЬНО ОТЛИЧАЮТСЯ от рассчитанных рекомендаций.
+
+  ● Auto
+      — VPA работает как в режиме Recreate
+      (механизм изменения запросов на ресурсы «на лету» находится в разработке).
+
+(!) Режимы Auto и Recreate добавят динамики в поведение деплоймента в Kubernetes:
+    => VPA будет пересоздавать Pod'ы при изменении нагрузки.
+
+[На что в манифесте следует обратить внимание:]
+
+► containerName: "*"
+    = определяет, на какие контейнеры будет распространена ресурсная политика.
+
+► controlledResources
+    = ресурсы для которых будут записываться рекомендации.
+    ## в нашем случае это cpu и memory
+
+► controlledValues
+    = выбираем, какие параметры будут контролироваться:
+      ▸▸ RequestsOnly — только запросы на ресурсы.
+      ▸▸ RequestsAndLimits — запросы на ресурсы и лимиты (значение по умолчанию).
+
+****************
+[!] VPA отсутствует по дефолту в Kubernetes кластере,
+    его надо устанавливать дополнительно:
+-->
+git clone https://github.com/kubernetes/autoscaler.git && \
+cd autoscaler/vertical-pod-autoscaler/hack && \
+./vpa-up.sh
+<--
+****************
+
+VPA отслеживает:
+  + как используются ресурсы,
+  + как работает OOM
+
+  -> и выдаёт рекомендации новых значений для RAM и CPU.
+
+Делает он эту магию на основе внутреннего алгоритма с учётом исторических метрик.
+
+--[describe VerticalPodAutoscaler]--
+Status:
+  Conditions:
+    Last Transition Time:  2022-03-19T16:54:50Z
+    Status:                True
+    Type:                  RecommendationProvided
+  Recommendation:
+    Container Recommendations:
+      Container Name:  backend
+      Lower Bound:
+        Cpu:     250m
+        Memory:  2621440k
+      Target:
+        Cpu:     250m
+        Memory:  2621440k
+      Uncapped Target:          # Целевой показатель без ограничения
+        Cpu:     250m
+        Memory:  2621440k
+      Upper Bound:
+        Cpu:     141960m
+        Memory:  3202550291810
+
+##__##
+
+  ● Lower bound
+    — нижняя граница или значение, при котором приложение запустится, но стабильную работу гарантировать не сможет.
+
+  ● Upper bound
+    — верхняя граница, то, что рекомендуется по ресурсам для контейнера.
+
+  ● Target
+    — цель, текущее задание ресурсов.
+
+  ● Uncapped target
+    — неограниченная цель, то есть показатели того, что могло быть без ограничений Pod'а.
+
+[О компоненте VPA Recommender:]
+  -> отслеживает использование ресурсов Pod'ом
+  -> и вычисляет рекомендации. 
+
+[О компоненте VPA Updater:]
+  -> проверяет соответствие текущих настроек запросов ресурсов рассчитанным рекомендациям.
+
+# Для корректировки ресурсов Pod удаляется и вы можете увидеть такое сообщение в events:
+-->
+25m         Normal    EvictedByVPA             pod/backend-6556fd99d8-zsl99
+Pod was evicted by VPA Updater to apply resource recommendation.
+<--
+
+Контроллер ReplicaSet пересоздаст удалённый Pod,
+НО уже с новыми настройками:
+  запрос на создание нового пода перехватит VPA Admission Plugin
+  и вставит новые значения запросов ресурсов согласно рекомендациям VPA.
+
+
+[sources:]
+1) "Vertical Pod Autoscaler": https://github.com/kubernetes/autoscaler/tree/master/vertical-pod-autoscaler#installation
+2) "Вертикальное автомасштабирование pod'ов в Kubernetes: полное руководство": https://habr.com/ru/companies/flant/articles/541642/
+
+
+####################
+# Horizontal Scale #
+####################
+
+Можно легко изменить число реплик (spec.replicas):
+-->
+$ kubectl scale deployment/backend-report --replicas=3
+
+##_OUTPUT_##
+deployment.apps/backend-report scaled
+<--
+
+(!)
+[Kubernetes:]
+  = просто поднимает новые инстансы,
+
+[Разработчик:]
+  = занимается обеспечением "безболезненной" работы приложения одновременно в нескольких экземплярах.
+
+Horizontal Pod Autoscaler (HPA)
+(Автоматическое горизонтальное масштабирование)
+
+[!] HPA настраивает само количество Pod'ов для конкретной сущности (Deployment, ReplicaSet или StatefulSet),
+    с указанием диапазона и параметров CPU, при которых надо добавлять новый Pod.
+
+Определение HPA:
+
+1) просто создать HPA командой:
+-->
+$ kubectl autoscale deployment/backend-report --min=3 --max=10 --cpu-percent=80
+
+##_OUTPUT_##
+horizontalpodautoscaler.autoscaling/backend-report autoscaled
+<--
+
+2) представить HPA в виде манифеста yaml
+---
+apiVersion: autoscaling/v2beta2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: backend-report-hpa
+  labels:
+    app: backend-report-hpa
+spec:
+  minReplicas: 3
+  maxReplicas: 10
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend-report
+  metrics:
+    — type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+
+#[!] мы используем autoscaling/v2beta2,
+     так как данный формат ещё не перешёл в стабильную версию!
+
+# сейчас в v1 это записывается иначе — targetCPUUtilizationPercentage: 80.
+
+[Как выглядит новая сущность:]
+
+-->
+$ kubectl get horizontalpodautoscaler
+
+##_OUTPUT_##
+NAME             REFERENCE                   TARGETS   MINPODS   MAXPODS   REPLICAS   AGE
+backend-report   Deployment/backend-report   3%/80%    3         10        3          21m
+<--
+
+# по умолчанию шаг = +1 Pod
+
+
+[!] Кроме CPU можно указывать и другие критерии для скейлинга,
+    например, оперативную память:
+
+--<>--
+spec:
+  metrics:
+    — type: Resource
+    resource:
+        name: memory
+        target:
+          type: Utilization
+          averageValue: 800Mi
+#--#
+
+# В процессе использования новый критерий добавляется в статус ресурса:
+-->
+$ kubectl get horizontalpodautoscaler.autoscaling/backend-report
+
+##_OUTPUT_##
+NAME             REFERENCE                   TARGETS                  MINPODS   MAXPODS   REPLICAS   AGE
+backend-report   Deployment/backend-report   132032512/800Mi, 5%/80%   3         10        3         18m
+<--
+
+
+#< Задание >#
+Что произойдёт, если мы попробуем запустить HPA с конфигурацией ниже?
+Умышленно пропускаем часть параметров за api, name и количество реплик
+
+---
+kind: HorizontalPodAutoscaler
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: backend-report, backend           # <=
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 80
+
+[>] Kubernetes создаст новый HPA с правилом CPU 80%, которое распространится на Deployment backend-report и backend
+# Нет, потому что "backend-report, backend" в данном случае НЕ ПЕРЕЧИСЛЕНИЕ РАЗНЫХ Deployment, а полноценное имя.
+
+[>] Kubernetes создаст новый HPA с правилом CPU 80%, которое распространится на Deployment "backend-report, backend"
+
+[sources:]
+1) "Horizontal Pod Autoscaling": https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+2) "Модуль prometheus-metrics-adapter: примеры конфигурации":
+##  https://deckhouse.ru/products/kubernetes-platform/documentation/v1.65/modules/prometheus-metrics-adapter/usage.html
+
+######################
+# Cluster Autoscaler #
+######################
+
+(?) что будет, если Node в кластере закончатся, и негде будет разместить новые Pod'ы?
+
+Чтобы не заниматься добавлением новых Node в кластер вручную,
+был придуман механизм автомасштабирования кластера — Cluster Autoscaler (CA).
+
+"""
+  Кластер периодически проверяет, не ждёт ли кто-нибудь Node,
+  <если таковые есть> => то увеличивает размер кластера;
+  <если есть Node-бездельники> => уменьшает размер кластера
+"""
+# Фиксированное и автоматическое масштабирование. Создание группы узлов:
+#-> https://yandex.cloud/ru/docs/managed-kubernetes/operations/node-group/node-group-create
+
+
+##################
+# Rolling Update #
+##################
+
+  Стратегии деплоя приложения в Deployment (spec.strategy):
+    * Recreate
+      — при обновлении все Pod'ы с предыдущей версией будут УБИТЫ ДО ТОГО, как начнут создаваться новые.
+
+    * RollingUpdate
+      — при обновлении Pod'ы будут ОДИН ЗА ДРУГИМ ЗАМЕНЯТЬСЯ,
+        убирая старые только при статусе Running с новой версией.
+
+--<>--
+---
+...
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+      maxSurge: 1
+...
+##//##
+# здесь:
+  maxUnavailable
+    = максимальное количество ОДНОВРЕМЕННО НЕРАБОТАЮЩИХ Pod'ов в процессе обновления
+    (можно указывать как в абсолютных числах, так и в процентах),
+    дефолтное значение — 25%.
+  
+  maxSurge
+    = максимальное количество Pod'ов, которое может быть создано сверх указанного количества Pod'ов.
+      Это значение необходимо, чтобы можно было во время обновления регулировать шаг обновления.
+<--->
+Контроллер Deployment автоматически останавливает неудачный rollout и прекращает масштабирование нового набора ReplicaSet.
+Это зависит от параметров rollingUpdate (в частности, maxUnavailable), которые вы указали.
+По умолчанию Kubernetes устанавливает значение maxUnavailable = 25%.
+
+"""
+  Мы можем запустить сверх уже старых работающих Pod'ов какое-то количество с новой версией,
+(!) причём с ожиданием, пока не получим от новой версии статус Ready,
+  и после этого уничтожим старые
+  (можно указывать как в абсолютных числах, так и в процентах),
+  дефолтное значение — 25%).
+"""
+
+Применим новую конфигурацию уже знакомым способом:
+kubectl apply -f backend-report
+
+
+############################
+# Affinity и Anti-Affinity #
+############################
+
+#= Подбор Nodes для развёртываемых Pod'ов
+## например, более производительные Nodes => для более ресурсоёмких Pods
+
+nodeSelector
+
+--<Example>--
+nodeSelector:
+  cpu: highPerformance      # Если стоит такой селектор,
+                            # то Kubernetes будет разворачивать эти Pod на Node, помеченные меткой cpu: highPerformance
+##//##
+
+# Чтобы посмотреть метки Node, введём:
+-->
+$ kubectl get nodes --show-labels
+
+##_OUTPUT_##
+NAME                        STATUS   ROLES    AGE   VERSION    LABELS
+cl17it1ti54cda2q2d0h-evow   Ready    <none>   56d   v1.20.11   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v2,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl17it1ti54cda2q2d0h-evow,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v2,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat1ktmifrcj6men1i4t,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+cl17it1ti54cda2q2d0h-iciw   Ready    <none>   56d   v1.20.11   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v2,beta.kubernetes.io/os=linux,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl17it1ti54cda2q2d0h-iciw,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v2,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat1ktmifrcj6men1i4t,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+<--
+
+# Пример добавления метки:
+# kubectl label nodes <node-id(||name)> cpu=highPerformance
+$ kubectl label nodes cl17it1ti54cda2q2d0h-evow cpu=highPerformance
+
+##_OUTPUT_##
+node/cl17it1ti54cda2q2d0h-evow labeled
+
+# Проверим добавление нового label:
+-->
+cl17it1ti54cda2q2d0h-evow   Ready    <none>   56d   v1.20.11   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/instance-type=standard-v2,beta.kubernetes.io/os=linux,**cpu=highPerformance**,failure-domain.beta.kubernetes.io/zone=ru-central1-b,kubernetes.io/arch=amd64,kubernetes.io/hostname=cl17it1ti54cda2q2d0h-evow,kubernetes.io/os=linux,node.kubernetes.io/instance-type=standard-v2,node.kubernetes.io/kube-proxy-ds-ready=true,node.kubernetes.io/masq-agent-ds-ready=true,node.kubernetes.io/node-problem-detector-ds-ready=true,topology.kubernetes.io/zone=ru-central1-b,yandex.cloud/node-group-id=cat1ktmifrcj6men1i4t,yandex.cloud/pci-topology=k8s,yandex.cloud/preemptible=false
+<--
+
+Селекторы узлов — очень простой метод планирования назначения Pod'ов.
+(!) Однако, селекторов не хватит, когда потребуются более сложные условия.
+Для этого есть такие приспособления, как Affinity и Anti-Affinity
+## ("сходство" и "анти-сходство", как бы ужасно это ни звучало в переводе на русский).
+
+Если ни одна Node не удовлетворяет нашим требованиям, то при старте Pod'а мы увидим в логах:
+-->
+Events:
+  Type     Reason             Age                From                Message
+  ----     ------             ----               ----                -------
+  Warning  FailedScheduling   27s (x2 over 27s)  default-scheduler   0/4 nodes are available: 4 node(s) didn't match Pod's node affinity.
+  Normal   NotTriggerScaleUp  17s                cluster-autoscaler  pod didn't trigger scale-up: 1 node(s) didn't match Pod's node affinity
+<--
+
+# Вместо жёстких требований к развёртыванию Pod'а можно указать, например, предпочтения:
+-->
+---
+...
+spec:
+  template:
+    spec:
+      affinity:
+        nodeAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            — weight: 80
+              preference:
+                # предпочтение по развертыванию в определенной зоне             
+                matchExpressions:
+                  — key: availability-zone
+                    operator: In
+                    values:
+                      — zone1
+<--
+
+[!] условия Anti-Affinity
+  => позволяют НЕ РАЗВОРАЧИВАТЬ Pod'ы на узлах, соответствующих определённым правилам,
+## например, чтобы все Pod'ы не собирались на одной Node и не занимали весь трафик.
+
+# "Шпаргалка по kubectl": https://kubernetes.io/ru/docs/reference/kubectl/cheatsheet/
+
+
+############
+############
+## Addons ##
+############
+############
+
+**************************
+* Revision History Limit *
+**************************
+
+*=(Ограничение истории ревизий)=*
+# https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#revision-history-limit
+
+История ревизий Deployment'ов хранится ReplicaSet'ах, которыми оно управляет.
+.spec.revisionHistoryLimit
+  = необязательное поле, определяющее количество старых ReplicaSet'ов, которые нужно сохранить для возможности rollback'а.
+  Эти старые ReplicaSet'ы:
+    - потребляют ресурсы в etcd
+    - и переполняют вывод kubectl get rs.
+
+Конфигурация каждой ревизии Deployment хранится в её ReplicaSet'е;
+==> удалив старый ReplicaSet, вы потеряете возможность rollback'а к этой ревизии Deployment.
+
+По умолчанию будет сохранено 10 старых ReplicaSets,
+однако идеальное значение зависит от частоты и стабильности новых Deployment'ов.
+
+[Более конкретно:]
+  установка этого поля в ноль означает, что все старые ReplicaSets с 0 репликами будут очищены.
+  В этом случае развертывание нового Deployment не может быть отменено,
+  поскольку его история ревизий будет очищена.
