@@ -1,0 +1,94 @@
+###################################################
+# Добавление сертификата доверия Active Directory #
+###################################################
+
+# Имя файла корневого сертификата:
+certnew.cer
+
+## при обращении к конкретным контроллерам домена, их сертификаты будут валидными через высланный. Должны быть.
+
+# Копируем файл сертификата в docker контейнер Jenkins
+---
+docker cp /home/devops/certnew.cer e4a8f5549c5c:/var/jenkins_home/certnew.cer
+
+/*
+# "Как посмотреть сертификаты java":
+#(https://ru.hexlet.io/qna/java/questions/kak-posmotret-sertifikaty-java)
+---
+keytool -list -v -keystore имя_хранилища
+## в нашем случае:
+имя_хранилища = $JENKINS_HOME/.keystore/
+---
+
+## Вывод в консоль будет иметь следующий формат:
+---<Console>---
+Type: X.509
+Issuer: CN=Example Root CA
+Subject: CN=Example Domain
+Valid from: Sat Jan 01 00:00:00 UTC 2022 until: Tue Jan 01 00:00:00 UTC 2024
+---
+Здесь:
+  * Type — указывает на тип сертификата,
+  * Issuer — на удостоверяющий центр, выдавший сертификат,
+  * Subject — на имя домена или IP-адрес, для которого выдан сертификат,
+  * Valid from и until — на даты начала и окончания действия сертификата соответственно.
+*/
+
+
+[Step 1. Создаём хранилище сертификатов]
+---
+CUSTOM_KEYSTORE=$JENKINS_HOME/.keystore/
+mkdir -p $CUSTOM_KEYSTORE
+#cp $JAVA_HOME/jre/lib/security/cacerts $CUSTOM_KEYSTORE
+cp $JAVA_HOME/lib/security/cacerts $CUSTOM_KEYSTORE
+---
+
+[Step 2. Импортируем наш сертификат]
+---
+	$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+	-import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
+---
+---
+$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+	-import -alias Jenkins_AD -file certnew.cer
+---
+
+[Step 3. Добавить сертификат в параметры запуска Jenkins]
+---
+-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts \
+-Djavax.net.ssl.trustStorePassword=changeit
+---
+
+[!] По сути Step 2, Step 3 - это ранее описанный (первый) способ
+
+Эти параметры будем прокидывать с помощью специальной переменной окружения JAVA_OPTS
+---
+  environment:
+    JAVA_OPTS: "-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
+---
+
+ISSUE:
+
+--->
+# Проблема возникает, когда хост LDAP передает сертификат, не содержащий правильного имени хоста в SAN (Subject Alternative Name).
+# Java проверяет имя хоста в сертификате вместе с хостом во время рукопожатия SSL. При этом отображается следующее сообщение об ошибке:
+---
+## for Domain Controller = dc1.prosoft.ural.ru:3268 | dc3.prosoft.ural.ru:3268
+java.net.SocketException: Connection reset
+...
+Caused: javax.naming.CommunicationException: simple bind failed: dc1.prosoft.ural.ru:3268 [Root exception is java.net.SocketException: Connection reset]
+
+####
+
+## for Domain Controller = 172.25.245.213:3268
+## port 3268 in docker container has binded to the host port
+
+java.net.SocketException: Connection reset
+...
+Caused: javax.naming.CommunicationException: simple bind failed: 172.25.245.213:3268 [Root exception is java.net.SocketException: Connection reset]
+---
+Проблемы возникают при включённых:
+[v] Require TLS
+TLS Configuration: JDK TrustStore
+Расширенные:
+  [v] Enable StartTls

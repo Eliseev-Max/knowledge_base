@@ -1,0 +1,7 @@
+SonarQube C++ Community plugin (cxx plugin)
+(https://github.com/SonarOpenCommunity/sonar-cxx/blob/master/README.md)
+
+[more:]
+1) "Install the Plugin": https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Install-the-Plugin
+2) "Sonar Open Community. sonar-cxx V2.1.3":  https://github.com/SonarOpenCommunity/sonar-cxx/releases/tag/cxx-2.1.3
+3) "Compatibility Matrix": https://github.com/SonarOpenCommunity/sonar-cxx/wiki/Compatibility-Matrix

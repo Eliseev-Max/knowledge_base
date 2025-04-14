@@ -1,0 +1,408 @@
+Persistent Volumes
+#(https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+
+[more:]
+1) "Configure a Pod to Use a PersistentVolume for Storage": https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+2) "Работа с хранилищами в Kubernetes": https://habr.com/ru/companies/otus/articles/717486/
+3) "Работа с хранилищами в Kubernetes: руководство для инженеров": https://habr.com/ru/companies/T1Holding/articles/781368/
+4) "Хранение данных в кластере Kubernetes": https://slurm.io/blog/tpost/m67sopj21m-hranenie-dannih-v-klastere-kubernetes
+
+
+Управление хранилищем - это отдельная проблема, отличная от управления вычислительными экземплярами (compute instances).
+Подсистема PersistentVolume предоставляет пользователям и администраторам API,
+который абстрагирует детали
+  > [того, как предоставляется хранилище]
+  < [от того, как оно потребляется]
+
+Для этого мы вводим два новых ресурса API:
+  * PersistentVolume
+<и>
+  * PersistentVolumeClaim.
+
+*************************
+* PersistentVolume (PV) *
+*************************
+  = это часть хранилища в кластере, которая
+    -> была предоставлена администратором
+  <или>
+    -> была динамически предоставлена с помощью Storage Classes.
+
+  Это такой же ресурс в кластере, как Node - ресурс кластера.
+
+  PVs являются плагинами томов (volume plugins), как и Volumes,
+[!] НО имеют жизненный цикл, НЕ ЗАВИСЯЩИЙ от отдельного Pod, который использует PV.
+
+  Этот объект API фиксирует детали реализации хранилища,
+  будь то
+    - NFS,
+    - iSCSI
+    - или система хранения, специфичная для облачного провайдера
+      (cloud-provider-specific storage system)
+
+
+*******************************
+* PersistentVolumeClaim (PVC) *
+*******************************
+
+  = это ЗАПРОС ПОЛЬЗОВАТЕЛЯ на хранение данных.
+
+  Он аналогичен Pod'у.
+  Pod'ы -> потребляют ресурсы Node;
+  а PVC -> потребляют ресурсы PV.
+
+  Pod'ы могут запрашивать определенные уровни ресурсов (CPU and Memory).
+
+  Claims могут запрашивать
+    ➜ определенный размер
+    ➜ и режим доступа
+
+[например:]
+  они могут быть смонтированы:
+    - ReadWriteOnce,
+    - ReadOnlyMany,
+    - ReadWriteMany
+    - или ReadWriteOncePod
+    ...
+# см. раздел AccessModes: https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
+
+
+  Хотя PersistentVolumeClaims позволяют пользователю потреблять АБСТРАКТНЫЕ ресурсы хранения,
+  часто бывает, что для решения различных задач пользователям нужны PersistentVolumes с различными свойствами,
+  (например производительностью).
+
+[StorageClass]
+  Администраторам кластеров необходимо иметь возможность предлагать различные PersistentVolumes,
+  которые отличаются не только размером и режимами доступа,
+  не посвящая пользователей в детали реализации этих томов.
+  Для этих целей существует ресурс StorageClass.
+
+# подробное руководство с рабочими примерами:
+#(1):
+#-> https://kubernetes.io/docs/tasks/configure-pod-container/configure-persistent-volume-storage/
+
+***********************************
+* Lifecycle of a volume and claim *
+***********************************
+
+PVs = это ресурсы в кластере.
+PVC представляют собой ЗАПРОСЫ НА ЭТИ РЕСУРСЫ,
+  а также выступают в качестве ПРОВЕРКИ ПРАВ на ресурс.
+
+Взаимодействие между PVs и PVCs происходит по следующему жизненному циклу:
+
+  ● Static
+      Администратор кластера создает несколько PV.
+      Они содержат сведения о реальном хранилище, которое доступно для использования пользователями кластера.
+      Они существуют в API Kubernetes и доступны для использования.
+
+  ● Dynamic
+      Если ни один из статических PV, созданных администратором, не соответствует PersistentVolumeClaim пользователя,
+      кластер может попытаться динамически предоставить том специально для PVC.
+      Такое выделение основано на StorageClasses:
+        PVC должен запросить storage class,
+        а администратор должен создать и настроить этот класс,
+        чтобы динамическое выделение могло произойти.
+        Claims, запрашивающие класс "", фактически отключают динамическое выделение для себя.
+
+      Чтобы включить динамическое предоставление хранилища на основе storage class,
+      администратору кластера необходимо включить контроллер допуска DefaultStorageClass (DefaultStorageClass admission controller) на сервере API.
+      Это можно сделать, например, убедившись, что DefaultStorageClass входит в упорядоченный список значений через запятую
+      (comma-delimited) для флага --enable-admission-plugins компонента API-сервера.
+      # Дополнительную информацию о флагах командной строки сервера API можно найти в документации kube-apiserver:
+      #-> https://kubernetes.io/docs/reference/command-line-tools-reference/kube-apiserver/
+
+  ● Binding
+      Пользователь создает
+      (или, в случае динамической инициализации, уже создал)
+      PersistentVolumeClaim
+        -> с определенным требуемым объемом памяти
+        -> и с определенными режимами доступа.
+      Цикл управления в control plane
+        + следит за новыми PVC,
+        + находит подходящий PV (если это возможно)
+        + и связывает их вместе.
+      Если PV был динамически предоставлен для нового PVC:
+        => цикл всегда будет связывать этот PV с PVC.
+      В противном случае пользователь всегда получит по крайней мере то, что он просил, но объем может превышать запрошенный.
+
+      После привязки (Bound) PersistentVolumeClaim binds являются эксклюзивными, независимо от того, как они были привязаны.
+
+      Привязка PVC к PV = это привязка один-к-одному (one-to-one mapping), использующая ClaimRef,
+      которая является двунаправленной (bi-directional) привязкой между PersistentVolume и PersistentVolumeClaim.
+      # PersistentVolume <-> PersistentVolumeClaim
+
+      Claims будут оставаться unbound неопределенное время, если не существует подходящего тома.
+      Claims будут привязываться (bound) по мере появления соответствующих томов.
+ 
+      [Например:]
+        кластер с большим количеством PV 50Gi НЕ БУДЕТ СООТВЕТСТВОВАТЬ PVC, запрашивающему 100Gi.
+        PVC можно связать, когда в кластер будет добавлен ПВ 100Gi.
+
+  ● Using
+      Pod'ы используют claims в качестве (as) volumes.
+      Кластер
+        ✓ проверяет claim, чтобы найти связанный том (bound volume),
+        ✓ и монтирует этот том для Pod'а.
+      Для томов, поддерживающих несколько режимов доступа (multiple access modes):
+        пользователь указывает, какой режим ему нужен, когда использует свой claim в качестве volume в Pod'е.
+
+      После того как у пользователя есть claim и STATUS этого claim == bound,
+      связанный том PV принадлежит пользователю до тех пор, пока он ему нужен.
+      Пользователи schedule'ят (планируют) Pod'ы и получают доступ к заявленным PV,
+      включив раздел persistentVolumeClaim в блок volume Pod'а.
+      # Дополнительные сведения об этом см. в разделе "Claims As Volumes":
+      #-> https://kubernetes.io/docs/concepts/storage/persistent-volumes/#claims-as-volumes
+
+/*
+--<Pod_manifest's_spec>--
+...
+spec:
+  containers:
+   - name: nginx
+     image: nginx:1.21.6
+     volumeMounts:
+       - name: nginx-pvc-volume
+         mountPath: /usr/share/nginx/html/
+  volumes:
+    - name: nginx-pvc-volume        # Произвольное имя
+      persistentVolumeClaim:
+        claimName: nginx-pvc        # имя созданного ранее PersistentVolumeClaim
+##END##
+*/
+
+
+  ● Storage Object in Use Protection
+      Цель функции Storage Object in Use Protection:
+        = гарантировать, что
+          PersistentVolumeClaims (PVC), активно используемые Pod,
+            <и>
+          PersistentVolume (PV), привязанные к PVC,
+        НЕ БУДУТ УДАЛЕНЫ ИЗ СИСТЕМЫ,
+        -> так как это может привести к потере данных.
+    """
+    #[Замечание:]
+    #  PVC активно используется Pod, если существует объект Pod, который использует PVC.
+    """
+      Если пользователь удаляет PVC, активно используемый Pod'ом, PVC удаляется не сразу.
+      Удаление PVC откладывается до тех пор, пока PVC не перестанет активно использоваться какими-либо Pod'ами.
+
+      Также, если администратор удаляет PV, привязанный к PVC, PV не удаляется немедленно.
+      Удаление PV откладывается до тех пор, пока PV больше не будет привязан к PVC.
+
+      Вы можете видеть, что PVC защищен, если статус PVC - Terminating,
+      а список Finalizers включает kubernetes.io/pvc-protection:
+
+--[CLI]--
+kubectl describe pvc hostpath
+
+##_OUTPUT_##
+Name:          hostpath
+Namespace:     default
+StorageClass:  example-hostpath
+Status:        Terminating
+Volume:
+Labels:        <none>
+Annotations:   volume.beta.kubernetes.io/storage-class=example-hostpath
+               volume.beta.kubernetes.io/storage-provisioner=example.com/hostpath
+Finalizers:    [kubernetes.io/pvc-protection]
+...
+####
+
+      Вы можете видеть, что PV защищен, когда его статус Terminating,
+      а список Finalizers также включает kubernetes.io/pv-protection:
+
+--[CLI]--
+kubectl describe pv task-pv-volume
+
+##_OUTPUT_##
+Name:            task-pv-volume
+Labels:          type=local
+Annotations:     <none>
+Finalizers:      [kubernetes.io/pv-protection]
+StorageClass:    standard
+Status:          Terminating
+Claim:
+Reclaim Policy:  Delete
+Access Modes:    RWO
+Capacity:        1Gi
+Message:
+Source:
+    Type:          HostPath (bare host directory volume)
+    Path:          /tmp/data
+    HostPathType:
+Events:            <none>
+####
+
+
+  ● Reclaiming (Восстановление)
+      Когда пользователь заканчивает работу с томом, он может удалить объекты PVC из API, который позволяет восстановить ресурс.
+      Политика reclaim для PersistentVolume указывает кластеру, что делать с томом после того, как он был освобожден от своих прав.
+      В настоящее время тома могут быть:
+        - Retained (сохранены),
+        - Recycled (переработаны),
+        - Deleted (удалены)
+        
+    [Retain]
+      Политика Retain reclaim позволяет вручную освободить ресурс.
+      Когда PersistentVolumeClaim удаляется, PersistentVolume все еще существует,
+      => и том считается «освобожденным».
+      (!) Но он еще НЕ ДОСТУПЕН ДЛЯ ДРУГОГО ПРЕТЕНДЕНТА,
+          поскольку данные предыдущего претендента остаются на томе.
+        Администратор может вручную вернуть том, выполнив следующие действия:
+        1. Удалите PersistentVolume.
+           Связанный с ним актив хранения во внешней инфраструктуре продолжает существовать после удаления PV.
+        2. Вручную очистите данные на соответствующем объекте хранения.
+        3. Вручную удалите связанный актив хранения (storage asset).
+
+      Если вы хотите повторно использовать один и тот же storage asset,
+      -> создайте новый PersistentVolume с тем же определением storage asset.
+
+
+    [Delete]
+      Для плагинов томов (volume plugins), поддерживающих Delete reclaim policy,
+      удаление удаляет
+        + как объект PersistentVolume из Kubernetes,
+        + так и связанный с ним storage asset во внешней инфраструктуре.
+
+      Тома, которые были динамически инициализированы, наследуют reclaim policy своего StorageClass, который по умолчанию имеет значение Delete.
+      (!) Администратор должен настроить StorageClass в соответствии с ожиданиями пользователей;
+          в противном случае PV придется редактировать или исправлять после его создания.
+      # См. раздел "Change the Reclaim Policy of a PersistentVolume":
+      # https://kubernetes.io/docs/tasks/administer-cluster/change-pv-reclaim-policy/
+
+
+    [Recycle]
+
+[!] Warning:
+  Политика Recycle reclaim УСТАРЕЛА.
+  Вместо нее рекомендуется использовать динамическую инициализацию (dynamic provisioning).
+
+    Если политика Recycle reclaim поддерживается плагином базового тома,
+    она выполняет базовую очистку (rm -rf /thevolume/*) тома и снова делает его доступным для нового claim.
+
+    Однако администратор может настроить пользовательский шаблон recycler Pod с помощью аргументов командной строки Kubernetes controller manager,
+    как описано в справке: https://kubernetes.io/docs/reference/command-line-tools-reference/kube-controller-manager/
+
+    Пользовательский шаблон recycler Pod должен содержать спецификацию volumes,
+    как показано в примере ниже:
+
+--<Pod_manifest>--
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pv-recycler
+  namespace: default
+spec:
+  restartPolicy: Never
+  volumes:
+  - name: vol
+    hostPath:
+      path: /any/path/it/will/be/replaced
+  containers:
+  - name: pv-recycler
+    image: "registry.k8s.io/busybox"
+    command: ["/bin/sh", "-c", "test -e /scrub && rm -rf /scrub/..?* /scrub/.[!.]* /scrub/*  && test -z \"$(ls -A /scrub)\" || exit 1"]
+    volumeMounts:
+    - name: vol
+      mountPath: /scrub
+####
+    (!) Однако конкретный путь, указанный в шаблоне custom recycler Pod в части volumes,
+        заменяется конкретным путем тома, который recycled (перерабатывается).
+
+
+PersistentVolume deletion protection finalizer
+
+
+
+###############################
+# Types of Persistent Volumes #
+###############################
+
+  Типы PersistentVolume реализуются в виде плагинов.
+  В настоящее время Kubernetes поддерживает следующие плагины:
+    csi - Container Storage Interface (CSI)
+    fc - Fibre Channel (FC) storage
+    hostPath - HostPath volume
+      ( for single node testing ONLY!;
+        WILL NOT WORK in a multi-node cluster; consider using local volume instead
+      )
+    iscsi - iSCSI (SCSI over IP) storage
+    local - local storage devices mounted on nodes.
+    nfs - Network File System (NFS) storage
+
+
+  The following types of PersistentVolume are DEPRECATED but still available.
+  If you are using these volume types except for flexVolume, cephfs and rbd,
+  (!) please install corresponding CSI drivers.
+
+    awsElasticBlockStore - AWS Elastic Block Store (EBS) (migration on by default starting v1.23)
+    azureDisk - Azure Disk (migration on by default starting v1.23)
+    azureFile - Azure File (migration on by default starting v1.24)
+    cinder - Cinder (OpenStack block storage) (migration on by default starting v1.21)
+    flexVolume - FlexVolume (deprecated starting v1.23, no migration plan and no plan to remove support)
+    gcePersistentDisk - GCE Persistent Disk (migration on by default starting v1.23)
+    portworxVolume - Portworx volume (migration on by default starting v1.31)
+    vsphereVolume - vSphere VMDK volume (migration on by default starting v1.25)
+
+
+######################
+# Persistent Volumes #
+######################
+
+  Каждый PV содержит спецификацию и статус, которые являются спецификацией и статусом тома.
+  Имя объекта PersistentVolume должно быть действительным именем поддомена DNS.
+  # "DNS subdomain name": https://kubernetes.io/docs/concepts/overview/working-with-objects/names/#dns-subdomain-names
+
+--<Persistent Volume Manifest>--
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv0003
+spec:
+  capacity:
+    storage: 5Gi
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Recycle
+  storageClassName: slow
+  mountOptions:
+    - hard
+    - nfsvers=4.1
+  nfs:
+    path: /tmp
+    server: 172.17.0.2
+
+####
+
+[!] Для использования PersistentVolume в кластере могут потребоваться вспомогательные программы, относящиеся к типу тома.
+    В этом примере PersistentVolume имеет тип NFS, и для поддержки монтирования файловых систем NFS требуется вспомогательная программа /sbin/mount.nfs
+
+***************
+*  Capacity   *
+* Вместимость *
+***************
+
+  Как правило, PV имеет определенную емкость.
+  Она задается с помощью атрибута Capacity PV, который является значением Quantity.
+  В настоящее время размер хранилища - единственный ресурс, который можно установить или запросить.
+  В будущем атрибуты могут включать IOPS, пропускную способность и т. д.
+
+***************
+* Volume Mode *
+***************
+
+  Kubernetes поддерживает два режима volumeMode для PersistentVolumes:
+    * Filesystem
+      <и>
+    * Block
+
+  volumeMode - это необязательный параметр API. Filesystem - это режим по умолчанию, используемый, когда параметр volumeMode опущен.
+  Том с volumeMode: Filesystem монтируется в Pods в каталог.
+  Если том подкреплен блочным устройством и устройство пустое, Kubernetes создает файловую систему на устройстве перед его первым монтированием.\
+  Вы можете установить значение volumeMode в Block, чтобы использовать том как необработанное блочное устройство.
+  Такой том будет представлен в Pod как блочное устройство, без какой-либо файловой системы на нем.
+  Этот режим полезен для того, чтобы предоставить боду максимально быстрый доступ к тому, без какого-либо слоя файловой системы между бодом и томом.
+  С другой стороны, приложение, запущенное в Pod, должно знать, как работать с устройством с сырыми блоками.
+  Пример использования тома с режимом volumeMode см. в разделе Поддержка томов с сырыми блоками: Block в Pod'е.
+

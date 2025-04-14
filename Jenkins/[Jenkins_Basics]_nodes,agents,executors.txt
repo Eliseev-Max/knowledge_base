@@ -1,6 +1,7 @@
 Jenkins. Разбираемся с сущностями: node, agent, executor
 
 { Используемые источники:
+  0. "Glossary. General Terms": https://www.jenkins.io/doc/book/glossary/#controller
   1. Брент Ластер. "Jenkins 2. Приступаем к работе"
   2. "Managing Nodes" (https://www.jenkins.io/doc/book/managing/nodes/)
   3. "What Is a Jenkins Agent?": https://youtu.be/4KghHJEz5no

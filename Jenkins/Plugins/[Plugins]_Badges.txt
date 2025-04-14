@@ -1,0 +1,210 @@
+Jenkins plugin: Badge
+
+[main:]
+  https://plugins.jenkins.io/badge/
+
+[more:]
+  releases: https://github.com/jenkinsci/badge-plugin/releases
+
+  "Jenkins Pipeline Steps Reference": https://www.jenkins.io/doc/pipeline/steps/badge/#addbadge-add-badge
+
+  "Badge Plugin. New Major Version": https://github.com/jenkinsci/badge-plugin/releases/tag/badge-2.0
+  ## Описаны:
+  ##   + Breaking Changes and Deprecations;
+  ##   + причины неправильной работы форматирования HTML и JCasC;
+  ##   + New features and improvements
+
+
+Full Name: Badge
+Short Name: badge
+Latest version: 2.7     # on 20.03.2025
+
+
+############
+# ОПИСАНИЕ #
+############
+
+Этот плагин позволяет пользователям
+  ✓ добавлять бейджи (badges)
+  ✓ и создавать сводные записи (summary entries) из пайплайна.
+
+
+Version 2.x
+  Версия 2.0 - это большая переработка оригинального плагина, в которой появилось множество новых функций.
+  Более подробную информацию об этом можно найти в описании версии 2.0.
+# https://github.com/jenkinsci/badge-plugin/releases/tag/badge-2.0
+
+Version 1.x
+  Устаревшая версия, которая изначально была форкнута из Groovy Postbuild Plugin.
+  #-> https://plugins.jenkins.io/groovy-postbuild
+
+
+#################
+# Использование #
+#################
+
+addBadge
+  = это центральный pipeline step, который позволяет пользователям добавлять пользовательские значки (custom badges) в свои сборки.
+    Значок может быть
+      -> либо иконкой,
+      -> либо текстом, который по желанию может быть отформатирован как HTML, а не как обычный текст.
+    (*) Пользователи также могут добавлять ссылки на бейджи, а также стилизовать их, чтобы получить желаемый визуальный результат.
+
+[Примеры:]
+# Подробное описание смотри здесь:
+# "Jenkins Pipeline Steps Reference": https://www.jenkins.io/doc/pipeline/steps/badge/#addbadge-add-badge
+
+```
+// add a badge with an icon and text #(иконка ракеты в правом верхнем углу блока выполняющегося задания, текст - всплывающая подсказка)
+def badge = addBadge(icon: 'symbol-rocket plugin-ionicons-api', text: 'Launching ...')
+
+// update the icon and text during build time #(обновить значок и текст во время сборки)
+badge.setIcon('symbol-planet-outline plugin-ionicons-api')
+badge.setText('Lunar orbit reached, proceed landing maneuver ...')
+
+// update the icon and text during build time
+badge.setIcon('symbol-american-football-outline plugin-ionicons-api')
+badge.setText('Huston, we have touchdown!')
+
+// remove the badge
+removeBadges(id: badge.getId())
+
+// add another badge with html formatted text and css style
+addBadge(text: '<i>Apollo 11 landed on the moon!</i>', style: 'color: var(--success-color)')
+```
+# см. результат на изображениях: https://github.com/jenkinsci/badge-plugin/blob/master/images/examples/addBadge.png
+
+
+addInfoBadge
+#[more: https://www.jenkins.io/doc/pipeline/steps/badge/#addinfobadge-add-info-badge]
+
+  = удобный шаг пайплайна, который добавляет
+    + информационный значок (info)
+    + вместе с текстом всплывающей подсказки
+    + и необязательной ссылкой.
+
+[Примеры:]
+```
+// add a badge with an info icon and text
+def badge = addInfoBadge(text: 'Launching in ...')
+
+// update the text during build time
+badge.setText('10 ...')
+badge.setText('9 ...')
+badge.setText('8 ...')
+```
+
+
+addWarningBadge
+#[more: https://www.jenkins.io/doc/pipeline/steps/badge/#addwarningbadge-add-warning-badge]
+
+  = удобный шаг пайплайна, который добавляет значок предупреждения (warning)
+    + вместе с текстом подсказки
+    + и необязательной ссылкой.
+
+[Примеры:]
+```
+// add a badge with a warning icon, text and link
+addWarningBadge(text: 'Houston, we have a problem ...', link: 'https://youtu.be/2Q_ZzBGPdqE')
+```
+
+
+addErrorBadge
+#[more: ]
+  = удобный шаг пайплайна, который добавляет значок ошибки (error)
+    + вместе с текстом всплывающей подсказки
+    + и необязательной ссылкой.
+
+[Примеры:]
+```
+// add a badge with an error icon and text
+addErrorBadge(text: 'Transmission failed!')
+```
+
+removeBadges: Remove Badges
+[-> https://www.jenkins.io/doc/pipeline/steps/badge/#removebadges-remove-badges]
+
+
+
+*************
+* Summaries *
+*************
+
+addSummary
+  = этот pipeline step позволяет пользователям добавлять пользовательские сводки (custom summaries) в обзор сборки (build overview).
+    Сводка может состоять из значка и текста, который по желанию может быть оформлен в виде HTML, а не обычного текста.
+    Пользователи также могут
+      * добавить ссылки на сводку,
+      * стилизовать ее, чтобы получить желаемый визуальный результат.
+
+
+```
+// add a summary with an icon, text and link
+addSummary(icon: 'symbol-home-outline plugin-ionicons-api', text: 'Test Chamber prepared', link: 'https://jenkins.io')
+
+// add another summary with an icon and text
+def summary = addSummary(icon: 'symbol-people-outline plugin-ionicons-api', text: 'Looking for Test Subjects ...')
+
+// removes a summary
+removeSummaries(id: summary.getId())
+
+// add another summary with an icon and formatted html as text
+addSummary(icon: 'symbol-aperture-outline plugin-ionicons-api',
+           text: '<b>Results:</b><li>Test Chamber ready</li><li>Test Subject missing</li>')
+```
+
+
+#######################################
+# Badge (ver 1.x) VS Badge (ver. 2.x) #
+#           (=Comparison=)            #
+#######################################
+
+Badge. Version 1.X
+```
+--<Groovy_Postbuild.Badge.methods>--
+addBadge(icon, text, link)
+  = как addBadge(icon, text), но значок Badge в этом случае фактически ссылается на заданную ссылку
+
+addInfoBadge(text)
+  =  помещает значок (!) с информационной иконкой и заданным текстом.
+
+addWarningBadge(text)
+  = помещает значок /!\ с предупреждающей иконкой и заданным текстом.
+
+addErrorBadge(text)
+  = выводит значок (x) с иконкой ошибки и заданным текстом
+
+addHtmlBadge(html)
+  = помещает значок с html-источником.
+  (!) Небезопасные html-коды будут удалены.
+
+removeBadges()
+  = Удаляет ВСЕ значки из текущей сборки.
+    Часто используется вместе с setBuildNumber.
+
+removeBadge(index)
+  = Удаляет значок с заданным индексом.
+    Часто используется вместе с setBuildNumber.
+
+addBadge(icon, text)
+  = puts a badge with the given icon and text. Provides the following icons:
+
+```
+
+
+*************************************
+* Breaking Changes and Deprecations *
+*************************************
+
+[!] Новая основная версия 2.0 помечена как НЕСОВМЕСТИМАЯ С ПРЕДЫДУЩИМИ ВЕРСИЯМИ
+    и упраздняет большинство предыдущих pipeline steps и полей для этих steps.
+
+[Несовместимые последующие плагины:]
+  -> groovy-postbuild-plugin
+     # Please update to version 264.vf6e02a_77d5b_c as compatible release
+
+  -> build-monitor-plugin
+     # Please update to version 1.14-925.v95b_9089a_4c7f as compatible realease
+
+(!) Пользователям этих плагинов рекомендуется обновлять Badge Plugin вместе с совместимыми версиями соответствующих плагинов.
+

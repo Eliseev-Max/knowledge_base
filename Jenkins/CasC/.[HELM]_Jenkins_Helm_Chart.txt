@@ -1,0 +1,907 @@
+Jenkins with Helm Chart
+
+[sources:]
+  "GitHub.jenkinsci/helm-chart": https://github.com/jenkinsci/helm-charts
+  "Chart documentation.README.md": https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md
+  "Jenkins Docs. Kubernetes": https://www.jenkins.io/doc/book/installing/kubernetes/
+  "CI/CD используя Jenkins на Kubernetes": https://habr.com/ru/articles/442614/
+(*) "jenkins. VALUES.md": https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/VALUES.md
+
+#=> values.yaml: https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/values.yaml
+
+```
+## Добавить репозиторий jenkins helm chart:
+
+helm repo add jenkins https://charts.jenkins.io
+helm repo update
+```
+
+```
+## Устанавливаем чарт
+
+helm install [RELEASE_NAME] jenkins/jenkins [flags]
+# или
+helm upgrade --install ... # (см. helm.txt)
+```
+
+```
+## Удалить чарт:
+## Helm 3
+
+helm uninstall [RELEASE_NAME]
+```
+
+```
+# просмотреть все настраиваемые параметры с подробными комментариями
+# Helm 3
+$ helm show values jenkins/jenkins
+```
+
+
+"""
+  Jenkins - ведущий сервер автоматизации с открытым исходным кодом.
+  Jenkins предоставляет более 2000 плагинов для поддержки создания, развертывания и автоматизации любого проекта.
+  Эта схема устанавливает сервер Jenkins, который порождает агентов на Kubernetes, используя плагин Jenkins Kubernetes.
+  Вдохновленный удивительной работой Карлоса Санчеса:
+  (*) https://github.com/carlossg
+"""
+
+# (*) "Customizing the Chart Before Installing":
+#-> https://helm.sh/docs/intro/using_helm/#customizing-the-chart-before-installing
+
+# Все настраиваемые параметры: https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/VALUES.md
+
+
+** Настройте область безопасности и стратегию авторизации **
+# Configure Security Realm and Authorization Strategy
+
+В данном чарте настроены
+  - SecurityRealm (область безопасности) и
+  - AuthorizationStrategy (стратегия авторизации)
+как показано ниже:
+
+---
+controller:
+  JCasC:
+    securityRealm: |-
+      local:
+        allowsSignup: false
+        enableCaptcha: false
+        users:
+        - id: "${chart-admin-username}"
+          name: "Jenkins Admin"
+          password: "${chart-admin-password}"
+    authorizationStrategy: |-
+      loggedInUsersCanDoAnything:
+        allowAnonymousRead: false
+
+//##//
+
+
+В приведенной выше конфигурации есть только один пользователь.
+Это хорошо для быстрого начала работы, но для серьезного окружения ее нужно подкорректировать.
+
+Поэтому вы должны настроить ее в соответствии с вашими потребностями.
+Это может быть 
+  -> использование LDAP / OIDC / ... в качестве стратегии авторизации
+  -> и использование globalMatrix в качестве стратегии авторизации для настройки более тонких разрешений.
+
+
+******************************************************************
+* Рассмотрите возможность использования пользовательского образа *
+*              (Consider using a custom image)                   *
+******************************************************************
+
+Этот график позволяет пользователю указать плагины, которые должны быть установлены.
+Однако для production случаев следует подумать о создании СОБСТВЕННОГО ОБРАЗА Jenkins,
+в котором будут предустановлены все необходимые плагины.
+
+Таким образом, вы можете быть уверены, какие плагины использует Jenkins при запуске,
+и избежать проблем в случае проблем с подключением к сайту обновления Jenkins.
+
+В репозитории docker для образа Jenkins есть документация, как это сделать.
+# (documentation: https://github.com/jenkinsci/docker#preinstalling-plugins)
+
+--<Dockerfile_custom-jenkins>--
+FROM jenkins/jenkins:lts
+RUN jenkins-plugin-cli --plugins kubernetes workflow-aggregator git configuration-as-code
+...
+//##//
+
+[ПРИМЕЧАНИЕ:]
+  Если вы хотите получить воспроизводимую сборку, то вам следует указать не плавающий тег (не 'latest') для образа
+  jenkins/jenkins:2.249.3
+  и указать версии плагинов.
+
+После того как вы собрали образ и поместили его в реестр, вы можете указать его в файле значений следующим образом:
+
+# Manifest.Part
+---
+controller:
+  image: "registry/my-jenkins"
+  tag: "v1.2.3"
+  installPlugins: false
+
+//##//
+
+[Обратите внимание:]
+  значение installPlugins установлено в false, чтобы ОТКЛЮЧИТЬ загрузку плагинов.
+  В этом случае реестр образов `/my-jenkins:v1.2.3` должен иметь плагины, указанные в качестве значения по умолчанию для директивы
+  controller.installPlugins
+  чтобы side-car система конфигурации работала так, как ожидается.
+
+В случае использования private реестра вы можете использовать 'imagePullSecretName',
+чтобы указать имя секрета, который будет использоваться при извлечении образа:
+
+# Manifest.Part
+---
+controller:
+  image: "registry/my-jenkins"
+  tag: "v1.2.3"
+  imagePullSecretName: registry-secret
+  installPlugins: false
+
+//##//
+
+
+************************************
+* Конфигурация внешнего URL-адреса *
+************************************
+
+Если вы используете определения ingress, предоставленные этим чартом через блок controller.ingress,
+то сконфигурированный hostname будет именем хоста ingress, начинающимся с https:// или http:// в зависимости от конфигурации tls.
+
+Протокол можно изменить, указав controller.jenkinsUrlProtocol. 
+
+Если вы не используете предоставленный ingress, вы можете указать controller.jenkinsUrl, чтобы изменить определение URL.
+
+
+*************************
+* Configuration as Code *
+*************************
+
+Jenkins Configuration as Code (JCasC) теперь является стандартным компонентом в проекте Jenkins.
+
+[!] Чтобы конфигурация JCasC могла передаваться из helm values,
+    плагин configuration-as-code ДОЛЖЕН БЫТЬ УСТАНОВЛЕН в Docker-образ контроллера Jenkins
+   (что и происходит по умолчанию, как указано в значении по умолчанию директивы controller.installPlugins).
+
+********************************************************************************
+* Конфигурация JCasc передается через Helm values под ключом controller.JCasC. *
+********************************************************************************
+
+В разделе «Jenkins Configuration as Code (JCasC)» страницы «VALUES_SUMMARY.md»
+#-> https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/VALUES_SUMMARY.md#jenkins-configuration-as-code-jcasc
+  перечислены все возможные директивы.
+
+В частности, вы можете указать пользовательские JCasC-скрипты,
+добавив sub-key в controller.JCasC.configScripts для каждой области конфигурации,
+где каждый соответствует плагину или разделу пользовательского интерфейса.
+
+Sub-keys (до символа |) - это только метки (labels), используемые для того, чтобы дать разделу осмысленное имя.
+
+(!) Единственное ограничение:
+    они должны соответствовать определению метки DNS в RFC 1123,
+    поэтому могут содержать ТОЛЬКО
+      ✓ строчные буквы,
+      ✓ цифры
+      ✓ и дефисы.
+
+# Механизм исполнения Configuration-as-Code:
+(!) Каждый ключ станет именем конфигурационного yaml-файла на контроллере в /var/jenkins_home/casc_configs (по умолчанию)
+    и будет обработан плагином Configuration as Code Plugin во время запуска Jenkins.
+
+(*) Строки после каждого | становятся содержимым конфигурационного yaml-файла.
+    Первая строка после этой - корневой элемент JCasC, например jenkins, credentials и т. д.
+
+Лучшей ссылкой является ссылка на документацию здесь:
+https://<jenkins_url>/configuration-as-code.
+
+
+# В приведенном ниже примере задается пользовательское сообщение systemMessage:
+
+---
+controller:
+  JCasC:
+    configScripts:
+      welcome-message: |
+        jenkins:
+          systemMessage: Welcome to our CI\CD server.
+
+//##//
+
+# Более сложный пример, создающий настройки ldap:
+
+---
+controller:
+  JCasC:
+    configScripts:
+      ldap-settings: |
+        jenkins:
+          securityRealm:
+            ldap:
+              configurations:
+                - server: ldap.acme.com
+                  rootDN: dc=acme,dc=uk
+                  managerPasswordSecret: ${LDAP_PASSWORD}
+                  groupMembershipStrategy:
+                    fromUserRecord:
+                      attributeName: "memberOf"
+
+//##//
+
+[!] Помните, что файл конфигурации по умолчанию УЖЕ СОДЕРЖИТ некоторые значения, которые вы НЕ СМОЖЕТЕ ИЗМЕНИТЬ в разделе configScripts.
+
+[Например:]
+  вы не можете настроить Jenkins URL и адрес электронной почты системного администратора таким образом,
+  потому что это может привести к ошибке.
+
+НЕВЕРНО:
+---
+controller:
+  JCasC:
+    configScripts:
+      jenkins-url: |
+        unclassified:
+          location:
+            url: https://example.com/jenkins
+            adminAddress: example@mail.com
+
+//##//
+
+ВЕРНО:
+---
+controller:
+  jenkinsUrl: https://example.com/jenkins
+  jenkinsAdminEmail: example@mail.com
+
+
+# Другие примеры JCasC можно найти здесь:
+https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos
+
+
+** Разбиение больших скриптов Config as Code **
+
+Скрипты Jenkins Config as Code могут стать довольно большими,
+=> поддерживать все ваши скрипты в одном yaml-файле может быть сложно.
+
+Сам плагин Config as Code предлагает обновить переменную окружения CASC_JENKINS_CONFIG,
+чтобы она представляла собой разделенный запятыми список путей, по которым будет двигаться плагин, подбирая yaml-файлы по мере необходимости.
+
+Однако в Jenkins helm chart это значение CASC_JENKINS_CONFIG поддерживается через шаблоны (templates).
+
+Лучшим решением будет разделить ваши controller.JCasC.configScripts на отдельные values файлы,
+и предоставить каждый файл во время установки helm.
+
+Например:
+  вы можете иметь values файл (например, values_main.yaml),
+  который определяет значения, описанные в VALUES_SUMMARY.md для вашей конфигурации Jenkins:
+
+---
+jenkins:
+  controller:
+    jenkinsUrlProtocol: https
+    installPlugins: false
+    ...
+//##//
+
+  Во втором файле (например, values_jenkins_casc.yaml) вы можете определить секцию ваших конфигурационных скриптов:
+
+---
+jenkins:
+  controller:
+    JCasC:
+      configScripts:
+        jenkinsCasc:  |
+          jenkins:
+            disableRememberMe: false
+            mode: NORMAL
+            ...
+//##//
+
+  И продолжайте расширять свои конфигурационные скрипты, создавая дополнительные файлы
+  (чтобы не все конфигурационные скрипты располагались в одном yaml-файле для лучшего обслуживания):
+
+--<values_jenkins_unclassified.yaml>--
+jenkins:
+  controller:
+    JCasC:
+      configScripts:
+        unclassifiedCasc: |
+          unclassified:
+            ...
+//##//
+
+
+При установке вы предоставляете все соответствующие yaml-файлы,
+например:
+--[CMD]--
+helm install -f values_main.yaml \
+             -f values_jenkins_casc.yaml \
+             -f values_jenkins_unclassified.yaml ...
+--//--
+
+Вместо обновления переменной окружения CASC_JENKINS_CONFIG для включения нескольких путей,
+несколько файлов CasC yaml будут созданы по одному и тому же пути var/jenkins_home/casc_configs
+
+
+***********************************************
+*  Config as Code With or Without Auto-Reload *
+* CasC с автоматической загрузкой или без нее *
+***********************************************
+(https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md#config-as-code-with-or-without-auto-reload)
+
+Изменения Config as Code (в controller.JCasC.configScripts) могут
+  -> либо заставлять создавать новый pod и применяться только при следующем запуске,
+  -> либо автоматически перезагружаться «на лету».
+
+  Если вы установите значение   controller.sidecars.configAutoReload.enabled в true,
+
+->>
+controller.sidecars.configAutoReload.enabled: true
+<<-
+
+  -> в pod контроллера Jenkins будет установлен второй, вспомогательный контейнер, известный как «sidecar».
+  Он следит за изменениями в configScripts, копирует содержимое в файловую систему Jenkins и отправляет POST по адресу
+http://<jenkins_url>/reload-configuration-as-code
+  с предварительно созданным ключом.
+
+  Вы можете следить за логами этого sidecar'а с помощью команды
+-->
+kubectl logs <controller_pod> -c config-reload -f
+<--
+
+  Если вы хотите ВКЛЮЧИТЬ АВТОЗАГРУЗКУ, то вам также необходимо настроить rbac,
+  поскольку контейнер, запускающий перезагрузку, должен следить за config maps:
+
+---
+controller:
+  sidecars:
+    configAutoReload:
+      enabled: true
+rbac:
+  create: true
+
+
+*****************************************************************************
+* Разрешить ограниченную HTML-разметку в тексте, отправленном пользователем *
+*****************************************************************************
+
+  Некоторые сторонние системы (например, GitHub) используют данные в формате HTML в своей полезной нагрузке (payload),
+  отправляемой на веб-хук Jenkins (например, URL-адрес создаваемого pull-запроса).
+
+  Чтобы отображать такие данные в виде обработанного HTML вместо необработанного текста,
+  установите для параметра controller.enableRawHtmlMarkupFormatter значение true.
+
+->>
+controller.enableRawHtmlMarkupFormatter: true
+<<-
+
+  Эта опция требует установки плагина OWASP Markup Formatter Plugin (antisamy-markup-formatter)
+#-> https://plugins.jenkins.io/antisamy-markup-formatter/
+
+  Этот плагин не установлен по умолчанию, но может быть добавлен в controller.additionalPlugins.
+
+
+******************************************************************
+* Изменение максимального количества соединений с Kubernetes API *
+******************************************************************
+
+  При использовании агентов с контейнерами, отличными от JNLP,
+  плагин kubernetes будет взаимодействовать с этими контейнерами, используя Kubernetes API.
+  это изменяет максимальное количество одновременных соединений
+
+---
+agent:
+  maxRequestsPerHostStr: "32"
+<<<
+
+  Это изменит конфигурацию kubernetes "cloud" (как его называет jenkins),
+  которая создается автоматически в рамках этого helm chart'а.
+
+
+****************************************
+* Change container cleanup timeout API *
+****************************************
+
+  Для задач, использующих очень большие образы (= docker images), этот таймаут можно увеличить,
+  чтобы избежать преждевременного завершения задачи, пока pod Kubernetes еще развертывается.
+
+---
+agent:
+  retentionTimeout: "32"
+
+//##//
+
+  Это изменит конфигурацию kubernetes "cloud" (как его называет jenkins),
+  которая создается автоматически в рамках этого helm chart'а.
+
+************************************************
+* Change seconds to wait for pod to be running *
+************************************************
+
+  Это изменит время (в секундах), в течение которого Jenkins будет ждать, пока pod не перейдет в running state.
+
+---
+agent:
+  waitForPodSec: "32"
+
+<<<
+
+  Это изменит конфигурацию kubernetes "cloud" (как его называет jenkins),
+  которая создается автоматически в рамках этого helm chart'а.
+
+
+************************************
+* Mounting Volumes into Agent Pods *
+************************************
+
+  Ваши агенты Jenkins будут работать как pod'ы, и можно будет вводить volumes там, где это необходимо:
+
+---
+agent:
+  volumes:
+  - type: Secret
+    secretName: jenkins-mysecrets
+    mountPath: /var/run/secrets/jenkins-mysecrets
+
+//##//
+
+  Поддерживаются следующие типы томов:
+    ✓ ConfigMap,
+    ✓ EmptyDir,
+    ✓ HostPath,
+    ✓ Nfs,
+    ✓ PVC,
+    ✓ Secret
+
+(*) Каждый тип поддерживает свой набор настраиваемых атрибутов, определяемых соответствующим классом Java.
+
+
+*****************
+* NetworkPolicy *
+*****************
+
+  Чтобы использовать ресурсы NetworkPolicy, созданные по умолчанию,
+  установите сетевой плагин, реализующий спецификацию Kubernetes NetworkPolicy
+# "Declare Network Policy": https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#before-you-begin
+
+  Установите helm chart с включенной сетевой политикой, установив networkPolicy.enabled в true.
+
+--<CasC>--
+networkPolicy.enabled: true
+<<<
+
+  Вы можете использовать строфы
+  ● controller.networkPolicy.internalAgents
+    <и>
+  ● controller.networkPolicy.externalAgents
+  
+  -> для тонкого контроля над тем, откуда могут подключаться внутренние/внешние агенты.
+  Внутренние (Internal) агенты могут подключаться
+    -> на основе  pod labels
+    -> и (опционально) пространств имен
+
+  Внешние:
+    -> на основе диапазонов IP-адресов (IP ranges).
+
+
+*******************************
+* Список утверждения скриптов *
+*******************************
+
+controller.scriptApproval
+  - позволяет передать сигнатуры функций, которые будут разрешены в пайплайнах.
+
+Пример:
+--<CasC>--
+controller:
+  scriptApproval:
+    - "method java.util.Base64$Decoder decode java.lang.String"
+    - "new java.lang.String byte[]"
+    - "staticMethod java.util.Base64 getDecoder"
+<<<
+
+
+*****************
+* Custom Labels *
+*****************
+
+controller.serviceLabels
+  -> можно использовать для добавления пользовательских меток (custom labels) в jenkins-controller-svc.yaml.
+
+Например:
+
+ServiceLabels:
+  expose: true
+
+<<<
+
+***************
+* Persistence *
+***************
+
+#(*) == Сохраняемость, живучесть, постоянство
+
+  Образ Jenkins хранит персистентные данные по пути: ```/var/jenkins_home```  контейнера.
+
+  ПО УМОЛЧАНИЮ для хранения данных во время развертывания используется динамически управляемый Persistent Volume Claim.
+# dynamically managed Persistent Volume Claim
+(*) Известно, что это работает в GCE, AWS и minikube.
+
+  В качестве альтернативы можно использовать ранее настроенный Persistent Volume Claim.
+
+Можно смонтировать несколько volumes с помощью параметров:
+  persistence.volumes
+    <и>
+  persistence.mounts.
+
+# См. дополнительные значения persistence с помощью команд конфигурации.
+#-> https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md#configuration
+
+
+Существующий PersistentVolumeClaim
+  1) Создайте PersistentVolume
+  2) Создайте PersistentVolumeClaim
+  3) Install the chart, setting persistence.existingClaim -to-> PVC_NAME
+
+
+[Long Volume Attach/Mount Times]
+[Длительное время прикрепления/монтирования томов]
+
+  При использовании fsGroup некоторые комбинации типов томов и форматов файловых систем могут иметь длительное время прикрепления/монтирования,
+  10 или более минут.
+
+  Эта проблема может привести к появлению следующих записей в истории событий Pod'а:
+
+--[OUTPUT]--
+Warning  FailedMount  38m        kubelet, aks-default-41587790-2 Unable to attach or mount volumes: unmounted volumes=[jenkins-home], unattached volumes=[plugins plugin-dir jenkins-token-rmq2g sc-config-volume tmp jenkins-home jenkins-config secrets-dir]: timed out waiting for the condition
+--##--
+
+  В таких случаях попробуйте заменить fsGroup на supplementalGroups в securityContext pod'а.
+  Этого можно добиться, установив Helm chart value  `controller.podSecurityContextOverride`
+  на что-то вроде:
+
+---
+controller:
+  podSecurityContextOverride:
+    runAsNonRoot: true
+    runAsUser: 1000
+    supplementalGroups: [1000]
+<<<
+
+# Эта проблема была обнаружена на azureDisk с ext4 и в облаке Alibaba.
+
+[Класс хранения (storage class)]
+
+Можно определить, какой storage class будет использоваться, установив persistence.storageClass в [customStorageClass].
+  Если задан прочерк (-)  => динамическая инициализация отключена.
+  Если класс хранилища имеет значение null или не определен (""),
+    -> используется провизор по умолчанию (gp2 на AWS, стандартный на GKE, AWS и OpenStack).
+
+
+**************************
+*   Additional Secrets   *
+* Дополнительные секреты *
+**************************
+
+  Additional secrets и Additional Existing Secrets могут быть
+    ➜ установлены в контроллер Jenkins ЧЕРЕЗ CHART
+    ➜ или созданы с помощью
+       ● controller.additionalSecrets
+         <или>
+       ● controller.additionalExistingSecrets
+
+  Частым случаем использования могут быть учетные данные (credentials) провайдера идентификации,
+  если используется внешний провайдер идентификации на основе LDAP или OIDC.
+
+  Затем на этот секрет можно ссылаться в конфигурации JCasC (см. Configuration as Code (JCasC) ).
+
+# секция контроллера values.yaml, ссылающаяся на смонтированные секреты:
+
+# controller section docstrings translation:
+"""
+'name' и 'keyName' конкатенируются со знаком '-' между ними, поэтому, например:
+существующий секрет «secret-credentials» и ключ внутри него с именем «github-password» должны использоваться в Jcasc как
+${secret-credentials-github-password}
+
+'name' и 'keyName'
+  + должны быть строчными
+  + RFC 1123 метки должны состоять из буквенно-цифровых символов нижнего регистра или '-',
+  + и должна начинаться и заканчиваться буквенно-цифровым символом (например, 'my-name', или '123-abc')
+
+existingSecret существующий секрет «secret-credentials» и ключ внутри него с именем «github-username» должны использоваться в Jcasc как ${github-username}.
+При использовании existingSecret нет необходимости указывать keyName в additionalExistingSecrets.
+"""
+
+---
+controller:
+  # the 'name' and 'keyName' are concatenated with a '-' in between, so for example:
+  # an existing secret "secret-credentials" and a key inside it named "github-password" should be used in Jcasc as ${secret-credentials-github-password}
+  # 'name' and 'keyName' must be lowercase RFC 1123 label must consist of lower case alphanumeric characters or '-',
+  # and must start and end with an alphanumeric character (e.g. 'my-name', or '123-abc')
+  # existingSecret existing secret "secret-credentials" and a key inside it named "github-username" should be used in Jcasc as ${github-username}
+  # When using existingSecret no need to specify the keyName under additionalExistingSecrets.
+  existingSecret: secret-credentials
+  
+  additionalExistingSecrets:
+    - name: secret-credentials
+      keyName: github-username
+    - name: secret-credentials
+      keyName: github-password
+    - name: secret-credentials
+      keyName: token
+  
+  additionalSecrets:
+    - name: client_id
+      value: abc123
+    - name: client_secret
+      value: xyz999
+  JCasC:
+    securityRealm: |
+      oic:
+        clientId: ${client_id}
+        clientSecret: ${client_secret}
+        ...
+    configScripts:
+      jenkins-casc-configs: |
+        credentials:
+          system:
+            domainCredentials:
+            - credentials:
+              - string:
+                  description: "github access token"
+                  id: "github_app_token"
+                  scope: GLOBAL
+                  secret: ${secret-credentials-token}
+              - usernamePassword:
+                  description: "github access username password"
+                  id: "github_username_pass"
+                  password: ${secret-credentials-github-password}
+                  scope: GLOBAL
+                  username: ${secret-credentials-github-username}
+
+# Более подробно: -> https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets
+
+
+**************************************
+* Secret Claims from HashiCorp Vault *
+**************************************
+
+  В этом чарте можно генерировать ресурсы SecretClaim
+  для автоматического создания и обслуживания Kubernetes `Secrets` из HashiCorp Vault через kube-vault-controller
+
+# "kube-vault-controller": https://github.com/roboll/kube-vault-controller
+
+  На эти секреты можно ссылаться так же, как и на Additional Secrets.
+  Этого можно добиться, определив необходимые Secret Claims в файле controller.secretClaims, как показано ниже:
+
+---
+controller:
+  secretClaims:
+    - name: jenkins-secret
+      path: secret/path
+    - name: jenkins-short-ttl
+      path: secret/short-ttl-path
+      renew: 60
+
+<<<
+
+
+********
+* RBAC *
+********
+
+# RBAC (Role Based Access Control || Контроль доступа на основе ролей)
+#   = это метод регулирования доступа к компьютерным или сетевым ресурсам на основе ролей отдельных пользователей в вашей организации.
+#     Авторизация RBAC использует группу API rbac.authorization.k8s.io для принятия решений об авторизации,
+#     позволяя вам динамически настраивать политики через API Kubernetes. [1]
+#
+# Иными словами, это система распределения прав доступа к различным объектам в кластере Kubernetes.
+# Объекты в кластере Kubernetes — это YAML-манифесты,
+# а права доступа определяют:
+#   какому пользователю можно только просматривать манифесты,
+#   а кто может их создавать, изменять или даже удалять.
+#
+# Пользователи кластера Kubernetes — это все, кто шлёт запросы в API-сервер,
+#   * не только администраторы
+#   * и разработчики,
+#   + скрипты CI/CD,
+#   + компоненты control plane,
+#   + kubelet и kube-proxy на узлах,
+#   + приложения, запущенные в кластере. 
+
+# В рамках модели контроля доступа на основании ролей есть 5 сущностей:
+#  * Role,
+#  * RoleBinding,
+#  * ClusterRole,
+#  * ClusterRoleBinding,
+#  * ServceAccount            [2]
+
+
+##[1] "Kubernetes. Using RBAC Authorization": https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+##[2] "Как работает RBAC в Kubernetes": https://habr.com/ru/companies/slurm/articles/655409/
+
+  RBAC ВКЛЮЧЕН по умолчанию.
+  Если вы хотите отключить его, вам нужно установить значение rbac.create в false.
+
+
+*******************************
+* Adding Custom Pod Templates *
+*******************************
+
+  Можно добавить пользовательские шаблоны pod'ов для kubernetes cloud, настроенного по умолчанию.
+
+  Добавьте ключ в agent.podTemplates для каждого pod template.
+  Каждый ключ (до символа |) является просто меткой (label) и может быть любым значением.
+  Ключи используются только для того, чтобы дать шаблону Pod'а осмысленное имя.
+  Единственное ограничение - они могут содержать только RFC 1123 \ DNS символы меток:
+    строчные буквы,
+    цифры
+    и дефисы.
+
+  Каждый Pod template может содержать несколько контейнеров.
+
+[!] Добавлять контейнер jnlp НЕ НУЖНО,
+    так как плагин kubernetes автоматически добавит (inject) его в pod.
+
+  Для загрузки конфигурации pod templates необходимо установить следующие значения:
+```
+controller.JCasC.defaultConfig: true
+```
+
+# В примере ниже создается шаблон python pod в облаке kubernetes:
+
+---
+agent:
+  podTemplates:
+    python: |
+      - name: python
+        label: jenkins-python
+        serviceAccount: jenkins
+        containers:
+          - name: python
+            image: python:3
+            command: "/bin/sh -c"
+            args: "cat"
+            ttyEnabled: true
+            privileged: true
+            resourceRequestCpu: "400m"
+            resourceRequestMemory: "512Mi"
+            resourceLimitCpu: "1"
+            resourceLimitMemory: "1024Mi"
+<<<
+
+# Лучшая ссылка: https://<jenkins_url>/configuration-as-code/reference#Cloud-kubernetes
+
+
+***********************************************
+* Adding Pod Templates Using additionalAgents *
+***********************************************
+
+  additionalAgents можно использовать для настройки дополнительных шаблонов kubernetes pod.
+  Каждый дополнительный агент соответствует `agent` по настраиваемым значениям
+  и наследует все значения от агента,
+  поэтому вам нужно указать только те значения, которые ОТЛИЧАЮТСЯ.
+
+[Например:]
+
+---
+agent:
+  podName: default
+  customJenkinsLabels: default
+  # set resources for additional agents to inherit
+  resources:
+    limits:
+      cpu: "1"
+      memory: "2048Mi"
+
+additionalAgents:
+  maven:
+    podName: maven
+    customJenkinsLabels: maven
+    # An example of overriding the jnlp container
+    # sideContainerName: jnlp
+    image: jenkins/jnlp-agent-maven
+    tag: latest
+  python:
+    podName: python
+    customJenkinsLabels: python
+    sideContainerName: python
+    image: python
+    tag: "3"
+    command: "/bin/sh -c"
+    args: "cat"
+    TTYEnabled: true
+
+
+*************************
+* Ingress Configuration *
+*************************
+
+  Этот chart предоставляет ресурсы ingress, настраиваемые с помощью блока   controller.ingress.
+  Простейшая конфигурация выглядит следующим образом:
+
+---
+controller:
+   ingress:
+       enabled: true
+       paths: []
+       apiVersion: "extensions/v1beta1"
+       hostName: jenkins.example.com
+<<<
+
+  Этот фрагмент (snippet) настраивает правило ingress для экспонирования (exposing) jenkins на jenkins.example.com
+  Вы можете определить метки и аннотации с помощью
+    controller.ingress.labels
+      <и>
+    controller.ingress.annotations
+  соответственно.
+
+  Кроме того, вы можете настроить входной tls через
+    controller.ingress.tls
+
+  По умолчанию это ingress rule открывает все пути.
+  При необходимости это можно отменить, указав нужные пути в controller.ingress.paths
+
+  Если вы хотите настроить secondary ingress (вторичный ingress)
+  # например, вы не хотите, чтобы экземпляр jenkins был раскрыт, но все еще хотите получать webhooks,
+  вы можете настроить controller.secondaryingress.
+
+  По умолчанию secondary ingress ничего не expose'ит
+  и должен быть настроен через controller.secondaryingress.paths:
+
+--<Secondary-Ingress>--
+---
+controller:
+   ingress:
+       enabled: true
+       apiVersion: "extensions/v1beta1"
+       hostName: "jenkins.internal.example.com"
+       annotations:
+           kubernetes.io/ingress.class: "internal"
+   secondaryingress:
+       enabled: true
+       apiVersion: "extensions/v1beta1"
+       hostName: "jenkins-scm.example.com"
+       annotations:
+           kubernetes.io/ingress.class: "public"
+       paths:
+        - /github-webhook
+<<<
+
+
+######################
+# Prometheus Metrics #
+######################
+
+(https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md#prometheus-metrics)
+
+
+#########################################
+********************************
+* HTTPS Keystore Configuration *
+********************************
+
+  Эта конфигурация позволяет jenkins использовать keystore для обслуживания HTTPS.
+  Вот раздел файла значений, связанный с конфигурацией keystore.
+  Само хранилище ключей должно быть размещено перед ключом jenkinsKeyStoreBase64Encoded и в формате base64.
+  Для этого после получения файла keystore.jks просто сделайте следующее:
+-->
+cat keystore.jks | base64
+<--
+
+и вставьте полученный результат перед jenkinsKeyStoreBase64Encoded.
+
+После включения httpsKeyStore.enable убедитесь, что httpPort и targetPort не совпадают, так как targetPort будет обслуживать HTTPS.
+Не устанавливайте значение controller.httpsKeyStore.httpPort равным -1, так как это приведет к ошибкам в проверке на готовность и живость.
+Если у вас уже есть секрет kubernetes, содержащий keystore и пароль к нему,
+=> вы можете указать его имя перед jenkinsHttpsJksSecretName;
+Вы должны помнить, что ваш секрет должен иметь соответствующие имена ключей данных jenkins-jks-file
+# (или переопределить имя ключа с помощью jenkinsHttpsJksSecretKey)
+  и https-jks-password
+# (или переопределить имя ключа с помощью jenkinsHttpsJksPasswordSecretKey;
+
+дополнительно вы можете заставить его получать пароль из другого секрета с помощью jenkinsHttpsJksPasswordSecretName).
+
+[Пример:]

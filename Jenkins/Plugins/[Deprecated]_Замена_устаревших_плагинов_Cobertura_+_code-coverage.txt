@@ -1,0 +1,205 @@
+Замена устаревших плагинов
+
+1. Cobertura Plugin
+  1.1. "Cobertura": https://plugins.jenkins.io/cobertura/
+  1.2. "Cobertura Plugin": https://www.jenkins.io/doc/pipeline/steps/cobertura/
+
+2. Code Coverage Plugin:
+  2.1. "Code Coverage Plugin": https://www.jenkins.io/doc/pipeline/steps/code-coverage-api/
+  2.2. "Code Coverage": https://plugins.jenkins.io/code-coverage-api/
+
+3. Coverage Plugin:
+     - https://www.jenkins.io/doc/pipeline/steps/coverage/
+     - https://plugins.jenkins.io/coverage/
+
+
+Текущее состояние:
+
+#<Установлено:>
+
+  "Cobertura Plugin"
+    - short_name: cobertura
+    - version: 1.17
+
+  "Code Coverage Plugin"
+    - short_name: code-coverage-api 
+    - version: 4.99.0
+
+  "Coverage Plugin":
+    - short_name: coverage
+    - version: 1.16.1
+
+#<Задача:>
+  -> перейти на использование плагина "Coverage Plugin", отказаться от устаревших плагинов
+
+
+1. Cobertura
+
+  Данный плагин предоставляет функциональность, доступную через steps, совместимые с Pipeline.
+# подробнее об интеграции steps в Pipeline: https://www.jenkins.io/doc/book/pipeline/syntax/#declarative-steps
+  Список других подобных плагинов см. на странице Pipeline Steps Reference.
+
+cobertura: """Publish Cobertura Coverage Report"""
+  autoUpdateHealth :            boolean (optional)
+  autoUpdateStability :         boolean (optional)
+  classCoverageTargets :        String (optional)
+  coberturaReportFile :         String (optional)
+  conditionalCoverageTargets :  String (optional)
+  enableNewApi :                boolean (optional)
+  failNoReports :               boolean (optional)
+  failUnhealthy :               boolean (optional)
+  failUnstable :                boolean (optional)
+  fileCoverageTargets :         String (optional)
+  lineCoverageTargets :         String (optional)
+  maxNumberOfBuilds :           int (optional)
+  methodCoverageTargets :       String (optional)
+  onlyStable :                  boolean (optional)
+  packageCoverageTargets :      String (optional)
+  sourceEncoding (optional)
+    Values: ASCII, Big5, Big5_HKSCS, Big5_Solaris, Cp037, Cp1006, Cp1025, Cp1026, Cp1046, Cp1047, Cp1097, Cp1098, Cp1112, Cp1122, Cp1123, Cp1124, Cp1140, Cp1141, Cp1142, Cp1143, Cp1144, Cp1145, Cp1146, Cp1147, Cp1148, Cp1149, Cp1250, Cp1251, Cp1252, Cp1253, Cp1254, Cp1255, Cp1256, Cp1257, Cp1258, Cp1381, Cp1383, Cp273, Cp277, Cp278, Cp280, Cp284, Cp285, Cp297, Cp33722, Cp420, Cp424, Cp437, Cp500, Cp737, Cp775, Cp838, Cp850, Cp852, Cp855, Cp856, Cp857, Cp858, Cp860, Cp861, Cp862, Cp863, Cp864, Cp865, Cp866, Cp868, Cp869, Cp870, Cp871, Cp874, Cp875, Cp918, Cp921, Cp922, Cp930, Cp933, Cp935, Cp937, Cp939, Cp942, Cp942C, Cp943, Cp943C, Cp948, Cp949, Cp949C, Cp950, Cp964, Cp970, EUC_CN, EUC_JP, EUC_JP_LINUX, EUC_JP_Solaris, EUC_KR, EUC_TW, GB18030, GBK, ISCII91, ISO2022_CN_CNS, ISO2022_CN_GB, ISO2022CN, ISO2022JP, ISO2022KR, ISO8859_1, ISO8859_13, ISO8859_15, ISO8859_2, ISO8859_3, ISO8859_4, ISO8859_5, ISO8859_6, ISO8859_7, ISO8859_8, ISO8859_9, JISAutoDetect, KOI8_R, MacArabic, MacCentralEurope, MacCroatian, MacCyrillic, MacDingbat, MacGreek, MacHebrew, MacIceland, MacRoman, MacRomania, MacSymbol, MacThai, MacTurkish, MacUkraine, MS874, MS932, MS936, MS949, MS950, MS950_HKSCS, PCK, SJIS, TIS620, UnicodeBig, UnicodeBigUnmarked, UnicodeLittle, UnicodeLittleUnmarked, UTF_16, UTF_8, x_iso_8859_11, x_Johab
+
+  zoomCoverageChart :           boolean (optional)
+
+"""
+  Существует способ добавить pipeline step для публикации отчета о покрытии (coverage report),
+  но он не отображается в интерфейсе BlueOcean.
+  В обычном пользовательском интерфейсе он отображается нормально.
+"""
+
+#EXAMPLE:
+---
+pipeline {
+    agent any
+
+    stages {
+        ...
+    }
+    post {
+        always {
+            junit '**/nosetests.xml'
+            step([$class: 'CoberturaPublisher', autoUpdateHealth: false, autoUpdateStability: false, coberturaReportFile: '**/coverage.xml', failUnhealthy: false, failUnstable: false, maxNumberOfBuilds: 0, onlyStable: false, sourceEncoding: 'ASCII', zoomCoverageChart: false])
+        }
+    }
+}
+
+# [!] одним из параметров плагина Cobertura является XML, который он будет использовать ('**/coverage.xml' в примере).
+# Если вы используете python, вам нужно использовать что-то вроде:
+```
+nosetests --with-coverage --cover-xml --cover-package=pkg1,pkg2 --with-xunit test
+```
+
+Другой способ использования плагина Cobertura:
+
+---
+...
+stage ("Extract test results") {
+    cobertura coberturaReportFile: 'path-to/coverage.xml'
+}
+...
+<<<
+
+---<Cobertura Plugin Usage>---
+pipeline {
+...
+    stage("Report Coverage") {
+        when {
+            allOf {
+                expression { params.UNIT_TESTS }
+                expression { params.COVERAGE }
+            }
+        }
+        steps {
+            sh "cmake --build ./build --target coverage-xml"
+        }
+
+    stage("Report Coverage") {
+        post {
+            cobertura(
+                autoUpdateHealth: false,
+                autoUpdateStability: false,
+                coberturaReportFile: "path/to/coverage.xml",
+                conditionalCoverageTargets: "70, 0, 0",
+                failUnhealthy: false,
+                failUnstable: false,
+                lineCoverageTargets: "80, 0, 0",
+                maxNumberOfBuilds: 0,
+                methodCoverageTargets: "80, 0, 0",
+                onlyStable: false,
+                sourceEncoding: "UTF_8",
+                zoomCoverageChart: false
+            )
+        }
+    }
+}
+
+    recordCoverage(
+        tools: [[parser: 'COBERTURA', pattern: 'path/to/coverage-pattern.xml']],
+        enabledForFailure: true,
+        id: 'tests',
+        name: 'Tests Coverage',
+        enabledForFailure: false,
+        sourceCodeRetention: 'LAST_BUILD',
+        sourceCodeEncoding: UTF-8,
+        ignoreParsingErrors: true,
+        skipPublishingChecks: true,
+        skipSymbolicLinks: true,
+        failOnError: false
+    )
+
+Code Coverage Plugin
+(https://www.jenkins.io/doc/pipeline/steps/code-coverage-api/)
+
+publishCoverage: Publish Coverage Report
+
+# Атрибуты/параметры:
+
+adapters (optional)
+  # Массив / список вложенных друг в друга объектов
+  #<Объекты>:
+    antPath
+    dListingAdapter
+    istanbulCoberturaAdapter
+    jacocoAdapter
+    llvmAdapter
+    opencoverAdapter
+    sonarGenericCoverageAdapter
+    coberturaAdapter
+    cobertura
+
+  applyThresholdRecursively : boolean (optional)
+
+  calculateDiffForChangeRequests : boolean (optional)
+
+  checksName : String (optional)
+
+  failBuildIfCoverageDecreasedInChangeRequest : boolean (optional)
+
+  failNoReports : boolean (optional)
+
+  failUnhealthy : boolean (optional)
+
+  failUnstable : boolean (optional)
+
+  globalThresholds (optional)
+    Array / List of Nested Object
+      thresholdTarget : String
+      failUnhealthy : boolean
+      unhealthyThreshold : float
+      unstableThreshold : float
+
+  scm : String (optional)
+    
+  skipPublishingChecks : boolean (optional)
+
+  sourceCodeEncoding : String (optional)
+
+  sourceDirectories (optional)
+    Array / List of Nested Object
+      path : String
+
+  sourceFileResolver (optional)
+    Nested Object
+      level
+
+  tag : String (optional)
+

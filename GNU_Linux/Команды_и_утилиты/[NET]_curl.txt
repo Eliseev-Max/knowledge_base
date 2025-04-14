@@ -8,6 +8,7 @@
 **************************************************************
 {"curl(1) - Linux man page":https://linux.die.net/man/1/curl}
 {"HTTP API Curl (урок)":https://ru.hexlet.io/courses/http-api/lessons/curl/theory_unit}
+[+] "HTTPS Connection Using Curl": https://www.baeldung.com/linux/curl-https-connection
 
 
 curl - 

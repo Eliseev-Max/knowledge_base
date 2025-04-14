@@ -1,0 +1,10 @@
+Jenkins Security Advisory 2024-10-02
+(https://www.jenkins.io/security/advisory/2024-10-02/#SECURITY-3373)
+
+Это сообщение сообщает об уязвимостях в следующих компонентах Jenkins:
+
+  * Jenkins (core)
+  * Credentials Plugin
+  * OpenId Connect Authentication Plugin
+
+

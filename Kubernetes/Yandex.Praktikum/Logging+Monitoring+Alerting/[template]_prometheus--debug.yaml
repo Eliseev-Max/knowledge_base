@@ -1,0 +1,158 @@
+---
+# Source: prometheus-student/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-conf
+  namespace: std-017-033
+  labels:
+    app: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      scrape_timeout: 10s
+    rule_files:
+       - "/config/*"
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager:9093"
+    scrape_configs:
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - std-017-033
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        regex: (.+);(.+)
+        replacement: $1:$2
+        target_label: __address__
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        regex: (.+)
+        target_label: __metrics_path__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+---
+# Source: prometheus-student/templates/rules.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: std-017-033
+  labels:
+    app: prometheus
+data:
+  sausage-store.yaml: "---\ngroups:\n  - name: Sausage store rules\n    rules:\n    - alert: InstanceDown\n      expr: up{app=\"backend\"} == 0\n      for: 1m\n      labels:\n        severity: critical\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Problem with your backend pod\"\n        description: \"Backend pod is down for 1 minute\"\n    - alert: HTTP status code is 500\n      expr: http_server_requests_seconds_count{status=\"500\"} > 0\n      for: 1m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"You have got a bad request\"\n        description: \"You have got request with status code = 500, please check\"\n    - alert: Delay over 100ms for /api/orders\n      expr: http_server_requests_seconds_bucket{quantile=\"0.95\", method=\"POST\", uri=\"/api/orders\"} > 100000\n      for: 5m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Delay to /api/orders requests\"\n        description: \"Delay more than 100ms for 0.95 quantile of success POST  requsests to /api/orders\"\n    - alert: Errors for /actuator/prometheus\n      expr: http_server_requests_seconds_count{outcome!=\"SUCCESS\", uri!=\"/actuator/prometheus\"} > 0\n      for: 2m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Error in requests to /actuator/prometheus\"\n        description: \"There is an error in API request to /actuator/prometheus for 2 minutes\"\n"
+---
+# Source: prometheus-student/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: std-017-033
+spec:
+  ports:
+    - port: 9090
+      protocol: TCP
+  selector:
+    app: prometheus
+  sessionAffinity: None
+  type: ClusterIP
+---
+# Source: prometheus-student/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: std-017-033
+  labels:
+    app: prometheus
+    provider: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometheus
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs/format: zap
+        co.elastic.logs/timezone: Europe/Moscow
+        co.elastic.logs/exclude_lines: skipping duplicate scrape target with identical labels;
+    spec:
+      terminationGracePeriodSeconds: 90
+      restartPolicy: Always
+      volumes:
+      - name: timezone-moscow
+        hostPath:
+          path: /usr/share/zoneinfo/Europe/Moscow
+      - name: config
+        configMap:
+          name: prometheus-conf
+      - name: prometheus-rules
+        configMap:
+          name: prometheus-rules
+      containers:
+      - name: prometheus
+        image: prom/prometheus
+        args:
+          - --config.file=/etc/prometheus/prometheus.yml
+          - --web.enable-lifecycle
+          - --log.level=debug
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: prometheus-rules
+          mountPath: /config/sausage-store.yaml
+          subPath: sausage-store.yaml
+        - name: timezone-moscow
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: config
+          mountPath: /etc/prometheus/
+          readOnly: true
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+---
+# Source: prometheus-student/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: std-017-033
+  labels:
+    app: prometheus
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "std-017-033-monitoring.k8s.praktikum-services.tech"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090

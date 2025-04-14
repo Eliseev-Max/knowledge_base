@@ -1,0 +1,9 @@
+Плагины Jenkins для работы с объектными хранилищами (S3, AWS)
+
+1) "Pipeline: AWS Steps":
+    - https://www.jenkins.io/doc/pipeline/steps/pipeline-aws/
+    - https://plugins.jenkins.io/pipeline-aws/
+
+2) "AWS CodePipeline": https://plugins.jenkins.io/aws-codepipeline/
+
+3) "Artifact Manager on S3 plugin": https://plugins.jenkins.io/artifact-manager-s3/

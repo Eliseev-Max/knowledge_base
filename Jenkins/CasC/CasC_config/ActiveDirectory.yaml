@@ -1,0 +1,20 @@
+jenkins:
+  securityRealm:
+    activeDirectory:
+      domains:
+        - name: "PROSOFT.URAL.RU"
+          servers: "dc1.prosoft.ural.ru:3268"
+          site: "dc1.prosoft.ural.ru"
+          bindName: "daes-ldap@prosoft.ural.ru"
+          bindPassword: "${BIND_PASSWORD}"
+          tlsConfiguration: JDK_TRUSTSTORE
+      groupLookupStrategy: "RECURSIVE"
+      removeIrrelevantGroups: true
+      customDomain: true
+      cache:
+        size: 500
+        ttl: 600
+      startTls: true
+      requireTLS: false
+      internalUsersDatabase:
+        jenkinsInternalUser: "admin"

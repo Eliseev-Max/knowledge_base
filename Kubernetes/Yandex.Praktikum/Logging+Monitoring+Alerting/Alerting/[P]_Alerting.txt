@@ -1,0 +1,80 @@
+Практическая работа 10.3 "Алертинг"
+
+# Мы используем Grafana из предыдущих серий, не забывайте!
+
+1) Создайте в инфраструктурном репозитории ветку notifications и дальнейшие работы выполняйте в ней.
+
+2) В Prometheus, в конфигурационном файле правил нотификации, настройте проверку работы backend, что он запущен;
+   алерты должны быть с уровнем critical и описанием конкретной проблемы.
+[!Важно!:] не забудьте переделать алерты на Telegram!
+
+3) Настройте правила алертов Prometheus для метрик из предыдущей практики:
+   - оповещения о запросах с кодом ошибки 500;
+   - оповещения для успешных POST-запросов к /api/orders, но со значением задержки более 100ms для 95 перцентиля в течение 5 минут;
+   - оповещения для /actuator/prometheus с любым кодом ошибки за временной промежуток в две минуты;
+
+Изменяя нагрузку на приложение, получите алерт от Alertmanager в канал нотификаций в Telegram для вашей когорты.
+---
+!!!!!!!!!!!!Ссылка-приглашение: https://t.me/+wAU1l-TbZLZmZWVi  --!!! НЕ НУЖНА!!!
+id канала: -1002065700118
+bot_token = 5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs
+---
+Чтобы добавить нагрузку, ещё раз воспользуйтесь Telegram-ботом, как в предыдущем уроке, и «Передайте адрес агрегаторам».
+                
++ Сохраните настройки Alertmanager в notifications/alertmanager.yaml, а правила Prometheus в notifications/rules.yaml.
+Создайте Merge Request и отправьте наставнику ссылку на него.
+В описании к MR приложите скриншот сообщения с алертом в Telegram.
+
+helm upgrade --atomic --install alertmanager alertmanager
+helm upgrade --atomic --install prometheus prometheus
+
+
+# promet-rule
+---
+ - alert: 100ms
+      expr: histogram_quantile(0.95, sum without (uri)(rate(http_server_requests_seconds_bucket{app="backend", method="POST", status=~"2.."}[5m]))) >= 0.1
+      for: 1m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "Backend"
+      annotations:
+        summary: LongResponseTime
+        description: "Время ответа больше 100"
+
+
+---
+global:
+  resolve_timeout: 1m
+
+route:
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 30m
+  receiver: "telegram"
+  routes:
+    - receiver: "telegram"
+      group_wait: 10s
+      match_re:
+        severity: critical|warning
+      continue: true
+
+receivers:
+ - name: "telegram"
+   telegram_configs:
+   - send_resolved: true
+     bot_token: "{{ .Values.bot_token }}"
+     chat_id: {{ .Values.chat_id }}
+     message: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"
+     message: "Alertmanager (std-017-033) \n  Alertname: {{ "{{" }} .GroupLabels.alertname {{ "}}" }} \n Severity: {{ "{{" }} .CommonLabels.severity {{ "}}" }}\n  {{ "{{" }} range .Alerts {{ "}}" }}{{ "{{" }} .Annotations.summary {{ "}}" }}\n{{ "{{" }} .Annotations.description }}\n{{ "{{" }} end {{ "}}" }}"
+     
+
+receivers:
+    - name: "telegram"
+      telegram_configs:
+      - send_resolved: true
+        api_url: 'https://api.telegram.org'
+        parse_mode: 'HTML'
+        bot_token: '{{ .Values.bot_token }}'
+        chat_id: {{ .Values.chat_id }}
+        message: "Alertmanager \n  Alertname: {{ "{{" }} .GroupLabels.alertname {{ "}}" }} \n Severity: {{ "{{" }} .CommonLabels.severity {{ "}}" }}\n {{ "{{" }} range .Alerts {{ "}}" }}{{ "{{" }} .Annotations.summary {{ "}}" }}\n{{ "{{" }} end {{ "}}" }}" 

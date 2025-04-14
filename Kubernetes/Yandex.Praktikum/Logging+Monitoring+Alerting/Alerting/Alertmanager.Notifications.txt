@@ -1,0 +1,40 @@
+Alertmanager. Notifications
+
+[sources:]
+
+"Notification Template Examples": https://prometheus.io/docs/alerting/latest/notification_examples/
+"Notification Template Reference": https://prometheus.io/docs/alerting/latest/notifications/
+
+
+  Prometheus создает и отправляет оповещения в Alertmanager,
+  который затем рассылает уведомления различным получателям на основе их лейблов (меток).
+
+  Приемником (receiver) может быть одна из многих интеграций, включая:
+    - Slack,
+    - PagerDuty,
+    - email (электронная почта)
+    - или пользовательская интеграция через ОБЩИЙ ИНТЕРФЕЙС webhook.
+
+  Уведомления, отправляемые получателям, создаются с помощью ШАБЛОНОВ.
+  Alertmanager поставляется с шаблонами по умолчанию, но их также можно настраивать.
+
+  Чтобы избежать путаницы, важно отметить, что (!) шаблоны Alertmanager ОТЛИЧАЮТСЯ ОТ шаблонов Prometheus,
+  однако шаблоны Prometheus также включают шаблоны в alert rule labels/annotations.
+
+[!] Шаблоны уведомлений Alertmanager основаны на системе шаблонов Go.
+
+(!)Обратите внимание:
+  некоторые поля оцениваются как текст,
+  а другие - как HTML, что влияет на ЭКРАНИРОВАНИЕ!
+
+
+Name	            Type            	Notes
+Receiver	        string	    Defines the receiver's name that the notification will be sent to (slack, email etc.).
+Status	            string	    Defined as firing if at least one alert is firing, otherwise resolved.
+Alerts	            Alert	    List of all alert objects in this group (see below).
+GroupLabels	        KV	        The labels these alerts were grouped by.
+CommonLabels	    KV	        The labels common to all of the alerts.
+CommonAnnotations	KV	        Set of common annotations to all of the alerts. Used for longer additional strings of information about the alert.
+ExternalURL	        string	    Backlink to the Alertmanager that sent the notification
+
+

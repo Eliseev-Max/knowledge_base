@@ -1,0 +1,18 @@
+Practical Work
+
+1) Создайте клон репозитория с Helm-чартами:
+-->
+git clone https://gitlab.praktikum-services.ru/root/monitoring-tools
+<--
+
+В директории monitoring-tools установите Grafana с помощью Helm-чарта:
+-->
+helm upgrade --atomic --install grafana grafana
+<--
+
+# Вместе с чартом Grafana будет установлен Ingress.
+# Когда доберётесь до него, то увидите и URL, через который можно попасть в Grafanа через браузер.
+
+#{{ .Release.Namespace }}-grafana.k8s.praktikum-services.tech
+
+https://std-017-033-grafana.k8s.praktikum-services.tech

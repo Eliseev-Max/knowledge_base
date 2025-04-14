@@ -1,0 +1,10 @@
+Alerting based on metrics
+(https://prometheus.io/docs/tutorials/alerting_based_on_metrics/)
+
+
+В этом руководстве мы будем создавать оповещения на метрике ping_request_count, которую мы измерили ранее в руководстве
+"Instrumenting HTTP server written in Go" https://prometheus.io/docs/tutorials/instrumenting_http_server_in_go/
+
+В рамках этого руководства мы будем оповещать, когда метрика ping_request_count больше 5,
+Проверьте "лучшие практики реального мира" (https://prometheus.io/docs/practices/alerting),
+чтобы узнать больше о принципах оповещения. Скачайте последний выпуск Alertmanager для вашей операционной системы отсюда Alertmanager поддерживает различные приемники, такие как email, webhook, pagerduty, slack и т.д., через которые он может уведомлять о срабатывании оповещения. Список приемников и способы их настройки можно найти здесь. Мы будем использовать webhook в качестве приемника в этом руководстве, перейдите на webhook.site и скопируйте URL webhook, который мы будем использовать позже для настройки Alertmanager. Сначала давайте настроим Alertmanager с приемником webhook.

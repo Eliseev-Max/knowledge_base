@@ -1,0 +1,7 @@
+How to clear bash history completely?
+(https://askubuntu.com/questions/191999/how-to-clear-bash-history-completely)
+
+
+-->
+cat /dev/null > ~/.bash_history && history -c && exit
+<--

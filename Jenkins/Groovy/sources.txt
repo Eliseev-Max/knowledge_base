@@ -1,0 +1,17 @@
+Ссылки на материалы:
+
+1) "Groovy. A multi-faceted language for the Java platform": https://groovy-lang.org/
+  1.1) Syntax: https://groovy-lang.org/syntax.html
+  1.2) Documentation: https://groovy-lang.org/documentation.html
+
+2) "Introduction to Groovy Language": https://www.baeldung.com/groovy-language
+
+3) "Groovy Tutorial": https://www.tutorialspoint.com/groovy/index.htm
+
+4) "Использование Groovy": https://runawfe.ru/GroovySupport
+
+5) "Что такое Groovy": https://workspace.ru/tools/language/groovy/
+
+6) "Учебное пособие: Файл Jenkins Pipeline с Apache Groovy": https://habr.com/ru/companies/otus/articles/745568/
+
+7) "Улучшенный sandboxing для Groovy скриптов": https://habr.com/ru/companies/haulmont/articles/445114/

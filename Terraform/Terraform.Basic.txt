@@ -1,0 +1,379 @@
+Terraform
+
+[sources:]
+1) "Terraform Community": https://www.terraform.io/
+2) "Terraform": https://yandex.cloud/ru/docs/message-queue/instruments/terraform
+3) "Yandex.Cloud Provider": https://terraform-provider.yandexcloud.net/
+3.1) "yandex_kubernetes_cluster": https://terraform-provider.yandexcloud.net/data-sources/kubernetes_cluster.html
+4) "Начало работы с Terraform": https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart#linux_1
+5) "Install Terraform": https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli?in=terraform%2Faws-get-started
+6) "Создание кластера Managed Service for Kubernetes": https://yandex.cloud/ru/docs/managed-kubernetes/operations/kubernetes-cluster/kubernetes-cluster-create#tf_1
+7) "Справочник Terraform для Yandex Managed Service for Kubernetes": https://yandex.cloud/ru/docs/managed-kubernetes/tf-ref
+
+
+#############################
+# Начало работы с Terraform #
+#############################
+
+Terraform позволяет
+  -> быстро создать облачную инфраструктуру в Yandex Cloud
+  -> и управлять ею с помощью файлов конфигураций.
+
+В файлах конфигураций хранится описание инфраструктуры на языке HCL (HashiCorp Configuration Language).
+
+При изменении файлов конфигураций Terraform автоматически определяет:
+  -> какая часть вашей конфигурации уже развернута,
+  -> что следует добавить или удалить.
+
+
+Чтобы создать вашу первую инфраструктуру в Yandex Cloud с помощью Terraform:
+  1) Подготовьте облако к работе.
+  2) Установите Terraform.
+  3) Получите данные для аутентификации.
+  4) Создайте файл конфигурации Terraform.
+  5) Настройте провайдер.
+  6) Подготовьте план инфраструктуры.
+  7) Проверьте и отформатируйте файлы конфигурации.
+  8) Создайте ресурсы.
+
+
+******************************
+* Подготовка облака к работе *
+******************************
+
+  ✓ зарегистрироваться в Yandex Cloud
+  ✓ создать платёжный аккаунт
+    (Yandex Cloud Billing -> платёжный аккаунт в статусе "ACTIVE" или "TRIAL_ACTIVE")
+    # Необходимые платные ресурсы:
+      ✓ Плата за постоянно запущенные виртуальные машины (см. тарифы Yandex Compute Cloud).
+      ✓ Плата за использование динамических публичных IP-адресов (см. тарифы Yandex Virtual Private Cloud).
+
+
+***********************
+* Установка Terraform *
+***********************
+
+# Зеркало для скачивания Terraform:
+#-> https://hashicorp-releases.yandexcloud.net/terraform/
+# После загрузки добавьте путь к папке, в которой находится исполняемый файл, в переменную PATH:
+--[CMD]--
+export PATH=$PATH:/path/to/terraform
+#//#
+
+# Инструкция по установке Terraform
+#-> https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli?in=terraform%2Faws-get-started
+#!!!
+# Согласно инструкции Terraform не получится установить из-за отсутствия доступа.
+# Качаем с зеркала (FTP-сервера) Yandex,
+# -> chmod u+x ./terraform
+# -> mv ./terraform /usr/local/bin/terraform
+
+
+**************************************
+* Получите данные для аутентификации *
+**************************************
+
+  Чтобы управлять инфраструктурой Yandex Cloud с помощью Terraform, ИСПОЛЬЗУЙТЕ СЕРВИСНЫЙ АККАУНТ.
+  Это позволит гибко настраивать права доступа к ресурсам.
+#-> "Сервисные аккаунты": https://yandex.cloud/ru/docs/iam/concepts/users/service-accounts
+
+# Также вы можете использовать Terraform от имени:
+#   - аккаунта на Яндексе
+#   - или федеративного аккаунта,
+#(!) однако этот способ является МЕНЕЕ БЕЗОПАСНЫМ.
+
+  1) Если у вас еще нет интерфейса командной строки Yandex Cloud, установите его:
+     # https://yandex.cloud/ru/docs/cli/quickstart#install
+
+  2) Если у вас еще нет сервисного аккаунта, создайте его:
+
+<2>[Создание сервисного аккаунта]</2>
+
+  1. В консоли управления выберите каталог, в котором хотите создать сервисный аккаунт.
+  2. В списке сервисов выберите Identity and Access Management.
+  3. Нажмите кнопку "Создать сервисный аккаунт".
+  4. Введите имя сервисного аккаунта.
+     Требования к формату имени:
+       длина — от 2 до 63 символов;
+       может содержать строчные буквы латинского алфавита, цифры и дефисы;
+       первый символ — буква, последний — НЕ ДЕФИС.
+
+  5. Нажмите кнопку Создать.
+
+--//--
+
+  3) Назначьте сервисному аккаунту роли, необходимые для управления ресурсами Yandex Cloud:
+     #-> https://yandex.cloud/ru/docs/iam/concepts/access-control/roles
+
+// речь идёт о сервисных ролях типа service.resources.role
+
+     # Сервисному аккаунту можно назначать роли на ЛЮБЫЕ РЕСУРСЫ в ЛЮБОМ ОБЛАКЕ,
+     # если эти ресурсы относятся к той же организации, что и сервисный аккаунт.
+     #[+] Также сервисному аккаунту можно назначать роли на саму организацию.
+
+  4) Настройте профиль CLI для выполнения операций от имени сервисного аккаунта:
+    4.1) Создайте авторизованный ключ для сервисного аккаунта и запишите его файл:
+      #-> https://yandex.cloud/ru/docs/iam/concepts/authorization/key
+
+--[CMD. yc]--
+yc iam key create \
+  --service-account-id <идентификатор_сервисного_аккаунта> \
+  --folder-name <имя_каталога_с_сервисным_аккаунтом> \
+  --output key.json
+
+#//#
+
+  service-account-id
+    = идентификатор сервисного аккаунта.
+
+  folder-name
+    = имя каталога, в котором создан сервисный аккаунт.
+
+  output
+    = имя файла с авторизованным ключом.
+
+##_RESULT_##
+id: aje8nn871qo4********
+service_account_id: ajehr0to1g8********
+created_at: "2022-09-14T09:11:43.479156798Z"
+key_algorithm: RSA_2048
+#//#
+
+    4.2) Создайте профиль CLI для выполнения операций от имени сервисного аккаунта.
+         Укажите имя профиля:
+
+--[CMD. yc]--
+yc config profile create <имя_профиля>
+
+##_RESULT_##
+
+Profile 'sa-terraform' created and activated
+#//#
+
+
+    4.3) Задайте конфигурацию профиля:
+--[CMD. yc]--
+yc config set service-account-key key.json
+yc config set cloud-id <идентификатор_облака>
+yc config set folder-id <идентификатор_каталога>
+#//#
+
+
+# Где:
+  service-account-key  — файл с авторизованным ключом сервисного аккаунта.
+  cloud-id             — идентификатор облака.
+  folder-id            — идентификатор каталога.
+
+
+  5) Добавьте аутентификационные данные в переменные окружения:
+
+--[CMD. yc]--
+export YC_TOKEN=$(yc iam create-token)
+export YC_CLOUD_ID=$(yc config get cloud-id)
+export YC_FOLDER_ID=$(yc config get folder-id)
+#//#
+Где:
+  YC_TOKEN — IAM-токен.
+  YC_CLOUD_ID — идентификатор облака.
+  YC_FOLDER_ID — идентификатор каталога.
+
+[!] Примечание:
+  Время жизни IAM-токена — НЕ БОЛЬШЕ 12 часов,
+  НО рекомендуется запрашивать его ЧАЩЕ, например каждый час.
+
+
+########################################
+# Создайте файл конфигурации Terraform #
+########################################
+
+  1. Создайте новую директорию с произвольным названием, например cloud-terraform.
+     В ней будут храниться конфигурационные файлы и сохраненные состояния Terraform и инфраструктуры.
+[!] КАЖДАЯ конфигурация должна находиться В ОТДЕЛЬНОЙ ДИРЕКТОРИИ.
+
+  2. Создайте в новой директории конфигурационный файл с расширением .tf,
+     например main.tf.
+
+
+########################
+# Настройка провайдера #
+########################
+
+[!] Рекомендуется использовать последнюю стабильную версию Terraform.
+
+  1. Если раньше у вас был настроен провайдер из реестра HashiCorp, сохраните его настройки:
+---
+mv ~/.terraformrc ~/.terraformrc.old
+#//#
+
+  2. Укажите источник, из которого будет устанавливаться провайдер.
+--[Файл конфигурации Terraform CLI]--
+nano ~/.terraformrc
+#//#
+
+[!] Файл .terraformrc должен располагаться В КОРНЕ ДОМАШНЕЙ ПАПКИ ПОЛЬЗОВАТЕЛЯ,
+## например, /home/user/ или /User/user/.
+
+  * Добавьте в него следующий блок:
+
+// std-017-033.yandex.praktikum \\
+--<.terraformrc>--
+provider_installation {
+  network_mirror {
+    url = "https://terraform-mirror.yandexcloud.net/"
+    include = ["registry.terraform.io/*/*"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/*/*"]
+  }
+}
+
+##//##
+
+// Блок: https://yandex.cloud/ru/docs/tutorials/infrastructure-management/terraform-quickstart#configure-provider \\
+##--то-же-самое--##
+--<.terraformrc>--
+provider_installation {
+  network_mirror {
+    url = "https://terraform-mirror.yandexcloud.net/"
+    include = ["registry.terraform.io/*/*"]
+  }
+  direct {
+    exclude = ["registry.terraform.io/*/*"]
+  }
+}
+
+##//##
+
+{Подробнее_о_настройках_зеркал: "CLI Configuration File (.terraformrc or terraform.rc)":
+  https://developer.hashicorp.com/terraform/cli/config/config-file#explicit-installation-method-configuration
+}
+
+  3. В начале конфигурационного файла .tf добавьте следующие блоки:
+
+--<main.tf>--
+
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }
+  }
+  required_version = ">= 0.13"
+}
+
+##! самая свежая версия Yandex Cloud Provider: v0.135.0
+
+provider "yandex" {
+  zone = "<зона_доступности_по_умолчанию>"
+}
+
+##//##
+
+Где:
+  ● source  = глобальный адрес источника провайдера.
+  ● required_version  = минимальная версия Terraform, с которой совместим провайдер.
+  ● provider  = название провайдера.
+  ● zone  = зона доступности, в которой по умолчанию будут создаваться все облачные ресурсы.
+
+
+  4. Выполните команду terraform init В ПАПКЕ С КОНФИГУРАЦИОННЫМ ФАЙЛОМ .tf.
+     Эта команда:
+       + инициализирует провайдеров, указанных в конфигурационных файлах,
+       + и позволяет работать с ресурсами и источниками данных провайдера.
+
+[!] Если провайдер НЕ УСТАНОВИЛСЯ, создайте обращение в поддержку с именем и версией провайдера.
+
+<Если вы использовали файл .terraform.lock.hcl>:
+  перед инициализацией выполните команду:
+-->
+$ terraform providers lock
+<--
+  указав:
+    + адрес зеркала, откуда будет загружаться провайдер,
+    + и платформы, на которых будет использоваться конфигурация:
+
+-->
+terraform providers lock -net-mirror=https://terraform-mirror.yandexcloud.net \
+                         -platform=<название_платформы_1> \
+                         -platform=<название_платформы_2> \
+                         yandex-cloud/yandex
+<--
+Где:
+
+  -net-mirror — адрес зеркала, откуда будет загружаться провайдер.
+  -platform — платформы, на которых будет использоваться конфигурация.
+[Возможные значения:]
+  windows_amd64 — 64-bit Windows.
+  linux_amd64 — 64-bit Linux.
+  darwin_arm64 — 64-bit macOS.
+
+
+[!] Если вы использовали МОДУЛИ Terraform:
+  * сначала выполните    $ terraform init
+  * затем удалите lock-файл
+  * а затем выполните команду    $ terraform providers lock.
+
+# Подробнее о команде `terraform providers lock`:
+-> https://developer.hashicorp.com/terraform/cli/commands/providers/lock
+
+
+###################################
+# Подготовка плана инфраструктуры #
+###################################
+
+  С помощью Terraform в Yandex Cloud можно создавать облачные ресурсы всех типов:
+    ✓ ВМ,
+    ✓ диски,
+    ✓ образы
+    и т. д.
+
+  Подробнее о ресурсах, создающихся с помощью Terraform: https://terraform-provider.yandexcloud.net//
+
+
+[!] Для создания ресурса необходимо указать набор обязательных и опциональных параметров, определяющих свойства ресурса.
+    Такие описания ресурсов составляют ПЛАН ИНФРАСТРУКТУРЫ.
+
+# По плану будут созданы
+# > две ВМ: terraform1 и terraform2,
+# > + облачная сеть network-1 с подсетью subnet-1.
+
+[Требования к именам ресурсов:]
+
+  ❗ длина — от 2 до 63 символов;
+  ❗ может содержать СТРОЧНЫЕ БУКВЫ латинского алфавита, цифры и дефисы;
+  ❗ первый символ — буква, последний — НЕ ДЕФИС.
+
+► У ВМ будут разные количества ядер и объемы памяти:
+[terraform1:]  2 ядра и 2 ГБ оперативной памяти; 
+[terraform2:]  4 ядра и 4 ГБ оперативной памяти.
+
+► ВМ автоматически получат публичные и приватные IP-адреса из диапазона 192.168.10.0/24 в подсети subnet-1,
+  находящейся в зоне доступности ru-central1-d
+  и принадлежащей облачной сети network-1.
+
+► На ВМ будет установлена операционная система Ubuntu
+  и размещена публичная часть ключа для доступа к ВМ по SSH.
+
+В конфигурации ВМ вам потребуется указать идентификатор образа загрузочного диска. Список доступных публичных образов можно получить командой CLI:
+
+yc compute image list --folder-id standard-images
+
+Для доступа к ВМ через SSH сгенерируйте пару SSH-ключей и передайте публичную часть ключа на ВМ в параметре ssh-keys блока metadata.
+
+Конфигурации ресурсов задаются сразу после конфигурации провайдера:
+
+terraform {
+  required_providers {
+    yandex = {
+      source = "yandex-cloud/yandex"
+    }
+  }
+}
+
+provider "yandex" {
+  zone = "<зона доступности по умолчанию>"
+}
+
+resource "yandex_compute_instance" "vm-1" {
+  name = "terraform1"
+}

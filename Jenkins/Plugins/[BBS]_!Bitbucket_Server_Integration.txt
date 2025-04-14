@@ -10,6 +10,79 @@ Bitbucket Server Integration
 3) "pipelineTriggers": https://www.jenkins.io/doc/pipeline/steps/params/pipelinetriggers/
 
 
+Full_Name: Bitbucket Server Integration
+Short_Name: atlassian-bitbucket-server-integration
+
+
+** Overview **
+
+Плагин Bitbucket Server Integration - это САМЫЙ ПРОСТОЙ способ подключить Jenkins к Bitbucket Server.
+
+С помощью нескольких простых шагов вы сможете настроить его на:
+  ● автоматическое создание веб-хуков в Bitbucket для запуска сборок.
+  ● возможность Jenkins клонировать/получать данные из Bitbucket для запуска сборок.
+  ● отображение подробной информации о сборке в Bitbucket,
+    например, сводки и продолжительность тестов (summaries and durations).
+  ● прямые ссылки из Bitbucket на логи для каждой сборки.
+
+Плагин atlassian-bitbucket-server-integration:
+  ✓ упрощает весь процесс настройки
+  ✓ избавляет от необходимости использовать несколько плагинов для достижения одного и того же рабочего процесса.
+
+
+** Plugin features **
+
+  ◎ Поддержка Jenkins Pipeline, Multibranch Pipeline и Freestyle-проектов.
+
+  ◎ Безопасное управление учетными данными (credential management) в Jenkins для клонирования с Bitbucket Server.
+
+  ◎ Добавляет в Jenkins менеджер исходного кода (Bitbucket Server Source Code Manager (SCM)) Bitbucket Server,
+    что упрощает создание соединения с репозиторием Bitbucket при настройке job.
+
+  ◎ Автоматическое создание веб-хука в репозитории Bitbucket Server при сохранении Jenkins job.
+
+  ◎ Быстрый выбор проектов и репозиториев Bitbucket Server для задания Jenkins с помощью выпадающего списка.
+
+  ◎ Возможность автоматической отправки статусов сборки на Bitbucket Server.
+
+  ◎ Клонирование из «умных зеркал» Bitbucket Server без необходимости изменять URL-адрес клона.
+
+
+Support for Jenkins Pipeline, Multibranch Pipeline, and Freestyle projects.
+Secure credential management in Jenkins for cloning from Bitbucket Server.
+Adds a Bitbucket Server Source Code Manager (SCM) to Jenkins, making it easier to create a connection to a Bitbucket repository when setting up a job.
+Automatic webhook creation in a Bitbucket Server repo when a Jenkins job is saved.
+Quick selection of Bitbucket Server projects and repos for a Jenkins job through a dropdown.
+The ability to automatically send build statuses to Bitbucket Server.
+Cloning from Bitbucket Server Smart Mirrors with no need to modify the clone URL.
+
+
+** Install the plugin **
+
+  To install the plugin:
+
+  1) In Jenkins, go to Jenkins > Manage Jenkins > Manage Plugins.
+  2) Select the Available tab.
+  3) Search for BitBucket Server Integration.
+  4) Tick the checkbox.
+  5) Select Install without Restart.
+
+The status will change to Success when the plugin is installed.
+
+
+########################
+# Configure the plugin #
+########################
+
+  Чтобы настроить плагин:
+  1. Добавьте сведения об экземпляре Bitbucket Server:
+    (https://plugins.jenkins.io/atlassian-bitbucket-server-integration/#plugin-content-add-bitbucket-server-instance-details)
+
+  2. Создайте ссылку на приложение:
+    (https://plugins.jenkins.io/atlassian-bitbucket-server-integration/#plugin-content-create-an-application-link)
+
+
+
 ################
 # bbs_checkout #
 ################
@@ -140,7 +213,7 @@ add credentials as a SSH Username with private key (the username must be "git")
 # bbs_deploy #
 ##############
 
-bbs_deploy: Wrapper step to notify Bitbucket Server of the deployment status.
+bbs_deploy: Шаг-обертка для уведомления Bitbucket Server о статусе развертывания.
 
   ● environmentName : String
 A human-readable display name for the environment that was deployed to.

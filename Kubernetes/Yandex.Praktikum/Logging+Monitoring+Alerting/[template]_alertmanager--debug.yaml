@@ -1,0 +1,279 @@
+
+---
+# Source: prometheus-student/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-conf
+  namespace: std-017-033
+  labels:
+    app: prometheus
+data:
+  prometheus.yml: |
+    global:
+      scrape_interval: 10s
+      scrape_timeout: 10s
+    rule_files:
+       - "/config/*"
+    alerting:
+      alertmanagers:
+      - scheme: http
+        static_configs:
+        - targets:
+          - "alertmanager:9093"
+    scrape_configs:
+    - job_name: kubernetes-pods
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - std-017-033
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+        regex: (.+);(.+)
+        replacement: $1:$2
+        target_label: __address__
+      - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+        regex: (.+)
+        target_label: __metrics_path__
+      - action: labelmap
+        regex: __meta_kubernetes_pod_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_pod_name]
+        action: replace
+        target_label: kubernetes_pod_name
+---
+# Source: prometheus-student/templates/rules.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: std-017-033
+  labels:
+    app: prometheus
+data:
+  sausage-store.yaml: "---\ngroups:\n  - name: Sausage store rules\n    rules:\n    - alert: InstanceDown\n      expr: up{app=\"backend\"} == 0\n      for: 1m\n      labels:\n        severity: critical\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Problem with your backend pod\"\n        description: \"Backend pod is down for 1 minute\"\n    - alert: HTTP status code is 500\n      expr: http_server_requests_seconds_count{status=\"500\"} > 0\n      for: 1m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"You have got a bad request\"\n        description: \"You have got request with status code = 500, please check\"\n    - alert: Delay over 100ms for /api/orders\n      expr: http_server_requests_seconds_bucket{quantile=\"0.95\", method=\"POST\", uri=\"/api/orders\"} > 100000\n      for: 5m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Delay to /api/orders requests\"\n        description: \"Delay more than 100ms for 0.95 quantile of success POST  requsests to /api/orders\"\n    - alert: Errors for /actuator/prometheus\n      expr: http_server_requests_seconds_count{outcome!=\"SUCCESS\", uri!=\"/actuator/prometheus\"} > 0\n      for: 2m\n      labels:\n        severity: warning\n        project: \"sausage_store\"\n        component: \"backend\"\n      annotations:\n        summary: \"Error in requests to /actuator/prometheus\"\n        description: \"There is an error in API request to /actuator/prometheus for 2 minutes\"\n"
+---
+# Source: prometheus-student/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: prometheus
+  namespace: std-017-033
+spec:
+  ports:
+    - port: 9090
+      protocol: TCP
+  selector:
+    app: prometheus
+  sessionAffinity: None
+  type: ClusterIP
+---
+# Source: prometheus-student/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prometheus
+  namespace: std-017-033
+  labels:
+    app: prometheus
+    provider: prometheus
+spec:
+  selector:
+    matchLabels:
+      app: prometheus
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: prometheus
+      annotations:
+        co.elastic.logs/enabled: "true"
+        co.elastic.logs/format: zap
+        co.elastic.logs/timezone: Europe/Moscow
+        co.elastic.logs/exclude_lines: skipping duplicate scrape target with identical labels;
+    spec:
+      terminationGracePeriodSeconds: 90
+      restartPolicy: Always
+      volumes:
+      - name: timezone-moscow
+        hostPath:
+          path: /usr/share/zoneinfo/Europe/Moscow
+      - name: config
+        configMap:
+          name: prometheus-conf
+      - name: prometheus-rules
+        configMap:
+          name: prometheus-rules
+      containers:
+      - name: prometheus
+        image: prom/prometheus
+        args:
+          - --config.file=/etc/prometheus/prometheus.yml
+          - --web.enable-lifecycle
+          - --log.level=debug
+        ports:
+          - containerPort: 9090
+        volumeMounts:
+        - name: prometheus-rules
+          mountPath: /config/sausage-store.yaml
+          subPath: sausage-store.yaml
+        - name: timezone-moscow
+          mountPath: /etc/localtime
+          readOnly: true
+        - name: config
+          mountPath: /etc/prometheus/
+          readOnly: true
+        resources:
+          limits:
+            cpu: 1
+            memory: 1Gi
+---
+# Source: prometheus-student/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: prometheus
+  namespace: std-017-033
+  labels:
+    app: prometheus
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "std-017-033-monitoring.k8s.praktikum-services.tech"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: prometheus
+            port:
+              number: 9090
+student@fhmu480th55lboom8jgn:~/monitoring-tools$ helm template alertmanager --debug
+install.go:224: 2024-12-27 10:44:29.590721288 +0000 UTC m=+0.061984357 [debug] Original chart version: ""
+install.go:241: 2024-12-27 10:44:29.590805292 +0000 UTC m=+0.062068345 [debug] CHART PATH: /home/student/monitoring-tools/alertmanager
+
+---
+# Source: alertmanager/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 1m
+    route:
+       group_wait: 10s
+       group_interval: 30s
+       repeat_interval: 30m
+       receiver: "telegram"
+       routes:
+         - receiver: "telegram"
+           group_wait: 10s
+           match_re:
+             severity: critical|warning
+           continue: true
+    receivers:
+     - name: "telegram"
+       telegram_configs:
+         - send_resolved: true
+           bot_token: "5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs"
+           chat_id: -1.002065700118e+12
+           api_url: "https://t.me/+wAU1l-TbZLZmZWVi"
+           message: "Alertmanager (std-017-033) \n  Alertname: {{ .GroupLabels.alertname }} \n Severity: {{ .CommonLabels.severity }}\n  {{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}"
+---
+# Source: alertmanager/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+spec:
+  ports:
+    - port: 9093
+      protocol: TCP
+  selector:
+    app: alertmanager
+  sessionAffinity: None
+  type: ClusterIP
+---
+# Source: alertmanager/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+spec:
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
+    spec:
+      terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
+      restartPolicy: Always
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest
+        args:
+          - '--config.file=/etc/alertmanager/alertmanager.yml'
+          - '--storage.path=/alertmanager'
+        resources:
+          limits:
+            cpu: 0.5
+            memory: 256Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: alertmanager
+          mountPath: /alertmanager
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager
+      - name: alertmanager
+        emptyDir: {}
+---
+# Source: alertmanager/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "std-017-033-alertmanager.k8s.praktikum-services.tech"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alertmanager
+            port:
+              number: 9093

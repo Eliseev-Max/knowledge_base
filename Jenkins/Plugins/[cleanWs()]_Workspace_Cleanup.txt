@@ -3,3 +3,22 @@ Workspace Cleanup
 [source:]
 https://plugins.jenkins.io/ws-cleanup/
 
+"What are the @tmp folders in a Jenkins workspace and how to clean them up":
+-> https://stackoverflow.com/questions/58588794/what-are-the-tmp-folders-in-a-jenkins-workspace-and-how-to-clean-them-up
+
+
+--<Post-Build_Actions.wsCleanup>--
+post {
+  always {
+    cleanWs()
+    dir("${env.WORKSPACE}@tmp") {
+      deleteDir()
+    }
+    dir("${env.WORKSPACE}@script") {
+      deleteDir()
+    }
+    dir("${env.WORKSPACE}@script@tmp") {
+      deleteDir()
+    }
+  }
+}

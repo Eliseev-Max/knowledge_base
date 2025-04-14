@@ -1,0 +1,43 @@
+The majority of the Terraform language documentation focuses on the practical uses of the language and the specific constructs it uses. The pages in this section offer a more abstract view of the Terraform language.
+
+Configuration Syntax describes the native grammar of the Terraform language.
+JSON Configuration Syntax documents how to represent Terraform language constructs in the pure JSON variant of the Terraform language. Terraform's JSON syntax is unfriendly to humans, but can be very useful when generating infrastructure as code with other systems that don't have a readily available HCL library.
+Style Conventions documents some commonly accepted formatting guidelines for Terraform code. These conventions can be enforced automatically with terraform fmt.
+
+Синтаксис конфигурации описывает родную грамматику языка Terraform.
+Синтаксис конфигурации JSON описывает, как представлять конструкции языка Terraform в чистом JSON-варианте языка Terraform.
+Синтаксис JSON в Terraform недружелюбен к человеку,
+НО может быть очень полезен при создании инфраструктуры в виде кода с другими системами, у которых нет легкодоступной библиотеки HCL.
+Style Conventions содержит некоторые общепринятые рекомендации по форматированию кода Terraform. Эти соглашения могут быть автоматически применены с помощью terraform fmt.
+
+
+resource "aws_instance" "example" {
+  ami = "abc123"
+
+  network_interface {
+    # ...
+  }
+}
+
+Команда terraform fmt используется для переписывания конфигурационных файлов Terraform в канонический формат и стиль.
+Эта команда применяет подмножество соглашений о стиле языка Terraform,
+а также другие незначительные корректировки для удобства чтения.
+
+Другие команды Terraform, генерирующие конфигурацию Terraform, будут создавать конфигурационные файлы, соответствующие стилю,
+навязанному командой terraform fmt, поэтому использование этого стиля в ваших собственных файлах обеспечит согласованность.
+
+Канонический формат может незначительно меняться между версиями Terraform,
+поэтому после обновления Terraform мы рекомендуем запустить `terraform fmt` на ваших модулях вместе с другими изменениями,
+которые вы делаете для перехода на новую версию.
+
+Мы не считаем, что новые правила форматирования в terraform fmt являются ЛОМАЮЩИМИ ИЗМЕНЕНИЯМИ в новых версиях Terraform,
+но мы стремимся минимизировать изменения для конфигураций, которые уже следуют примерам стиля, показанным в документации Terraform.
+
+При добавлении новых правил форматирования обычно стремятся применить больше правил, уже показанных в примерах конфигурации в документации,
+поэтому мы рекомендуем следовать документированному стилю даже для решений, которые terraform fmt пока не применяет автоматически.
+
+Решения по форматированию всегда субъективны, поэтому вы можете не согласиться с решениями, которые принимает terraform fmt.
+Эта команда намеренно выражает свое мнение и не имеет опций настройки, потому что ее основная цель - поощрять согласованность стиля между различными кодовыми базами Terraform, хотя выбранный стиль никогда не может быть любимым для всех.
+
+Мы рекомендуем вам следовать стилевым соглашениям, применяемым terraform fmt при написании модулей Terraform, но если вы находите результаты особенно неприемлемыми, вы можете не использовать эту команду, а вместо нее воспользоваться сторонним инструментом форматирования. Если вы решите использовать сторонний инструмент, то вам также следует запустить его на файлах, которые автоматически генерируются Terraform, чтобы добиться согласованности между вашими рукописными и сгенерированными файлами.
+

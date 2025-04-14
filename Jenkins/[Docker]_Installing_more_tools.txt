@@ -1,0 +1,184 @@
+Jenkins in Docker. Installing more tools
+
+[sources:]
+  main: https://github.com/jenkinsci/docker/blob/master/README.md
+  "Installing more tools": https://github.com/jenkinsci/docker?tab=readme-ov-file#installing-more-tools
+
+$JENKINS_HOME == /var/jenkins_home
+
+[!] В /var/jenkins_home хранятся ВСЕ ДАННЫЕ Jenkins, включая ПЛАГИНЫ и КОНФИГУРАЦИЮ.
+    Возможно, вам захочется сделать этот volume явным (explicit volume),
+    чтобы вы могли управлять им
+    и подключать к другому контейнеру для обновления
+
+[ПРИМЕЧАНИЕ:]
+  ИЗБЕГАЙТЕ использования bind mount из папки на хост-машине в /var/jenkins_home!
+  Это может привести к ПРОБЛЕМАМ С ПРАВАМИ на файлы
+  (пользователь, используемый внутри контейнера, может не иметь прав на папку на хост-машине).
+
+  Если вам действительно необходимо выполнить bind mount jenkins_home:
+    - убедитесь, что каталог на хосте доступен пользователю jenkins внутри контейнера (jenkins user - uid 1000)
+  <или>
+    - используйте параметр -u some_other_user в docker run.
+
+[Установка количества executors:]
+# по умолчанию executors on the built-in node: 2
+# рекомендуемое количество executors on the built-in node: 0
+
+Задаём количество executors:
+--<executors.groovy script file>--
+import jenkins.model.*
+Jenkins.instance.setNumExecutors(0) // Recommended to not run builds on the built-in node
+--//--
+
+# копируем файл groovy-скрипта в Dockerfile:
+
+--<Dockerfile>--
+FROM jenkins/jenkins:lts
+COPY --chown=jenkins:jenkins executors.groovy /usr/share/jenkins/ref/init.groovy.d/executors.groovy
+--//--
+
+(!) /usr/share/jenkins/ref/init.groovy.d  = директория размещения пользовательских скриптов Groovy
+
+
+Вы можете запустить свой контейнер от имени root - и установить через apt-get,
+установить как часть шагов сборки через установщики инструментов jenkins (jenkins tool installers),
+# непонятно, зачем. Непрактично
+
+  <или>
+
+[!] создать свой собственный Dockerfile для настройки:
+
+---<Dockerfile>---
+FROM jenkins/jenkins:lts-jdk17
+# if we want to install via apt
+USER root
+RUN apt-get update && apt-get install -y ruby make more-thing-here
+# drop back to the regular jenkins user - good practice
+USER jenkins
+
+#-END-#
+
+В таком производном образе можно настраивать экземпляр jenkins с помощью скриптов-хуков или дополнительных плагинов.
+Для этого используйте /usr/share/jenkins/ref в качестве места для определения содержимого JENKINS_HOME по умолчанию,
+которое вы хотите видеть в целевой установке:
+
+--[]--
+FROM jenkins/jenkins:lts-jdk17
+COPY --chown=jenkins:jenkins custom.groovy /usr/share/jenkins/ref/init.groovy.d/custom.groovy
+#...#
+
+
+*************************
+* Preinstalling plugins *
+*************************
+
+[Install plugins]
+
+Вы можете полагаться на CLI менеджера плагинов (*), чтобы передать набор плагинов для загрузки с их зависимостями.
+(*) https://github.com/jenkinsci/plugin-installation-manager-tool/
+
+Этот инструмент будет выполнять загрузку из центров обновления,
+а для центров обновления по умолчанию требуется доступ в интернет.
+
+[Setting update centers]
+  Во время загрузки CLI будет использовать центры обновления, определенные следующими переменными окружения:
+
+    JENKINS_UC
+      = Основной центр обновлений.
+        Этот центр обновления может предлагать версии плагинов в зависимости от версий Jenkins LTS Core.
+        Default value: https://updates.jenkins.io
+
+    JENKINS_UC_EXPERIMENTAL
+      = Центр экспериментальных обновлений.
+        Этот центр предлагает альфа- и бета-версии плагинов.
+        Default value: https://updates.jenkins.io/experimental
+
+    JENKINS_INCREMENTALS_REPO_MIRROR
+      = Определяет зеркало Maven, которое будет использоваться для загрузки плагинов из репозитория Incrementals.
+        Default value: https://repo.jenkins-ci.org/incrementals
+
+    JENKINS_UC_DOWNLOAD
+      = URL загрузки Центра обновления
+        Default value: $JENKINS_UC/download
+
+    JENKINS_PLUGIN_INFO
+      = Расположение информации о плагине.
+        Default value: https://updates.jenkins.io/current/plugin-versions.json
+
+(*) It is possible to override the environment variables in images.
+
+❗ Обратите внимание, что изменение переменных центра обновления НЕ ИЗМЕНИТ центр обновления, используемый во время выполнения Jenkins,
+   это касается только CLI менеджера плагинов.
+
+
+***************************************
+* Установка пользовательских плагинов *
+*     Installing  Custom  Plugins     *
+***************************************
+
+Установка предварительно собранных пользовательских плагинов может быть выполнена путем
+копирования файла HPI плагина в /usr/share/jenkins/ref/plugins/ в Dockerfile:
+
+--[]--
+COPY --chown=jenkins:jenkins path/to/custom.hpi /usr/share/jenkins/ref/plugins/
+####
+
+
+*****************
+* Использование *
+*****************
+
+(*) Вы можете запустить CLI вручную в Dockerfile:
+
+--[Running CLI manually]--
+FROM jenkins/jenkins:lts-jdk17
+RUN jenkins-plugin-cli --plugins pipeline-model-definition github-branch-source:1.8
+
+#EOF#
+
+#[!] Кроме того, можно передать файл, содержащий этот набор плагинов (с разрывами строк или без них).
+
+
+--[]--
+FROM jenkins/jenkins:lts-jdk17
+COPY --chown=jenkins:jenkins plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt
+#><#
+
+# При запуске контейнера jenkins он
+# 1) проверит, есть ли в JENKINS_HOME это содержимое ссылок,
+# 2) и при необходимости скопирует их туда.
+
+(!) Он НЕ БУДЕТ ПЕРЕОПРЕДЕЛЯТЬ такие файлы!
+  => поэтому, если вы обновили некоторые плагины из UI, они не будут отменены при следующем запуске.
+
+(*) Если вы хотите переопределить, добавьте '.override' к имени файла ссылки.
+[Например:]
+  файл с именем  /usr/share/jenkins/ref/config.xml.override
+  => ПЕРЕЗАПИШЕТ =>
+  существующий файл config.xml в JENKINS_HOME.
+
+
+[ПРИМЕР ПОЛУЧЕНИЯ СПИСКА ПЛАГИНОВ С СУЩЕСТВУЮЩЕГО СЕРВЕРА:]
+--[CMD]--
+JENKINS_HOST=username:password@myhost.com:port
+curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | perl -pe 's/.*?<shortName>([\w-]+).*?<version>([^<]+)()(<\/\w+>)+/\1 \2\n/g'|sed 's/ /:/'
+
+
+(!) Для образов версии 2.X может также понадобиться:
+--[Dockerfile]--
+RUN echo 2.0 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
+####
+
+, чтобы указать, что данная установка Jenkins полностью настроена.
+В противном случае появится баннер, предлагающий пользователю установить дополнительные плагины, что может быть неуместно.
+
+
+Access logs
+
+  Чтобы включить ведение журналов доступа пользователей Jenkins из домашнего каталога Jenkins внутри docker-контейнера,
+  установите значение переменной окружения JENKINS_OPTS в:
+
+--accessLoggerClassName=winstone.accesslog.SimpleAccessLogger --simpleAccessLogger.format=combined --simpleAccessLogger.file=/var/jenkins_home/logs/access_log
+

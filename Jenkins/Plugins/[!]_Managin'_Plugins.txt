@@ -1,0 +1,4 @@
+Managing Plugins
+(https://www.jenkins.io/doc/book/managing/plugins/)
+
+

@@ -1,5 +1,0 @@
-
-[sources:]
-  1) "Как очистить историю Bash в Linux": https://itshaman.ru/articles/1066/kak-ochistit-istoriyu-bash-v-linux
-  2) "Как очистить историю командной строки BASH в Linux?": https://blog.sedicomm.com/2019/09/04/kak-ochistit-istoriyu-komandnoj-stroki-bash-v-linux/
-

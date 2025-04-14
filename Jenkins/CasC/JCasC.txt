@@ -1,0 +1,327 @@
+Jenkins Configuration as Code (a.k.a. JCasC) Plugin
+(https://github.com/jenkinsci/configuration-as-code-plugin)
+
+[more:]
+  "Configuration as Code": https://plugins.jenkins.io/configuration-as-code/
+
+Настройка Jenkins - сложный процесс
+  поскольку и Jenkins, и его плагины требуют определенной настройки и конфигурации с десятками параметров,
+  которые можно задать в разделе `manage` веб-интерфейса.
+
+[Настройка с помощью Groovy-скриптов]
+  Опытные пользователи Jenkins полагаются на скрипты groovy init, чтобы настроить Jenkins и добиться желаемого состояния.
+(+) Эти скрипты напрямую вызывают API Jenkins и, как таковые, могут делать все (на ваш страх и риск).
+(-) Но они также требуют, чтобы вы знали внутреннее устройство Jenkins и были уверены в написании groovy-скриптов поверх Jenkins API.
+
+
+Плагин Configuration as Code - это способ конфигурирования Jenkins (opinionated way),
+основанный на человекочитаемых декларативных конфигурационных файлах.
+
+Написать такой файл можно, не будучи экспертом по Jenkins,
+просто переведя в код процесс настройки, который вы привыкли выполнять в веб-интерфейсе.
+
+Приведенный ниже файл конфигурации включает корневые записи для различных компонентов вашей основной установки Jenkins.
+
+
+Корневая запись `jenkins`:
+  -> предназначена для корневого объекта Jenkins,
+
+остальные:
+  -> для различных элементов глобальной конфигурации (global configuration elements).
+  # "Настроить Jenkins" -> [System_Configuration]: System
+
+---
+jenkins:
+  systemMessage: "Jenkins configured automatically by Jenkins Configuration as Code plugin\n\n"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: VARIABLE1
+        value: foo
+      - key: VARIABLE2
+        value: bar
+  securityRealm:
+    ldap:
+      configurations:
+        - groupMembershipStrategy:
+            fromUserRecord:
+              attributeName: "memberOf"
+          inhibitInferRootDN: false
+          rootDN: "dc=acme,dc=org"
+          server: "ldaps://ldap.acme.org:1636"
+
+  nodes:
+    - permanent:
+        name: "static-agent"
+        remoteFS: "/home/jenkins"
+        launcher:
+          inbound:
+            workDirSettings:
+              disabled: true
+              failIfWorkDirIsMissing: false
+              internalDir: "remoting"
+              workDirPath: "/tmp"
+
+  slaveAgentPort: 50000
+
+tool:
+  git:
+    installations:
+      - name: git
+        home: /usr/local/bin/git
+
+credentials:
+  system:
+    domainCredentials:
+      - credentials:
+          - basicSSHUserPrivateKey:
+              scope: SYSTEM
+              id: ssh_with_passphrase_provided
+              username: ssh_root
+              passphrase: ${SSH_KEY_PASSWORD}
+              description: "SSH passphrase with private key file. Private key provided"
+              privateKeySource:
+                directEntry:
+                  privateKey: ${SSH_PRIVATE_KEY}
+##END##
+
+[!] Кроме того, мы хотим иметь
+      ✓ хорошо документированный синтаксический файл
+      ✓ и инструментарий для помощи в написании и тестировании,
+    чтобы конечные пользователи имели полное руководство по использованию этого набора инструментов и не искали примеры в Интернете.
+
+//#(!) Смотрите слайды презентации DevOps World - Jenkins World 2018 для обзора.
+//#-> https://docs.google.com/presentation/d/1VsvDuffinmxOjg0a7irhgJSRWpCzLg_Yskf7Fw7FpBg/edit?usp=sharing
+
+---
+Web UI as implict documentation (Веб-интерфейс в качестве неявной документации)
+[Config element in web UI] == [Config element in YAML]
+
+
+*******************
+* Getting Started *
+*  Начало работы  *
+*******************
+
+  ВО-ПЕРВЫХ, запустите экземпляр Jenkins С УСТАНОВЛЕННЫМ ПЛАГИНОМ Configuration as Code.
+#-> https://plugins.jenkins.io/configuration-as-code/
+
+// name: configuration-as-code:1932.v75cb_b_f1b_698d
+// releases: https://plugins.jenkins.io/configuration-as-code/releases/
+
+[!] Те, кто запускает Jenkins как Docker-контейнер (и, возможно, ПРЕДВАРИТЕЛЬНО УСТАНАВЛИВАЕТ ПЛАГИНЫ),
+    включают (include) плагин Configuration as Code.
+
+/*
+#(*) "Preinstalling plugins": https://github.com/jenkinsci/docker#preinstalling-plugins
+*/
+
+  ВО-ВТОРЫХ, плагин ищет переменную окружения CASC_JENKINS_CONFIG.
+  Переменная указывает на список, разделенный запятыми, состоящий из следующих элементов:
+    ● путь к папке, содержащей набор конфигурационных файлов
+      # Например, /var/jenkins_home/casc_configs.
+
+    ● полный путь к одиночному файлу.
+      # Например, /var/jenkins_home/casc_configs/jenkins.yaml.
+
+    ● URL-адрес, указывающий на файл, обслуживаемый (served) в Интернете.
+      # Например, https://acme.org/jenkins.yaml.
+
+
+  Если элемент CASC_JENKINS_CONFIG указывает на ПАПКУ:
+  => плагин будет рекурсивно обходить эту папку, чтобы найти файл(ы) с суффиксом .yml,.yaml,.YAML,.YML.
+     Он ИСКЛЮЧИТ:
+       ❌ скрытые файлы
+       ❌ или файлы, СОДЕРЖАЩИЕ СКРЫТУЮ ПАПКУ в любой части полного пути.
+     Он соблюдает символические ссылки как для файлов, так и для каталогов.
+
+--< Пример выполнения >--
+CASC_JENKINS_CONFIG=/jenkins/casc_configs
+✔️ /jenkins/casc_configs/jenkins.yaml
+✔️ /jenkins/casc_configs/dir1/config.yaml
+❌ /jenkins/casc_configs/.dir1/config.yaml           # будет исключён, как содержащий скрытую папку
+❌ /jenkins/casc_configs/..dir2/config.yaml          # указывает на скрытую папку
+
+(!) CASC_JENKINS_CONFIG=/jenkins/.configs/casc_configs contains hidden folder .config
+❌ /jenkins/.configs/casc_configs/jenkins.yaml
+❌ /jenkins/.configs/casc_configs/dir1/config.yaml
+❌ /jenkins/.configs/casc_configs/.dir1/config.yaml
+❌ /jenkins/.configs/casc_configs/..dir2/config.yaml
+--><--
+
+[!] Все обнаруженные файлы конфигурации ДОЛЖНЫ БЫТЬ ДОПОЛНЯЮЩИМИ (supplementary).
+  Они НЕ МОГУТ ПЕРЕЗАПИСЫВАТЬ значения конфигурации друг друга.
+  Это приведет к конфликту и вызовет ConfiguratorException.
+
+  Таким образом, порядок обхода НЕ ИМЕЕТ ЗНАЧЕНИЯ для конечного результата.
+
+  Вместо установки переменной окружения CASC_JENKINS_CONFIG можно задать свойство casc.jenkins.config Java.
+  Это удобно, если вы устанавливаете Jenkins с помощью инструмента управления пакетами (package management tool)
+  и не можете задать переменную окружения вне управляемого пакетами файла, который может быть перезаписан при обновлении.
+
+  Для систем RHEL/CentOS вы можете добавить следующее к записи JENKINS_JAVA_OPTIONS в:
+/etc/sysconfig/jenkins -Dcasc.jenkins.config=/jenkins/casc_configs
+
+  Если вы НЕ УСТАНОВИТЕ
+    - переменную окружения CASC_JENKINS_CONFIG
+    - или свойство casc.jenkins.config Java-свойство,
+  плагин по умолчанию будет искать одиночный файл конфигурации в $JENKINS_HOME/jenkins.yaml.
+
+(!) Если все настроено правильно, вы должны иметь возможность просматривать страницу Configuration as Code:
+
+Manage Jenkins -> Configuration as Code.
+
+
+**************************
+* Начальная конфигурация *
+* Initial  Configuration *
+**************************
+
+[ВАЖНО:]
+  При настройке первого экземпляра Jenkins просмотрите примеры, представленные в каталоге demos этого репозитория.
+  - https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/demos
+
+Если у вас есть плагин, для которого нет примера, обратитесь к справочному документу (reference help document).
+
+Щелкните ссылку "Документация" в нижней части страницы "Configuration as Code" в вашем экземпляре Jenkins.
+
+Если вы хотите настроить конкретный плагин, найдите его название на странице.
+На странице будет показано, к какому корневому элементу относится конфигурация.
+
+(!) Большинство установленных плагинов относятся к корневому элементу `unclassified`.
+
+
+{Пример для настройки LDAP с помощью JCasC:
+  https://github.com/jenkinsci/configuration-as-code-plugin?tab=readme-ov-file#examples
+}
+
+--[LDAP-configuration.yaml]--
+jenkins:
+  securityRealm:
+    ldap:
+      configurations:
+        - groupMembershipStrategy:
+            fromUserRecord:
+              attributeName: "memberOf"
+          inhibitInferRootDN: false
+          rootDN: "dc=acme,dc=org"
+          server: "ldaps://ldap.acme.org:1636"
+####
+
+
+****************************
+* Yaml Aliases and Anchors *
+****************************
+
+Замените повторяющиеся элементы на yaml-якоря (yaml anchors).
+
+КЛЮЧИ ЯКОРЕЙ должны иметь префикс `x-` из-за того, что JCasC обрабатывает неизвестные корневые элементы.
+# в примере ниже это x-jenkins-linux-node с именем jenkins_linux_node_anchor
+# символ & указывает, что следующее после него имя является именем якоря
+# символ * вызывает определённый ранее якорь
+
+---<yaml anchor>---
+x-jenkins-linux-node: &jenkins_linux_node_anchor
+  remoteFS: "/home/jenkins"
+  launcher:
+    inbound:
+      workDirSettings:
+        disabled: true
+        failIfWorkDirIsMissing: false
+        internalDir: "remoting"
+        workDirPath: "/tmp"
+
+jenkins:
+  nodes:
+    - permanent:
+        name: "static-agent1"
+        <<: *jenkins_linux_node_anchor
+    - permanent:
+        name: "static-agent2"
+        <<: *jenkins_linux_node_anchor
+
+# В результате образуются два постоянных узла агента,
+# которые также можно записать следующим образом:
+
+---
+jenkins:
+  nodes:
+    - permanent:
+        name: "static-agent1"
+        remoteFS: "/home/jenkins"
+        launcher:
+          inbound:
+            workDirSettings:
+              disabled: true
+              failIfWorkDirIsMissing: false
+              internalDir: "remoting"
+              workDirPath: "/tmp"
+    - permanent:
+        name: "static-agent2"
+        remoteFS: "/home/jenkins"
+        launcher:
+          inbound:
+            workDirSettings:
+              disabled: true
+              failIfWorkDirIsMissing: false
+              internalDir: "remoting"
+              workDirPath: "/tmp"
+
+
+****************************
+* Соображения безопасности *
+* Security  considerations *
+****************************
+
+[!] Только администраторы Jenkins могут создавать или обновлять экземпляры Jenkins,
+    используя конфигурацию в виде файлов конфигурации кода.
+
+  Однако в некоторых средах администраторы могут разрешить менее привилегированным пользователям изменять части конфигурационных файлов,
+  например, храня их в репозитории SCM, к которому у этих пользователей есть доступ.
+  
+(!) Разрешение неадминистраторам редактировать эти файлы конфигурации может создавать различные риски для безопасности,
+    поэтому любые изменения, внесенные неадминистраторами, должны быть проверены на безопасность до их применения.
+    Вот несколько примеров изменений, которые могут быть проблематичными:
+      * Изменение параметров области безопасности (security realm) или стратегии авторизации (authorization strategy settings)
+        может дать пользователям более высокие разрешения, чем предполагалось.
+
+      * Интерполяция секретов в незащищенных контекстах может привести к раскрытию конфиденциальных данных.
+          Например, фрагмент типа systemMessage: "${SENSITIVE_VARIABLE}"
+          может раскрыть значение чувствительной переменной окружения всем пользователям, имеющим доступ к Jenkins.
+
+**********************
+* Installing plugins *
+**********************
+
+(!) Мы НЕ ПОДДЕРЖИВАЕМ УСТАНОВКУ ПЛАГИНОВ с помощью JCasC,
+    => для этого вам нужно использовать что-то другое:
+
+  1) Dockers users can use:
+  -> https://github.com/jenkinsci/docker/#preinstalling-plugins
+     https://github.com/jenkinsci/docker#preinstalling-plugins
+
+  2) Kubernetes users:
+  -> https://github.com/jenkinsci/helm-charts
+
+
+################################################################################
+#     Offer an alternate location to store plugins and groovy hook scripts     #
+# Предложите альтернативное место для хранения плагинов и скриптов groovy hook #
+################################################################################
+
+
+Description:
+  Запрашиваемая функция официального образа jenkins в Docker = возможность создавать производные образы с пользовательскими плагинами.
+  Но поскольку jenkins_home является томом, образ Docker не может быть создан с пользовательскими плагинами / скриптами.
+  Этот запрос функции заключается в том, чтобы ввести,
+  в дополнение к jenkins.war:/WEB-INF и JENKINS_HOME,
+  поддерживаемый каталог, где jenkins будет подбирать плагины и скрипты хуков.
+
+(?) Что не так с изменением jenkins.war (/?)
+  Изменение jenkins.war требует пересборки war, а затем генерации нового Docker image с этим пользовательским бинарником, не полагаясь на официальный.
+  Если предположить, что jenkins поддерживает каталог "patch" в дополнение к bundled-in-war и jenkins_home,
+  конечному пользователю будет проще создать Dockerfile следующим образом:
+
+--[Dockerfile]--
+FROM jenkins:1.565.3
+RUN curl -L https://updates.jenkins-ci.org/latest/git.hpi -o /opt/jenkins_patch/plugins/git.hpi

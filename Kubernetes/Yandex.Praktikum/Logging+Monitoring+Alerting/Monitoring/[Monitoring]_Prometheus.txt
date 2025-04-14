@@ -1,0 +1,455 @@
+Мониторинг: запуск и настройка Prometheus
+
+
+Из этого урока вы узнаете:
+  ● О двух способах сбора метрик
+  ● Об архитектуре Prometheus
+  ● О том, как настроить в вашем приложении публикацию метрик
+  ● О формате метрик Prometheus и языке PromQL
+  ● О механизме Service Discovery в Prometheus
+
+
+***********************
+* Push vs Pull модели *
+***********************
+
+# У нас будет система мониторинга, совмещающая подходы White-box и Black-box.
+# Называется Prometheus!
+
+Позволяет:
+  + экспортировать общее количество http-запросов, полученных приложением,
+  + собирать стандартные системные метрики
+
+# Какая модель мониторинга нам лучше подходит:  Push или Pull
+
+  Push-модель
+    = когда у вас есть централизованный сервер,
+      на который распределенные агенты активно пушат метрики.
+    В Push-модели вам нужно ОТДЕЛЬНО НАСТРАИВАТЬ КАЖДЫЙ СЕРВЕР, который вы хотите мониторить, 
+    устанавливая на него специальный агент мониторинга.
+    При таком подходе сервер мониторинга занимается своей основной задачей
+      ✓ хранит метрики
+    <и>
+      ✓ управляет их жизненным циклом,
+    спокойно ожидая, пока в его базу данных что-нибудь положат.
+
+# Основная модель работы системы мониторинга Zabbix = Push-модель.
+
+
+  Pull-модель
+    = подход, набравший популярность с приходом в нашу жизнь платформ оркестрации контейнеров.
+    В этом случае сам СЕРВЕР МОНИТОРИНГА находит эндпоинты экспортеров для сбора метрик.
+
+[*] Эндпоинт (англ. endpoint)
+  = в текущем контексте это URL для http-запросов метрик.
+  По соглашению приложение
+    -> запускает http-сервер на служебном порту
+    -> и отдаёт метрики на GET запросы к /metrics.
+
+[*] ЭКСПОРТЁР (англ. exporter)
+  = библиотека для приложения или отдельный процесс на сервере, выполняющие публикацию (экспорт) актуальных метрик.
+
+  Экспортёры могут
+    ✓ предоставлять внутренние метрики приложения (метрики времени обработки пользовательских http-запросов),
+    ✓ служить интеграционной прослойкой (из логов Nginx извлекать время обработки запроса и частоту ошибок)
+    ✓ или выступать агентом для мониторинга сервера (Node Exporter).
+
+[!] Pull-модель отлично показывает себя в ЭФЕМЕРНЫХ СРЕДАХ вроде Kubernetes,
+    когда количество точек мониторинга ИЗМЕНЯЕТСЯ с течением времени.
+
+  Для мониторинга СЕРВЕРОВ эта модель тоже подходит, но нужно будет озаботиться автоматизацией
+    + добавления новых серверов
+      <или>
+    + удаления неактуальных из конфигурации.
+
+  В особых случаях для получения метрик понадобятся промежуточные серверы, работающие по push-модели.
+
+# Например, когда целевые серверы находятся за файерволом с политикой, запрещающей двунаправленные соединения.
+
+
+Характерные черты для Push и Pull моделей:
+
+Push-модель:
+  - Не нужно хранить информацию о клиентах мониторинга;
+  - По этой модели работает сервер мониторинга Zabbix;
+  - Сервер только хранит и обрабатывает метрики.
+
+Pull-модель:
+  - сервер периодически опрашивает агенты по http для сбора метрик
+  - активно используется в динамической инфраструктуре, такой как Kubernetes
+  - нужен СПИСОК агентов-экспортёров, с которых требуется собират метрики
+
+
+##########################
+# Архитектура Prometheus #
+##########################
+
+Основными компонентами Prometheus являются:
+  ● сам сервер, выполняющий периодический опрос экспортеров
+  ● база данных временных рядов (англ. time series database, TSDB) — хранилище метрик
+  ● алертменеджер для отправки оповещений
+
+
+Данные метрик в Prometheus хранятся в базе данных в виде ВРЕМЕННЫХ РЯДОВ (англ. time series)
+  = численных значений измеряемой характеристики и временной метки каждого измерения.
+
+  С метрикой ассоциируется
+    + имя
+    + набор лейблов
+      # = пар ключ-значение с дополнительной информацией о происхождении метрики.
+
+Временные ряды
+  => позволяют эффективно анализировать изменения метрики с течением времени,
+
+Лейблы
+  => однозначно определяют происхождение данных:
+     - сервер-источник,
+     - имя приложения,
+     - название окружения.
+
+[!] Интерфейсом к такой базе данных служит язык PromQL == язык запросов Prometheus
+
+Внешний клиент
+  (будь то человек или приложение отрисовки графиков)
+  будет выполнять запрос на языке PromQL для получения данных:
+
+[External Client]--{PromQL-Request}-->(TSDB)
+
+
+--[запрос для получения общего количества HTTP-запросов на сервере фронтенда тестового окружения]--
+
+http_requests_total{instance="frontend", env="test"}
+
+# Такой запрос выдаст:
+##   -> временной ряд, связанный с метрикой http_requests_total
+##   -> и значениями лейблов в фигурных скобках.
+
+
+#(!) Установим Prometheus из предварительно подготовленного helm-чарта:
+-->
+$ cd monitoring-tools
+$ helm upgrade --atomic --install prometheus prometheus
+<--
+
+# Так же, как и для Grafana, будет установлен Ingress для Web-интерфейса Prometheus,
+# адрес которого можно посмотреть с помощью kubectl:
+-->
+$ kubectl get ingress/prometheus
+<--
+##_OUTPUT_##
+NAME         CLASS    HOSTS                                                ADDRESS           PORTS   AGE
+prometheus   <none>   std-017-033-monitoring.k8s.praktikum-services.tech   178.154.194.109   80      4m30s
+
+# заходим по URL, указанному в HOSTS
+
+*******************************************************************************************
+* (В терминологии Prometheus) опрашиваемые экспортёры для сбора метрик называются targets *
+*******************************************************************************************
+#(от англ. «цели»).
+
+В панели верхнего меню выберите Status -> (в выпадающем списке) Targets.
+В свежей установке здесь будет пустая страница и мы добавим сюда бэкенд нашей сосисочной
+с помощью интересного механизма "Service Discovery".
+
+
+(?) Задание 2
+<?> Какие утверждения верны для Prometheus? <?>
+
+  "-" Метрики отправляются в базу Prometheus напрямую
+'''
+  Не-а, Prometheus использует PUSH-МОДЕЛЬ для отправки метрик.
+'''
+
+  "+" Prometheus САМ собирает метрики по заданному интервалу и списку эндпоинтов, с кого надо собрать
+'''
+  Да, у Prometheus есть
+  ✓ список эндпоинтов, с кого собирать метрики,
+  ✓ и набор правил, как это делать.
+'''
+
+  "-" Умеет мониторить только базы данных
+'''
+  Prometheus умеет мониторить всё что угодно,
+  главное — сказать ему, откуда забирать метрики и отдавать метрики по этому пути в понятном для него формате.
+'''
+
+  "-" Prometheus не очень популярен, поэтому надо писать свои экспортёры
+'''
+  С распространением Kubernetes Prometheus стал популярнее,
+  => и для него появилось множество экспортёров на все случаи жизни.
+  Чаще всего не нужно писать что-то своё, стоит лишь порыться в интернете.
+  Кроме того, существуют Prometheus-клиенты под разные языки программирования.
+'''
+
+  "+" Из Prometheus можно смотреть метрики разными способами
+
+  "+" Prometheus умеет отправлять алерты
+'''
+  Да, умеет. Для этого есть AlertManager.
+'''
+
+
+************************************
+* Prometheus-экспортёр для бэкенда *
+************************************
+
+
+--[curl-output]--
+curl http://localhost:8080/actuator/prometheus
+
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Frontend</title>
+  <base href="/">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="spring-boot-angular/src/main/js/ecommerce/src/favicon.ico">
+</head>
+<body>
+  <app-root></app-root>
+<script type="text/javascript" src="runtime.js"></script><script type="text/javascript" src="polyfills.js"></script><script type="text/javascript" src="styles.js"></script><script type="text/javascript" src="vendor.js"></script><script type="text/javascript" src="main.js"></script></body>
+</html>
+
+# после редактирования pom.xml и установки требуемой версии Spring-Boot ( == 2.6.2)
+/*
+<parent>
+    <groupId>org.springframework.boot</groupId>
+    <artifactId>spring-boot-starter-parent</artifactId>
+    <version>2.6.2</version>
+    <relativePath/> <!-- lookup parent from repository -->
+</parent>
+*/
+
+... запрос на http://backend:8080/actuator/prometheus выдаёт:
+## (см. [Prometheus]_Metrics-in-Prometheus-format_=_backend-8080-response.txt)
+
+
+*****************************
+* Пример метрики Prometheus *
+*****************************
+
+# HELP jvm_memory_max_bytes The maximum amount of memory in bytes that can be used for memory management
+# TYPE jvm_memory_max_bytes gauge
+jvm_memory_max_bytes{area="heap",id="Tenured Gen",} 7.7037568E8
+jvm_memory_max_bytes{area="nonheap",id="CodeHeap 'profiled nmethods'",} 1.22912768E8
+...
+---
+  # HELP — включает в себя описание метрики
+  # TYPE — описывает тип метрики
+#// (подробнее про типы метрик можно почитать здесь: https://prometheus.io/docs/concepts/metric_types/
+
+  jvm_memory_max_bytes — имя метрики
+
+  {area="heap",id="Tenured Gen",} = в фигурных скобках находятся ЛЕЙБЛЫ метрики.
+  # В нашем примере есть лейблы с именами area и id, а их значения «heap» и «Tenured Gen»
+
+  7.7037568E8 — значение метрики
+
+---
+<имя_метрики>{[лейблы метрики]} <значение_метрики>
+---
+
+[ ] - необязательный параметр
+
+[!] даже у одной метрики могут быть разные значения лейблов!
+## например, area="heap" и area="nonheap".
+
+
+[!] У метрики может вовсе не быть лейблов:
+--<Пример метрики Prometheus без лейблов>--
+# HELP jvm_gc_max_data_size_bytes Max size of long-lived heap memory pool
+# TYPE jvm_gc_max_data_size_bytes gauge
+jvm_gc_max_data_size_bytes 7.7037568E8
+--<<--
+
+
+[!] Теперь нужно позаботиться о том, чтобы этот endpoint:
+    ✓ был обнаружен сервером Prometheus,
+    ✓ и он начал собирать метрики
+
+#[!] Научим Prometheus собирать эти метрики
+
+
+********************************
+* Prometheus Service Discovery *
+********************************
+
+(!) Конфигурация сервера Prometheus определяется в YAML-формате,
+#=> по соглашению в файле prometheus.yml
+## Имеются в виду соглашения, увековеченные в Agile-манифесте разработки программного обеспечения.
+
+В конфиге нам важны следующие секции:
+  * global
+      — глобальные параметры, которые допустимы во всех других контекстах конфигурации.
+        Параметры из этой секции также служат значениями по умолчанию для других разделов конфигурации;
+
+  * scrape_configs
+      — настройки поиска целей мониторинга.
+
+
+Цели мониторинга могут быть определены ЯВНО
+  = в scrape_configs указывается адрес и URL экспортёра:
+
+
+--[(part_of).prometheus.yml]--
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+    # Значение job_name добавляется лейблом `job=<job_name>` ко всем метрикам из этой конфигурации
+  - job_name: 'example_exporter'
+    metrics_path: '/metrics'
+    static_configs:
+      - targets: ['example.com:8080']
+--<<--
+
+[!] Но для Kubernetes в Prometheus предусмотрен АВТОМАТИЧЕСКИЙ процесс обнаружения экспортеров!!!
+
+  1) Prometheus читает секцию конфига scrape_configs,
+     согласно которой настраивает свой внутренний механизм обнаружения сервисов (Service Discovery).
+
+  2) Механизм Service Discovery взаимодействует с API платформы (Kubernetes или облака),
+     которая (платформа) помогает нам в обнаружении эндпоинтов для сбора метрик.
+
+  3) На основании данных из платформы механизм Service Discovery автоматически обновляет Targets (список целей).
+
+
+(!) В scrape_configs добавляются специальные директивы:
+  kubernetes_sd_configs  # = (<?> что искать </?>)
+  relabel_configs  # = (<?> как искать </?>):
+  
+--[]--
+scrape_configs:
+- job_name: kubernetes-pods
+  # Настройки Service Discovery
+  kubernetes_sd_configs:
+    - role: pod # целью (target) будет каждый подходящий Pod
+      namespaces:
+        names:
+          - <your k8s namespace>
+
+  # Фильтрация и динамическое назначение лейблов
+  relabel_configs:
+    # Аннотации-фильтры для поиска подов
+    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_scrape]
+      action: keep
+      regex: true
+    - source_labels: [__meta_kubernetes_pod_ip, __meta_kubernetes_pod_annotation_prometheus_io_port]
+      regex: (.+);(.+)
+      replacement: $1:$2
+      target_label: __address__
+    - source_labels: [__meta_kubernetes_pod_annotation_prometheus_io_path]
+      regex: (.+)
+      target_label: __metrics_path__
+
+    # Добавление полезных лейблов временному ряду этого конфига
+    - action: labelmap
+      regex: __meta_kubernetes_pod_label_(.+)
+    - source_labels: [__meta_kubernetes_namespace]
+      action: replace
+      target_label: kubernetes_namespace
+    - source_labels: [__meta_kubernetes_pod_name]
+      action: replace
+      target_label: kubernetes_pod_name
+-<<-
+
+# Cервер Prometheus АВТОМАТИЧЕСКИ ДОБАВЛЯЕТ meta-лейблы при нахождении цели с помощью механизма Service Discovery.
+# Для Kubernetes API эти meta-лейблы формируются из знакомых нам сущностей:
+    ✓ имя и неймспейс Pod'а,
+    ✓ аннотации и лейблы Pod'ов.
+
+
+[Механизм релейблинга]
+У meta-лейблов длинные и труднопроизносимые имена,
+  => поэтому применяют технику РЕЛЕЙБЕЛИНГА — переименования лейблов.
+
+Например, meta-лейбл __meta_kubernetes_pod_name заменяют на kubernetes_pod_name.
+
+Тот же механизм релейбелинга используется для фильтрации целей и получения конфигурации сбора метрик.
+
+# В примере выше на Pod'ах должны быть определены три аннотации:
+  1) prometheus.io/scrape,
+  2) prometheus.io/port
+  3) prometheus.io/path,
+
+  которые транслируются в автоматические meta-лейблы:
+    __meta_kubernetes_pod_annotation_prometheus_io_scrape,
+    __meta_kubernetes_pod_annotation_prometheus_io_port     и
+    __meta_kubernetes_pod_annotation_prometheus_io_path
+  
+    соответственно (спецсимволы заменяются на нижнее подчёркивание). 
+
+Для конфигурации action: keep
+  несоответствие значения аннотации prometheus.io/scrape значению в поле regex
+  или отсутствие такой аннотации
+=> приведёт к игнорированию Pod'а механизмом Service Discovery.
+
+
+Похожий конфиг устанавливается нашим Helm-чартом,
+его можно найти в ConfigMap с именем prometheus-conf:
+-->
+$ kubectl get cm/prometheus-conf -o yaml
+<--
+
+--[(part).backend.yaml]--
+spec:
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: /actuator/prometheus
+        prometheus.io/port: "8080"
+        prometheus.io/scrape: "true"
+####____####
+# версия для Helm-чарта
+---
+spec:
+  template:
+    metadata:
+      annotations:
+        prometheus.io/path: {{ .Values.prometheus_path }}
+        prometheus.io/port: "{{ .Values.prometheus_port }}"
+        prometheus.io/scrape: "{{ .Values.prometheus_scrape }}"
+--<<--
+
+# Service Discovery отработает быстро и в списке целей в Web-интерфейсе появится эндпоинт Pod'а нашего бэкенда:
+
+
+Метрики, собранные с помощью механизма Service Discovery можно увидеть в панели верхнего меню Graph.
+В поле Expression вводим выражение вида {job="kubernetes-pods"}:
+
+
+# В Grafana намного удобнее строить и редактировать дашборды
+# + в новой версии Grafana есть классный линт, который сильно облегчит жизнь в освоении нового языка запросов.
+
+
+########################
+# Ключевые мысли урока #
+########################
+
+  Push и Pull модели определяют способ сбора метрик
+  Экспортёр — библиотека для приложения или отдельный процесс на сервере, выполняющие публикацию актуальных метрик
+  Данные метрик в Prometheus хранятся в базе данных в виде временных рядов (time series),
+  а интерфейсом к такой базе данных служит язык PromQL
+  Цели мониторинга в Prometheus
+    могут быть определены явно,
+    а могут добавляться автоматически с помощью механизма Service Discovery
+
+  Полученные метрики лучше оформить в виде графиков в Grafana
+
+######################
+# Полезные материалы #
+######################
+
+Prometheus Overview (eng):
+#-> https://prometheus.io/docs/introduction/overview/
+
+Prometheus Getting started (eng)
+#-> https://prometheus.io/docs/prometheus/latest/getting_started/
+
+Prometheus Data Model (eng):
+#-> https://prometheus.io/docs/concepts/data_model/
+
+PromLabs: Как на самом деле PromQL рассчитывает метрики (eng)
+#-> https://promlabs.com/blog/2021/01/29/how-exactly-does-promql-calculate-rates

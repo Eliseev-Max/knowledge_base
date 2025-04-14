@@ -1,0 +1,8 @@
+Bitbucket Push and Pull Request
+(https://plugins.jenkins.io/bitbucket-push-and-pull-request/)
+
+[more:]
+  "Trigger Jenkins Job from Bitbucket on Pull Request":
+  -> https://stackoverflow.com/questions/59653369/trigger-jenkins-job-from-bitbucket-on-pull-request
+
+

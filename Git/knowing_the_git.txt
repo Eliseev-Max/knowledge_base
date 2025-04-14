@@ -1,0 +1,22 @@
+Познавая git
+
+$ git log --oneline --graph --all
+# = отобразить все изменения в виде графа
+
+$ git fetch
+# = 
+
+$ git tag <tag-name>
+# = 
+
+
+**********
+* REBASE *
+**********
+
+$ git rebase -i origin/master
+
+
+
+$ git push -f -u origin feature/CICD-80-docker-sonarqube
+

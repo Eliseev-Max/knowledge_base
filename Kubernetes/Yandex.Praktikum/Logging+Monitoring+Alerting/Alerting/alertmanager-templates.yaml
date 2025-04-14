@@ -1,0 +1,116 @@
+---
+# Source: alertmanager/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+data:
+  alertmanager.yml: |
+    global:
+      resolve_timeout: 1m
+    route:
+       group_wait: 10s
+       group_interval: 30s
+       repeat_interval: 30m
+       receiver: "telegram"
+       routes:
+         - receiver: "telegram"
+           group_wait: 10s
+           match_re:
+             severity: critical|warning
+           continue: true
+    receivers:
+     - name: "telegram"
+       telegram_configs:
+         - send_resolved: true
+           bot_token: "5933756043:AAE8JLL5KIzgrNBeTP5e-1bkbJy4YRoeGjs"
+           chat_id: -1.002065700118e+12
+           api_url: "https://t.me/+wAU1l-TbZLZmZWVi"
+           message: "{{ range .Alerts }}{{ .Annotations.summary }}\n{{ .Annotations.description }}\n{{ end }}"
+---
+# Source: alertmanager/templates/services.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+spec:
+  ports:
+    - port: 9093
+      protocol: TCP
+  selector:
+    app: alertmanager
+  sessionAffinity: None
+  type: ClusterIP
+---
+# Source: alertmanager/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+spec:
+  selector:
+    matchLabels:
+      app: alertmanager
+  template:
+    metadata:
+      labels:
+        app: alertmanager
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9093"
+    spec:
+      terminationGracePeriodSeconds: 30
+      automountServiceAccountToken: false
+      restartPolicy: Always
+      containers:
+      - name: alertmanager
+        image: prom/alertmanager:latest
+        args:
+          - '--config.file=/etc/alertmanager/alertmanager.yml'
+          - '--storage.path=/alertmanager'
+        resources:
+          limits:
+            cpu: 0.5
+            memory: 256Mi
+        volumeMounts:
+        - name: config-volume
+          mountPath: /etc/alertmanager
+        - name: alertmanager
+          mountPath: /alertmanager
+      volumes:
+      - name: config-volume
+        configMap:
+          name: alertmanager
+      - name: alertmanager
+        emptyDir: {}
+---
+# Source: alertmanager/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: alertmanager
+  namespace: std-017-033
+  labels:
+    app: alertmanager
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+  - host: "std-017-033-alertmanager.k8s.praktikum-services.tech"
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: alertmanager
+            port:
+              number: 9093

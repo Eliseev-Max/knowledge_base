@@ -1,0 +1,5 @@
+Jenkins User Handbook
+
+Managing Nodes. Components of Distributed Builds
+(https://www.jenkins.io/doc/book/managing/nodes/#creating-agents/)
+

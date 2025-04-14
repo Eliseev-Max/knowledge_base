@@ -1,0 +1,198 @@
+Terraform. Input Variables
+(https://developer.hashicorp.com/terraform/language/values/variables)
+
+[more:]
+  "Customize Terraform configuration with variables":
+#-> https://developer.hashicorp.com/terraform/tutorials/configuration-language/variables?utm_source=WEBSITE&utm_medium=WEB_IO&utm_offer=ARTICLE_PAGE&utm_content=DOCS
+  "Environment Variables": https://developer.hashicorp.com/terraform/language/values/variables#environment-variables
+
+#-> "Credentials": https://developer.hashicorp.com/terraform/cli/config/config-file#credentials-1
+
+
+Input Variables (входные переменные)
+  -> позволяют настраивать аспекты модулей Terraform, не ИЗМЕНЯЯ ИСХОДНЫЙ КОД МОДУЛЯ.
+
+  Эта функциональность позволяет совместно использовать модули в различных конфигурациях Terraform,
+  делая модуль КОМПОЗИТНЫМ (composable) и МНОГОКРАТНО ИСПОЛЬЗУЕМЫМ (reusable).
+
+  При объявлении переменных в корневом модуле (root module) конфигурации вы можете задать их значения с помощью:
+    + опций CLI
+    + и переменных окружения.
+  
+  Когда вы объявляете их в дочерних модулях (child modules)*, вызывающий модуль должен передать значения в блок module.
+# "Modules": https://developer.hashicorp.com/terraform/language/modules
+"""
+  Модули - это контейнеры для нескольких ресурсов, которые используются вместе.
+  Модуль состоит из коллекции файлов .tf и/или .tf.json, хранящихся вместе в директории.
+
+  Модуль Terraform (обычно корневой модуль конфигурации) может вызывать другие модули для включения их ресурсов в конфигурацию.
+  Модуль, вызванный другим модулем, часто называют ДОЧЕРНИМ МОДУЛЕМ (child module).
+
+  * Дочерние модули могут быть ВЫЗВАНЫ НЕСКОЛЬКО РАЗ в одной конфигурации,
+  * и несколько конфигураций могут использовать ОДИН И ТОТ ЖЕ дочерний модуль.
+"""
+
+  Если вы знакомы с традиционными языками программирования, может быть полезно сравнить модули Terraform с определениями функций:
+    * Input Variables = это аргументы функции.
+
+    * Output Variables = это возвращаемые значения функции.
+      #-> https://developer.hashicorp.com/terraform/language/values/outputs
+
+    * Local Values - это временные локальные переменные функции.
+      #-> https://developer.hashicorp.com/terraform/language/values/locals
+      # Локальное значение присваивает выражению имя,
+      # поэтому вы можете использовать это имя несколько раз в модуле вместо повторения выражения. 
+
+/*
+Примечание:
+  Для краткости входные переменные часто называют просто "переменными" или "переменными Terraform",
+  если из контекста ясно, о какой именно переменной идет речь.
+
+  Другие виды переменных в Terraform включают
+    - переменные окружения (задаются оболочкой, в которой запущена Terraform)
+    - и переменные выражения (используются для косвенного представления значения в выражении).
+*/
+
+
+*****************************
+* Объявление Input Variable *
+*****************************
+
+[!] Каждая входная переменная, принимаемая модулем, должна быть объявлена с помощью блока `variable`:
+
+--[EXAMPLE.declaring_an_Input_Var.tf]--
+
+variable "image_id" {
+  type = string
+}
+
+variable "availability_zone_names" {
+  type    = list(string)
+  default = ["us-west-1a"]
+}
+
+variable "docker_ports" {
+  type = list(object({
+    internal = number
+    external = number
+    protocol = string
+  }))
+  default = [
+    {
+      internal = 8300
+      external = 8300
+      protocol = "tcp"
+    }
+  ]
+}
+
+\\\
+
+  Метка после ключевого слова variable = это имя переменной, которое должно быть УНИКАЛЬНЫМ для всех переменных в одном модуле.
+  Это имя используется
+    > для присвоения значения переменной извне
+    > и для ссылки на значение переменной внутри модуля.
+
+  Именем переменной может быть любой допустимый идентификатор, кроме следующих:
+    - source,
+    - version,
+    - providers,
+    - count,
+    - for_each,
+    - lifecycle,
+    - depends_on,
+    - locals
+
+(!) Эти имена зарезервированы для мета-аргументов в блоках конфигурации модуля
+    и НЕ МОГУТ БЫТЬ ОБЪЯВЛЕНЫ КАК ИМЕНА ПЕРЕМЕННЫХ.
+
+*************
+* Arguments *
+*************
+
+  Terraform CLI определяет следующие необязательные аргументы для объявления переменных:
+  ● default
+    = A default value which then makes the variable optional.
+
+  ● type
+    = This argument specifies what value types are accepted for the variable.
+
+  ● description
+    = This specifies the input variable's documentation.
+
+  ● validation
+    = Блок для определения правил проверки, обычно в дополнение к ограничениям типа.
+
+  ● ephemeral
+    = Эта переменная доступна во время выполнения, но не записывается в файлы состояния или плана.
+
+  ● sensitive
+    = Ограничивает вывод пользовательского интерфейса Terraform, когда переменная используется в конфигурации.
+
+  ● nullable
+    = определяет, может ли переменная принимать нулевое значение (null) внутри модуля
+
+
+******************
+* Default values *
+******************
+
+  Объявление переменной может также включать аргумент по умолчанию.
+  Если он присутствует:
+    -> переменная считается необязательной,
+    -> и значение по умолчанию будет использоваться, если оно не задано при вызове модуля или запуске Terraform.
+
+(!) Аргумент по умолчанию требует буквального значения и НЕ МОЖЕТ ССЫЛАТЬСЯ НА ДРУГИЕ ОБЪЕКТЫ в конфигурации.
+
+
+********************
+* Type Constraints *
+********************
+
+  Аргумент type в блоке переменных позволяет ограничить тип значения, которое будет принято в качестве значения переменной.
+  Если ограничение типа не задано, то принимается значение ЛЮБОГО ТИПА.
+
+  Хотя ограничения типа необязательны, мы рекомендуем указывать их; они могут служить полезным напоминанием для пользователей модуля, а также позволяют Terraform возвращать полезное сообщение об ошибке, если используется неправильный тип.
+
+  Ограничения типов создаются из смеси ключевых слов типа и конструкторов типов.
+
+The supported type keywords are:
+
+  ● string
+  ● number
+  ● bool
+
+Конструкторы типов позволяют задавать сложные типы, такие как коллекции:
+
+  ● list(<TYPE>)
+  ● set(<TYPE>)
+  ● map(<TYPE>)
+  ● object({<ATTR NAME> = <TYPE>, ... })
+  ● tuple([<TYPE>, ...])
+
+[any]
+  Ключевое слово any может использоваться для указания того, что допустим любой тип.
+
+  Более подробную информацию о значении и поведении этих различных типов,
+  а также подробную информацию об автоматическом преобразовании сложных типов см. в разделе:
+  "Type Constraints": https://developer.hashicorp.com/terraform/language/expressions/types
+
+[!] Если указаны аргументы type и default, то ЗНАЧЕНИЕ ПО УМОЛЧАНИЮ ДОЛЖНО БЫТЬ ПРЕОБРАЗОВАНО К УКАЗАННОМУ ТИПУ.
+
+
+Input Variable Documentation
+Because the input variables of a module are part of its user interface, you can briefly describe the purpose of each variable using the optional description argument:
+
+variable "image_id" {
+  type        = string
+  description = "The id of the machine image (AMI) to use for the server."
+}
+
+The description should concisely explain the purpose of the variable and what kind of value is expected. This description string might be included in documentation about the module, and so it should be written from the perspective of the user of the module rather than its maintainer. For commentary for module maintainers, use comments.
+
+
+***************************
+* Custom Validation Rules *
+***************************
+(https://developer.hashicorp.com/terraform/language/values/variables#custom-validation-rules)
+

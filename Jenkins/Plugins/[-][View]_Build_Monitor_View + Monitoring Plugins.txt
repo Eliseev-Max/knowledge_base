@@ -1,0 +1,5 @@
+Build Monitor View. Monitoring
+
+[sources:]
+  1) "Build Monitor View": https://plugins.jenkins.io/build-monitor-plugin/
+  2) "Monitoring": https://plugins.jenkins.io/monitoring/

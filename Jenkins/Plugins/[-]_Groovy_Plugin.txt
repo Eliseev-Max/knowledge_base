@@ -1,0 +1,5 @@
+Groovy plugin for Jenkins
+
+[sources:]
+  "Groovy plugin for Jenkins": https://plugins.jenkins.io/groovy/
+  "Groovy plugin for Jenkins (GitHub)": https://github.com/jenkinsci/groovy-plugin

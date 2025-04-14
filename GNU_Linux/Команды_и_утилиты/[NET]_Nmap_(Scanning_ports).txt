@@ -1,2 +1,5 @@
 How to Use Nmap to Scan for Open Ports
-(https://phoenixnap.com/kb/nmap-scan-open-ports)
+
+[sources:]
+1) "Справочное руководство Nmap (Man Page)": https://nmap.org/man/ru/index.html
+2) "How to Use Nmap to Scan for Open Ports": https://phoenixnap.com/kb/nmap-scan-open-ports

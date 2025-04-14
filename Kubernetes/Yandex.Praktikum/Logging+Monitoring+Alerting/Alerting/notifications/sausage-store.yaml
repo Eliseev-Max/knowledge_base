@@ -1,0 +1,44 @@
+---
+groups:
+  - name: Sausage store rules
+    rules:
+    - alert: InstanceDown
+      expr: up{app="backend"} == 0
+      for: 1m
+      labels:
+        severity: critical
+        project: "sausage_store"
+        component: "backend"
+      annotations:
+        summary: "Problem with your backend pod"
+        description: "Backend pod is down for 1 minute"
+    - alert: HTTP status code is 500
+      expr: http_server_requests_seconds_count{status="500"} > 0
+      for: 1m
+      labels:
+        severity: warning
+        project: "sausage_store"
+        component: "backend"
+      annotations:
+        summary: "You have got a bad request"
+        description: "You have got request with status code = 500, please check"
+    - alert: Delay over 100ms for /api/orders
+      expr: http_server_requests_seconds_bucket{quantile="0.95", method="POST", uri="/api/orders"} > 100000
+      for: 5m
+      labels:
+        severity: warning
+        project: "sausage_store"
+        component: "backend"
+      annotations:
+        summary: "Delay to /api/orders requests"
+        description: "Delay more than 100ms for 0.95 quantile of success POST  requsests to /api/orders"
+    - alert: Errors for /actuator/prometheus
+      expr: http_server_requests_seconds_count{outcome!="SUCCESS", uri!="/actuator/prometheus"} > 0
+      for: 2m
+      labels:
+        severity: warning
+        project: "sausage_store"
+        component: "backend"
+      annotations:
+        summary: "Error in requests to /actuator/prometheus"
+        description: "There is an error in API request to /actuator/prometheus for 2 minutes"

@@ -1,0 +1,158 @@
+Alertmanager
+(https://prometheus.io/docs/alerting/latest/alertmanager/)
+
+******************
+* Обзор Alerting *
+******************
+(https://prometheus.io/docs/alerting/latest/overview/)
+
+  Оповещение в Prometheus состоит из двух частей.
+    1) Правила оповещения (Alerting rules) на серверах Prometheus отправляют алерты (оповещения) в Alertmanager.
+    2) Затем Alertmanager управляет этими алертами, включая:
+       ✓ silencing (глушение),
+       ✓ inhibition (подавление),
+       ✓ aggregation (агрегирование)
+       ✓ и отправку уведомлений с помощью таких методов, как
+         электронная почта,
+         системы оповещения по вызову
+         и чат-платформы.
+
+Основные шаги по настройке оповещений и уведомлений:
+  установка и настройка Alertmanager: 
+  настройка Prometheus для взаимодействия с Alertmanager: 
+  создание правил оповещения в Prometheus: 
+
+
+Alertmanager обрабатывает оповещения, отправленные клиентскими приложениями, такими как сервер Prometheus.
+
+Он заботится
+  ✓ о дедупликации,
+  ✓ о группировке 
+  ✓ и о маршрутизации
+
+=> их в нужный приемник интеграции, такой как
+  - электронная почта,
+  - PagerDuty
+  - или OpsGenie.
+
+  Он также позаботится о глушении (silencing ) и запрете (inhibition ) оповещений.
+
+  Ниже описаны основные концепции, которые реализует Alertmanager.
+  Для более детального изучения их использования обратитесь к документации по конфигурации:
+#(https://prometheus.io/docs/alerting/latest/configuration/)
+
+***************
+*  Grouping   *
+* Группировка *
+***************
+
+  Группировка объединяет оповещения схожего характера в одно уведомление.
+  Это особенно полезно во время крупных сбоев, когда
+    ✓ многие системы выходят из строя одновременно
+    ✓ и сотни-тысячи оповещений могут поступать одновременно.
+
+Пример:
+  Десятки или сотни экземпляров службы работают в вашем кластере, когда происходит разделение сети.
+  Половина экземпляров службы БОЛЬШЕ НЕ МОЖЕТ связаться с базой данных.
+  Правила оповещения в Prometheus были настроены на отправку оповещения для каждого экземпляра службы,
+  если он не может связаться с базой данных.
+  В результате в Alertmanager отправляются СОТНИ ОПОВЕЩЕНИЙ,
+  а пользователь хочет получать только ОДНУ СТРАНИЦУ и при этом видеть, какие именно экземпляры служб были затронуты.
+
+=>  Поэтому можно настроить Alertmanager на группировку оповещений по кластеру и имени оповещения,
+    чтобы он отправлял одно компактное уведомление.
+
+  ✓ Группировка оповещений,
+  ✓ время для сгруппированных уведомлений
+  ✓ и получатели этих уведомлений
+  настраиваются с помощью дерева маршрутизации в файле конфигурации.
+
+
+*****************
+*   Inhibition  *
+* Ингибирование *
+*****************
+
+  Ингибирование - это концепция подавления уведомлений для определенных оповещений, если некоторые другие оповещения уже срабатывают.
+
+Пример:
+  Выдается оповещение о том, что ВЕСЬ КЛАСТЕР НЕДОСТУПЕН.
+  Alertmanager может быть настроен на отключение всех других оповещений, касающихся этого кластера, при появлении этого конкретного оповещения.
+  Это предотвращает уведомления о сотнях или тысячах оповещений, которые не имеют отношения к реальной проблеме.
+  Запреты настраиваются через конфигурационный файл Alertmanager.
+
+************
+* Silences *
+*  Запреты *
+************
+
+  Silences - это простой способ просто отключить оповещения на определенное время.
+  Silence настраивается на основе матчеров, как и дерево маршрутизации.
+
+  Входящие оповещения проверяются, соответствуют ли они всем равенствам или регулярным выражениям активной тишины.
+  Если совпадают, то уведомления по этому оповещению рассылаться не будут.
+
+  Оповещения настраиваются в веб-интерфейсе Alertmanager.
+
+*********************
+*  Client behavior  *
+* Поведение клиента *
+*********************
+
+  У Alertmanager есть особые требования к поведению клиента.
+  Они актуальны только для продвинутых случаев использования, когда Prometheus не используется для отправки оповещений.
+
+
+
+<telegram_config>
+# Whether to notify about resolved alerts.
+[ send_resolved: <boolean> | default = true ]
+
+# The Telegram API URL i.e. https://api.telegram.org.
+# If not specified, default API URL will be used.
+[ api_url: <string> | default = global.telegram_api_url ]
+
+# Telegram bot token. It is mutually exclusive with `bot_token_file`.
+[ bot_token: <secret> ]
+
+# Read the Telegram bot token from a file. It is mutually exclusive with `bot_token`.
+[ bot_token_file: <filepath> ]
+
+# ID of the chat where to send the messages.
+[ chat_id: <int> ]
+
+# Message template.
+[ message: <tmpl_string> default = '{{ template "telegram.default.message" .}}' ]
+
+# Disable telegram notifications
+[ disable_notifications: <boolean> | default = false ]
+
+# Parse mode for telegram message, supported values are MarkdownV2, Markdown, HTML and empty string for plain text.
+[ parse_mode: <string> | default = "HTML" ]
+
+# The HTTP client's configuration.
+[ http_config: <http_config> | default = global.http_config ]
+
+---
+global:
+  resolve_timeout: 1m
+
+route:
+  group_wait: 10s
+  group_interval: 30s
+  repeat_interval: 30m
+  receiver: "telegram"
+  routes:
+    - receiver: "telegram"
+      group_wait: 10s
+      match_re:
+        severity: critical|warning
+      continue: true
+
+receivers:
+ - name: "telegram"
+   telegram_configs:
+   - send_resolved: true
+     bot_token: 'IAMSECRETTOKENFORTELEGRAMVERYLONGLONGSTRING'
+     chat_id: -000000000000
+     message: "{{ range .Alerts }}{{ .Annotations.description }}\n{{ end }}"

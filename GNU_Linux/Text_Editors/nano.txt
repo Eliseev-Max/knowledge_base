@@ -1,0 +1,10 @@
+Nano
+
+[sources:]
+"The GNU nano homepage": https://www.nano-editor.org/
+"nano(1) - Linux man page": https://linux.die.net/man/1/nano
+"Nano: И всё-таки его придётся выучить [1]": https://habr.com/ru/articles/106471/
+"Nano: И всё-таки его придётся выучить [2]": https://habr.com/ru/articles/106554/
+"Nano: И всё-таки его придётся выучить [3]": https://habr.com/ru/articles/106748/
+"Инструкция для работы с редактором nano": https://wiki.astralinux.ru/pages/viewpage.action?pageId=326852723#:~:text=%D0%BE%D1%82%D0%BC%D0%B5%D0%BD%D0%B8%D1%82%D1%8C%20%D0%B4%D0%B5%D0%B9%D1%81%D1%82%D0%B2%D0%B8%D0%B5%20%E2%80%94%20.
+

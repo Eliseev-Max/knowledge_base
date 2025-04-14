@@ -1,4 +1,5 @@
-ssh-keyscan  - 
+ssh-keyscan
+(https://linux.die.net/man/1/ssh-keyscan)
 
 Синтаксис:
 $ ssh-keyscan [-46cHv] [-f file] [-p port] [-T timeout] [-t type] [host | addrlist namelist]

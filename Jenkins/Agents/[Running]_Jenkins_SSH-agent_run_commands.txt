@@ -1,15 +1,55 @@
-docker run -d --rm --name=agent1 --network jenkins -p 22:22 `
-  -e "JENKINS_AGENT_SSH_PUBKEY=[your-public-key]" `
-  jenkins/ssh-agent:jdk17
-  
-  
+******************
+* volume mounts: *
+******************
+
+jenkins_agent_volume:/home/jenkins/agent
+
+
+
+# Jenkins SSH Agent for CAG
+# not restarting
+# Using SSH public key: j-agents.pub (1024b)
+---
+docker run --rm -d \
+           --name=ssh-agent-cag \
+           --publish 2202:22 \
+           --network=infrastructure_infrastructure \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v cag_jenkins_agent:/home/jenkins/agent \
+           --memory="2048m" \
+           --memory-swap="2048m" \
+           --cpus="1.5" \
+           -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDv/ci0/2QRLRw9JnVaWIeiOef1Xw+y0coY3ze2Po0+s48n8Ets/Ozk767aPW76zyUwwr0LFJiCNLPJx1twFULmf9o93iipPgA3aJJcGqlRWUEvwjlqBIT7B5bBZD16kiseqrm2T8a+T0Gl0PKbOlGneDHm4zkiAcNBvQQVgUn40Q== devops@srv-cicd" \
+           docker.prosyst.ru/jenkins/ssh-agent:debian-jdk17-latest
+
+
+# Jenkins SSH Agent for CAG
+# restar: unless-stopped
+# without port publishing
+# Using SSH public key: j-agents.pub (1024b)
+docker run -d \
+           --name=ssh-agent-cag \
+           --restart unless-stopped \
+           --network=infrastructure_infrastructure \
+           -v /var/run/docker.sock:/var/run/docker.sock \
+           -v cag_jenkins_agent:/home/jenkins/agent \
+           --memory="2048m" \
+           --memory-swap="2048m" \
+           --cpus="1.5" \
+           -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDv/ci0/2QRLRw9JnVaWIeiOef1Xw+y0coY3ze2Po0+s48n8Ets/Ozk767aPW76zyUwwr0LFJiCNLPJx1twFULmf9o93iipPgA3aJJcGqlRWUEvwjlqBIT7B5bBZD16kiseqrm2T8a+T0Gl0PKbOlGneDHm4zkiAcNBvQQVgUn40Q== devops@srv-cicd" \
+           docker.prosyst.ru/jenkins/ssh-agent:debian-jdk17-latest
+
+
+https://docs.docker.com/go/credential-store/
+
+
 docker run -d --rm --name=ssh-agent --publish 2200:22 --network keeper_build_keeper-network \
 -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXhzpOTKJCvVoGaQQlTtDxux48t7jihg2NoKBrDlV7047vi9TdJ7tFZaSUMAzXz93jwT4ATS2KA46eEJgiIZrny8Npa4HLInDGgkzbqsgL1Zf6BG7AEt33q3GMCW7ERyp3ap8c20cV/lmRyYfO0utju29zMWaaDNA6MqIl5FRMTjHknHQ3cVwhDaYTdbU1Cl4PcydwBBEQIgF0aV84XFDzEhqD9K6uRErbGZGSkFJoQwTIOFRgpSuEQ4EIcoX2lcjqq5OLJDzcmKOyS8cnixqfYZVggF8iXlWZLi8bH8aKvbYF8cP9i8FL2hN1QzwUq+SaQnI7e8V+ydCT4/9MY91sZz6SrMta7aHQFFs+xG1VRFlFd8G0h2snn5eSWZpmP4f0LkE3KIGWbKJ1Euk40JXWCayFreq2pAycqdGFcr0pb8XhdGdYxwqjMLNT5t26MtKb1ewdimEtIIaeNn2C9euoCpnM/ROe5gSerMz7pxTAkAeFugFapiqh1/mMAmXUG8c= devops@srv-cicd" \
 jenkins/ssh-agent:latest-debian-jdk17
 
 ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXhzpOTKJCvVoGaQQlTtDxux48t7jihg2NoKBrDlV7047vi9TdJ7tFZaSUMAzXz93jwT4ATS2KA46eEJgiIZrny8Npa4HLInDGgkzbqsgL1Zf6BG7AEt33q3GMCW7ERyp3ap8c20cV/lmRyYfO0utju29zMWaaDNA6MqIl5FRMTjHknHQ3cVwhDaYTdbU1Cl4PcydwBBEQIgF0aV84XFDzEhqD9K6uRErbGZGSkFJoQwTIOFRgpSuEQ4EIcoX2lcjqq5OLJDzcmKOyS8cnixqfYZVggF8iXlWZLi8bH8aKvbYF8cP9i8FL2hN1QzwUq+SaQnI7e8V+ydCT4/9MY91sZz6SrMta7aHQFFs+xG1VRFlFd8G0h2snn5eSWZpmP4f0LkE3KIGWbKJ1Euk40JXWCayFreq2pAycqdGFcr0pb8XhdGdYxwqjMLNT5t26MtKb1ewdimEtIIaeNn2C9euoCpnM/ROe5gSerMz7pxTAkAeFugFapiqh1/mMAmXUG8c= devops@srv-cicd
 
-## JFrog-server (172.21.240.141)
+## JFrog-server (172.21.240.141) ##
 docker run -d --rm \
            --name=remote-ssh-agent \
            --publish 2141:22 \
@@ -17,6 +57,10 @@ docker run -d --rm \
            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXhzpOTKJCvVoGaQQlTtDxux48t7jihg2NoKBrDlV7047vi9TdJ7tFZaSUMAzXz93jwT4ATS2KA46eEJgiIZrny8Npa4HLInDGgkzbqsgL1Zf6BG7AEt33q3GMCW7ERyp3ap8c20cV/lmRyYfO0utju29zMWaaDNA6MqIl5FRMTjHknHQ3cVwhDaYTdbU1Cl4PcydwBBEQIgF0aV84XFDzEhqD9K6uRErbGZGSkFJoQwTIOFRgpSuEQ4EIcoX2lcjqq5OLJDzcmKOyS8cnixqfYZVggF8iXlWZLi8bH8aKvbYF8cP9i8FL2hN1QzwUq+SaQnI7e8V+ydCT4/9MY91sZz6SrMta7aHQFFs+xG1VRFlFd8G0h2snn5eSWZpmP4f0LkE3KIGWbKJ1Euk40JXWCayFreq2pAycqdGFcr0pb8XhdGdYxwqjMLNT5t26MtKb1ewdimEtIIaeNn2C9euoCpnM/ROe5gSerMz7pxTAkAeFugFapiqh1/mMAmXUG8c= devops@srv-cicd" \
            172.21.240.131:8123/agents/jenkins/ssh-agent:latest-debian-jdk17
 
+
+********************
+* Resources Limits *
+********************
 
 ## The same ssh-agent Up on srv-cicd:
 #!!! (with memory and CPU limits!)
@@ -31,19 +75,22 @@ docker run -d --rm \
            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCXhzpOTKJCvVoGaQQlTtDxux48t7jihg2NoKBrDlV7047vi9TdJ7tFZaSUMAzXz93jwT4ATS2KA46eEJgiIZrny8Npa4HLInDGgkzbqsgL1Zf6BG7AEt33q3GMCW7ERyp3ap8c20cV/lmRyYfO0utju29zMWaaDNA6MqIl5FRMTjHknHQ3cVwhDaYTdbU1Cl4PcydwBBEQIgF0aV84XFDzEhqD9K6uRErbGZGSkFJoQwTIOFRgpSuEQ4EIcoX2lcjqq5OLJDzcmKOyS8cnixqfYZVggF8iXlWZLi8bH8aKvbYF8cP9i8FL2hN1QzwUq+SaQnI7e8V+ydCT4/9MY91sZz6SrMta7aHQFFs+xG1VRFlFd8G0h2snn5eSWZpmP4f0LkE3KIGWbKJ1Euk40JXWCayFreq2pAycqdGFcr0pb8XhdGdYxwqjMLNT5t26MtKb1ewdimEtIIaeNn2C9euoCpnM/ROe5gSerMz7pxTAkAeFugFapiqh1/mMAmXUG8c= devops@srv-cicd" \
            127.0.0.1:8123/agents/jenkins/ssh-agent:latest-debian-jdk17
 
+
 # Jenkins SSH Agent for CAG
 # restarts allways
 # Using SSH public key: j-agents.pub (1024b)
 docker run -d \
-           --name=ssh-agent-cag \
+           --name=ssh-agent-cag-1 \
            --restart always \
-           --publish 2202:22 \
+           --publish 2203:22 \
            -v /var/run/docker.sock:/var/run/docker.sock \
-           --memory="1024m" \
-           --memory-swap="1024m" \
+           --memory="512m" \
+           --memory-swap="512m" \
            --cpus="0.5" \
            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDv/ci0/2QRLRw9JnVaWIeiOef1Xw+y0coY3ze2Po0+s48n8Ets/Ozk767aPW76zyUwwr0LFJiCNLPJx1twFULmf9o93iipPgA3aJJcGqlRWUEvwjlqBIT7B5bBZD16kiseqrm2T8a+T0Gl0PKbOlGneDHm4zkiAcNBvQQVgUn40Q== devops@srv-cicd" \
            docker.prosyst.ru/jenkins/ssh-agent:debian-jdk17-latest
+
+
 
 ---
 Jenkins.Clouds: docker-agents
@@ -62,10 +109,3 @@ docker run -d --rm \
            --cpus="0.5" \
            -e "JENKINS_AGENT_SSH_PUBKEY=ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAAAgQDv/ci0/2QRLRw9JnVaWIeiOef1Xw+y0coY3ze2Po0+s48n8Ets/Ozk767aPW76zyUwwr0LFJiCNLPJx1twFULmf9o93iipPgA3aJJcGqlRWUEvwjlqBIT7B5bBZD16kiseqrm2T8a+T0Gl0PKbOlGneDHm4zkiAcNBvQQVgUn40Q== devops@srv-cicd" \
            docker.prosyst.ru/jenkins/ssh-agent:debian-jdk17-latest
-
-docker run -it --rm \
-           --name=test-ubuntu \
-           --memory="1024m" \
-           --memory-swap="1024m" \
-           --cpus="0.5" \
-           ubuntu:latest bash

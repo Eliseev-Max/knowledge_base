@@ -1,0 +1,60 @@
+apiVersion: v1
+data:
+  sausage-store.yaml: |
+    ---
+    groups:
+      - name: Sausage store rules
+        rules:
+        - alert: InstanceDown
+          expr: up{app="backend"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            project: "sausage_store"
+            component: "backend"
+          annotations:
+            summary: "Problem with your backend pod"
+            description: "Backend pod is down for 1 minute"
+        - alert: HTTP status code is 500
+          expr: http_server_requests_seconds_count{status="500"} > 0
+          for: 1m
+          labels:
+            severity: warning
+            project: "sausage_store"
+            component: "backend"
+          annotations:
+            summary: "You have got a bad request"
+            description: "You have got request with status code = 500, please check"
+        - alert: Delay over 100ms for /api/orders
+          expr: http_server_requests_seconds_bucket{quantile="0.95", method="POST", uri="/api/orders"} > 100000
+          for: 5m
+          labels:
+            severity: warning
+            project: "sausage_store"
+            component: "backend"
+          annotations:
+            summary: "Delay to /api/orders requests"
+            description: "Delay more than 100ms for 0.95 quantile of success POST  requsests to /api/orders"
+        - alert: Errors for /actuator/prometheus
+          expr: http_server_requests_seconds_count{outcome!="SUCCESS", uri!="/actuator/prometheus"} > 0
+          for: 2m
+          labels:
+            severity: warning
+            project: "sausage_store"
+            component: "backend"
+          annotations:
+            summary: "Error in requests to /actuator/prometheus"
+            description: "There is an error in API request to /actuator/prometheus for 2 minutes"
+kind: ConfigMap
+metadata:
+  annotations:
+    meta.helm.sh/release-name: prometheus
+    meta.helm.sh/release-namespace: std-017-033
+  creationTimestamp: "2024-12-21T14:00:31Z"
+  labels:
+    app: prometheus
+    app.kubernetes.io/managed-by: Helm
+  name: prometheus-rules
+  namespace: std-017-033
+  resourceVersion: "2306809707"
+  uid: 11961496-5fd6-4132-bbe0-8e34cf692b56

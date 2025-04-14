@@ -1,0 +1,26 @@
+[source:]
+  "Installing Python 3 on Linux": https://docs.python-guide.org/starting/install3/linux/
+  
+
+1) 
+
+sudo apt update
+
+sudo apt install build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev libsqlite3-dev wget libbz2-dev
+
+wget https://www.python.org/ftp/python/3.10.0/Python-3.10.0.tgz
+
+tar -xvf Python-3.10.0.tgz
+
+# Build and Install Python 3.10 on Debian 11
+```
+cd Python-3.10.0
+
+sudo ./configure --enable-optimizations
+# The -–enable-optimizations flag optimizes the Python binary and executes multiple tests.
+# To start the build process, execute the following make command.
+# This takes quite a while, so be patient.
+
+sudo make -j 2
+# или
+# sudo make -j $(nproc)

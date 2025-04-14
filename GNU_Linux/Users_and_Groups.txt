@@ -86,7 +86,7 @@
 	- (в некоторых системах) домашний каталог пользователя [!НО лучше добавлять опцию -m].
 
 [Пример:]
-  $ sudo useradd -m -u 1000 -U -G docker jenkins
+  $ sudo useradd -m -s /bin/bash -u 1000 -U -G docker,<group1> new_user
 
 [‼] в Debian рекомендуется использовать: $ adduser
 		  

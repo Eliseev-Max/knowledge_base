@@ -50,8 +50,16 @@ ulimit -u 8192
 
 --[/etc/sysctl.d/99-sonarqube.conf]--
 vm.max_map_count = 524288
-fs.file-max=131072
+fs.file-max = 131072
 --/END/--
+
+
+[!] После помещения конфигурационного файла 99-sonarqube.conf в директорию /etc/sysctl.d/
+    для применения изменений выполнить команду:
+-->
+sysctl --system
+<--
+
 
 ## Установка требуемых значений ограничений для пользователя, запускающего SonarQube:
   Добавить строки в файл:
@@ -78,3 +86,9 @@ sysctl --system
 /usr/lib/sysctl.d/*.conf
 /lib/sysctl.d/*.conf
 /etc/sysctl.conf
+
+####
+vm.max_map_count = 524288
+fs.file-max = 131072
+sonarqube   -   nofile   131072
+sonarqube   -   nproc    8192

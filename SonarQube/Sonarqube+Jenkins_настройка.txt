@@ -49,7 +49,7 @@ https://thetechdarts.com/sonarqube-integration-with-jenkins/
 ---[Проект Java/Maven: пример этапов пайплайна для анализа SonarQube и Quality Gate]---
 
 node(label:'master') {
-  try{  
+  try{
     stage('Static Analysis') {
       withSonarQubeEnv('SonarQube1') {
         sh 'mvn clean package sonar:sonar

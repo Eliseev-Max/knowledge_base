@@ -1125,23 +1125,21 @@ spec:
     fsType: ext4
     volumeHandle: epdt13t41isrit225vdv      #ID of HDD
 
+[Overview:]
+  ● apiVersion, metadata    # нам уже знакомые.
+  ● kind  = соответствует типу новой сущности.
+  ● spec.capacity.storage
+    = показывающий Kubernetes, сколько именно места будет в данном хранилище.
 
-● apiVersion, metadata    # нам уже знакомые.
+  ● spec.accessModes
+    = режим доступа к диску.
 
-● kind  = соответствует типу новой сущности.
-
-● spec.capacity.storage
-  = показывающий Kubernetes, сколько именно места будет в данном хранилище.
-
-● spec.accessModes
-  = режим доступа к диску.
-
-● spec.csi
-  = специфичный блок, отвечающий за выбранный тип volume.
-  В нашем случае для подключения к HDD-диску Яндекс.Облака:
-    * spec.csi.driver = используется специальный драйвер,
-    * spec.csi.fsType = указывается тип файловой системы
-    * spec.csi.volumeHandle = указывается id диска.
+  ● spec.csi
+    = специфичный блок, отвечающий за выбранный тип volume.
+    # В нашем случае для подключения к HDD-диску Яндекс.Облака:
+      * spec.csi.driver = используется специальный драйвер,
+      * spec.csi.fsType = указывается тип файловой системы
+      * spec.csi.volumeHandle = указывается id диска.
 
 # Подробнее про управление хранилищами в Яндекс.Облаке:
 #-> https://yandex.cloud/ru/docs/managed-kubernetes/operations/volumes/manage-storage-class?utm_referrer=https%3A%2F%2Fpracticum.yandex.ru%2F
@@ -1188,8 +1186,7 @@ nginx-pv   4Gi        RWO            Retain           Available                 
 [!] Persistent Volume — это сущность, которая
       - НЕ ЗАВИСИТ от namespace   и
       - создаётся НА ВЕСЬ Kubernetes КЛАСТЕР,
-==>  поэтому стоит быть аккуратней с именованием Persistent Volume.
-
+==>  поэтому стоит быть АККУРАТНЕЙ С ИМЕНОВАНИЕМ Persistent Volume.
 
 
 ###########################
@@ -1230,7 +1227,7 @@ spec:
     — имя persistentVolume, к которому мы будем подключаться.
 
 [!]  Как и основные сущности в Kubernetes, взаимодействующие с приложением,
-     PersistentVolumeClaim работает в namespace.
+     PersistentVolumeClaim РАБОТАЕТ В NAMESPACE.
 
 #(Посмотрим, что вышло:)
 -->

@@ -4,6 +4,9 @@
   1) "Install Docker Engine on Debian": https://docs.docker.com/engine/install/debian/
   2) "Docker image for Jenkins agents connected over SSH": https://hub.docker.com/r/jenkins/ssh-agent
 
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+## Если кастомизируешь базовый образ jenkins/ssh-agent, в конце всех настроек USER должен быть root
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 **************************************
 * Установка Docker внутри SSH-агента *

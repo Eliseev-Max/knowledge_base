@@ -1,0 +1,121 @@
+Java keytool. Export and Import certificates
+
+[source:]
+  1) "keytool export cert – Export a certificate with Java keytool": https://www.misterpki.com/keytool-export-cert/
+  2) "How to export .key and .crt from keystore": https://stackoverflow.com/questions/23087537/how-to-export-key-and-crt-from-keystore
+  3) "Common Java Keytool Commands": https://knowledge.digicert.com/quovadis/ssl-certificates/ssl-general-topics/common-java-keytool-commands
+
+
+
+<? Что такое keytool ?>
+
+  Java keytool - это утилита командной строки, используемая для управления хранилищами ключей различных форматов,
+  содержащими
+    + ключи
+      <и>
+    + сертификаты.
+
+  Вы можете использовать java keytool для ЭКСПОРТА сертификата из хранилища ключей.
+  Во многих отношениях java keytool является конкурирующей утилитой с openssl для хранения ключей, управления ключами и сертификатами.
+
+<? Случай использования для экспорта сертификата из хранилища ключей ?>
+
+  В некоторых случаях вы можете захотеть переместить сертификат в другое хранилище ключей, или третьему лицу может понадобиться ваш открытый ключ.
+  В этом случае, если вы не хранили сертификат вне хранилища ключей, необходимо экспортировать сертификат из хранилища.
+
+(!) Вы НЕ ЗАХОТИТЕ ДЕЛИТЬСЯ хранилищем ключей, если оно содержит закрытый ключ,
+    а скорее сертификатом, содержащим открытый ключ.
+
+<? What keytool command do I use to export a cert from a keystore? ?>
+
+  Используйте эту команду для экспорта сертификата из хранилища ключей с помощью java keytool.
+  Результатом будет сертификат X.509 в формате PEM.
+  Если опция -rfc не задана, результат будет в двоичном формате.
+
+```
+keytool -exportcert \
+ -rfc \
+ -alias example \
+ -file cert.pem \
+ -keystore example.p12 \
+ -storepass changeit \
+ -storetype PKCS12 \
+ -v
+```
+
+  -rfc
+    = Will output in PEM format as defined by RFC 1421.
+
+  -alias
+    = The alias of the entry encapsulated in the keystore. The chosen value should enhance the readability of the keystore entries, especially when the keystore contains multiple entries.
+
+  -file
+    = The file to contain the exported X.509 certificate.
+
+  -keystore
+    = The filename of the keystore.
+
+  -storepass
+    = The current keystore password. We recommend leaving this option off and letting keytool prompt you instead of writing your password in plain text here.
+
+  -storetype
+    = Recommended keystore types include PKCS12 and JKS. In this case, the keystore was of type PKCS12.
+
+  -v
+    = Verbose output.
+
+
+Keytool (available in JDK) allows you to export certificates to a file:
+
+```
+keytool -exportcert -keystore [keystore] -alias [alias] -file [cert_file]
+```
+
+To export regular keys you should use -importkeystore command (surprise):
+
+```
+keytool -importkeystore -srckeystore [keystore] -destkeystore [target-keystore] -deststoretype PKCS12
+```
+
+
+--<Script_Example>--
+```
+#!/usr/bin/env bash
+
+set -e
+
+# Extracts the private key and certificate from a Java keystore and saves them
+#
+# Ouputs:
+#   <keystore>.p12: private key and certificate in PKCS12 format
+#   <keystore>.pem: private key and certificate in PEM format
+#   <keystore>.crt: certificate only
+#   <keystore>.key: private key only
+
+# Usage:
+#   jks2pem.sh <keystore>
+
+# Example:
+#   jks2pem.sh keystore.jks
+
+if [ -z "$1" ]; then
+    echo "Usage: jks2pem.sh <keystore>.jks"
+    exit 1
+fi
+
+base_name=$(basename "$1" .jks)
+temp_password="changeit"
+
+keytool -importkeystore -srckeystore "$1" -srcstoretype jks \
+    -destkeystore "$base_name.p12" -deststoretype PKCS12 \
+    -deststorepass "$temp_password"
+
+# Export the private key and certificate as a PEM file without a password
+openssl pkcs12 -nodes -in "$base_name.p12" -out "$base_name.pem" -passin pass:"$temp_password"
+
+# Export the certificate as a PEM file
+openssl pkcs12 -nokeys -in "$base_name.p12" -out "$base_name.crt" -passin pass:"$temp_password"
+
+# Export the private key as a PEM file
+openssl pkcs12 -nocerts -nodes -in "$base_name.p12" -out "$base_name.key" -passin pass:"$temp_password"
+```

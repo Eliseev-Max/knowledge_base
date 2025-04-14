@@ -1,0 +1,137 @@
+#Jenkins.dockerfile.fix-gid
+ARG VERSION=jdk17
+FROM jenkins/jenkins:${VERSION}
+
+ARG DOCKER_COMPOSE_VERSION=1.25.0
+#ENV JAVA_ARGS="\"-Dhudson.model.DirectoryBrowserSupport.CSP=default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';
+#-Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400;\""
+USER root
+
+RUN apt-get update && \
+   apt-get upgrade -y && \
+   apt-get -y install ca-certificates \
+      curl \
+      gnupg2 \
+      git \
+      software-properties-common && \
+    groupmod -g 995 systemd-journal && \
+    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+    add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y install docker-ce acl  && \
+   apt-get clean autoclean && apt-get autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+RUN usermod -aG docker jenkins && gpasswd -a jenkins docker
+
+RUN groupmod -g 999 docker
+
+USER jenkins
+
+EXPOSE 8080
+EXPOSE 50000
+
+---
+#Jenkins.dockerfile
+ARG VERSION=jdk11
+FROM jenkins/jenkins:${VERSION}
+
+ARG DOCKER_COMPOSE_VERSION=1.25.0
+#ENV JAVA_ARGS="\"-Dhudson.model.DirectoryBrowserSupport.CSP=default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline';
+#-Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400;\""
+USER root
+
+RUN apt-get update && \
+   apt-get upgrade -y && \
+   apt-get -y install ca-certificates \
+      curl \
+      gnupg2 \
+      git \
+      software-properties-common && \
+    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+    add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y install docker-ce acl  && \
+   apt-get clean autoclean && apt-get autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+RUN usermod -aG docker jenkins && gpasswd -a jenkins docker
+
+USER jenkins
+
+EXPOSE 8080
+EXPOSE 50000
+
+---
+#./Jenkins_debug/Dockerfile
+FROM jenkins/jenkins:2.346.3-jdk11
+
+ARG JENKINS_PLUGINS="blueocean:1.25.6 docker-workflow:1.29 cobertura:1.17 code-coverage-api:3.2.0 htmlpublisher:1.31"
+ENV JAVA_ARGS="\"-Dhudson.model.DirectoryBrowserSupport.CSP=default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.HEARTBEAT_CHECK_INTERVAL=86400; -Dorg.jenkinsci.plugins.durabletask.BourneShellScript.LAUNCH_DIAGNOSTICS=true\""
+
+USER root
+
+WORKDIR /home
+
+COPY install-docker.sh .
+RUN bash install-docker.sh
+RUN jenkins-plugin-cli --plugins ${JENKINS_PLUGINS}
+
+VOLUME ["/var/jenkins_home"]
+
+EXPOSE 8080
+EXPOSE 50000
+
+---
+#install-docker.sh
+#!/bin/bash
+
+apt-get update
+apt-get install -y lsb-release
+curl -fsSLo /usr/share/keyrings/docker-archive-keyring.asc \
+  https://download.docker.com/linux/debian/gpg
+echo "deb [arch=$(dpkg --print-architecture) \
+  signed-by=/usr/share/keyrings/docker-archive-keyring.asc] \
+  https://download.docker.com/linux/debian \
+  $(lsb_release -cs) stable" > /etc/apt/sources.list.d/docker.list
+apt-get update
+apt-get install -y docker-ce-cli
+
+rm ${0}
+
+
+---
+#Jenkins.dockerfile
+FROM jenkins/jenkins:jdk17
+
+ARG DOCKER_COMPOSE_VERSION=1.25.0
+
+USER root
+RUN apt-get update && \
+   apt-get upgrade -y && \
+   apt-get -y install apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg2 \
+      git \
+      software-properties-common && \
+   curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \
+   add-apt-repository \
+      "deb [arch=amd64] https://download.docker.com/linux/$(. /etc/os-release; echo "$ID") \
+      $(lsb_release -cs) \
+      stable" && \
+   apt-get update && \
+   apt-get -y install docker-ce && \
+   apt-get clean autoclean && apt-get autoremove && rm -rf /var/lib/{apt,dpkg,cache,log}/
+
+RUN curl -L https://github.com/docker/compose/releases/download/${DOCKER_COMPOSE_VERSION}/docker-compose-`uname -s`-`uname -m` -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose
+
+RUN usermod -aG docker jenkins && gpasswd -a jenkins docker
+
+USER jenkins

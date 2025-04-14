@@ -83,7 +83,9 @@ Inbound Jenkins agents
   The most common way, that is also advertised in the Node page, is by using the remoting Launcher and pass the URL of the JNLP File:
 
 java -jar agent.jar -jnlpUrl "${JENKINS_URL}"/computer/"${AGENT_NAME}"/jenkins-agent.jnlp ....
-This command retrieve the jenkins-agent.jnlp file at "${JENKINS_URL}"/computer/"${AGENT_NAME}"/jenkins-agent.jnlp via HTTP/S. It is an XML file and can be read with cat or a text editor. That file contains the options and arguments that will be passed to the hudson.remoting.jnlp.Main class of remoting to start the agent (like the raw approach does).
+This command retrieve the jenkins-agent.jnlp file at "${JENKINS_URL}"/computer/"${AGENT_NAME}"/jenkins-agent.jnlp via HTTP/S.
+It is an XML file and can be read with cat or a text editor.
+That file contains the options and arguments that will be passed to the hudson.remoting.jnlp.Main class of remoting to start the agent (like the raw approach does).
 
 Use java -jar agent.jar -help to see the options.
 

@@ -1,0 +1,26 @@
+
+0) "Jenkins Helm Chart": https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md#jenkins
+1) "Bitnami package for Jenkins": https://bitnami.com/stack/jenkins/helm
+2) "Jenkins helm-chart. Prometheus Metrics": https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/README.md#prometheus-metrics
+3) "Kubernetes secrets": https://github.com/jenkinsci/configuration-as-code-plugin/blob/master/docs/features/secrets.adoc#kubernetes-secrets
+4) "kube-vault-controller. Public archive": https://github.com/roboll/kube-vault-controller
+5) "Declare Network Policy": https://kubernetes.io/docs/tasks/administer-cluster/declare-network-policy/#before-you-begin
+6) "Jenkins Helm Chart. Values": https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/VALUES.md
+7) "Installing Jenkins. Kubernetes": https://www.jenkins.io/doc/book/installing/kubernetes/
+
+(!) "Why Smart, Efficient Backup and Restore Techniques Are Essential with Jenkins Production Server":
+#-> https://www.cloudbees.com/blog/why-smart-efficient-backup-and-restore-techniques-are-essential-jenkins-production-server
+
+---
+https://github.com/jenkinsci/configuration-as-code-plugin?tab=readme-ov-file#supported-plugins
+https://github.com/jenkinsci/configuration-as-code-groovy-plugin
+https://github.com/jenkinsci/configuration-as-code-plugin/tree/master/demos/active-directory
+https://github.com/jenkinsci/helm-charts/blob/main/charts/jenkins/values.yaml#L517
+https://cicd.prosyst.ru/jenkins/manage/configuration-as-code/reference
+https://toolsqa.com/jenkins/jenkins-configuration/
+
+
+"Jenkins. Initial Settings": https://www.jenkins.io/doc/book/installing/initial-settings/
+"Configuring the System": https://www.jenkins.io/doc/book/managing/system-configuration/
+"Config File Provider": https://plugins.jenkins.io/config-file-provider/
+"JENKINS_OPTS in docker-compose not reliable": https://github.com/jenkinsci/docker/issues/1107

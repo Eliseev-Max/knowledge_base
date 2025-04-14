@@ -46,11 +46,11 @@ https://stackoverflow.com/questions/65787455/jenkins-active-directory-broke-cann
 В конфигурационном файле /var/lib/jenkins/config.xml
 (в нашем случае:"/var/jenkins_home/config.xml"),
 
- УСТАНОВИТЬ вместо значения:
+# УСТАНОВИТЬ вместо значения:
 <useSecurity>true</useSecurity>
-значение:
+# значение:
 <useSecurity>false</useSecurity>
-и перезапустить сервис jenkins.
+# и перезапустить сервис jenkins.
 
 ####
 Logging ID=21ff064e-6ac4-4bb2-bd13-17fa30ec3cd4
@@ -81,12 +81,16 @@ keytool -importcert \
 	 -noprompt
 ---
 ## Таким способом не сработало
-####
+
+/*
 #+ "Как посмотреть сертификаты java": https://ru.hexlet.io/qna/java/questions/kak-posmotret-sertifikaty-java
+*/
+
 ---
 keytool -list -v -keystore имя_хранилища
 ## в нашем случае:
-имя_хранилища = $JENKINS_HOME/.keystore/
+# имя_хранилища = $JENKINS_HOME/.keystore
+имя_хранилища = $JENKINS_HOME/.keystore/cacerts
 ---
 
 ## Вывод в консоль будет иметь следующий формат:
@@ -111,6 +115,10 @@ CUSTOM_KEYSTORE=$JENKINS_HOME/.keystore/
 mkdir -p $CUSTOM_KEYSTORE
 #cp $JAVA_HOME/jre/lib/security/cacerts $CUSTOM_KEYSTORE
 cp $JAVA_HOME/lib/security/cacerts $CUSTOM_KEYSTORE
+
+#[!] Изначально хранилищем сертификатов была директория: $JENKINS_HOME/.keystore/
+# в результате копирования была добавлена директория: ./cacerts
+# путь до хранилища сертификатов стал: $JENKINS_HOME/.keystore/cacerts
 ---
 
 [Step 2. Импортируем наш сертификат]
@@ -131,17 +139,22 @@ $JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
 
 [!] По сути Step 2, Step 3 - это ранее описанный (первый) способ
 
+!!! ПАРОЛЬ ХРАНИЛИЩА СЕРТИФИКАТОВ ПЕРЕДАЁТСЯ В ОТКРЫТОМ ВИДЕ !!!
 Эти параметры будем прокидывать с помощью специальной переменной окружения JAVA_OPTS
 ---
   environment:
     JAVA_OPTS: "-Djavax.net.ssl.trustStore=$JENKINS_HOME/.keystore/cacerts -Djavax.net.ssl.trustStorePassword=changeit"
 ---
 
-ISSUE:
+
+**********
+* ISSUE: *
+**********
 
 --->
 # Проблема возникает, когда хост LDAP передает сертификат, не содержащий правильного имени хоста в SAN (Subject Alternative Name).
-# Java проверяет имя хоста в сертификате вместе с хостом во время рукопожатия SSL. При этом отображается следующее сообщение об ошибке:
+# Java проверяет имя хоста в сертификате вместе с хостом во время рукопожатия SSL.
+# При этом отображается следующее сообщение об ошибке:
 ---
 ## for Domain Controller = dc1.prosoft.ural.ru:3268 | dc3.prosoft.ural.ru:3268
 java.net.SocketException: Connection reset
@@ -188,3 +201,81 @@ TLS Configuration: JDK TrustStore
   4. Перепривязка.
 (https://support.citrix.com/article/CTX201087/error-javaxnamingcommunicationexception-simple-bind-failed-while-binding-ldaps-on-xenmobile)
 <---
+
+
+# source: https://stackoverflow.com/questions/49995451/jenkins-ssl-certificate-from-windows-ad-cs
+
+
+** Опыт запуска Jenkins с SSL **
+
+На Jenkins Master:
+
+  1) В оснастке сертификатов mmc (Certificate Snap-in) перейдите к Certificates (Local Computer) / Personal.
+#(*) mmc = Microsoft Management Console
+
+  2) Щелкните правой кнопкой мыши Personal folder и выберите: "All Tasks / Request New Certificate..."
+  3) Подтвердите следующие две страницы регистрации, нажав на кнопку Next.
+  4) Проверьте политику регистрации веб-сервера Active Directory.
+  5) Под политикой регистрации отображается предупреждающее сообщение (Warning Message)
+      "Для получения этого сертификата требуется дополнительная информация. Нажмите здесь, чтобы настроить параметры."
+    -> Нажмите на него.
+
+  6) Заполните свойства сертификата:
+    * Subject name: Common name: [the name of your jenkins server]
+    * Alternative name: DNS: [the name of your jenkins server]
+    * Alternative name: DNS: [the full name of your jenkins server including your domain]
+    -> Confirm the page with OK and the following two pages.
+
+  7) Export the Certificate as PFX format
+     -> Right click on certificate
+     -> All Tasks / Export...
+
+  8) Проверьте:
+```
+  Да, экспортировать закрытый ключ
+  Проверка Включите все сертификаты в путь сертификации, если это возможно
+  Проверьте: Экспортировать все расширенные свойства
+  Поскольку мы экспортируем закрытый ключ, мы должны указать пароль
+  Проверьте: Пароль и введите пароль и подтверждение пароля
+```
+
+  9) Выберите путь для сертификата PFX и завершите экспорт.
+
+  10) Экспортируйте сертификат еще раз без пароля в формате X.509 (.CER) в кодировке Base-64.
+
+  11) Переименуйте полученный файл .CER в .PEM.
+
+  12) Создайте на сервере Jenkins хранилище java-ключей с именем
+
+```
+keytool -genkeypair \
+        -keysize 2048 \
+        -keyalg RSA \
+        -alias jenkins \
+        -keystore jenkins.jks
+```
+
+  Ответьте на вопросы, соответствующие вашей компании и организации.
+
+  Импортируйте сертификат PFX в хранилище ключей java с помощью
+
+keytool -importkeystore -srckeystore jenkins.pfx -srcstoretype pkcs12 -destkeystore jenkins.jks -deststoretype JKS
+Copy the jenkins.jks to secrets directory where Jenkins is installed (in my case C:\Program Files (x86)\Jenkins\secrets).
+
+Add the certificate to the Jenkins startup parameters:
+
+ -Djavax.net.ssl.trustStore=%JENKINS_HOME%\secrets\jenkins.jks
+ -Djavax.net.ssl.trustStorePassword=[your password for the java key store]
+Restart the jenkins service
+
+On the Jenkins Agent
+
+Import the PEM certificate from above into the java keystore from the command line with administrator priviliges:
+
+keytool -import -alias jenkins -keystore "C:\Program Files (x86)\Java\jre1.8.0_161\lib\security\cacerts" -file [your pem file]
+Enter the password of the keystore (by default changeit)
+Trust this certificate? [no]: yes
+
+Make sure your jenkins-slave.xml in %JENKINS_HOME% does not contain -noCheckCertificate in the arguments.
+
+Restart the service jenkinsslave-D__Jenkins.

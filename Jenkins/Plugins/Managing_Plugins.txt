@@ -1,0 +1,288 @@
+Managing Plugins
+
+[sources:]
+  1. "Managing Plugins": https://www.jenkins.io/doc/book/managing/plugins/
+  2. "Updating Jenkins Plugins From the Command Line": https://www.baeldung.com/ops/jenkins-update-plugins-cli
+  *) "Glossary. General Terms": https://www.jenkins.io/doc/book/glossary/#controller
+
+#(+): "How can I update jenkins plugins from the terminal?":> https://stackoverflow.com/questions/7709993/how-can-i-update-jenkins-plugins-from-the-terminal
+#(+): "Jenkins Plugin Installation":> https://stackoverflow.com/questions/31457623/jenkins-plugin-installation
+
+Плагины - это основной способ расширения функциональности среды Jenkins в соответствии с потребностями организации или пользователя.
+
+Существует более тысячи различных плагинов, которые можно
+  -> установить на контроллер Jenkins
+  -> и интегрировать с ним
+     ✓ различные инструменты сборки,
+     ✓ облачные провайдеры,
+     ✓ инструменты анализа
+     ...и многое другое.
+
+
+Плагины могут быть автоматически загружены вместе с их зависимостями из Центра обновления (Update Center).
+
+
+ЦЕНТР ОБНОВЛЕНИЯ
+  = это служба, управляемая проектом Jenkins, которая предоставляет перечень плагинов с открытым исходным кодом,
+    разработанных и поддерживаемых различными членами сообщества Jenkins.
+
+В этом разделе рассматривается все,
+  - начиная с основ управления плагинами в веб-интерфейсе Jenkins
+  - и заканчивая внесением изменений в файловую систему контроллера.
+
+
+#######################
+# Installing a plugin #
+#######################
+
+Jenkins предоставляет два способа установки плагинов на контроллер:
+  1) С помощью "Менеджера плагинов" (Plugin Manager) в веб-интерфейсе.
+  2) С помощью команды Jenkins CLI install-plugin.
+#(*) "Using the Jenkins CLI": https://www.jenkins.io/doc/book/managing/plugins/#install-with-cli
+
+(!) Каждый подход приводит к загрузке плагина в Jenkins,
+НО для его использования могут потребоваться различные уровни доступа и компромиссы.
+
+Оба подхода требуют, чтобы контроллер Jenkins мог ЗАГРУЖАТЬ МЕТАДАННЫЕ из центра обновления,
+  ✓ будь то основной центр обновления, управляемый проектом Jenkins [1],
+  ✓ или собственный центр обновления.
+
+#[1]-> https://updates.jenkins.io/
+
+Плагины упаковываются в виде автономных файлов .hpi, содержащих
+  ✓ весь необходимый код,
+  ✓ изображения и другие ресурсы, которые нужны плагину для успешной работы.
+
+
+*******************
+* From the web UI *
+*******************
+
+Самый простой и распространенный способ установки плагинов = через представление (view)
+Manage Jenkins ➜ Plugins
+#("Настроить Jenkins" ➜ "Plugins")
+(!) доступное администраторам среды Jenkins.
+
+На вкладке "Доступные" (Available) можно искать и рассматривать плагины, доступные для загрузки из настроенного Центра обновления:
+#(см. рисунок)
+
+(*) Большинство плагинов можно установить и использовать сразу
+  1) установив флажок рядом с плагином и
+  2) нажав кнопку "Установить без перезапуска" (Install without restart).
+  
+<!--
+  Если список доступных плагинов пуст:
+  -> контроллер может быть неправильно настроен
+  -> или еще не загрузил метаданные плагинов из центра обновления.
+  Нажатие кнопки "Проверить сейчас" (Check now) заставляет Jenkins попытаться связаться с настроенным центром обновления.
+-->
+
+*************************
+* Using the Jenkins CLI *
+*************************
+
+  Администраторы также могут использовать Jenkins CLI, который предоставляет команду для установки плагинов.
+
+(*) Скрипты для управления средами Jenkins или код управления конфигурацией
+    -> могут нуждаться в установке плагинов без непосредственного взаимодействия с пользователем в веб-интерфейсе.
+
+(+) Jenkins CLI позволяет пользователю командной строки или средству автоматизации загрузить ПЛАГИН И ЕГО ЗАВИСИМОСТИ.
+
+--[CMD]--
+java -jar jenkins-cli.jar -s http://localhost:8080/ install-plugin SOURCE ... [-deploy] [-name VAL] [-restart]
+
+# = Устанавливает плагин из файла, URL-адреса или из центра обновления.
+<<<
+
+  SOURCE:
+    = Если параметр указывает на локальный файл, то этот файл будет установлен.
+      Если параметр является URL, Jenkins загружает URL и устанавливает его как плагин.
+      В противном случае имя принимается за short name (короткое имя) плагина в существующем Центре обновлений (например, «findbugs»),
+      и плагин будет установлен из Центра обновлений.
+
+  -deploy:
+     = Развертывайте (deploy) плагины сразу, не откладывая их до перезагрузки.
+
+  -name VAL:
+     = Если указано, то плагин будет установлен под этим коротким именем
+       (в то время как обычно имя определяется из исходного имени автоматически).
+
+  -restart:
+     = После успешной установки перезапустите Jenkins.
+
+
+*************************
+* Расширенная установка *
+*************************
+
+  Центр обновления позволяет установить ТОЛЬКО ПОСЛЕДНЮЮ выпущенную версию плагина.
+
+[*] В случаях, когда требуется более старая версия плагина:
+      администратор Jenkins может загрузить старый архив .hpi
+      и вручную установить его на контроллер Jenkins.
+
+Jenkins хранит загруженные им плагины в каталоге plugins с суффиксом .jpi, независимо от того, был ли у плагинов первоначальный суффикс .jpi или .hpi.
+
+Если администратор вручную копирует архив плагинов в каталог plugins, он должен быть назван с суффиксом .jpi, чтобы соответствовать именам файлов, используемым в плагинах, установленных из центра обновления.
+
+[From the web UI]
+
+  Если файл .hpi уже загружен, администратор Jenkins, вошедший в систему, может загрузить его из веб-интерфейса:
+
+[Web UI]:
+  1) [Manage Jenkins] -> [Plugins] ->
+  2) -> на вкладку [Advanced] ("Дополнительно")
+  3) -> выберите файл .hpi из своей системы ||
+        введите URL-адрес архивного файла в разделе "Deploy Plugin" ("Развернуть плагин")
+  4) разверните файл плагина.
+
+(!) После загрузки файла плагина необходимо ВРУЧНУЮ ПЕРЕЗАПУСТИТЬ контроллер Jenkins,
+    чтобы изменения вступили в силу.
+
+
+[On the controller (FS)]:
+  Если файл .hpi был явно загружен системным администратором,
+  он может вручную поместить его в определённое место в файловой системе.
+
+  1) Скопируйте загруженный файл .hpi в каталог JENKINS_HOME/plugins на контроллере Jenkins
+     (например, на системах Debian JENKINS_HOME - это /var/lib/jenkins).
+     Если администратор ВРУЧНУЮ копирует архив плагина в каталог plugins, он должен быть назван с суффиксом .jpi,
+     чтобы соответствовать именам файлов, используемым плагинами, установленными из центра обновления.
+
+  2) Контроллер ДОЛЖЕН БЫТЬ ПЕРЕЗАПУЩЕН, прежде чем плагин будет загружен и станет доступен в среде Jenkins.
+
+(!) | Названия каталогов плагинов на сайте обновлений [1] не всегда совпадают с отображаемым именем плагина.
+    | Поиск по адресу plugins.jenkins.io для нужного плагина предоставит соответствующую ссылку на архивный файл.
+
+
+*********************
+* Updating a plugin *
+*********************
+
+  Обновления перечислены на вкладке "Updates" ("Обновления") на странице "Plugins" ("Плагины")
+  и могут быть установлены путем установки галочек напротив нужных обновлений плагинов и нажатия кнопки
+  "Download now and install after restart" ("Скачать сейчас и установить после перезапуска")
+
+--<Актуализация обновлений>--
+(!) По умолчанию контроллер Jenkins будет проверять наличие обновлений из Центра обновления раз в 24 часа.
+    Чтобы вручную запустить проверку обновлений, просто нажмите на кнопку "Check now" ("Проверить сейчас") 
+    на вкладке "Updates" ("Обновления")
+//\\
+
+*********************************************
+* Список установленных плагинов и их версий *
+*********************************************
+
+Самый простой способ получить список установленных плагинов и их версий:
+  = использовать Консоль сценариев Jenkins (Jenkins Script Console).
+
+# Выполните следующие действия:
+  1) Откройте Консоль сценариев Jenkins
+    # Manage Jenkins > Script Console
+    # Настроить Jenkins > Консоль сценариев
+
+  2) Запустите следующий скрипт для получения списка установленных плагинов и их версий:
+
+--<Groovy_Script>--
+Jenkins.instance.pluginManager.plugins.each {
+    println("${it.getShortName()}: ${it.getVersion()}")
+}
+#END#
+
+# Этот скрипт перебирает все установленные плагины и выводит их краткое название вместе с версией.
+
+
+#####################
+# Removing a plugin #
+#####################
+
+  Когда плагин больше не используется в среде Jenkins, целесообразно удалить его из контроллера Jenkins.
+  Это дает ряд преимуществ:
+    + снижение нагрузки на память при загрузке или во время выполнения,
+    + уменьшение количества опций конфигурации в веб-интерфейсе
+    + устранение возможности конфликтов в будущем при обновлении плагинов.
+
+Самый простой способ удалить плагин - перейти на вкладку Installed на странице Plugins.
+Оттуда Jenkins автоматически определит, какие плагины безопасно удалить,
+# = те, которые не являются зависимостями других плагинов, = #
+и представит кнопку для этого.
+
+[+] Плагин также можно удалить, удалив соответствующий файл .jpi из каталога JENKINS_HOME/plugins на контроллере.
+    Плагин будет продолжать работать до перезапуска контроллера.
+
+(!) Если файл плагина удален, но требуется другим плагинам, контроллер Jenkins может загрузиться некорректно.
+
+
+Деинсталляция плагина не удаляет конфигурации, которые он мог создать. Если существуют существующие конфигурации jobs/nodes/views/builds/etc, которые ссылаются на данные, созданные плагином, во время загрузки Jenkins предупредит, что некоторые конфигурации не могут быть полностью загружены, и проигнорирует нераспознанные данные.
+
+Поскольку конфигурация(и) будет сохраняться до тех пор, пока не будет перезаписана, переустановка плагина приведет к тому, что эти значения конфигурации появятся снова.
+
+Removing old data
+Jenkins provides a facility for purging configuration left behind by uninstalled plugins. Navigate to Manage Jenkins and then click on Manage Old Data to review and remove old data.
+
+
+Disabling a plugin
+Disabling a plugin is a softer way to retire a plugin. Jenkins will continue to recognize that the plugin is installed, but it will not start the plugin, and no extensions contributed from this plugin will be visible.
+
+A Jenkins administrator may disable a plugin by unchecking the box on the Installed tab of the Plugins page (see below).
+
+
+A systems administrator may also disable a plugin by creating a file on the Jenkins controller, such as: JENKINS_HOME/plugins/PLUGIN_NAME.jpi.disabled.
+
+The configuration(s) created by the disabled plugin behave as if the plugin were uninstalled, insofar that they result in warnings on boot but are otherwise ignored.
+
+Using the Jenkins CLI
+It is also possible to enable or disable plugins via the Jenkins CLI using the enable-plugin or disable-plugin commands.
+
+The enable-plugin command was added to Jenkins in v2.136. The disable-plugin command was added to Jenkins in v2.151.
+
+The enable-plugin command receives a list of plugins to be enabled. Any plugins which a selected plugin depends on will also be enabled by this command.
+
+--[CMD]--
+java -jar jenkins-cli.jar -s http://localhost:8080/ enable-plugin PLUGIN ... [-restart]
+#END#
+
+# Enables one or more installed plugins transitively.
+  
+  PLUGIN:
+    = Enables the plugins with the given short names and their dependencies.
+
+  -restart:
+    = Restart Jenkins after enabling plugins.
+
+
+The disable-plugin command receives a list of plugins to be disabled.
+The output will display messages for both successful and failed operations.
+If you only want to see error messages, the -quiet option can be specified.
+The -strategy option controls what action will be taken when one of the specified plugins is listed as an optional or mandatory dependency of another enabled plugin.
+
+--[CMD]--
+java -jar jenkins-cli.jar -s http://localhost:8080/ disable-plugin PLUGIN ... [-quiet (-q)]
+[-restart (-r)] [-strategy (-s) strategy]
+
+--[Execution of groovy script in the Jenkins Script Console]--
+# Все классы из всех плагинов доступны.
+# jenkins.*, jenkins.model.*, hudson.* и hudson.model.* уже импортированы по умолчанию.
+
+Jenkins.instance.pluginManager.plugins.findAll {
+    it -> it.hasUpdate()
+}.collect {
+    it -> it.getShortName()
+}
+
+Result: [badge, jackson2-api]
+
+
+--< update_plugins.groovy >--
+import jenkins.model.*
+
+def plugins = Jenkins.instance.pluginManager.plugins.findAll {
+    it -> it.hasUpdate()
+}.collect {
+    it -> it.getShortName()
+}
+
+Jenkins.instance.pluginManager.install(plugins, false).each{ it -> it.get() }
+Jenkins.instance.safeRestart()
+
+<<<

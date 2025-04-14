@@ -252,12 +252,14 @@ $JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
 # Восстановление после катастрофы: #
 ####################################
   
-    Если после всего этого вы больше не можете войти в систему, вам следует включить логирование на плагине, чтобы понять, почему оно не работает.
-	В случае если после включения защищенной опции вы больше не можете войти в инстанс, вам может понадобиться быстро вернуться к предыдущему состоянию, особенно в production environments.
+  Если после всего этого вы больше не можете войти в систему, вам следует включить логирование на плагине, чтобы понять, почему оно не работает.
+
+  В случае если после включения защищенной опции вы больше не можете войти в инстанс,
+  вам может понадобиться быстро вернуться к предыдущему состоянию, особенно в production environments.
 	
-	Это можно легко сделать,
-	  1) перейдя в $JENKINS_HOME/config.xml
-	  2) в разделе <securityRealm class="hudson.plugins.active_directory.ActiveDirectorySecurityRealm" верните tlsConfiguration к предыдущему состоянию.
+  Это можно легко сделать,
+    1) перейдя в $JENKINS_HOME/config.xml
+    2) в разделе <securityRealm class="hudson.plugins.active_directory.ActiveDirectorySecurityRealm" верните tlsConfiguration к предыдущему состоянию.
 	Необходим перезапуск.
 #> <tlsConfiguration>TRUST_ALL_CERTIFICATES</tlsConfiguration>
 

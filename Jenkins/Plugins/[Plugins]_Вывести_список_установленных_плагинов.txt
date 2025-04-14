@@ -1,9 +1,27 @@
 How to get the list of installed Jenkins plugins
 {https://stackoverflow.com/questions/9815273/how-to-get-a-list-of-installed-jenkins-plugins-with-name-and-version-pair}
 
-Dashboard -> Settings (Настроить Jenkins) -> Jenkins Script Console
+1) Dashboard -> Settings (Настроить Jenkins) -> Jenkins Script Console
 
 Jenkins.instance.pluginManager.plugins.each{
   plugin -> 
     println ("${plugin.getDisplayName()} (${plugin.getShortName()}): ${plugin.getVersion()}")
 }
+
+/*
+# Вставка символов, в том числе \t \n ... тоже канает
+Jenkins.instance.pluginManager.plugins.each{
+  plugin -> 
+    println ("Plugin_Name: ${plugin.getDisplayName()} \t Short_Name: (${plugin.getShortName()}) current_version: ${plugin.getVersion()}")
+}
+*/
+
+2) wget http://<jenkins>/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins
+
+Запрос с помощью curl через Web API:
+# выводит полный список всех установленных плагинов.
+
+JENKINS_HOST=<jenkins-admin>:<password>@localhost:8080
+curl -sSL "http://$JENKINS_HOST/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins" | perl -pe 's/.*?<shortName>([\w-]+).*?<version>([^<]+)()(<\/\w+>)+/\1 \2\n/g'|sed 's/ /:/'
+
+JENKINS_HOST=https://m.eliseev:08Mashulik2023@cicd.prosyst.ru/jenkins

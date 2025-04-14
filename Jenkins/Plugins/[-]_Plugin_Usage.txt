@@ -1,0 +1,10 @@
+Plugin Usage
+
+[sources:]
+  1) "": https://plugins.jenkins.io/plugin-usage-plugin/
+  2) "GitHub: plugin-usage-plugin": https://github.com/jenkinsci/plugin-usage-plugin
+  
+
+Short Name: plugin-usage-plugin
+Latest Version (02.04.2025): 4.10
+

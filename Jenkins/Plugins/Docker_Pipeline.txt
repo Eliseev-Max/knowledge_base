@@ -1,0 +1,6 @@
+Плагин Docker Pipeline
+
+[sources:]
+  1) "Pipeline Steps. Docker Pipeline": https://www.jenkins.io/doc/pipeline/steps/docker-workflow/
+  2) https://plugins.jenkins.io/docker-workflow/
+  3) "CloudBees. Docker Pipeline plugin": https://docs.cloudbees.com/docs/cloudbees-ci/latest/pipelines/docker-workflow

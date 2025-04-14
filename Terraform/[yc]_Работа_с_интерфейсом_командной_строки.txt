@@ -1,0 +1,243 @@
+Начало работы с интерфейсом командной строки yc
+(https://yandex.cloud/ru/docs/cli/quickstart#yandex-account_1)
+--------------------------------------
+| Попытки одуплить инструкции Yandex |
+--------------------------------------
+
+
+1. Начало работы с интерфейсом командной строки
+
+Интерфейс командной строки Yandex Cloud (CLI) 
+  — скачиваемое программное обеспечение для управления вашими облачными ресурсами через командную строку.
+
+Установка:
+  1. Скачивание + установка:
+
+  $ curl -sSL https://storage.yandexcloud.net/yandexcloud-yc/install.sh | bash
+  
+  # Скрипт установит CLI и добавит путь до исполняемого файла в переменную окружения PATH
+--[!]--
+‼ Скрипт дополнит переменную PATH только если его запустить в командных оболочках bash или zsh.
+  если скрипт запущен в другой оболочке, добавьте путь до CLI в переменную PATH самостоятельно.
+<<<
+
+  2. После завершения установки перезапустите командную оболочку.
+     $ source ~/.bashrc
+
+
+****************************************
+* Создание профиля. Аккаунт на Яндексе *
+****************************************
+
+Чтобы аутентифицироваться с помощью аккаунта на Яндексе:
+  1. Получите OAuth-токен в сервисе Яндекс ID: (https://yandex.ru/dev/id/doc/ru/concepts/ya-oauth-intro)
+    1.1 Перейдите по ссылке:
+    #-> https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb
+        Если приложение запрашивает доступ к данным, разрешите. Это нужно для получения токена.
+
+    1.2 Скопируйте в буфер обмена или сохраните полученный токен.
+
+  2. Если вы аутентифицируетесь впервые, перейдите в консоль облака.
+     Примите условия лицензионного соглашения и политики конфиденциальности.
+  3. Чтобы начать настройку профиля CLI, выполните команду:
+
+-->
+yc init
+<--
+
+  4. Выберите профиль, для которого вы хотите настроить аутентификацию, или создайте новый.
+     Если вы выполняете команду yc init впервые, этот шаг будет отсутствовать.
+
+--[CONSOLE]--
+Pick desired action:
+[1] Re-initialize this profile 'default' with new settings
+[2] Create a new profile
+Please enter your numeric choice: 1
+<<<
+
+  5. По запросу команды введите OAuth-токен, полученный ранее:
+
+--[CONSOLE]--
+Please go to https://oauth.yandex.ru/authorize?response_type=token&client_id=1a6990aa636648e9b2ef855fa7bec2fb
+in order to obtain OAuth token.
+
+Please enter OAuth token: y0_AgA ... wvs7N4
+<<<
+
+  6. Выберите одно из предложенных облаков, к которым у вас есть доступ:
+
+--[CONSOLE]--
+Please select cloud to use:
+ [1] cloud1 (id = aoe2bmdcvata********)
+ [2] cloud2 (id = dcvatao4faoe********)
+Please enter your numeric choice: 2
+<<<
+
+  # Если вам доступно только одно облако, оно будет выбрано автоматически.
+
+
+  7. Выберите каталог по умолчанию:
+
+--[CONSOLE]--
+Please choose a folder to use:
+ [1] folder1 (id = cvatao4faoe2********)
+ [2] folder2 (id = tao4faoe2cva********)
+ [3] Create a new folder
+Please enter your numeric choice: 1
+<<<
+
+  8. Чтобы выбрать зону доступности по умолчанию для сервиса Compute Cloud, введите Y.
+     Чтобы пропустить настройку, введите n.
+
+--[CONSOLE]--
+Do you want to configure a default Yandex Compute Cloud availability zone? [Y/n] Y
+<<<
+
+  # Если вы ввели Y, выберите зону доступности:
+
+--[CONSOLE]--
+Which zone do you want to use as a profile default?
+ [1] ru-central1-a
+ [2] ru-central1-b
+ [3] ru-central1-d
+ [4] Do not set default zone
+Please enter your numeric choice: 2
+<<<
+
+  9. Проверьте настройки вашего профиля CLI:
+-->
+yc config list
+<--
+
+##_Результат:_##
+
+token: y0_AgA...wvs7N4
+cloud-id: b1g159pa15cd********
+folder-id: b1g8o9jbt58********
+compute-default-zone: ru-central1-b
+####
+Живой пример:
+-->
+C:\Users\m.eliseev>yc config list
+token: y0__xDnlJKAARjB3RMg1pztkBK2S_zN-KtL0-QUmnLvvjgqMTQE8g
+cloud-id: b1gudh5stf4o64s359tt
+folder-id: b1gusrvuden7e2imo0ao
+compute-default-zone: ru-central1-a
+<--
+
+[!] получите IAM-токен:
+$ yc iam create-token
+
+[!!] полученный токен сохранить в переменной окружения:
+$ export YC_TOKEN=<ВАШ IAM ТОКЕН>
+
+******************************************
+* Создание профиля. Федеративный аккаунт *
+******************************************
+  1. Узнайте идентификатор федерации у вашего администратора  
+    (В лекции указан такой ID федерации: ***)
+  2. Запустите интерактивное создание профиля:
+-->
+$ yc init --federation-id=***
+<--
+#, где --federation-id=***  = идентификатор федерации, предоставляется администратором
+
+# Данной командой мы аутентифицируемся с помощью SAML-совместимой федерации удостоверений
+# и запускаем интерактивное создание профиля.
+# см.: https://cloud.yandex.ru/docs/cli/operations/authentication/federated-user
+
+  3. Выберите профиль, для которого вы хотите настроить аутентификацию, или создайте новый.
+'''
+Welcome! This command will take you through the configuration process.
+Pick desired action:
+[1] Re-initialize this profile 'default' with new settings
+[2] Create a new profile
+'''
+(выбрали → )
+
+  4. CLI выведет сообщение о продолжении аутентификации в браузере. Для продолжения нажмите клавишу Enter
+'''
+You are going to be authenticated via federation-id 'aje1f0hsgds3a********'.
+Your federation authentication web site will be opened.
+After your successful authentication, you will be redirected to 'https://console.cloud.yandex.ru'.
+
+Press 'enter' to continue...
+'''
+
+  После успешной аутентификации в профиле сохранится IAM-токен.
+  При каждой операции аутентификация будет происходить с помощью этого токена, пока не истечет время жизни токена.
+  После этого CLI снова выведет сообщение о необходимости пройти аутентификацию в браузере.
+
+  5. Вернитесь в интерфейс командной строки, чтобы завершить создание профиля.
+  6. Выберите одно из предложенных облаков, в которых у вас есть права доступа:
+'''
+Please select cloud to use:
+ [1] cloud1 (id = aoe2bmdcvata********)
+ [2] cloud2 (id = dcvatao4faoe********)
+Please enter your numeric choice: 2
+'''
+  ‼ Если вам доступно только одно облако, оно будет выбрано автоматически
+
+  7. Выберите каталог* по умолчанию:
+'''
+Please choose a folder to use:
+ [1] folder1 (id = cvatao4faoe2********)
+ [2] folder2 (id = tao4faoe2cva********)
+ [3] Create a new folder
+Please enter your numeric choice: 1
+'''
+
+[*Каталог] - пространство, в котором создаются и группируются ресурсы Yandex Cloud.
+Как и каталоги в файловой системе, каталоги в Yandex Cloud упрощают управление ресурсами.
+Вы можете группировать ресурсы в каталоги
+  • по типу ресурса,
+  • по проекту,
+  • по отделу, который работает с этими ресурсами,
+  • или по любому другому признаку.
+
+  8. Чтобы выбрать зону доступности* по умолчанию для сервиса Compute Cloud, введите Y.
+     Чтобы пропустить настройку, введите n.
+'''
+Do you want to configure a default Yandex Compute Cloud availability zone? [Y/n] Y
+'''
+
+  Если вы ввели Y, выберите зону доступности:
+'''
+Which zone do you want to use as a profile default?
+ [1] ru-central1-a
+ [2] ru-central1-b
+ [3] ru-central1-c
+ [4] Don't set default zone
+Please enter your numeric choice: 2
+'''
+[Зона доступности]*
+  - это инфраструктура внутри датацентра, в котором размещается платформа Yandex Cloud.
+    Ресурсы в Yandex Cloud делятся на зональные (привязанные к зоне доступности) и глобальные (не привязанные к зоне).
+	Зональными ресурсами являются, например, виртуальная машина и диск.
+	Примеры глобальных ресурсов — облачная сеть и бакет.
+	
+    Каждая зона изолирована от аппаратных и программных сбоев в других зонах доступности.
+	Разворачивая ваши приложения сразу в нескольких зонах, вы
+	  - обеспечиваете отказоустойчивость своих приложений и 
+	  - значительно снижаете вероятность потери данных.
+
+  Платформа Yandex Cloud размещается в трех дата-центрах Яндекса, расположенных во Владимирской, Рязанской и Московской областях.
+  Вы можете размещать свои ресурсы в следующих зонах доступности:
+    • ru-central1-a;
+    • ru-central1-b;
+    • ru-central1-c (с ограничениями — см. подробности)
+  
+  9. Проверьте настройки вашего профиля CLI:
+-->
+$ yc config list
+<--
+
+    Результат:
+'''
+federation-id: aje1f0hs6oja********
+cloud-id: b1g159pa15cd********
+folder-id: b1g8o9jbt58********
+compute-default-zone: ru-central1-b
+'''
+
+Примеры команд:  https://cloud.yandex.ru/docs/cli/quickstart#example

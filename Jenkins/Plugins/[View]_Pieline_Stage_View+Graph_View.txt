@@ -1,0 +1,5 @@
+Pipeline: Stage View. Pipeline Graph View
+
+[sources:]
+  1) "Pipeline: Stage View": https://plugins.jenkins.io/pipeline-stage-view/
+  2) "Pipeline Graph View": https://plugins.jenkins.io/pipeline-graph-view/

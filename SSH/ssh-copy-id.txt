@@ -1,0 +1,4 @@
+ssh-copy-id
+
+(https://linux.die.net/man/1/ssh-copy-id)
+(https://blog.programs74.ru/how-to-copy-ssh-key-using-utility-ssh-copy-id/)
