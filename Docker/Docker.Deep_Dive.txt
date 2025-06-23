@@ -1,0 +1,198 @@
+[source:]
+Nigel Poulton "Docker Deep Dive. Zero to Docker in a single book", 11: Docker Networking (p.179)
+
+Docker Networking - The TLDR
+...
+Docker networking is based on an open-source pluggable architecture called the Container Network Model (CNM).
+libnetwork is the reference implementation of the CNM, and it provides all of Docker’s corenetworking capabilities.
+Drivers plug-in to libnetwork to provide specific 
+network topologies.
+To create a smooth out-of-the-box experience, Docker ships with a set of native drivers for the most common networking requirements.
+These include single-host bridge networks, multi-host overlays, and options for plugging into existing VLANs.
+Ecosystem partners can extend things further by providing their own drivers.
+Last but not least, libnetwork provides native service discovery and basic container load balancing.
+That’s this big picture. Let’s get into the detail.
+
+Docker Networking - The Deep Dive
+
+We’ll organize this section of the chapter as follows:
+  * The theory
+  * Single-host bridge networks
+  * Multi-host overlay networks
+  * Connecting to existing networks
+  * Service Discovery
+  * Ingress load balancing
+
+** The theory **
+At the highest level, Docker networking comprises three major components:
+  - The Container Network Model (CNM)
+  - Libnetwork
+  - Drivers
+
+The CNM is the design specification and outlines the fundamental building blocks of a Docker network.
+
+Libnetwork is a real-world implementation of the CNM.
+It’s open-sourced as part of the Moby project and used by Docker and other projects.
+
+Drivers extend the model by implementing specific network topologies such as VXLAN overlay networks.
+Figure 11.1 shows how they fit together at a very high level.
+
+Let’s look a bit closer at each.
+
+
+** The Container Network Model (CNM) **
+Everything starts with a design.
+The design guide for Docker networking is the CNM. It outlines the
+fundamental building blocks of a Docker network, and you can read the full spec here: https://github.com/docker/libnetwork/blob/master/docs/design.md
+I recommend reading the entire spec, but at a high level, it defines three building blocks:
+  * Sandboxes
+  * Endpoints
+  * Networks
+
+A sandbox is an isolated network stack in a container.
+It includes Ethernet interfaces, ports, routing tables, and DNS config.
+
+Endpoints are virtual network interfaces (E.g. veth).
+Like normal network interfaces, these are responsible for making connections.
+For example, endpoints to connect sandboxes to networks.
+
+Networks are a software implementation of a switch (802.1d bridge).
+As such, they group together and isolate a collection of endpoints that need to communicate.
+
+Figure 11.2 shows the three components and how they connect.
+
+The atomic unit of scheduling on Docker is the container, and as the name suggests, the Container Network Model is all about providing networking for containers.
+Figure 11.3 shows how CNM components relate to containers — sandboxes are placed inside of containers to provide network connectivity.
+
+## Figure 11.3
+Container A has a single interface (endpoint) and is connected to Network A.
+Container B has two interfaces (endpoints) and is connected to Network A and Network B.
+The two containers can communicate because they are both connected to Network A.
+However, the two endpoints in Container B cannot communicate with each other without the assistance of a layer 3 router.
+It’s also important to understand that endpoints behave like regular network adapters, meaning they can only be connected to a single network.
+Therefore, a container needing to connect to multiple networks will need multiple endpoints.
+
+Figure 11.4 extends the diagram again, this time adding a Docker host.
+Although Container A and Container B are running on the same host, their network stacks are completely isolated at the OS-level via the sandboxes
+and can only communicate via a network.
+
+## Figure 11.4
+
+
+Libnetwork
+The CNM is the design doc and libnetwork is the canonical
+implementation. It’s open-source, cross-platform (Linux and Windows),
+lives in the Moby project, and used by Docker.
+In the early days of Docker, all the networking code existed inside the
+daemon. This was a nightmare — the daemon became bloated, and it didn’t
+follow the Unix principle of building modular tools that can work on their
+own, but also be easily composed into other projects. As a result, the
+network code got ripped out and refactored into an external library called
+libnetwork based on the principles of the CNM. Today, all of the core
+Docker networking code lives in libnetwork.
+As well as implementing the core components of the CNM, libnetwork
+also implements native service discovery, ingress-based container load
+balancing, and the network control plane and management plane.
+Drivers
+If libnetwork implements the control plane and management plane, then
+drivers implement the data plane. For example, connectivity and isolation is
+all handled by drivers. So is the creation of networks. The relationship is
+shown in Figure 11.5.Figure 11.5
+Docker ships with several built-in drivers, known as native drivers or local
+drivers. These include bridge, overlay, and macvlan, and they build the
+most common network topologies. 3rd-parties can also write network
+drivers to implement other network topologies and more advanced
+configurations.
+Every network is owned by a driver, and the driver is responsible for the
+creation and management of all resources on the network. For example, an
+overlay network called “prod-fe-cuda” will be owned and managed by the
+overlay driver. This means the overlay driver is invoked for the creation,
+management, and deletion of all resources on that network.
+In order to meet the demands of complex highly-fluid environments,
+libnetwork allows multiple network drivers to be active at the same time.
+This means your Docker environment can sport a wide range of
+heterogeneous networks.
+Let’s look a bit closer at single-host bridge networks, multi-host overlay
+network, and connecting to existing networks…
+
+Сетевое взаимодействие с Docker - краткое содержание
+...
+Сетевое взаимодействие Docker основано на подключаемой архитектуре с открытым исходным кодом под названием Container Network Model (CNM).
+#(Модель сети контейнеров)
+libnetwork является эталонной реализацией CNM и обеспечивает все основные сетевые возможности Docker.
+Драйверы подключаются к libnetwork для обеспечения специфических сетевых топологий.
+
+Чтобы обеспечить беспроблемную работу из коробки, Docker поставляется с набором собственных драйверов для наиболее распространенных сетевых требований.
+К ним относятся однохостовые мостовые сети, многохостовые оверлеи и варианты подключения к существующим виртуальным локальным сетям.
+Партнеры по экосистеме могут расширить возможности, предоставив свои собственные драйверы.
+И последнее, но не менее важное: libnetwork обеспечивает нативное обнаружение сервисов и базовую балансировку нагрузки контейнеров.
+Такова общая картина.
+Давайте перейдем к деталям.
+
+Docker Networking - глубокое погружение
+
+Мы организуем этот раздел главы следующим образом:
+  * Теория
+  * Single-host bridge networks (Однохостовые сети типа "мост")
+  * Multi-host overlay networks (Многохостовые оверлейные сети)
+    # Overlay network = общий случай логической сети, создаваемой поверх другой сети
+
+  * Connecting to existing networks (Подключение к существующим сетям)
+  * Service Discovery (Обнаружение сервисов)
+  * Ingress load balancing (Балансировка нагрузки на входе)
+  
+
+** Теория **
+
+На самом высоком уровне сеть Docker состоит из трех основных компонентов:
+  - Сетевая модель контейнеров (CNM)
+  - Libnetwork
+  - Драйверы
+
+CNM является спецификацией проекта и описывает фундаментальные строительные блоки сети Docker.
+
+Libnetwork - это реальная реализация CNM.
+Она находится в открытом доступе в рамках проекта Moby и используется в Docker и других проектах.
+
+Драйверы расширяют модель, реализуя специфические сетевые топологии, такие как оверлейные сети VXLAN.
+На рисунке 11.1 показано, как они сочетаются друг с другом на самом высоком уровне.
+
+
+** The Container Network Model (CNM) **
+
+Все начинается с проектирования.
+Руководство по проектированию сети Docker - это CNM.
+В нем описаны фундаментальные строительные блоки сети Docker,
+
+# полная спецификация: https://github.com/docker/libnetwork/blob/master/docs/design.md.
+
+Я рекомендую прочитать всю спецификацию, но на высоком уровне она определяет три строительных блока:
+  * песочницы (Sandboxes)
+  * Конечные точки (Endpoints)
+  * Сети (Networks)
+
+Песочница
+  = это изолированный сетевой стек в контейнере.
+    Он включает в себя
+      - интерфейсы Ethernet,
+      - порты,
+      - таблицы маршрутизации
+      - и конфигурацию DNS.
+
+Конечные точки (Endpoints)
+  = это виртуальные сетевые интерфейсы (например, veth).
+    Как и обычные сетевые интерфейсы, они отвечают за создание соединений.
+    Например, конечные точки для подключения песочниц к сетям.
+
+Сети
+  = это программная реализация коммутатора (моста 802.1d).
+    Как таковые, они объединяют и изолируют набор конечных точек, которым необходимо взаимодействовать.
+
+На рисунке 11.2 показаны три компонента и способы их соединения.
+
+Атомарной единицей планирования в Docker является контейнер,
+и, как следует из названия, сетевая модель контейнеров призвана обеспечить сетевое взаимодействие для контейнеров.
+
+На рисунке 11.3 показано, как компоненты CNM связаны с контейнерами:
+  - песочницы размещаются внутри контейнеров, чтобы обеспечить сетевое подключение.
+

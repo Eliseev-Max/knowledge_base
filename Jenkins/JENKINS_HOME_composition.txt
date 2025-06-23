@@ -1,0 +1,219 @@
+#/var/jenkins_home
+
+16K     ./.config
+390G    ./workspace
+3.5M    ./updates
+8.0K    ./.groovy
+8.0K    ./userContent
+4.5M    ./logs
+1.6M    ./.docker
+688K    ./fingerprints
+40K     ./.cache
+360K    ./.java
+742M    ./plugins
+744K    ./users
+37G     ./jobs
+107M    ./war
+28K     ./nodes
+16K     ./.ssh
+8.0K    ./caches
+12K     ./scriptler
+48K     ./secrets
+684K    ./tools
+427G    .
+427G    total
+
+# ls -lah
+
+drwxr-xr-x  22 jenkins jenkins  12K May 22 12:31 .
+drwxr-xr-x   1 root    root    4.0K Aug 27  2024 ..
+-rw-------   1 jenkins jenkins 5.4K May 21 15:39 .bash_history
+drwxr-xr-x   3 jenkins jenkins 4.0K Mar  3 13:34 .cache
+drwxr-xr-x   4 jenkins jenkins 4.0K May  5 13:14 .config
+drwx------   3 jenkins jenkins 4.0K Mar 13 10:00 .docker
+drwxr-xr-x   3 jenkins jenkins 4.0K Mar  3 13:34 .groovy
+drwxr-xr-x   3 jenkins jenkins 4.0K Mar  3 13:34 .java
+-rw-r--r--   1 jenkins jenkins    0 May  3 15:40 .lastStarted
+-rw-r--r--   1 jenkins jenkins    1 May 22 11:53 .owner
+drwx------   2 jenkins jenkins 4.0K Apr 15 16:57 .ssh
+-rw-r--r--   1 jenkins jenkins  156 Sep  9  2024 atomic10387943107483775417tmp
+-rw-r--r--   1 jenkins jenkins  260 Mar  7 11:33 atomic11971047555782966729tmp
+-rw-r--r--   1 jenkins jenkins  260 Mar  7 09:50 atomic6317301007766520970tmp
+drwxr-xr-x   3 jenkins jenkins 4.0K Sep  9  2024 caches
+-rw-r--r--   1 jenkins jenkins 2.1K Sep  9  2024 certnew.cer
+-rw-r--r--   1 jenkins jenkins  546 May 20 07:37 com.atlassian.bitbucket.jenkins.internal.config.BitbucketPluginConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  270 May 20 07:37 com.cloudbees.hudson.plugins.folder.config.AbstractFolderConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  643 May 20 07:37 com.cloudbees.jenkins.plugins.bitbucket.endpoints.BitbucketEndpointConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  493 May 20 07:37 com.datapipe.jenkins.vault.configuration.GlobalVaultConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  190 Mar 28 12:46 com.jenkinsci.plugins.badge.BadgePlugin.xml
+-rw-r--r--   1 jenkins jenkins  27K May 20 07:37 config.xml
+-rw-r--r--   1 jenkins jenkins  61K May  3 15:39 copy_reference_file.log
+-rw-r--r--   1 jenkins jenkins  27K Apr  7 13:18 credentials.xml
+-rw-r--r--   1 jenkins jenkins  201 May 20 07:37 de.taimos.pipeline.aws.PluginImpl.xml
+-rw-r--r--   1 jenkins jenkins  786 May 20 07:37 docker-slaves.xml
+drwxr-xr-x  47 jenkins jenkins 4.0K May 21 16:24 fingerprints
+-rw-r--r--   1 jenkins jenkins  135 May 20 07:37 github-plugin-configuration.xml
+-rw-r--r--   1 jenkins jenkins  808 May 20 07:37 hudson.maven.MavenModuleSet.xml
+-rw-r--r--   1 jenkins jenkins  156 May  3 15:40 hudson.model.UpdateCenter.xml
+-rw-r--r--   1 jenkins jenkins  238 May 20 07:37 hudson.plugins.build_timeout.global.GlobalTimeOutConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  250 May 20 07:37 hudson.plugins.build_timeout.operations.BuildStepOperation.xml
+-rw-r--r--   1 jenkins jenkins  206 Nov 20  2024 hudson.plugins.doxygen.DoxygenBuilder.xml
+-rw-r--r--   1 jenkins jenkins 1.5K May 20 07:37 hudson.plugins.emailext.ExtendedEmailPublisher.xml
+-rw-r--r--   1 jenkins jenkins  645 May 20 07:37 hudson.plugins.git.GitSCM.xml
+-rw-r--r--   1 jenkins jenkins  370 Nov 20  2024 hudson.plugins.git.GitTool.xml
+-rw-r--r--   1 jenkins jenkins  173 Nov 20  2024 hudson.plugins.gradle.Gradle.xml
+-rw-r--r--   1 jenkins jenkins  424 May 20 07:37 hudson.plugins.gradle.enriched.EnrichedSummaryConfig.xml
+-rw-r--r--   1 jenkins jenkins  635 May 20 07:37 hudson.plugins.gradle.injection.InjectionConfig.xml
+-rw-r--r--   1 jenkins jenkins  227 Nov 20  2024 hudson.plugins.mercurial.MercurialInstallation.xml
+-rw-r--r--   1 jenkins jenkins  277 Nov 20  2024 hudson.plugins.sonar.MsBuildSQRunnerInstallation.xml
+-rw-r--r--   1 jenkins jenkins  918 May 20 07:37 hudson.plugins.sonar.SonarGlobalConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  683 Nov 20  2024 hudson.plugins.sonar.SonarRunnerInstallation.xml
+-rw-r--r--   1 jenkins jenkins  382 May 20 07:37 hudson.plugins.timestamper.TimestamperConfig.xml
+-rw-r--r--   1 jenkins jenkins  161 Nov 20  2024 hudson.tasks.Ant.xml
+-rw-r--r--   1 jenkins jenkins  262 May 20 07:37 hudson.tasks.Mailer.xml
+-rw-r--r--   1 jenkins jenkins  132 Nov 20  2024 hudson.tasks.Maven.xml
+-rw-r--r--   1 jenkins jenkins   76 May 20 07:37 hudson.tasks.Shell.xml
+-rw-r--r--   1 jenkins jenkins  216 May 20 07:37 hudson.triggers.SCMTrigger.xml
+-rw-------   1 jenkins jenkins 1.7K Sep  9  2024 identity.key.enc
+-rw-r--r--   1 jenkins jenkins  280 May 20 07:37 io.jenkins.plugins.analysis.warnings.groovy.ParserConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  461 May 20 07:37 io.jenkins.plugins.bitbucketpushandpullrequest.config.BitBucketPPRPluginConfig.xml
+-rw-r--r--   1 jenkins jenkins  219 May 20 07:37 io.jenkins.plugins.casc.CasCGlobalConfig.xml
+-rw-r--r--   1 jenkins jenkins  132 May 20 07:37 io.jenkins.plugins.grypescanner.GrypeScannerStep.xml
+-rw-r--r--   1 jenkins jenkins  835 Sep  9  2024 io.jenkins.plugins.jfrog.JfrogInstallation.xml
+-rw-r--r--   1 jenkins jenkins  808 Sep  9  2024 io.jenkins.plugins.jfrog.configuration.JFrogPlatformBuilder.xml
+-rw-r--r--   1 jenkins jenkins  300 May 20 07:37 io.jenkins.plugins.junit.storage.JunitTestResultStorageConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  329 May 20 07:37 io.jenkins.plugins.minio.config.GlobalMinioConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  216 May  3 15:46 io.jenkins.plugins.prism.PrismConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  227 May  3 15:46 javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  277 May 20 07:37 jenkins.fingerprints.GlobalFingerprintConfiguration.xml
+-rw-r--r--   1 jenkins jenkins    5 May  3 15:40 jenkins.install.InstallUtil.lastExecVersion
+-rw-r--r--   1 jenkins jenkins    5 Sep  9  2024 jenkins.install.UpgradeWizard.state
+-rw-r--r--   1 jenkins jenkins  208 May 20 07:37 jenkins.metrics.api.MetricsAccessKey.xml
+-rw-r--r--   1 jenkins jenkins  159 May 20 07:37 jenkins.model.ArtifactManagerConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  253 May 20 07:37 jenkins.model.GlobalBuildDiscarderConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  241 May 20 07:37 jenkins.model.GlobalComputerRetentionCheckIntervalConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  283 May 20 07:37 jenkins.model.JenkinsLocationConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  247 Nov 20  2024 jenkins.mvn.GlobalMavenConfig.xml
+-rw-r--r--   1 jenkins jenkins  240 May  3 15:46 jenkins.plugins.git.GitHooksConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  169 May  3 15:46 jenkins.security.QueueItemAuthenticatorConfiguration.xml
+-rw-r--r--   1 jenkins jenkins   86 May 20 07:37 jenkins.security.ResourceDomainConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  162 May  3 15:46 jenkins.security.UpdateSiteWarningsConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  357 May  3 15:46 jenkins.security.apitoken.ApiTokenPropertyConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  179 May 20 07:37 jenkins.tasks.filters.EnvVarsFilterGlobalConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  171 Sep  9  2024 jenkins.telemetry.Correlator.xml
+drwxr-xr-x  28 jenkins jenkins 4.0K May 14 10:48 jobs
+drwxr-xr-x   5 jenkins jenkins 4.0K Sep  9  2024 logs
+-rw-r--r--   1 jenkins jenkins 1.1K May  3 15:40 nodeMonitors.xml
+drwxr-xr-x   5 jenkins jenkins 4.0K Mar 11 05:21 nodes
+-rw-r--r--   1 jenkins jenkins  961 Nov 20  2024 org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation.xml
+-rw-r--r--   1 jenkins jenkins 455K Oct 15  2024 org.jenkinsci.plugins.cloudstats.CloudStatistics.xml
+-rw-r--r--   1 jenkins jenkins  169 May 20 07:37 org.jenkinsci.plugins.displayurlapi.DefaultDisplayURLProviderGlobalConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  661 Nov 20  2024 org.jenkinsci.plugins.docker.commons.tools.DockerTool.xml
+-rw-r--r--   1 jenkins jenkins  300 May 20 07:37 org.jenkinsci.plugins.docker.workflow.declarative.GlobalConfig.xml
+-rw-r--r--   1 jenkins jenkins  320 May  3 15:46 org.jenkinsci.plugins.gitclient.GitHostKeyVerificationConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  255 Nov 20  2024 org.jenkinsci.plugins.gitclient.JGitApacheTool.xml
+-rw-r--r--   1 jenkins jenkins  243 Nov 20  2024 org.jenkinsci.plugins.gitclient.JGitTool.xml
+-rw-r--r--   1 jenkins jenkins  289 May 20 07:37 org.jenkinsci.plugins.github_branch_source.GitHubConfiguration.xml
+-rw-r--r--   1 jenkins jenkins  382 Sep 26  2024 org.jenkinsci.plugins.pipeline.milestone.MilestoneStep.xml
+-rw-r--r--   1 jenkins jenkins  504 May 19 20:18 org.jenkinsci.plugins.resourcedisposer.AsyncResourceDisposer.xml
+-rw-r--r--   1 jenkins jenkins  426 May 22 12:23 org.jenkinsci.plugins.workflow.flow.FlowExecutionList.xml
+-rw-r--r--   1 jenkins jenkins  170 May 20 07:37 org.jenkinsci.plugins.workflow.flow.GlobalDefaultFlowDurabilityLevel.xml
+-rw-r--r--   1 jenkins jenkins  229 May 20 07:37 org.jenkinsci.plugins.workflow.libs.GlobalLibraries.xml
+-rw-r--r--   1 jenkins jenkins  247 May 20 07:37 org.jenkinsci.plugins.workflow.libs.GlobalUntrustedLibraries.xml
+-rw-r--r--   1 jenkins jenkins  839 Sep  9  2024 org.jfrog.hudson.ArtifactoryBuilder.xml
+-rw-r--r--   1 jenkins jenkins  85K May 21 23:13 plugin-usage.xml
+drwxr-xr-x 193 jenkins jenkins  28K Apr 21 13:20 plugins
+-rw-r--r--   1 jenkins jenkins  262 May 22 12:31 queue.xml
+-rw-r--r--   1 jenkins jenkins  262 May  3 15:39 queue.xml.bak
+-rw-r--r--   1 jenkins jenkins 2.1K Apr 17 13:23 root-cert-prosoft.crt
+-rw-r--r--   1 jenkins jenkins 2.4K May  3 16:38 scriptApproval.xml
+drwxr-xr-x   3 jenkins jenkins 4.0K May  3 15:40 scriptler
+-rw-r--r--   1 jenkins jenkins   64 Sep  9  2024 secret.key
+-rw-r--r--   1 jenkins jenkins    0 Sep  9  2024 secret.key.not-so-secret
+drwx------   2 jenkins jenkins 4.0K Sep  9  2024 secrets
+drwxr-xr-x   3 jenkins jenkins 4.0K Sep  9  2024 tools
+drwxr-xr-x   2 jenkins jenkins 4.0K May 21 15:41 updates
+drwxr-xr-x   2 jenkins jenkins 4.0K Sep  9  2024 userContent
+drwxr-xr-x  73 jenkins jenkins 4.0K May  5 14:42 users
+drwxr-xr-x  10 jenkins jenkins 4.0K Nov 28 04:31 war
+drwxr-xr-x 119 jenkins jenkins  12K May 22 08:01 workspace
+
+
+# ${JENKINS_HOME}. Only *.xml files
+
+com.atlassian.bitbucket.jenkins.internal.config.BitbucketPluginConfiguration.xml
+com.cloudbees.hudson.plugins.folder.config.AbstractFolderConfiguration.xml
+com.cloudbees.jenkins.plugins.bitbucket.endpoints.BitbucketEndpointConfiguration.xml
+com.datapipe.jenkins.vault.configuration.GlobalVaultConfiguration.xml
+com.jenkinsci.plugins.badge.BadgePlugin.xml
+config.xml
+credentials.xml
+de.taimos.pipeline.aws.PluginImpl.xml
+docker-slaves.xml
+github-plugin-configuration.xml
+hudson.maven.MavenModuleSet.xml
+hudson.model.UpdateCenter.xml
+hudson.plugins.build_timeout.global.GlobalTimeOutConfiguration.xml
+hudson.plugins.build_timeout.operations.BuildStepOperation.xml
+hudson.plugins.doxygen.DoxygenBuilder.xml
+hudson.plugins.emailext.ExtendedEmailPublisher.xml
+hudson.plugins.git.GitSCM.xml
+hudson.plugins.git.GitTool.xml
+hudson.plugins.gradle.enriched.EnrichedSummaryConfig.xml
+hudson.plugins.gradle.Gradle.xml
+hudson.plugins.gradle.injection.InjectionConfig.xml
+hudson.plugins.mercurial.MercurialInstallation.xml
+hudson.plugins.sonar.MsBuildSQRunnerInstallation.xml
+hudson.plugins.sonar.SonarGlobalConfiguration.xml
+hudson.plugins.sonar.SonarRunnerInstallation.xml
+hudson.plugins.timestamper.TimestamperConfig.xml
+hudson.tasks.Ant.xml
+hudson.tasks.Mailer.xml
+hudson.tasks.Maven.xml
+hudson.tasks.Shell.xml
+hudson.triggers.SCMTrigger.xml
+io.jenkins.plugins.analysis.warnings.groovy.ParserConfiguration.xml
+io.jenkins.plugins.bitbucketpushandpullrequest.config.BitBucketPPRPluginConfig.xml
+io.jenkins.plugins.casc.CasCGlobalConfig.xml
+io.jenkins.plugins.grypescanner.GrypeScannerStep.xml
+io.jenkins.plugins.jfrog.configuration.JFrogPlatformBuilder.xml
+io.jenkins.plugins.jfrog.JfrogInstallation.xml
+io.jenkins.plugins.junit.storage.JunitTestResultStorageConfiguration.xml
+io.jenkins.plugins.minio.config.GlobalMinioConfiguration.xml
+io.jenkins.plugins.prism.PrismConfiguration.xml
+javaposse.jobdsl.plugin.GlobalJobDslSecurityConfiguration.xml
+jenkins.fingerprints.GlobalFingerprintConfiguration.xml
+jenkins.metrics.api.MetricsAccessKey.xml
+jenkins.model.ArtifactManagerConfiguration.xml
+jenkins.model.GlobalBuildDiscarderConfiguration.xml
+jenkins.model.GlobalComputerRetentionCheckIntervalConfiguration.xml
+jenkins.model.JenkinsLocationConfiguration.xml
+jenkins.mvn.GlobalMavenConfig.xml
+jenkins.plugins.git.GitHooksConfiguration.xml
+jenkins.security.apitoken.ApiTokenPropertyConfiguration.xml
+jenkins.security.QueueItemAuthenticatorConfiguration.xml
+jenkins.security.ResourceDomainConfiguration.xml
+jenkins.security.UpdateSiteWarningsConfiguration.xml
+jenkins.tasks.filters.EnvVarsFilterGlobalConfiguration.xml
+jenkins.telemetry.Correlator.xml
+nodeMonitors.xml
+org.jenkinsci.plugins.cloudstats.CloudStatistics.xml
+org.jenkinsci.plugins.DependencyCheck.tools.DependencyCheckInstallation.xml
+org.jenkinsci.plugins.displayurlapi.DefaultDisplayURLProviderGlobalConfiguration.xml
+org.jenkinsci.plugins.docker.commons.tools.DockerTool.xml
+org.jenkinsci.plugins.docker.workflow.declarative.GlobalConfig.xml
+org.jenkinsci.plugins.gitclient.GitHostKeyVerificationConfiguration.xml
+org.jenkinsci.plugins.gitclient.JGitApacheTool.xml
+org.jenkinsci.plugins.gitclient.JGitTool.xml
+org.jenkinsci.plugins.github_branch_source.GitHubConfiguration.xml
+org.jenkinsci.plugins.pipeline.milestone.MilestoneStep.xml
+org.jenkinsci.plugins.resourcedisposer.AsyncResourceDisposer.xml
+org.jenkinsci.plugins.workflow.flow.FlowExecutionList.xml
+org.jenkinsci.plugins.workflow.flow.GlobalDefaultFlowDurabilityLevel.xml
+org.jenkinsci.plugins.workflow.libs.GlobalLibraries.xml
+org.jenkinsci.plugins.workflow.libs.GlobalUntrustedLibraries.xml
+org.jfrog.hudson.ArtifactoryBuilder.xml
+plugin-usage.xml
+queue.xml
+queue.xml.bak
+scriptApproval.xml

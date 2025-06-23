@@ -1,2 +1,0 @@
-Jenkins CLI. Using the CLI over SSH
-{ https://www.jenkins.io/doc/book/managing/cli/ }

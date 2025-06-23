@@ -56,6 +56,7 @@ https://stackoverflow.com/questions/65787455/jenkins-active-directory-broke-cann
 Logging ID=21ff064e-6ac4-4bb2-bd13-17fa30ec3cd4
 ####
 
+
 ###################################################
 # Добавление сертификата доверия Active Directory #
 ###################################################
@@ -116,16 +117,42 @@ mkdir -p $CUSTOM_KEYSTORE
 #cp $JAVA_HOME/jre/lib/security/cacerts $CUSTOM_KEYSTORE
 cp $JAVA_HOME/lib/security/cacerts $CUSTOM_KEYSTORE
 
-#[!] Изначально хранилищем сертификатов была директория: $JENKINS_HOME/.keystore/
-# в результате копирования была добавлена директория: ./cacerts
+# cacerts == бинарный файл, являющийся хранилищем доверенных сертификатов JRE (=== truststore)
+
+[!] Если вы используете OpenJDK, то путь для cacerts будет доступен
+  - НЕ В $JAVA_HOME/jre/lib/security/cacerts
+  + А В $JAVA_HOME/lib/security/cacerts
+
+/*
+```
+  Java KeyStore (JKS) - это хранилище сертификатов безопасности
+  - сертификатов авторизации или сертификатов открытых ключей -
+  и соответствующих закрытых ключей, используемых, например, при шифровании TLS.
+
+  [в IBM WebSphere Application Server и Oracle WebLogic Server]: хранилище ключей == файл с расширением jks.
+
+  Java Development Kit содержит файл CA keystore с именем cacerts в папке jre/lib/security.
+  JDK предоставляют инструмент keytool для работы с хранилищем ключей.
+
+  Keytool НЕ ИМЕЕТ функциональности для извлечения закрытого ключа из хранилища,
+  но это возможно с помощью таких сторонних инструментов, как
+    * jksExportKey,
+    * CERTivity,
+    * Portecle
+    * и KeyStore Explorer
+```
+*/
+
+#[!] Изначально мы указали в переменной окружения путь до хранилища сертификатов: $JENKINS_HOME/.keystore/
+# в результате копирования хранилища сертификатов JRE (cacerts) из $JAVA_HOME/lib/security/ 
 # путь до хранилища сертификатов стал: $JENKINS_HOME/.keystore/cacerts
 ---
 
 [Step 2. Импортируем наш сертификат]
----
-	$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
-	-import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
----
+```
+$JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
+                       -import -alias <YOUR_ALIAS_HERE> -file <YOUR_CA_FILE>
+```
 ---
 $JAVA_HOME/bin/keytool -keystore $JENKINS_HOME/.keystore/cacerts \
 	-import -alias Jenkins_AD -file certnew.cer
@@ -259,16 +286,21 @@ keytool -genkeypair \
 
   Импортируйте сертификат PFX в хранилище ключей java с помощью
 
+```
 keytool -importkeystore -srckeystore jenkins.pfx -srcstoretype pkcs12 -destkeystore jenkins.jks -deststoretype JKS
-Copy the jenkins.jks to secrets directory where Jenkins is installed (in my case C:\Program Files (x86)\Jenkins\secrets).
+```
+
+  Copy the jenkins.jks to secrets directory where Jenkins is installed (in my case C:\Program Files (x86)\Jenkins\secrets).
 
 Add the certificate to the Jenkins startup parameters:
 
  -Djavax.net.ssl.trustStore=%JENKINS_HOME%\secrets\jenkins.jks
  -Djavax.net.ssl.trustStorePassword=[your password for the java key store]
-Restart the jenkins service
 
-On the Jenkins Agent
+  Restart the jenkins service
+
+
+** On the Jenkins Agent **
 
 Import the PEM certificate from above into the java keystore from the command line with administrator priviliges:
 

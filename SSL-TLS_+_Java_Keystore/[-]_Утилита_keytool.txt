@@ -1,0 +1,12 @@
+Keytool util
+
+[sources:]
+  1) "Oracle. Keytool": https://docs.oracle.com/javase/8/docs/technotes/tools/unix/keytool.html
+  2) "OpenNET. keytool (1)": https://www.opennet.ru/man.shtml?topic=keytool&category=1&russian=4
+
+[more:]
+  1) "Криптография в Java. Утилита Keytool": https://habr.com/ru/articles/446322/
+  2) "How to check certificate name and alias in keystore files?": https://stackoverflow.com/questions/12893995/how-to-check-certificate-name-and-alias-in-keystore-files
+  3) "Как посмотреть сертификаты java": https://ru.hexlet.io/qna/java/questions/kak-posmotret-sertifikaty-java
+  4) "keytool list certs – How to list contents of a keystore": https://www.misterpki.com/keytool-list-certs/
+

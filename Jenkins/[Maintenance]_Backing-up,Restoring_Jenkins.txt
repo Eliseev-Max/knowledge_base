@@ -20,7 +20,7 @@ Backing-up/Restoring Jenkins
 
 
 ###################
-# Создание бэкапа #
+# СОЗДАНИЕ БЭКАПА #
 ###################
 
 
@@ -35,8 +35,9 @@ Backing-up/Restoring Jenkins
 * Filesystem snapshots *
 ************************
 
-  Снимки файловой системы обеспечивают максимальную согласованность резервных копий.
-  Кроме того, они выполняются быстрее, чем живые резервные копии (live backups),
+  Снимки файловой системы
+    + обеспечивают максимальную согласованность резервных копий.
+    + выполняются быстрее, чем живые резервные копии (live backups),
   что снижает вероятность копирования разных данных в разные моменты времени.
 
   Их поддерживают:
@@ -81,7 +82,10 @@ plugin_id: thinBackup:2.1.2
 (!) Резервное копирование в /tmp не рекомендуется, поскольку /tmp может быть очищен при перезагрузке.
 
 (*) Запись файлов в локальную ФС - самый быстрый способ создания backup'а.
-    Рассмотрите возможность копирования готовой резервной копии на удаленный сервер резервного копирования или устройство для долгосрочного хранения.
+    Рассмотрите возможность копирования готовой резервной копии
+      -> на удаленный сервер резервного копирования
+    <или>
+      -> устройство для долгосрочного хранения.
 
 
 ****************************************************
@@ -89,32 +93,35 @@ plugin_id: thinBackup:2.1.2
 *       Back up the Controller Key Separately      *
 ****************************************************
 
-[!] Никогда не включайте ключ контроллера в резервную копию Jenkins!
+[!] НИКОГДА НЕ ВКЛЮЧАЙТЕ КЛЮЧ КОНТРОЛЛЕРА В РЕЗЕРВНУЮ КОПИЮ JENKINS!
 
-(!) Ключ контроллера используется для шифрования данных в каталоге secrets, обеспечивающем безопасность credentials.
+(!) Ключ контроллера используется для шифрования данных в каталоге  secrets/, обеспечивающем безопасность credentials.
 
-  Он хранится в файле:
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-! $JENKINS_HOME/secrets/hudson.util.Secret !
-!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+Он хранится
+  - в файле:
 
-в каталоге $JENKINS_HOME/secrets/
+```
+$JENKINS_HOME/secrets/hudson.util.Secret
+```
+  - в каталоге `$JENKINS_HOME/secrets/`
 
-  и шифруется с помощью master.key
+  - и шифруется с помощью master.key
 
   Если вам понадобится восстановить систему из резервной копии, вам понадобится этот файл.
-  И если кто-то другой получит доступ к вашим резервным копиям и будет иметь этот ключ, он получит полный доступ ко всей вашей информации.
+  И если кто-то другой получит доступ к вашим резервным копиям и будет иметь этот ключ,
+(!) -> он получит полный доступ ко всей вашей информации.
 
 [!] Вы должны обращаться с ключом контроллера так же, как с закрытым ключом SSH,
-    и НИКОГДА не включать его в обычную резервную копию.
+    и НИКОГДА НЕ ВКЛЮЧАТЬ ЕГО В ОБЫЧНУЮ РЕЗЕРВНУЮ КОПИЮ.
 
   Вместо этого создайте резервную копию файла master.key ОТДЕЛЬНО и храните его в ОЧЕНЬ НАДЕЖНОМ МЕСТЕ,
   вдали от других резервных копий.
 
-  Это очень маленький файл, который редко изменяется.
+  Это очень маленький файл, который РЕДКО ИЗМЕНЯЕТСЯ.
 
-  Если вам нужно выполнить полное восстановление системы, вам нужно будет восстановить всю остальную систему,
-  а затем отдельно применить резервную копию файла master.key.
+  Если вам нужно выполнить ПОЛНОЕ ВОССТАНОВЛЕНИЕ СИСТЕМЫ, вам нужно будет
+    1) восстановить всю остальную систему,
+    2) а затем отдельно применить резервную копию файла master.key.
 
 
 ************************************
@@ -125,24 +132,31 @@ plugin_id: thinBackup:2.1.2
   При резервном копировании всего каталога $JENKINS_HOME сохраняется весь контроллер Jenkins.
   Чтобы восстановить систему, просто скопируйте всю резервную копию в новую систему.
 
-(!) Обратите внимание, что JENKINS_HOME включает в себя ряд файлов, которые на самом деле НЕ НУЖНО РЕЗЕРВИРОВАТЬ.
+[*Обратите внимание*]
+  JENKINS_HOME включает в себя ряд файлов, которые на самом деле НЕ НУЖНО РЕЗЕРВИРОВАТЬ.
 
-  Выбор конкретных каталогов и файлов для резервного копирования дает меньший объем резервных копий,
-  но может потребовать больших усилий для восстановления системы.
+  Выбор конкретных каталогов и файлов для резервного копирования
+    "+" дает меньший объем резервных копий,
+    "-" но может потребовать больших усилий для восстановления системы.
 
 (*) Один из подходов заключается в резервном копировании разных каталогов по разным расписаниям.
 
-[Configuration files]
+
+***********************
+* Configuration files *
+***********************
 
   Файлы конфигурации хранятся непосредственно в директории $JENKINS_HOME.
-  ./config.xml - это основной файл конфигурации Jenkins.
+
+./config.xml
+  = это основной файл конфигурации Jenkins.
 
   Другие файлы конфигурации также имеют суффикс .xml.
 
-(!) Укажите $JENKINS_HOME/*.xml для резервного копирования всех файлов конфигурации.
+  (!) Укажите $JENKINS_HOME/*.xml для резервного копирования всех файлов конфигурации.
 
-(*) Файлы конфигурации можно также хранить в репозитории SCM.
-  В нем хранятся копии всех предыдущих версий каждого файла, которые можно извлечь с помощью стандартных средств SCM.
+  (*) Файлы конфигурации можно также хранить в репозитории SCM.
+      В нем хранятся копии всех предыдущих версий каждого файла, которые можно извлечь с помощью стандартных средств SCM.
 
 
 [./jobs Subdirectory]
@@ -150,45 +164,48 @@ plugin_id: thinBackup:2.1.2
   Каталог $JENKINS_HOME/jobs содержит информацию обо всех заданиях (jobs), которые вы создаете в Jenkins.
 
   ● ./builds
-    = Содержит записи о сборке
+      = Содержит записи о сборке
 
   ● ./builds/archive
-    = содержит заархивированные артефакты
-      Создайте резервную копию, если важно сохранить эти артефакты в долгосрочной перспективе.
-      Они могут быть ОЧЕНЬ БОЛЬШИМИ и могут сделать ваши резервные копии очень большими
+      = содержит заархивированные артефакты
+        Создайте резервную копию, если важно сохранить эти артефакты в долгосрочной перспективе.
+        (!) Они могут быть ОЧЕНЬ БОЛЬШИМИ и могут сделать ваши резервные копии очень большими
 
   ● ./workspace
-    = Содержит файлы, checked out из SCM
-      Обычно нет необходимости создавать резервные копии этих файлов.
-      Вы можете выполнить clean checkout после восстановления системы.
+      = Содержит файлы, checked out из SCM
+        Обычно НЕТ НЕОБХОДИМОСТИ создавать резервные копии этих файлов.
+        Вы можете выполнить clean checkout после восстановления системы.
 
   ● ./plugins/*.hpi
-    = Пакеты плагинов с определенными версиями, используемыми в вашей системе
+      = Пакеты плагинов с определенными версиями, используемыми в вашей системе
 
   ● ./plugins/*.jpi
-    = Пакеты плагинов с определенными версиями, используемыми в вашей системе
+      = Пакеты плагинов с определенными версиями, используемыми в вашей системе
 
 
-********************************************
-* Что может не потребоваться резервировать *
-*     What may not need to be backed up    *
-********************************************
+############################################
+# Что может не потребоваться резервировать #
+#     What may not need to be backed up    #
+############################################
 
-  Следующие файлы и каталоги обычно не нужно включать в каждую обычную резервную копию,
+"""
+  Следующие файлы и каталоги обычно НЕ НУЖНО включать в каждую обычную резервную копию,
   поскольку при восстановлении системы можно загрузить последнюю версию.
 
-(!) Однако некоторые эксперты по аварийному восстановлению не рекомендуют выполнять какие-либо обновления во время восстановления системы,
+(!) Однако некоторые эксперты по аварийному восстановлению НЕ РЕКОМЕНДУЮТ выполнять какие-либо ОБНОВЛЕНИЯ во время восстановления системы,
     чтобы избежать задержек, вызванных проблемами совместимости, которые могут возникнуть.
 
     Если в вашем плане аварийного восстановления указано,
     что для восстановления системы необходимо использовать те же версии программного обеспечения, которые были запущены ранее,
     вы можете сделать нечастую резервную копию системы и всех загруженных инструментов
     и использовать ее для восстановления системы.
+"""
 
+--<НЕ_КОПИРУЕМ>--
 
   ./war
     = Exploded war file
-      Чтобы восстановить систему, загрузите последнюю версию war file.
+      Чтобы восстановить систему, загрузите ПОСЛЕДНЮЮ ВЕРСИЮ war file.
 
 
   ./cache
@@ -202,6 +219,7 @@ plugin_id: thinBackup:2.1.2
   ./plugins/xxx
     = Подкаталоги установленных плагинов
       Они будут автоматически заполнены при следующем перезапуске.
+\\
 
 
 ***********************************
@@ -218,18 +236,23 @@ plugin_id: thinBackup:2.1.2
   2. Восстановите резервную копию в этот каталог.
   3. Установите $JENKINS_HOME для указания на этот каталог, указав произвольный HTTP-порт,
      чтобы не столкнуться с реальным контроллером Jenkins:
---[CMD]--
-export JENKINS_HOME=/mnt/backup-test
-<<<
 
-  4. Теперь выполните восстановленный контроллер Jenkins:
 --[CMD]--
+```
+export JENKINS_HOME=/mnt/backup-test
+```
+
+  4. Теперь запустите восстановленный контроллер Jenkins:
+
+```
 java -jar jenkins.war --httpPort=9999
-<<<
+```
 
 
 [Рекомендовано к ознакомлению:]
 * "Why Smart, Efficient Backup and Restore Techniques are Essential with Jenkins Production Server":
+## Почему умные и эффективные методы резервного копирования и восстановления крайне важны для производственного сервера Jenkins
+
 #-> https://www.cloudbees.com/blog/why-smart-efficient-backup-and-restore-techniques-are-essential-jenkins-production-server
 
 
@@ -241,58 +264,108 @@ BACKUP PLANNING
   Даже если у вас распределенная установка Jenkins, вам НЕ НУЖНО создавать резервные копии НА СТОРОНЕ АГЕНТА.
 
 
-<?> можно ли делать резервные копии на живых экземплярах, не выводя Jenkins в автономный режим </?>
+?????????????????????????????????????????????????????????
+? Можно ли делать резервные копии на живых экземплярах, ?
+? не выводя Jenkins в автономный режим                  ?
+?????????????????????????????????????????????????????????
 
 К счастью, Jenkins спроектирован таким образом, что РЕЗЕРВНОЕ КОПИРОВАНИЕ В РЕАЛЬНОМ ВРЕМЕНИ РАБОТАЕТ НОРМАЛЬНО
   - изменения конфигурации атомарны, поэтому резервное копирование можно выполнять, не затрагивая работающий экземпляр.
 
 Теперь давайте рассмотрим, как можно оптимизировать резервное копирование.
 
-Optimization 1: Back up a subset of $JENKINS_HOME
-Although $JENKINS_HOME is the only directory you need to back up, there's a catch: this directory can become rather large. To save space, consider what parts of this directory you really need to back up and back them up selectively.
+Оптимизация №1: Back up a subset of $JENKINS_HOME
 
-The bulk of your data, including your job configuration and past filed records, lives in the /jobs directory. The /jobs directory holds information pertaining to all the jobs you create in Jenkins. Its directory structure looks like this:
+  Хотя $JENKINS_HOME - это ЕДИНСТВЕННЫЙ каталог, который нужно резервировать, есть одна загвоздка:
+(!)  этот каталог может стать довольно большим.
 
-/jobs/*
+  Чтобы сэкономить место
+    1) подумайте, какие части этого каталога вам действительно нужны для резервного копирования,
+    2) и создавайте резервные копии выборочно.
 
-builds (build records)
+  Основная часть ваших данных, включая конфигурацию заданий и прошлые записи, хранится в каталоге /jobs.
+  В каталоге /jobs хранится информация, относящаяся ко всем заданиям, которые вы создаете в Jenkins.
+  Структура каталога выглядит следующим образом:
+```
+#${JENKINS_HOME}:
 
-builds/*/archive (archived artifacts)
+  /jobs/*
+    builds (build records)
+    builds/*/archive (archived artifacts)
+    workspace (checked out workspace)
+```
 
-workspace (checked out workspace)
+  В каталоге /builds хранятся записи о прошлых сборках.
+  Поэтому если вас интересует ТОЛЬКО КОНФИГУРАЦИЯ, не делайте резервных копий сборок.
+  Или, возможно, вам нужно хранить записи о сборках, но вы можете позволить себе выбросить архивные артефакты
+  (которые на самом деле являются готовыми двоичными файлами (binaries)).
+  => Вы можете сделать это, исключив builds/*/archive;
+  (!) обратите внимание, что эти артефакты могут быть довольно большими, и их исключение может дать существенную экономию.
 
-The /builds directory stores past build records. So if you're interested in configuration only, don't back up the builds. Or perhaps you need to keep build records but can afford to throw away archived artifacts (which are actually produced binaries). You can do this excluding builds/*/archive; note that these artifacts can be pretty big, excluding them may introduce a substantial savings.
+[!] Обратите внимание, что следующие каталоги содержат биты, которые могут быть легко воссозданы,
+    => поэтому их не нужно включать в резервную копию:
 
-Note that the following directories contain bits that can be easily recreated, so you don't need to include these in the backup:
+## DO NOT BACKUP
+```
+  /war (exploded war)
+  /cache (downloaded tools)
+  /tools (extracted tools)
+```
 
-/war (exploded war)
+  Наконец, каталог workspace содержит файлы, которые вы проверяете (check out) для систем контроля версий.
+  Обычно эти каталоги можно СМЕЛО ВЫБРАСЫВАТЬ.
+  Если вам нужно восстановиться, Jenkins всегда может выполнить чистую проверку (clean checkout),
+  поэтому обычно нет необходимости создавать резервные копии workspace.
 
-/cache (downloaded tools)
 
-/tools (extracted tools)
+Оптимизация №2: Use OS-level Snapshots
 
-Finally, the workspace directory contains the files that you check out for the version control systems. Normally these directories can be safely thrown away. If you need to recover, Jenkins can always perform a clean checkout, so there's usually no need to back up your workspace.
+  Если вам нужна максимальная согласованность (consistency) резервных копий,
+  используйте возможность моментальных снимков (snapshots) в файловой системе.
+  Хотя вы можете создавать резервные копии в реальном времени, их выполнение занимает много времени,
+  => поэтому вы рискуете получить разные данные в разные моменты времени... что может быть или не быть реальной проблемой.
+  Снэпшоты решают эту проблему.
 
-Optimization 2: Use OS-level Snapshots
-If you want maximum consistency in your backups, use the snapshot capability in your file system. Although you can take live backups, they take a long time to run, so you run the risk of taking different data at different time points... which may or may not be a real concern.
-Snapshots solve this problem. Many file systems let you take snapshots, including Linux Logical Volume Manager (LVM) and Solaris ZFS (which also lets you take incremental backups). Some separate storage devices also let you create snapshots at the storage level.
+  Многие файловые системы позволяют делать моментальные снимки, включая
+    + Linux Logical Volume Manager (LVM)
+    + и Solaris ZFS (которая также позволяет делать инкрементные резервные копии).
 
-Now, let's test and restore .
+  Некоторые отдельные устройства хранения также позволяют создавать снэпшоты на уровне хранилища.
 
-Nothing is worse than thinking you have a backup and then when disaster hits, finding out you can't actually recover. So it's worth testing to make sure you have a proper backup.
+  Теперь давайте протестируем и восстановим.
 
-The JENKINS_HOME directory is "relocate-able" – meaning you can extract it anywhere and it still works. Here’s the easiest way to test a restoration:
+#! Проверять работоспособность бэкапов обязательно нужно, дабы не быть застигнутым врасплох, когда бэкап действительно потребуется.
 
-Copy the backup Home directory somewhere on your machine, such as ~/backup_test
+(!) Каталог JENKINS_HOME является «перемещаемым»!
+    Это значит, что вы можете извлечь его в любое место, и он все равно будет работать.
 
-Set JENKINS_HOME as an environment property and point to backup_test; for example, export JENKINS_HOME=~/backup_test
+# Вот самый простой способ проверить восстановление:
 
-Run java -jar jenkins.war --httpPort=9999
+  1) Скопируйте резервный каталог Home куда-нибудь на машину,
+     например ~/backup_test.
 
-This sequence of commands will pick up the new JENKINS_HOME with the backup_test directory. You can use this instance of Jenkins to make sure your backup works. Be sure to specify a random HTTP port so you don’t collide with the real one – otherwise the server won’t start!
+  2) Установите JENKINS_HOME в качестве свойства окружения и укажите на backup_test;
 
-While Jenkins is not difficult to set up or configure, you will get better results, support more projects and save administration time if you know the tips, tricks and optimal settings that can make your installation function most effectively.
+# например,
 
-This is just one tip, but I share several more in our article, "7 Ways to Optimize Jenkins". If you prefer slides and my voice, we also have the recorded webinar on the CloudBees resource page, as well as a list of the top questions asked by attendees during the webinar. I'll also be in the San Francisco Bay area on April 5th running a training course for those who want to controller Jenkins .
+```
+export JENKINS_HOME=~/backup_test
+```
 
-If there are other topics related to Jenkins that you'd like me to address, feel free to leave a comment!
+
+  3) Run
+```
+java -jar jenkins.war --httpPort=9999
+```
+
+Эта последовательность команд подхватит новый JENKINS_HOME с каталогом backup_test.
+Вы можете использовать этот экземпляр Jenkins, чтобы убедиться, что ваша резервная копия работает.
+
+(!) Не забудьте указать случайный HTTP-порт, чтобы не столкнуться с реальным - иначе сервер не запустится!
+
+  Хотя Jenkins несложно установить или настроить, вы
+    + получите лучшие результаты,
+    + поддержите больше проектов и
+    + сэкономите время администрирования,
+  если будете знать советы, хитрости и оптимальные настройки, которые позволят вашей установке работать наиболее эффективно.
+

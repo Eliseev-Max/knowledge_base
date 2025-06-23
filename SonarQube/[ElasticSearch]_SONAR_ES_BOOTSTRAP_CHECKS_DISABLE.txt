@@ -1,0 +1,17 @@
+Переменная окружения SonarQube: SONAR_ES_BOOTSTRAP_CHECKS_DISABLE
+Для чего нужна
+
+[sources:]
+  1) "Launching A SonarQube Docker Container": https://www.bundleapps.io/blog/sonarqube-docker-guide
+  2) https://stackoverflow.com/questions/61229621/sonarqube-container-on-azure-webapp-and-sqlazure
+
+Добавление переменной окружения ```-e SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true``` при запуске контейнера sonarqube:community
+  отключит некоторые проверки, которые SonarQube на производственном уровне считает необходимыми для интеграции с ElasticSearch
+  и которые в противном случае могут сломать вашу сборку.
+
+  Как правило, это проверки памяти, чтобы убедиться, что ее достаточно для нормальной работы.
+
+[!] При использовании ВНЕШНЕЙ БАЗЫ ДАННЫХ (PostgreSQL) эта настройка БУДЕТ ИГНОРИРОВАТЬСЯ.
+    Проверки Bootstrap будут выполняться КАЖДЫЙ РАЗ и, вероятно, приведут к неудаче сборки.
+    О том, как настроить систему для работы с внешней базой данных, читайте в шагах по устранению неполадок.
+#-> https://www.bundleapps.io/blog/sonarqube-docker-guide#troubleshooting

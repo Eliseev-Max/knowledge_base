@@ -1,0 +1,97 @@
+Back Up and Share Docker Volumes
+
+[sources:]
+  1) "Back Up and Share Docker Volumes with This Extension": https://www.docker.com/blog/back-up-and-share-docker-volumes-with-this-extension/
+  2) "Back up, restore, or migrate data volumes": https://docs.docker.com/engine/storage/volumes/#back-up-restore-or-migrate-data-volumes
+#[more: https://docs.docker.com/engine/storage/volumes/#share-data-between-machines]
+  3) https://gist.github.com/etoosamoe/4209ff54452ed724b609d554b0cb2aa0
+
+
+  Когда вам нужно
+    * создать резервную копию,
+    * восстановить данные
+    * или перенести данные с одного хоста Docker на другой,
+  volumes, как правило, являются лучшим выбором.
+
+  Вы можете остановить контейнеры, использующие том,
+  а затем создать резервную копию каталога volume
+  (например, /var/lib/docker/volumes/<volume-name>).
+
+  Другие альтернативы, такие как bind mounts, зависят от наличия в файловой системе хост-машины определенной структуры каталогов,
+  например /tmp/source в UNIX-системах, таких как Linux и macOS,
+  и C:/Users/John в Windows.
+
+  Обычно, если вы хотите создать резервную копию тома данных, вы
+  1) запускаете новый контейнер, используя volume, который вы хотите забэкапить,
+  2) затем выполняете команду tar, чтобы создать архив содержимого volume:
+
+---[COMMAND]---
+docker run --rm \
+      -v "$VOLUME_NAME":/backup-volume \
+      -v "$(pwd)":/backup \
+      busybox \
+      tar -zcvf /backup/my-backup.tar.gz /backup-volume
+---
+
+  Чтобы восстановить volume с существующей резервной копией (backup),
+  можно запустить новый контейнер, который
+  1) смонтирует целевой volume
+  2) выполнит команду tar для распаковки архива на целевой volume.
+
+Существует множество bash-скриптов, которые могут помочь создать backup томов, например,
+этот скрипт от капитана Docker Брета Фишера: https://github.com/BretFisher/docker-vackup
+
+# С помощью этого сценария можно выполнить более простую задачу - ./vackup export my-volume backup.tar.gz.
+
+Хотя подобные скрипты - это совершенно правильные подходы, команда разработчиков расширений задумалась:
+  "А что, если интегрировать этот инструмент в Docker Desktop для улучшения работы разработчиков?"
+  Интересно, что все началось с простой демонстрации всего за день до прямого эфира на потоковом шоу Брета!
+(https://www.youtube.com/watch?v=BHKp7Sc3VVc)
+
+docker run --rm -it -v keeper_build_jenkins_home:/src -v $(pwd):/backup ubuntu tar -zcvf /backup/jenkins_home.tar.gz /src
+
+
+####
+[Stackoverflow] Кратко о процедурах резервного копирования/восстановления данных docker volumes
+#(https://stackoverflow.com/questions/21597463/how-to-port-data-only-volumes-from-one-host-to-another)
+
+1. Резервное копирование
+---
+sudo docker run --rm --volumes-from DATA -v $(pwd):/backup busybox tar cvf /backup/backup.tar /data
+---
+
+  --rm
+    = remove the container when it exits
+
+  --volumes-from DATA
+    = attach to the volumes shared by the DATA container
+
+  -v $(pwd):/backup
+    = bind mount the current directory into the container;
+      (место, КУДА мы пишем tar-файл)
+
+  busybox
+    = a small simpler image - good for quick maintenance
+
+  tar cvf /backup/backup.tar /data
+    = создает несжатый tar-файл со всеми файлами в каталоге /data
+
+2. Восстановление
+
+  2.1 # create a new data container
+---
+$ sudo docker create -v /data --name DATA2 busybox true
+---
+
+  2.2 # untar the backup files into the new container᾿s data volume
+---
+$ sudo docker run --rm --volumes-from DATA2 -v $(pwd):/backup busybox tar xvf /backup/backup.tar
+data/
+data/sven.txt
+---
+
+  2.3 # сравните с оригинальным контейнером
+---
+$ sudo docker run --rm --volumes-from DATA -v `pwd`:/backup busybox ls /data
+sven.txt
+---

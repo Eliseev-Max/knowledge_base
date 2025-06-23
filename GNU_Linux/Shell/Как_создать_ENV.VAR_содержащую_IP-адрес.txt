@@ -1,0 +1,30 @@
+Как создать переменную среды, содержащую IP-адрес адаптера, установленный через DHCP
+#> https://askubuntu.com/questions/1128587/how-can-i-create-an-environment-variable-that-contains-the-ip-address-of-an-adap
+
+
+Необходимо точно знать имя адаптера (eth0, enp0s3...)
+
+[Скрипт №1]
+
+```
+IP="$(ip addr show enp0s3  | awk '$1 == "inet" { print $2 }' | cut -d/ -f1)"
+export SERVER_IP=${IP}
+```
+
+# можно добавить это в /etc/bash.bashrc
+
+[2]
+
+```
+IP=http://"$(ifconfig ens160 | awk '/inet /{print $2}' | cut -f2 -d':')"
+#OR
+IP=http://"$(hostname -I | cut -f1 -d' ')"
+```
+
+[3]
+
+```
+IP=$(hostname -I | awk '{print $1}')
+
+IP=$(ip addr show | grep 'inet' | awk '{print $2}' | cut -d'/' -f1 | head -n 3 | tail -n 1)
+```

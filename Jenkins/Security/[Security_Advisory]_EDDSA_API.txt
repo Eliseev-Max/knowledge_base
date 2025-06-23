@@ -1,0 +1,85 @@
+Jenkins Security Advisory 2025-03-19
+"Проблемы с плагином EDDSA API"
+
+[sources:]
+  1) "EDDSA API": https://plugins.jenkins.io/eddsa-api/
+  2) "Jenkins Security Advisory 2025-03-19": https://www.jenkins.io/security/advisory/2025-03-19/#SECURITY-3404
+
+
+******************************
+* Описание плагина EDDSA API *
+******************************
+
+EDDSA API:= API-плагин для создания пакета net.i2p.crypto:eddsa
+
+OpenJDK > 15 обеспечивает встроенную поддержку подписей EdDSA через Java cryptography API,
+/*
+#(*) "native support for EdDSA": https://bugs.openjdk.org/browse/JDK-8190219
+*/
+(!) однако есть несколько библиотек, которые все еще используют старые библиотеки, требующие этот код НАПРЯМУЮ.
+
+Этот плагин рассматривается как промежуточный вариант,
+чтобы мы могли поставлять одну копию библиотеки, пока потребители мигрируют от нее.
+
+
+Уязвимости обнаружены в следующих продуктах Jenkins:
+  AnchorChain Plugin
+  EDDSA API Plugin
+  Zoho QEngine Plugin
+
+Описание:
+
+```
+Реализация EdDSA в плагине EDDSA API демонстрирует нестабильность подписи 
+
+  SECURITY-3404 / CVE-2020-36843
+  Серьезность (CVSS): Medium
+  Затронутый плагин: eddsa-api
+  Описание:
+Плагин EDDSA API Plugin делает библиотеку EdDSA-Java (ed25519-java) доступной для других плагинов.
+```
+
+EDDSA API Plugin 0.3.0-13.v7cb_69ed68f00 и более ранние версии содержат версию 0.3.0 EdDSA-Java,
+которая демонстрирует податливость подписи и не удовлетворяет свойству SUF-CMA
+# (Strong Existential Unforgeability under Chosen Message Attacks).
+
+(!) Это позволяет злоумышленникам создавать новые валидные подписи, отличные от предыдущих подписей для известного сообщения.
+
+EDDSA API Plugin 0.3.0.1-16.vcb_4a_98a_3531c
+  + встраивает библиотеку EdDSA-Java (ed25519-java) непосредственно в плагин
+  + и добавляет валидацию для предотвращения нестабильности подписи и обеспечения свойства SUF-CMA.
+
+* Affected Versions *
+
+AnchorChain Plugin up to and including 1.0
+EDDSA API Plugin up to and including 0.3.0-13.v7cb_69ed68f00
+Zoho QEngine Plugin up to and including 1.0.29.vfa_cc23396502
+
+* Fix *
+
+EDDSA API Plugin should be updated to version 0.3.0.1-16.vcb_4a_98a_3531c
+Zoho QEngine Plugin should be updated to version 1.0.31.v4a_b_1db_6d6a_f2
+
+# Latest version: 0.3.0.1-19.vc432d923e5ee
+# Before version: 0.3.0.1-16.vcb_4a_98a_3531c
+# Installed version: 0.3.0-4.v84c6f0f4969e
+## Установленная версия - первая версия плагина
+
+# Plugin installation command:
+```
+jenkins-plugin-cli --plugins eddsa-api:0.3.0.1-16.vcb_4a_98a_3531c
+```
+
+  Эти версии содержат исправления описанных выше уязвимостей.
+  Все ПРЕДЫДУЩИЕ версии считаются затронутыми этими уязвимостями, если не указано иное.
+
+```
+jenkins-plugin-cli --plugins eddsa-api:0.3.0.1-19.vc432d923e5ee
+
+>>> Plugin prerequisite not met:
+>>> eddsa-api (0.3.0.1-19.vc432d923e5ee) requires a greater version of Jenkins (2.479.1) than 2.474
+
+jenkins@34b3a62e99e7:/$ jenkins-plugin-cli --plugins eddsa-api:0.3.0.1-16.vcb_4a_98a_3531c
+
+>>> Plugin prerequisite not met:
+>>> eddsa-api (0.3.0.1-16.vcb_4a_98a_3531c) requires a greater version of Jenkins (2.479.1) than 2.474

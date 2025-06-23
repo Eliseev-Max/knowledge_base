@@ -1,0 +1,66 @@
+Understanding NBD: Linux Network Block Device Protocol
+(Понимание NBD: Протокол сетевых блочных устройств Linux)
+
+[source:]
+#-> https://dev.to/noyelankry/understanding-nbd-linux-network-block-device-protocol-406k
+
+
+WHAT IS THE NBD PROTOCOL?
+At its core, the Network Block Device (NBD) protocol enables block-level access to remote storage devices over a network. It allows you to treat a distant disk as if it were right there in front of you, seamlessly extending your local storage capabilities.
+
+So let's dive in!
+
+HOW DOES IT WORK?
+As briefly mentioned in the intro, the protocol works by allowing a client machine to access remote block devices (disks) over a network, as if they were attached locally.
+
+The way I like to think of it: there are three main components - the server part, the client part, and of course the network.
+The client part doesn't have to be fully implemented in the kernel. It can be done with help of a userspace program, which could be a more maintainble alternative to writing a linux kernel driver (and having to update it to ensure it's compatible with the different kernel versions).
+
+So whenever a program tries to access the device, the kernel driver forwards the request to the server --> requests are handled by a userspace program.
+The userspace process communicates with the client via conventional sockets and accesses the storage via a conventional file system interface.
+
+Now we're ready for more details!
+
+Before using NBD, you need to ensure that the NBD kernel module is loaded. In most Linux distributions, the NBD kernel module is available by default, but it might not be loaded automatically - to load it run the command:
+sudo modprobe nbd
+
+The communication between the client and the server hosting the remote block device follows a straightforward interaction process:
+
+  1. Client Requests Connection: The client initiates a request to connect to the NBD server, specifying the network address (IP) and the port on which the server is listening.
+
+  2. Handshake: Once the connection is established, a simple handshake process takes place to negotiate the protocol version and other parameters between the client and the server.
+
+  3. Device Export: The NBD server presents a list of available remote block devices to the client, from which the client can choose the one it wants to use.
+
+  4. NBD Negotiation: The client and server negotiate the features and options they will support during the session. This includes things like read-only mode, data transmission block size, and other protocol-specific settings and configurations.
+     Those can be defined by using the ioctl system call with different flags. After configuring the options - use the blocking system call ioctl(nbd_dev, NBD_DO_IT)
+     Treat the NBD device like any other block device in Linux. You can format it with a filesystem (e.g., ext4) and mount it to a mount point using standard commands:
+```
+sudo mkfs.ext4 /dev/nbdX
+sudo mount /dev/nbdX /mnt
+```
+
+  5. Block Data Transmission: With the setup complete, the client can now read and write data to the remote block device. When the client requests data, the NBD server responds with the appropriate data blocks. Similarly, when the client writes data, the server stores it in the remote block device.
+
+  6. Closing the Connection: When the data transfer is complete or when the client no longer needs the remote block device, it can close the NBD connection, freeing up network resources.
+Please note that if the device is mounted, it should be unmounted by using this command sudo umount /dev/nbdX before disconnecting the device. Otherwise you might have issues trying to re-connect the next time you use it.
+
+As you can see, the NBD protocol is designed to be simple and efficient, focusing on block-level data transfer rather than file-level access. It does not impose a specific filesystem on the remote block device, allowing for flexibility in how the data is stored and accessed remotely.
+
+
+*******************************************************
+* SO WHAT ARE THE USE CASES OF THIS MAGICAL PROTOCOL? *
+*******************************************************
+
+  * NBD facilitates the seamless booting of diskless systems by enabling them to retrieve their operating system and data from a remote storage device.
+
+  * Virtualization environments also benefit from NBD, as it allows virtual machines to utilize disk images located on remote servers, optimizing resource allocation and management.
+
+  * NBD can be leveraged in data cloning and backup tasks, enabling the remote creation and imaging of disks for efficient data replication and recovery.
+
+  * NBD fosters centralized storage systems, allowing multiple machines to access shared disk images over the network, streamlining data access and management.
+
+
+If you want to implement NBD in your program, I recommend reading this document for more detailed info about the protocol.
+
+Let me know if it helped or if you have any questions! We can continue to explore it further together!

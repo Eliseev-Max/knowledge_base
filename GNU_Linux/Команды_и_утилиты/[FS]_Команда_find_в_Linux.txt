@@ -1,3 +1,0 @@
-{https://losst.pro/komanda-find-v-linux}
-{https://man7.org/linux/man-pages/man1/find.1.html}
-{https://linux.die.net/man/1/find}

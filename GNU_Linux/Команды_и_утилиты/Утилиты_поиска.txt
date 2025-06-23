@@ -68,10 +68,170 @@ $ - поиск вхождений в конце строки
 Цветной вывод в grep: --color
 	grep --color root /etc/passwd
 
-find
-https://man7.org/linux/man-pages/man1/find.1.html
-https://linux.die.net/man/1/find
-"Библиотека сайта rus-linux.net. Команда find": https://rus-linux.net/MyLDP/consol/hdrguide/rusman/find.htm
-"15 супер полезных примеров команды find в Linux": https://habr.com/ru/companies/first/articles/593669/
 
-locate
+########
+# find #
+########
+
+[sources:]
+  1) https://man7.org/linux/man-pages/man1/find.1.html
+  2) https://linux.die.net/man/1/find
+  3) "Библиотека сайта rus-linux.net. Команда find": https://rus-linux.net/MyLDP/consol/hdrguide/rusman/find.htm
+  4) "15 супер полезных примеров команды find в Linux": https://habr.com/ru/companies/first/articles/593669/
+  5) "Команда find в Linux": https://losst.pro/komanda-find-v-linux
+
+find = поиск файлов в иерархии каталогов
+
+[Synopsis]
+
+```
+find [-H] [-L] [-P] [-D debugopts] [-Olevel] [path...] [expression]
+```
+#(4):
+```
+find [directory to search] [options] [expression]
+# всё, что в квадратных скобках, указывать необязательно.
+```
+'''
+  directory to search (папка поиска)
+    = это расположение, с которого вы хотите начать поиск.
+      # Поиск по умолчанию рекурсивный и начинается с текущего расположения.
+
+  options (опции)
+    - содержит указание типа поиска:
+      * по имени,
+      * типу файла,
+      * времени изменения
+      ...и так далее
+    #(!) тут может быть более 50 вариантов.
+
+  expression (выражение)
+    - содержит поисковый запрос.
+      :: Если вы ищете файл по имени:
+         -> параметр expression должен содержать имя файла.
+      :: Если ищете файлы с именем, соответствующим заданному шаблону:
+         -> поисковое выражение — это шаблон.
+'''
+
+
+GNU find ищет в дереве каталогов, корнем которого является каждое заданное имя файла,
+оценивая заданное выражение слева направо в соответствии с правилами старшинства
+#(см. раздел ОПЕРАТОРЫ),
+пока не будет известен результат (левая часть ложна для операций and, истинна для or),
+после чего find переходит к следующему имени файла.
+
+Если вы используете find в среде, где важна безопасность
+#(например, если вы используете его для поиска каталогов, которые могут быть записаны другими пользователями),
+=> вам следует прочитать главу "Security Considerations" документации findutils,
+   которая называется "Finding Files" и поставляется вместе с findutils.
+
+[!] См. документацию Findutils: https://www.gnu.org/software/findutils/manual/html_mono/find.html
+
+[-H, -L, -P options]
+  Опции -H, -L и -P управляют обработкой символических ссылок.
+  Аргументы командной строки, следующие ЗА НИМИ, воспринимаются как имена файлов или каталогов,
+  которые нужно проверить, вплоть до первого аргумента,
+    -> начинающегося с '-',
+    -> или аргумента '('
+    -> или '!'
+  Этот аргумент и все последующие аргументы воспринимаются как выражение, описывающее то, что нужно искать.
+
+  Если пути не указаны, используется текущий каталог.
+
+  Если выражение не задано, используется выражение -print
+(!) но в любом случае вместо него лучше использовать -print0
+
+Пять "настоящих" опций -H, -L, -P, -D и -O должны появляться ПЕРЕД ПЕРВЫМ ИМЕНЕМ ПУТИ,
+# если вообще появляются.
+
+Двойное тире -- также может использоваться для указания на то, что все оставшиеся аргументы не являются опциями
+(хотя если вы используете подстановочные знаки в списке начальных точек, убедитесь,
+что все начальные точки начинаются либо с './', либо с '/', это будет безопаснее).
+
+-P
+Never follow symbolic links. This is the default behaviour. When find examines or prints information a file, and the file is a symbolic link, the information used shall be taken from the properties of the symbolic link itself.
+
+-L
+
+Follow symbolic links. When find examines or prints information about files, the information used shall be taken from the properties of the file to which the link points, not from the link itself (unless it is a broken symbolic link or find is unable to examine the file to which the link points). Use of this option implies -noleaf. If you later use the -P option, -noleaf will still be in effect. If -L is in effect and find discovers a symbolic link to a subdirectory during its search, the subdirectory pointed to by the symbolic link will be searched.
+
+When the -L option is in effect, the -type predicate will always match against the type of the file that a symbolic link points to rather than the link itself (unless the symbolic link is broken). Using -L causes the -lname and -ilname predicates always to return false.
+-H
+Do not follow symbolic links, except while processing the command line arguments. When find examines or prints information about files, the information used shall be taken from the properties of the symbolic link itself. The only exception to this behaviour is when a file specified on the command line is a symbolic link, and the link can be resolved. For that situation, the information used is taken from whatever the link points to (that is, the link is followed). The information about the link itself is used as a fallback if the file pointed to by the symbolic link cannot be examined. If -H is in effect and one of the paths specified on the command line is a symbolic link to a directory, the contents of that directory will be examined (though of course -maxdepth 0 would prevent this).
+
+If more than one of -H, -L and -P is specified, each overrides the others; the last one appearing on the command line takes effect. Since it is the default, the -P option should be considered to be in effect unless either -H or -L is specified.
+GNU find frequently stats files during the processing of the command line itself, before any searching has begun. These options also affect how those arguments are processed. Specifically, there are a number of tests that compare files listed on the command line against a file we are currently considering. In each case, the file specified on the command line will have been examined and some of its properties will have been saved. If the named file is in fact a symbolic link, and the -P option is in effect (or if neither -H nor -L were specified), the information used for the comparison will be taken from the properties of the symbolic link. Otherwise, it will be taken from the properties of the file the link points to. If find cannot follow the link (for example because it has insufficient privileges or the link points to a nonexistent file) the properties of the link itself will be used.
+
+When the -H or -L options are in effect, any symbolic links listed as the argument of -newer will be dereferenced, and the timestamp will be taken from the file to which the symbolic link points. The same consideration applies to -newerXY, -anewer and -cnewer.
+
+The -follow option has a similar effect to -L, though it takes effect at the point where it appears (that is, if -L is not used but -follow is, any symbolic links appearing after -follow on the command line will be dereferenced, and those before it will not).
+
+-D debugoptions
+Print diagnostic information; this can be helpful to diagnose problems with why find is not doing what you want. The list of debug options should be comma separated. Compatibility of the debug options is not guaranteed between releases of findutils. For a complete list of valid debug options, see the output of find -D help. Valid debug options include
+help
+Explain the debugging options
+
+tree
+
+Show the expression tree in its original and optimised form.
+
+stat
+
+Print messages as files are examined with the stat and lstat system calls. The find program tries to minimise such calls.
+
+opt
+
+Prints diagnostic information relating to the optimisation of the expression tree; see the -O option.
+
+rates
+
+Prints a summary indicating how often each predicate succeeded or failed.
+
+-Olevel
+Enables query optimisation. The find program reorders tests to speed up execution while preserving the overall effect; that is, predicates with side effects are not reordered relative to each other. The optimisations performed at each optimisation level are as follows.
+
+
+[EXAMPLES]
+#https://habr.com/ru/companies/first/articles/593669/
+
+```
+find . -type f -name myfile
+```
+#= команда выполнит поиск ФАЙЛА (именно файла, не папки) с именем myfile в текущей папке и подпапках.
+  - опция -type f
+      = сужает поиск до файлов.
+  - Точка (.)
+      = указывает на текущую папку.
+
+```
+# поиск файлов и папок по имени:
+find . -name SEARCH_NAME
+```
+
+```
+# поиск папок по имени:
+find . -type d -name SEARCH_NAME
+```
+
+```
+# поиск без учёта регистра:
+find . -type f -iname SEARCH_NAME
+```
+# работает для файлов (-type f) и для папок (-type d)
+
+```
+# Поиск файлов по расширению
+# например, файлов C++
+find . -type f -name "*.cpp"
+```
+
+[!] При работе с командой find ВСЕГДА заключайте поисковое выражение в двойные кавычки.
+>> Оболочка распознает подстановочный знак *
+>> и заменит его всеми файлами в текущей папке, чьи имена заканчиваются на .cpp.
+
+!!!! "Поисковой_запрос"
+
+
+##########
+# locate #
+##########

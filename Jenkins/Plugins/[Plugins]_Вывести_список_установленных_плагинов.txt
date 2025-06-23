@@ -16,6 +16,12 @@ Jenkins.instance.pluginManager.plugins.each{
 }
 */
 
+1.1) Вывести список плагинов для plugins.txt
+Jenkins.instance.pluginManager.plugins.each{
+  plugin -> 
+    println ("${plugin.getShortName()}:${plugin.getVersion()}")
+}
+
 2) wget http://<jenkins>/pluginManager/api/xml?depth=1&xpath=/*/*/shortName|/*/*/version&wrapper=plugins
 
 Запрос с помощью curl через Web API:

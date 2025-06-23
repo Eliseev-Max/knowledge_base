@@ -1,0 +1,73 @@
+Изменение порта SSH в операционной системе Linux Ubuntu
+
+[sources:]
+  1) "Change the SSH Port in the Linux Ubuntu operating system": https://docs.rackspace.com/docs/change-the-ssh-port-in-the-linux-ubuntu-operating-system
+  2) "SSH default port not changing (Ubuntu 22.10 and later)": https://askubuntu.com/questions/1439461/ssh-default-port-not-changing-ubuntu-22-10-and-later
+  3) "How to run the SSH server on a port other than 22": https://askubuntu.com/questions/264046/how-to-run-the-ssh-server-on-a-port-other-than-22
+  4) "How to change the SSH server port on Ubuntu?": https://serverfault.com/questions/1159599/how-to-change-the-ssh-server-port-on-ubuntu
+
+
+1. Отредактировать файл конфигурации демона SSH
+  1.1. Открыть конфигурационный файл /etc/ssh/sshd_config в текстовом редакторе
+       # в примере используется vi
+
+  1.2. С помощью клавиш со стрелками прокрутить файл до следующего текста:
+```
+#Port 22
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+```
+
+  1.3. Переместить курсор в строку под строкой #Port 22 и нажать клавишу i,
+       чтобы войти в режим вставки (Insert Mode).
+
+  1.4. Нажать Enter, чтобы вставить новую строку,
+       и ввести Port <Specified Port Number>.
+       # Порт 2021 - это новый порт SSH в следующем примере:
+```
+#Port 22
+Port 2021
+#AddressFamily any
+#ListenAddress 0.0.0.0
+#ListenAddress ::
+```
+
+  1.5. Нажать клавишу Esc, чтобы выйти из режима вставки,
+       и ввести :wq, чтобы сохранить изменения и закрыть файл.
+
+  2. Перезапустить демон SSH
+```
+sudo systemctl restart ssh
+```
+
+  3. Проверить привязку к новому порту
+```
+ss -tlpn | grep ssh
+```
+
+  4. Обновить файервол (брандмауэр)
+     Обновите брандмауэр, чтобы убедиться, что система разрешает входящие подключения к новому указанному порту.
+     Введите следующую команду с новым портом:
+```
+root@server-02:~# ufw allow 2021/tcp
+Rules updated
+Rules updated (v6)
+```
+
+  +) Для большей уверенности можно попытаться войти на сервер по SSH:
+```
+...
+>>> ssh: connect to host 104.239.174.157 port 22: Connection refused
+```
+
+
+#[!] SSHd теперь использует активацию на основе сокетов Ubuntu 22.10 или более поздней версии.
+# Подробнее об этом изменении читайте здесь: https://discourse.ubuntu.com/t/sshd-now-uses-socket-based-activation-ubuntu-22-10-and-later/30189/9
+
+"""
+# Параметры Port и ListenAddress не используются, если sshd активирован через сокет,
+# который теперь используется по умолчанию в Ubuntu. См. sshd_config(5)
+# -> https://linux.die.net/man/5/sshd_config
+# и /usr/share/doc/openssh-server/README.Debian.gz для подробностей.
+"""

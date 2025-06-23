@@ -1,0 +1,2 @@
+Анализ и измерение качества программного кода с помощью SonarQube
+(https://o2k.ru/blog/analiz-kachestva-koda-s-pomoshchyu-sonarqube)

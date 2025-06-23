@@ -1,0 +1,7 @@
+Berkeley Packet Filter (BPF)
+
+[sources:]
+  1) "Berkeley Packet Filter": https://en.wikipedia.org/wiki/Berkeley_Packet_Filter#:~:text=The%20Berkeley%20Packet%20Filter%20(BPF,at%20the%20operating%20system%20level.
+  2) "Understanding of BPF": https://unix.stackexchange.com/questions/699500/understanding-of-bpf
+  3) "BPF для самых маленьких, часть нулевая: classic BPF": https://habr.com/ru/articles/493880/
+

@@ -1,0 +1,47 @@
+docker container update (docker update)
+
+[source:]
+https://docs.docker.com/reference/cli/docker/container/update/
+
+
+  Команда docker update динамически обновляет конфигурацию контейнера.
+  С помощью этой команды можно предотвратить потребление контейнерами слишком большого количества ресурсов с хоста Docker.
+
+  С помощью одной команды можно установить ограничения
+    - как для одного контейнера,
+    - так и для многих
+      # Чтобы указать более одного контейнера, укажите список имен || идентификаторов контейнеров, разделенных пробелами.
+
+[!] За исключением опции --kernel-memory,
+    вы можете указать эти опции для запущенного или остановленного контейнера.
+(*) На ядре версии старше 4.6 можно обновить параметр --kernel-memory ТОЛЬКО НА ОСТАНОВЛЕННОМ контейнере
+    или на работающем контейнере с ИНИЦИАЛИЗИРОВАННОЙ ПАМЯТЬЮ ЯДРА.
+
+[!] Команды docker update и docker container update не поддерживаются для контейнеров Windows.
+
+
+*********
+* Опции *
+*********
+
+--blkio-weight		Block IO (relative weight), between 10 and 1000, or 0 to disable (default 0)
+--cpu-period		Limit CPU CFS (Completely Fair Scheduler) period
+--cpu-quota		Limit CPU CFS (Completely Fair Scheduler) quota
+--cpu-rt-period		API 1.25+ Limit the CPU real-time period in microseconds
+--cpu-rt-runtime		API 1.25+ Limit the CPU real-time runtime in microseconds
+-c, --cpu-shares		CPU shares (relative weight)
+--cpus		API 1.29+ Number of CPUs
+--cpuset-cpus		CPUs in which to allow execution (0-3, 0,1)
+--cpuset-mems		MEMs in which to allow execution (0-3, 0,1)
+-m, --memory		Memory limit
+--memory-reservation		Memory soft limit
+--memory-swap		Swap limit equal to memory plus swap: -1 to enable unlimited swap
+--pids-limit		API 1.40+ Tune container pids limit (set -1 for unlimited)
+--restart		Restart policy to apply when a container exits
+
+
+***********
+* Примеры *
+***********
+
+#-> https://docs.docker.com/reference/cli/docker/container/update/#examples

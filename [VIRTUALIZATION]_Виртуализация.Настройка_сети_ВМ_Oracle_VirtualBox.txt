@@ -1,0 +1,11 @@
+Виртуализация. Настройка сети виртуальной машины Oracle VirtualBox
+
+[sources:]
+1) "Основы виртуализации (обзор)": https://habr.com/ru/articles/657677/
+2) "VirtualBox: виртуальная локальная сеть, маршрутизация в Linux": https://habr.com/ru/articles/743950/
+3) Лиз Райс "Безопасность контейнеров. Фундаментальный подход к защите контейнеризированных приложений", 2021
+   Глава 5. "Виртуальные машины" (с. 85)
+
+4) "Virtual Networking": https://www.virtualbox.org/manual/topics/networkingdetails.html
+5) "Настройка сети в VirtualBox": https://rus-linux.net/MyLDP/vm/VirtualBox-networking.html
+6) "Настройка сети VirtualBox": https://help.reg.ru/support/vydelennyye-servery-i-dc/vmware-virtualnyy-data-tsentr/sozdaniye-i-nastroyka-virtualnykh-mashin/nastroyka-seti-virtualbox#0

@@ -1,0 +1,110 @@
+[DeepSeek]
+Настроить взаимодействие Jenkins и SonarQube, запущенных в контейнерах на одном хосте, можно следующим образом:
+
+### 1. Запуск контейнеров с правильными параметрами
+   - Оба контейнера должны быть в одной сети (лучше создать пользовательскую сеть Docker).
+   - SonarQube должен быть доступен по имени хоста (например, sonarqube).
+
+#### Пример docker-compose.yml:
+version: '3'
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_data:/var/jenkins_home
+    networks:
+      - sonar_jenkins_net
+
+  sonarqube:
+    image: sonarqube:community
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+    networks:
+      - sonar_jenkins_net
+
+volumes:
+  jenkins_data:
+  sonarqube_data:
+  sonarqube_extensions:
+
+networks:
+  sonar_jenkins_net:
+    driver: bridge
+
+'''
+#[!] переменная окружения `SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true` отключит некоторые проверки,
+#    которые SonarQube на производственном уровне считает необходимыми для интеграции с ElasticSearch
+#    и которые в противном случае могут сломать вашу сборку.
+
+# Как правило, это проверки памяти, чтобы убедиться, что ее достаточно для нормальной работы.
+!!! НЕ ОПРЕДЕЛЯТЬ ЭТУ ПЕРЕМЕННУЮ ПРИ РАЗВЁРТЫВАНИИ В PRODUCTION!!!
+
+[!] При использовании ВНЕШНЕЙ БАЗЫ ДАННЫХ (PostgreSQL) эта настройка БУДЕТ ИГНОРИРОВАТЬСЯ.
+    Проверки Bootstrap будут выполняться КАЖДЫЙ РАЗ и, вероятно, приведут к неудаче сборки.
+    О том, как настроить систему для работы с внешней базой данных, читайте в шагах по устранению неполадок.
+'''
+
+### 2. Настройка SonarQube
+   - После запуска SonarQube (docker-compose up -d) откройте http://localhost:9000.
+   - Войдите (логин admin, пароль admin по умолчанию).
+   - Смените пароль и создайте токен для Jenkins:
+     - My Account → Security → Generate Token.
+   - Запомните токен (он понадобится для Jenkins).
+
+### 3. Настройка Jenkins
+   - Установите плагины:
+     - SonarQube Scanner (через Manage Jenkins → Plugins).
+     - Docker Pipeline (если используется Pipeline).
+   - Добавьте SonarQube в Jenkins:
+     - Manage Jenkins → System → SonarQube servers:
+       - Имя: SonarQube
+       - URL: http://sonarqube:9000 (используется имя контейнера!)
+       - Добавьте токен (из шага 2) в качестве "Secret text" в Credentials.
+   - Настройте SonarScanner:
+     - Manage Jenkins → Tools → SonarQube Scanner:
+       - Установите автоматическую установку или укажите путь, если сканер уже есть в контейнере.
+
+### 4. Использование в Jenkins Job
+#### Вариант 1: Freestyle Project
+   - В настройках задачи добавьте шаг "Execute SonarQube Scanner".
+   - Укажите параметры анализа (либо через sonar-project.properties, либо вручную):
+  
+   sonar.projectKey=my-project
+   sonar.projectName=My Project
+   sonar.sources=src
+   sonar.java.binaries=target/classes
+   
+#### Вариант 2: Pipeline
+pipeline {
+    agent any
+    stages {
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('SonarQube') { // Название сервера из настроек Jenkins
+                    sh 'mvn clean verify sonar:sonar' // Для Maven
+                    // Или для SonarScanner:
+                    // sh 'sonar-scanner -Dsonar.projectKey=my-project -Dsonar.sources=src'
+                }
+            }
+        }
+    }
+}
+### 5. Проверка связи
+   - Запустите задачу в Jenkins.
+   - Результаты анализа появятся в SonarQube: http://localhost:9000.
+
+### Важные моменты
+- Имена контейнеров: Внутри Docker-сети контейнеры доступны по именам сервисов (например, sonarqube).
+- Память: SonarQube требует много RAM (минимум 2-4 ГБ), иначе может не запуститься.
+- Проксирование: Если хост доступен извне, настройте SONARQUBE_URL в Jenkins с учетом внешнего URL.
+
+Если что-то не работает, проверьте логи контейнеров:
+docker logs <container_name>

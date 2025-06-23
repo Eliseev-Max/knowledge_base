@@ -1,0 +1,171 @@
+tree
+
+[sources:]
+  1) "tree(1) - Linux man page": https://linux.die.net/man/1/tree
+  2) "OpenNet. tree": https://www.opennet.ru/man.shtml?topic=tree&category=1&russian=2
+  3) "tree Command in Linux with Examples": https://www.geeksforgeeks.org/tree-command-unixlinux/
+
+
+tree -  список содержимого каталогов в древовидном формате.
+
+Synopsis
+```
+tree [-adfghilnopqrstuvxACDFNS] \
+     [-L level [-R]] \
+     [-H baseHREF] \
+     [-T title] \
+     [-o filename] \
+     [--nolinks] \
+     [-P pattern] \
+     [-I pattern] \
+     [--inodes] \
+     [--device] \
+     [--noreport] \
+     [--dirsfirst] \
+     [--version] \
+     [--help] \
+     [--filelimit #] \
+     [directory ...]
+```
+
+Tree - это программа рекурсивного листинга каталогов, которая выводит листинг файлов с глубоким отступом.
+
++ Поддерживается цвет, как и в dircolors, если установлена переменная окружения LS_COLORS,
+  вывод осуществляется на tty и используется флаг -C.
+
+БЕЗ АРГУМЕНТОВ tree перечисляет файлы в текущем каталоге.
+Если указаны аргументы каталога, tree по очереди перечисляет все файлы и/или каталоги, находящиеся в указанных каталогах.
+
+По завершении перечисления всех найденных файлов/каталогов tree возвращает общее количество перечисляемых файлов и/или каталогов.
+
+По умолчанию, когда встречается символическая ссылка, путь, на который ссылается символическая ссылка,
+выводится после имени ссылки в формате:
+'''
+name -> real-path
+'''
+
+
+*********
+* Опции *
+*********
+
+  -a
+    = Печатаются все файлы.
+      По умолчанию tree не печатает скрытые файлы (те, что начинаются с точки '.').
+      Ни в коем случае tree не печатает конструкции файловой системы '.' (текущий каталог) и '.' (предыдущий каталог).
+
+  -d
+    = Перечислите только директории.
+
+  -f
+    = отобразить полный префикс пути для каждого файла
+
+  -i
+    = Заставляет дерево не печатать строки с отступами.
+      Полезно использовать вместе с опцией -f.
+
+  -l
+    = следовать по символическим ссылкам, если они указывают на каталоги, как если бы они были каталогами.
+      Символьные ссылки, которые приводят к рекурсии, при обнаружении избегаются.
+
+  -x
+    = Оставайтесь только в текущей файловой системе. Ala find -xdev.
+
+  -P pattern
+    = List only those files that match the wild-card pattern. Note: you must use the -a option to also consider those files beginning with a dot '.' for matching. Valid wildcard operators are '*' (any zero or more characters), '?' (any single character), '[...]' (any single character listed between brackets (optional - (dash) for character range may be used: ex: [A-Z]), and '[^...]' (any single character not listed in brackets) and '|' separates alternate patterns.
+
+  -I pattern
+    = Do not list those files that match the wild-card pattern.
+
+  --noreport
+    = Omits printing of the file and directory report at the end of the tree listing.
+
+  -p
+    = Print the file type and permissions for each file (as per ls -l).
+
+  -s
+    = Print the size of each file in bytes along with the name.
+
+  -h
+    = Выведите размер каждого файла, но в более удобном для восприятия виде,
+      например, добавив букву размера для
+      - килобайтов (K),
+      - мегабайтов (M),
+      - гигабайтов (G),
+      - террабайтов (T),
+      - петабайтов (P)
+      - и экзабайтов (E).
+
+  -u
+    = Print the username, or UID # if no username is available, of the file.
+
+  -g
+    Print the group name, or GID # if no group name is available, of the file.
+
+  -D
+    = Выведите дату последнего изменения для перечисленных файлов.
+
+  --inodes
+    = Prints the inode number of the file or directory
+
+  --device
+    = Prints the device number to which the file or directory belongs
+
+  -F
+    = Добавьте '/' для каталогов, '=' для файлов сокетов, '*' для исполняемых файлов и '|' для FIFO, как в ls -F.
+
+  -q
+    = Print non-printable characters in filenames as question marks instead of the default caret notation.
+
+  -N
+    = Print non-printable characters as is instead of the default caret notation.
+
+  -v
+    = Сортировка вывода по версии.
+
+  -r
+    = Sort the output in reverse alphabetic order.
+
+  -t
+    = Sort the output by last modification time instead of alphabetically.
+
+  --dirsfirst
+    = List directories before files.
+
+  -n
+    = Turn colorization off always, over-ridden by the -C option.
+
+  -C
+    = Turn colorization on always, using built-in color defaults if the LS_COLORS environment variable is not set. Useful to colorize output to a pipe.
+
+  -A
+    = Turn on ANSI line graphics hack when printing the indentation lines.
+
+  -S
+    = Turn on ASCII line graphics (useful when using linux console mode fonts). This option is now equivalent to '--charset=IBM437' and will eventually be depreciated.
+
+  -L <level>
+    = Максимальная глубина отображения дерева каталогов.
+
+  --filelimit #
+    Не спускайтесь по каталогам, содержащим более # записей.
+
+  -R
+    = Рекурсивно пройдите по дереву каталогов каждого уровня (см. опцию -L),
+      и на каждом из них выполните tree снова,
+      добавив '-o 00Tree.html' в качестве новой опции.
+
+  -H baseHREF
+Turn on HTML output, including HTTP references. Useful for ftp sites. baseHREF gives the base ftp location when using HTML output. That is, the local directory may be '/local/ftp/pub', but it must be referenced as 'ftp://hostname.organization.domain/pub' (baseHREF should be 'ftp://hostname.organization.domain'). Hint: don't use ANSI lines with this option, and don't give more than one directory in the directory list. If you wish to use colors via CCS stylesheet, use the -C option in addition to this option to force color output.
+
+  -T title
+Sets the title and H1 header string in HTML output mode.
+
+--charset charset
+Set the character set to use when outputting HTML and for line drawing.
+
+--nolinks
+Turns off hyperlinks in HTML output.
+
+  -o filename
+    = Send output to filename.

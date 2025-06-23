@@ -1,0 +1,8 @@
+Jetpack Compose
+
+[sources:]
+
+1) "Jetpack Compose — сила Android-разработки": https://habr.com/ru/articles/722040/
+2) "Введение в Jetpack Compose": https://metanit.com/kotlin/jetpack/1.1.php
+3) "Введение в Jetpack Compose": https://habr.com/ru/companies/rncb/articles/669374/
+

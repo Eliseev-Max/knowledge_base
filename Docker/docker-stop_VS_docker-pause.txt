@@ -1,0 +1,49 @@
+docker stop VS docker pause
+# The difference between docker container stop and docker container pause
+
+[sources:]
+  1) "pause vs stop in docker": https://stackoverflow.com/questions/51466148/pause-vs-stop-in-docker
+
+
+docker container stop ( == docker stop)
+  отправляет контейнеру (процессу) SIGTERM(termination signal), и, если потребуется, SIGKILL(kill signal)
+
+#["docker container stop"|https://docs.docker.com/reference/cli/docker/container/stop/#options]
+
+
+docker container pause ( == docker pause)
+  отправляет контейнеру (процессу) SIGSTOP (pause signal)
+
+#["docker container pause"|https://docs.docker.com/reference/cli/docker/container/pause/]
+
+
+SIGTERM (Сигнал 15)
+  = это сигнал завершения процесса (termination signal).
+    По умолчанию он завершает процесс, но его также можно перехватить или проигнорировать.
+(*) Намерение состоит в том, чтобы убить процесс (изящно || нет) но сначала дать ему возможность очиститься.
+
+```
+Сигнал SIGTERM - это общий сигнал, используемый для завершения работы программы.
+В отличие от SIGKILL, этот сигнал можно блокировать, обрабатывать и игнорировать.
+Это обычный способ вежливо попросить программу завершить работу.
+По умолчанию команда shell kill генерирует SIGTERM.
+##> https://www.gnu.org/software/libc/manual/html_node/Termination-Signals.html
+```
+
+SIGKILL (Сигнал 9)
+  = сигнал завершения процесса (kill signal).
+#:= директива немедленного завершения процесса.
+    Единственное поведение - немедленно убить процесс.
+    Поскольку процесс не может поймать (перехватить) сигнал, он не может очиститься,
+    и поэтому это сигнал последней надежды.
+
+SIGSTOP
+  = сигнал паузы.
+    Единственное действие - приостановить процесс;
+    сигнал нельзя перехватить или проигнорировать.
+    Оболочка использует паузу (и ее аналог, возобновление по сигналу SIGCONT) для управления заданиями.
+
+
+[more:]
+(*) "The cgroup freezer": https://www.kernel.org/doc/Documentation/cgroup-v1/freezer-subsystem.txt
+(!) "Docker Compose up, down, stop start difference": https://www.geeksforgeeks.org/docker-compose-up-down-stop-start-difference/

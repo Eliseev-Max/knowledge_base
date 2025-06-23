@@ -1,0 +1,299 @@
+Install and Configure SSL Certificates on Jenkins
+
+[sources:]
+[1] "Install SSL Certificates on Jenkins": https://infotechys.com/install-ssl-certificates-on-jenkins/
+[2] "How to Configure SSL on Jenkins Server": https://devopscube.com/configure-ssl-jenkins/
+[3] "Add Custom Trusted CA certificates": https://community.jenkins.io/t/add-custom-trusted-ca-certificates/15361
+
++) "Need to bring CA cert (.crt) into Jenkins Pod with this Chart": https://github.com/jenkinsci/helm-charts/issues/189
+
+
+Jenkins - это сервер автоматизации с открытым исходным кодом, который используется для
+  ● создания,
+  ● тестирования
+  ● и развертывания
+  программных приложений.
+
+
+[Для чего рекомендуется установить SSL-сертификаты на Jenkins]
+  -> защитить связь между сервером и клиентами
+  -> обеспечить доверие между сервером и клиентами
+
+
+[Шаг 1: Генерация самоподписанного SSL Сертификата]
+
+  1) Создадим новую директорию для Jenkins:
+```
+sudo mkdir /etc/ssl/jenkins
+```
+
+  2) Сгенерируем новый самоподписанный SSL-сертификат с помощью команды openssl:
+```
+$ sudo openssl req -newkey rsa:2048 -nodes -keyout /etc/ssl/jenkins/jenkins.key -x509 -days 365 -out /etc/ssl/jenkins/jenkins.crt
+```
+# Эта команда генерирует новый закрытый ключ и самоподписанный SSL-сертификат со сроком действия 365 дней.
+# Закрытый ключ сохраняется в файле -> /etc/ssl/jenkins/jenkins.key,
+# а SSL-сертификат: -> в файле /etc/ssl/jenkins/jenkins.crt.
+
+  3) Убедимся, что сертификат SSL действителен, выполнив следующую команду:
+```
+$ sudo openssl x509 -in /etc/ssl/jenkins/jenkins.crt -noout -text
+```
+# Эта команда отображает подробную информацию о сертификате SSL.
+
+[Шаг 2: Настройте Jenkins на использование самоподписного SSL-сертификата]
+
+  1) Откройте файл конфигурации Jenkins /etc/default/jenkins с помощью текстового редактора:
+
+#for Ubuntu:                sudo vim /etc/default/jenkins
+# for RHEL9 || CentOS9:     sudo vim /etc/sysconfig/jenkins
+
+  2) Добавьте следующую строку в конец файла:
+```
+JENKINS_ARGS="--httpPort=-1 --httpsPort=8083 --httpsCertificate=/etc/ssl/jenkins/jenkins.crt --httpsPrivateKey=/etc/ssl/jenkins/jenkins.key"
+```
+# Эта конфигурация предписывает Jenkins использовать SSL с предоставленным сертификатом и закрытым ключом.
+
+  3) Сохраните и закройте файл.
+  4) Перезапустите службу Jenkins, чтобы изменения вступили в силу:
+```
+$ sudo systemctl restart jenkins
+```
+
+  5) Убедитесь, что Jenkins работает на порту HTTPS, зайдя на https://<ваш сервер-ip>:8083 в веб-браузере.
+
+
+[Шаг 3: Создание несамоподписанного SSL-сертификата]
+
+  1) Сгенерируйте новый закрытый ключ и запрос на подписание сертификата (CSR) с помощью команды openssl:
+```
+$ sudo openssl req -new -newkey rsa:2048 -nodes -keyout jenkins.key -out jenkins.csr
+```
+# Эта команда генерирует новый закрытый ключ и CSR.
+# Закрытый ключ сохраняется в файле jenkins.key, а CSR - в файле jenkins.csr.
+#(*) CSR (Certificate Signing Request) — это зашифрованный запрос на выпуск сертификата, содержащий подробную информацию о домене и организации.
+
+  2.1) Отправьте CSR в центр сертификации (ЦС), чтобы получить подписанный сертификат.
+       Процесс может отличаться в зависимости от центра сертификации.
+
+  2.2) Получив подписанный сертификат, сохраните его в файле jenkins.crt.
+
+  2.3) Соедините цепочку сертификатов с файлом jenkins.crt.
+       Цепочка сертификатов состоит из подписанного сертификата и всех промежуточных сертификатов, предоставленных ЦС.
+       Сохраните конкатенированный (объединённый) файл под именем jenkins-bundle.crt.
+```
+$ cat jenkins.crt intermediate.crt > jenkins-bundle.crt
+```
+# где jenkins.crt = файл, содержащий подписанный сертификат от ЦС
+# intermediate.crt = файл, содержащий все промежуточные сертификаты, предоставленные ЦС
+
+  3) Скопируйте все файлы в следующее место (в каталог /etc/ssl/jenkins):
+```
+$ sudo mkdir /etc/ssl/jenkins
+# Копируем сгенерированный закрытый ключ
+$ sudo cp jenkins.key /etc/ssl/jenkins
+
+# Копируем полученный от ЦС подписанный сертификат
+$ sudo cp jenkins.crt /etc/ssl/jenkins
+
+# Копируем конкатенированный файл: "подписанный сертификат + цепочка сертификатов"
+$ sudo cp jenkins-bundle.crt /etc/ssl/jenkins
+
+```
+
+
+[Шаг 4: Настройте Jenkins на использование несамоподписанного SSL-сертификата]
+
+  1) Откроем файл конфигурации Jenkins: /etc/default/jenkins с помощью текстового редактора:
+```
+#[Ubuntu]
+$ sudo vim /etc/default/jenkins
+
+#[RHEL9 || CentOS9]
+$ sudo vim /etc/sysconfig/jenkins
+```
+
+  2) Добавьте следующие строки в конец файла:
+```
+JENKINS_ARGS="--httpPort=-1 \
+              --httpsPort=8083 \
+              --httpsCertificate=/etc/ssl/jenkins/jenkins.crt \
+              --httpsPrivateKey=/etc/ssl/jenkins/jenkins.key \
+              --httpsKeyStore=/etc/ssl/jenkins/jenkins-bundle.crt"
+```
+# Эта конфигурация предписывает Jenkins использовать SSL с...
+#  ✓ предоставленными сертификатом,
+#  ✓ закрытым ключом
+#  ✓ и цепочкой сертификатов.
+
+  3) Сохраните и закройте файл.
+
+  4) Перезапустите службу Jenkins, чтобы изменения вступили в силу:
+```
+$ sudo systemctl restart jenkins
+```
+
+>>  Verify that Jenkins is running on the HTTPS port by visiting https://<your-server-ip>:8083 in a web browser.
+
+
+******************
+* Best Practices *
+******************
+
+Вот несколько лучших практик, которых следует придерживаться при использовании SSL-сертификатов в Jenkins:
+
+  ➜ Используйте несамоподписанный SSL-сертификат, выпущенный доверенным центром сертификации, чтобы обеспечить безопасность соединений.
+
+  ➜ Храните файлы SSL-сертификата и закрытого ключа В НАДЕЖНОМ МЕСТЕ и ЗАЩИЩАЙТЕ их соответствующими разрешениями,
+    чтобы предотвратить несанкционированный доступ.
+
+  ➜ Обновляйте SSL-сертификат до истечения срока его действия, чтобы избежать перебоев в обслуживании.
+
+  ➜ Настройте сервер Jenkins на использование HTTPS по умолчанию, чтобы обеспечить безопасность всех соединений.
+
+
+Следующая последовательность действий предлагается в [2]:
+
+  1) Получение SSL-сертификатов
+  2) Преобразование SSL-ключей в формат PKCS12
+  3) Преобразование PKCS12 в формат JKS
+  4) Добавьте JKS в путь Jenkins
+  5) Настройте запуск Jenkins на использование файла JKS.
+  6) Проверка SSL Jenkins
+
+
+[Step 1: Получение SSL-сертификатов]
+
+  Для настройки SSL необходимо иметь действующий домен, указывающий на IP-адрес сервера Jenkins.
+  Домен может быть внутренним или внешним в зависимости от инфраструктуры вашей организации.
+
+  SSL-сертификат можно получить следующими способами.
+    1. В большинстве случаев Jenkins располагается в частной среде с внутренним DNS,
+       и вы можете получить внутренние SSL-сертификаты у соответствующих организаций.
+
+    2. Вы также можете создать самоподписанные SSL-сертификаты с помощью OpenSSL.
+       Следуйте инструкциям по созданию самоподписанных сертификатов с помощью OpenSSL
+
+    3. Кроме того, вы можете использовать такие сервисы, как Letsencrypt, для получения действительных SSL-сертификатов.
+       Но эти сертификаты необходимо обновлять каждые три месяца.
+
+
+[Step 2: Convert SSL keys to PKCS12 format]
+
+[Примечание:]
+  Если у вас уже есть сертификат в формате .p12 или .pfx, вам НЕ НУЖНО выполнять это преобразование.
+
+  Команда, приведенная ниже, преобразует SSL-сертификаты в промежуточный формат PKCS12 с именем jenkins.p12.
+  Перед выполнением команды убедитесь, что у вас есть следующие сертификаты:
+    ca.crt
+    server.key
+    server.crt
+
+Also,
+
+  1) Замените jenkins.devopscube.com в команде на свое собственное имя псевдонима
+  2) Замените пароль your-strong-password на надежный пароль
+```
+openssl pkcs12 -export -out jenkins.p12 \
+-passout 'pass:your-strong-password' -inkey server.key \
+-in server.crt -certfile ca.crt -name jenkins.devopscube.com
+```
+
+
+[Step 3: Преобразование PKCS12 в формат JKS]
+
+  Используйте следующую команду keytool для преобразования файла jenkins.p12 в формат JKS.
+# Замените приведенные ниже значения на свои собственные.
+
+  1) -srcstorepass - пароль, использованный в Step 3
+  2) -deststorepass - замените его надежным паролем
+  3) -srcalias - имя псевдонима (alias), используемое в шаге 2
+  4) -destalias - заменить на имя псевдонима назначения
+
+```
+keytool -importkeystore -srckeystore jenkins.p12 \
+-srcstorepass 'your-secret-password' -srcstoretype PKCS12 \
+-srcalias jenkins.devopscube.com -deststoretype JKS \
+-destkeystore jenkins.jks -deststorepass 'your-secret-password' \
+-destalias jenkins.devopscube.com
+```
+
+  Вы должны увидеть файл с именем jenkins.jks в вашем текущем местоположении.
+
+
+[Step 4: Добавьте JKS в путь к Jenkins]
+
+[!] Файл jenkins.jks должен быть сохранен в определенном месте, где Jenkins сможет получить к нему доступ.
+  Давайте создадим папку и переместим в нее ключ jenkins.jks.
+
+```
+mkdir -p /etc/jenkins
+cp jenkins.jks /etc/jenkins/
+```
+# Измените права доступа к ключам и папкам.
+
+```
+chown -R jenkins: /etc/jenkins
+chmod 700 /etc/jenkins
+chmod 600 /etc/jenkins/jenkins.jks
+```
+
+
+[Step 5: Изменение конфигурации Jenkins для SSL]
+
+  Все ключевые конфигурации запуска Jenkins находятся в файле /etc/sysconfig/jenkins.
+  Все конфигурации на основе SSL находятся в этом файле.
+
+  Откройте этот файл:
+
+```
+sudo vi /etc/sysconfig/jenkins
+```
+
+  Найдите и замените значения в файле, как показано ниже.
+
+[Примечание:]
+  Замените пароль <your-keystore-password> на пароль хранилища ключей Keystore, который вы задали в Step 3.
+  Также вы можете использовать либо 443, либо 8443 для портов.
+
+
+--</etc/sysconfig/jenkins>--
+JENKINS_PORT="-1"
+JENKINS_HTTPS_PORT="8443"
+JENKINS_HTTPS_KEYSTORE="/etc/jenkins/jenkins.jks"
+JENKINS_HTTPS_KEYSTORE_PASSWORD="<your-keystore-password>"
+JENKINS_HTTPS_LISTEN_ADDRESS="0.0.0.0"
+...
+##_END_##
+
+  Сохраните конфигурацию и перезапустите Jenkins.
+
+```
+sudo systemctl restart jenkins
+```
+
+  Проверьте статус Jenkins.
+
+```
+sudo systemctl status jenkins
+```
+
+
+[Step 6: Проверка подлинности SSL]
+
+  Теперь вы должны иметь возможность получить доступ к Jenkins по HTTPS с портом 8443
+```
+https://<jenkins-dns/ip>:8443
+```
+
+   You can also use curl to verify SSL
+
+```
+curl -k https://<jenkins-dns/ip>:8443
+```
+
+**************
+* Заключение *
+**************
+
+  В этом руководстве по Jenkins вы узнали, как запустить Jenkins на HTTPS.

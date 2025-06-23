@@ -1,23 +1,67 @@
 <?> Как запустить контейнер инстанса Jenkins с предустановленными плагинами ВПЕРВЫЕ,
    пропустив при этом страницу "Getting Started" с необходимостью Jenkins Unlock и созданием администратора Jenkins </?>
 
+#-> https://stackoverflow.com/questions/47185493/setup-docker-jenkins-with-default-plugins
+#(docs): https://www.jenkins.io/doc/book/managing/system-properties/#jenkins-install-runsetupwizard
 
-[!] Необходимо при запуске образа Jenkins с предустановленными плагинами (docker run || docker compose up)
+[!] Необходимо при запуске контейнера Jenkins
     передать через переменную окружения JAVA_OPTS следующее значение:
-
+```
 JAVA_OPTS=-Djenkins.install.runSetupWizard=false
+```
 
-# Команда целиком:
-$ docker run --rm -d -p 8080:8080 -e JAVA_OPTS=-Djenkins.install.runSetupWizard=false jenkins-automoduleinst:latest
+Это можно сделать
+  1) на этапе построения образа docker в Dockerfile
+  2) на этапе запуска контейнера
 
-[!] КРОМЕ ТОГО:
+```
+# for Dockerfile:
+ENV JAVA_OPTS=-Djenkins.install.runSetupWizard=false
 
-Пишут, что переменную окружения можно задать и в Dockerfile для Jenkins:
--->
-ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
-<--
+# for docker container running:
+docker run --rm -d -p 8080:8080 -e JAVA_OPTS=-Djenkins.install.runSetupWizard=false jenkins-automoduleinst:latest
+
+# for docker-compose.yaml
+...
+  environment:
+    - JAVA_OPTS="-Djenkins.install.runSetupWizard=false"
+```
+
+[!] Предупреждение:
+  это может стать риском для безопасности, если образ Jenkins открыт для общего доступа,
+  так как эта опция ОТКЛЮЧАЕТ НЕОБХОДИМОСТЬ АУТЕНТИФИКАЦИИ.
+
+EDIT: По умолчанию каталог плагинов для образа Docker - /var/jenkins_home/plugins
+EDIT 2: Согласно README в репозитории Jenkins Docker, добавление строки
+```
+RUN echo 2.0 > /usr/share/jenkins/ref/jenkins.install.UpgradeWizard.state
+```
+должно привести к тому же результату
 
 # source: https://stackoverflow.com/questions/60287407/why-does-jenkins-skip-the-create-first-admin-user-wizard
+
+
+* Комментарии из "Jenkins Features Controlled with System Properties" *
+
+jenkins.install.runSetupWizard 
+  feature
+  Since: 2.0
+  Default value:
+    - undefined
+
+[Description:]
+  Set to false to skip install wizard.                  # Установите значение false, чтобы пропустить мастер установки.
+  Note that doing so leaves Jenkins unsecured.          # Обратите внимание, что в этом случае Jenkins останется незащищенным.
+
+(!) Development-mode only: Set to true to not skip showing the setup wizard during Jenkins development.
+    This property is only effective the first time you run Jenkins in given JENKINS_HOME.
+/*
+## Установите значение true, чтобы не пропускать показ мастера настройки во время разработки Jenkins.
+## Это свойство действует только при первом запуске Jenkins в заданном JENKINS_HOME.
+*/
+
+
+[!] Подробнее: https://www.jenkins.io/doc/book/managing/system-properties/#jenkins-install-runsetupwizard
 
 Другие более "элегантные" варианты (с внесением изменений в config.xml и применением CasC) описаны здесь:
 https://www.jenkins.io/doc/book/security/access-control/disable/

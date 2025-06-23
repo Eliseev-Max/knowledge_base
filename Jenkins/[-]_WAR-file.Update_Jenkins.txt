@@ -1,0 +1,7 @@
+Jenkins. WAR file. Update Jenkins from WAR
+
+[sources:]
+  1) "WAR file": https://www.jenkins.io/doc/book/installing/war-file/
+  2) "Update Jenkins from WAR": https://www.baeldung.com/ops/jenkins-war-update
+
+

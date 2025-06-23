@@ -1,0 +1,248 @@
+EXTENDED FILE ATTRIBUTES
+
+[sources:]
+  1) "Linux Extended File Attributes Tutorial": https://www.linuxtoday.com/blog/linux-extended-file-attributes/
+  2) "Extended attributes"
+  2.1) (en): https://wiki.archlinux.org/title/Extended_attributes
+  2.2) (ru): https://wiki.archlinux.org/title/Extended_attributes_(%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9)
+  2) "xattr(7) — Linux manual page": https://man7.org/linux/man-pages/man7/xattr.7.html
+
+Тезисы:
+1. Медианный размер файла НЕ МЕНЯЕТСЯ (The median file size isn’t changing)
+2. Средний размер файла стал больше (The average file size is larger)
+3. Средняя емкость файловой системы увеличилась в три раза с 2000 по 2010 год
+   (The average file system capacity has tripled from 2000 to 2010)
+
+"""
+  * Средний размер файла вычисляется путем суммирования размеров каждого файла и деления на количество файлов.
+  * Медианный размер файла находится путем упорядочивания списка от наименьшего к наибольшему размеру каждого файла.
+      Медианный размер файла - это тот, который находится в середине упорядоченного списка.
+"""
+
+Т.о. три упомянутых ранее наблюдения показывают, что, возможно:
+  >> на настольных компьютерах есть несколько действительно больших файлов, которые увеличивают средний размер файла,
+  >> но в то же время есть и множество маленьких файлов, что делает медианный размер файла примерно таким же,
+     несмотря на увеличение количества файлов и увеличение больших файлов.
+
+***
+
+Одним из ключевых моментов в управлении данными является возможность отслеживать их состояние, что обычно означает КОНТРОЛЬ МЕТАДАННЫХ.
+К счастью, POSIX предоставляет нам некоторые стандартные метаданные для наших файлов, такие как следующие:
+  Право собственности (ownership) на файл  (User ID and Group ID)
+  Разрешения (permissions) на файл (world, group, user)
+  Время работы с файлом (atime, ctime, mtime)
+  Размер файла
+  Имя файла
+  Это настоящий файл или каталог?
+
+Есть еще несколько других (например, ссылки), о которых я здесь не упомянул.
+
+***
+
+Extended File Attributes
+
+[!] на самом деле существует механизм добавления собственных метаданных к файлам,
+    который поддерживается большинством файловых систем Linux.
+    Это называется расширенными атрибутами файлов (Extended File Attributes).
+
+  В Linux его поддерживают многие файловые системы,
+  например:
+    - ext2,
+    - ext3,
+    - ext4,
+    - jfs,
+    - xfs,
+    - reiserfs,
+    - btrfs,
+    - ocfs2 (2.1 и выше)
+    - и squashfs (ядро 2.6.35 и выше или backport к более старому ядру).
+
+  Некоторые из этих файловых систем имеют ограничения на расширенные атрибуты файлов,
+  такие как объем данных, которые могут быть добавлены,
+  но они позволяют добавлять метаданные, контролируемые пользователем.
+
+  Любой обычный файл, использующий один из ранее упомянутых расширенных атрибутов файла, может иметь список расширенных атрибутов файла.
+  Атрибуты имеют имя и некоторые связанные с ним данные (собственно атрибут).
+
+Имя начинается с так называемого идентификатора пространства имен (подробнее об этом позже),
+за ним следует точка «.»,
+а затем нуль-терминированная строка.
+
+Вы можете добавить столько имен, разделенных точками, сколько захотите, чтобы создать «классы» атрибутов.
+
+В настоящее время в Linux существует четыре пространства имен для расширенных атрибутов файлов:
+
+  ● user
+  ● trusted
+  ● security
+  ● system
+
+
+If you have write permission on the file then you can set an extended attribute. To give you an idea of what you can do for “names” for the extended file attributes for this namespace, here are some examples:
+
+(!) Пространстве имен "user" ("user" namespace) не имеет ограничений по именованию и содержимому.
+
+(!) Пространство имен "system" ("system" namespace) может быть использовано для добавления метаданных, контролируемых root.
+
+Системное пространство имен (system namespace)
+  -> используется в основном ядром для списков контроля доступа (ACL)
+  -> может быть задано только root'ом.
+
+# Например, для расширенных атрибутов файлов он будет использовать такие имена, как
+  - "system.posix_acl_access"
+    и
+  - "system.posix_acl_default"
+
+  Общая мудрость заключается в следующем:
+    если вы не используете ACL для хранения дополнительных метаданных (что можно делать)
+    то НЕ СЛЕДУЕТ ИСПОЛЬЗОВАТЬ системное пространство имен.
+
+# Мнение автора:
+"""
+  системное пространство имен - это место для метаданных, контролируемых root, или метаданных, неизменяемых по отношению к пользователям.
+"""
+
+Пространство имен безопасности используется в SELinux.
+Примером имени в этом пространстве имен может быть что-то вроде
+```
+"security.selinux"
+```
+
+Атрибуты пользователя предназначены для использования
+  -> пользователем
+  -> любым приложением, запущенным пользователем.
+
+Атрибуты пространства имен пользователя защищены обычными настройками прав пользователя Unix на файл.
+Если у вас есть РАЗРЕШЕНИЕ НА ЗАПИСЬ в файл (write permission, -w-), вы можете установить расширенный атрибут.
+
+Чтобы дать вам представление о том, что можно сделать для "names" для расширенных атрибутов файла для этого пространства имен,
+приведем несколько примеров:
+
+```
+user.checksum.md5
+user.checksum.sha1
+user.checksum.sha256
+user.original_author
+user.application
+user.project
+user.comment
+```
+
+  - Первые три примера имен используются для хранения контрольных сумм о файле с использованием трех различных методов контрольных сумм.
+  - В четвертом примере указан автор, что может быть полезно в случае, если
+    -> несколько человек имеют доступ к файлу на запись
+    -> или если автор ушел и файл был передан другому пользователю.
+
+  - В пятом примере имени может быть указано приложение, которое использовалось для генерации данных,
+    # например вывод из приложения.
+
+  - В шестом примере перечисляется проект, с которым связаны данные.
+
+  - Седьмой пример - это универсальный общий комментарий.
+
+# Из этих нескольких примеров видно, что вы можете создавать очень полезные метаданные.
+
+'''
+В Linux независимо от файловой системы командой для просмотра расширенных атрибутов файла является
+```
+getfattr -d -m '' -- <filename>
+# OR (better)
+getfattr -d -m ^ -R -- <filename or directory>
+# Параметр -m ^ соответствует началу любой строки без необходимости экранирования параметра,
+# а двойное тире -- необходимо в качестве разделителя в случае, если имя файла или каталога начинается с тире.
+
+# или же
+getfattr -d -m - <file>
+
+# -m pattern, --match=pattern
+# Включите только атрибуты с именами, соответствующими шаблону регулярного выражения. [...]
+# (!) Укажите "-" для включения всех атрибутов.
+```
+
+# show Selinux attributes
+```
+getfattr -d -- <filename>
+```
+'''
+
+
+**************************************
+* Tools for Extended File Attributes *
+**************************************
+
+  Существует несколько очень полезных инструментов для работы с расширенными атрибутами (setting (установка), getting (получение)).
+  Обычно они включены в пакет attr, который поставляется с большинством дистрибутивов.
+  Поэтому
+  1) убедитесь, что пакет `attr` установлен в системе.
+
+  2) следует проверить наличие в ядре поддержки атрибутов.
+     Она должна быть включена почти во всех дистрибутивах, которые вы можете использовать,
+     #(!)  хотя в некоторых специализированных дистрибутивах она может быть не включена.
+
+     (!) Но если вы СОБИРАЕТЕ СОБСТВЕННЫЕ ЯДРА (как это делает ваш коллега), убедитесь, что она включена.
+     Вы можете просто поискать в файле kernel «.config» (конфигурация ядра) любые атрибуты «ATTR».
+
+  3) Третье - убедитесь, что пакет `libattr` установлен.
+     Если вы установили пакет attr, то этот пакет также должен быть установлен.
+     Но не помешает проверить.
+
+  4) И наконец, вам нужно убедиться, что файловая система, которую вы собираетесь использовать с расширенными атрибутами,
+     смонтирована с опцией user_xattr.
+
+Выполнив все эти критерии можно использовать расширенные атрибуты!
+
+
+[Тестирование. Демонстрация инструментов:]
+
+  Для начала создадим простой файл с фиктивными данными.
+
+```
+$ echo "The quick brown fox" > ./test.txt
+$ more test.txt
+
+>> The quick brown fox
+```
+
+Now let’s add some extended attributes to this file.
+
+```
+$ setfattr -n user.comment -v "this is a comment" test.txt
+```
+
+This command sets the extended file attribute to the name “user.comment”. The option “-v” is the value of the attribute followed by that value. The final option for the command is the name of the file.
+
+You can determine the extended attributes on a file with a simple command, getfattr as in the following example,
+
+$ getfattr test.txt
+# file: test.txt
+user.comment
+
+Notice that this only lists what extended attributes are defined for a particular file not the values of the attributes. Also notice that it only listed the “user” attributes since the command was done as a regular user. If you ran the command as root and there were system or security attributes assigned you would see those listed.
+
+To see the values of the attributes you have to use the following command:
+
+$ getfattr -n user.comment test.txt
+# file: test.txt
+user.comment="this is a comment"
+
+With the “-n” option it will list the value of the extended attribute name that you specify.
+
+If you want to remove an extended attribute you use the setfattr command but use the “-x” option such as the following:
+
+$ setfattr -x user.comment test.txt
+$ getfattr -n user.comment test.txt
+test.txt: user.comment: No such attribute
+
+You can tell that the extended attribute no longer exists because of the return from the setfattr command.
+
+Summary
+
+Without belaboring the point, the amount of data is growing at a very rapid rate even on our desktops. A recent study also pointed out that the number of files is also growing rapidly and that we are adding some very large files but also a large number of small files so that the average file size is growing while the median file size is pretty much staying the same. All of this data will result in a huge data management nightmare that we need to be ready to address.
+
+One way to help address the deluge of data is to enable a rich set of metadata that we can use in our data management plan (whatever that is). An easy way to do this is to use extended file attributes. Most of the popular Linux file systems allow you to add to metadata to files, and in the case of xfs, you can pretty much add as much metadata as you want to the file.
+
+There are four “namespaces” of extended file attributes that we can access. The one we are interested as users is the user namespace because if you have normal write permissions on the file, you can add attributes. If you have read permission on the file you can also read the attributes. But we could use the system namespace as administrators (just be careful) for attributes that we want to assign as root (i.e. users can’t change or query the attributes).
+
+The tools to set and get extended file attributes come with virtually every Linux distribution. You just need to be sure they are installed with your distribution. Then you can set, retrieve, or erase as many extended file attributes as you wish.
+
+Extended file attributes can be used to great effect to add metadata to files. It is really up to the user to do this since they understand the data and have the ability to add/change attributes. Extended attributes give a huge amount of flexibility to the user and creating simple scripts to query or search the metadata is fairly easy (an exercise left to the user). We can even create extended attributes as root so that the user can’t change or see them. This allows administrators to add really meaningful attributes for monitoring the state of the data on the file system. Extended file attributes rock!

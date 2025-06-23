@@ -1,0 +1,6 @@
+SSL и SSL-сертификаты для новичков.
+Опыты с сертификатами — клиентскими и серверными
+
+[sources:]
+  1) https://habr.com/ru/articles/884898/
+  2) https://habr.com/ru/articles/686230/

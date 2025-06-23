@@ -1,0 +1,3 @@
+Установка и настройка nginx: пошаговая инструкция
+(https://firstvds.ru/technology/ustanovka-i-nastroyka-nginx)
+

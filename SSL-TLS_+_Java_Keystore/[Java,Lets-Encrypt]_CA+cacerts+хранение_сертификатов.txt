@@ -1,0 +1,105 @@
+Making Java 8 aware of Let's Encrypt root certificate
+#< Обеспечение осведомленности Java 8 о корневом сертификате Let's Encrypt >#
+(https://habr.com/ru/articles/755544/)
+
+"""
+  Для начала нам необходимо разобраться в терминологии и понятиях,
+  которые составляют основу и фундамент данной темы,
+  чтобы понять, почему возникает проблема и как ее решить.
+"""
+
+
+**********************************
+* ОСНОВНЫЕ ПОНЯТИЯ И ОПРЕДЕЛЕНИЯ *
+**********************************
+
+Центр сертификации (Certificate Authority, CA)
+  = это организация, которая выпускает цифровые сертификаты. 
+
+Корневой сертификат (Root Certificate)
+  = это самоподписанный сертификат, который представляет собой верхний уровень (или корень) в цепочке сертификатов.
+    Корневые сертификаты распространяются в доверенных хранилищах (trust stores) программного обеспечения,
+    например, в веб-браузерах или операционных системах.
+
+[!] Когда вы доверяете корневому сертификату, вы по своей сути доверяете всем сертификатам, подписанным этим корневым сертификатом.
+
+
+"""
+  До сентября 2021 года Let's Encrypt использовал корневой сертификат, выданный центром сертификации под названием Digital Signature Trust Co.
+#(часто сокращенно DST или IdenTrust).
+  Название сертификата было DST Root CA X3,
+
+В настоящее время организацией, стоящей за Let's Encrypt, является ISRG (Internet Security Research Group),
+поэтому ISRG является CA.
+Выпущенные им сертификаты - ISRG Root X1 и ISRG Root X2.
+
+Основным фактором, определяющим, может ли платформа подтверждать сертификаты Let's Encrypt, является то, доверяет ли она сертификату ISRG "ISRG Root X1".
+
+До сентября 2021 года некоторые платформы могли проверять сертификаты Let's Encrypt, даже если они не включали ISRG Root X1,
+поскольку они доверяли сертификату "DST Root CA X3" компании IdenTrust.
+С октября 2021 года только те платформы, которые доверяют ISRG Root X1, будут подтверждать сертификаты Let's Encrypt.
+"""
+
+[!] Каждая JRE имеет собственное хранилище ключей, в котором содержатся все центры сертификации, которым она доверяет.
+*******************************************
+* Это хранилище также называют truststore *
+*******************************************
+
+[!] Это хранилище хранится в файле под названием cacerts.
+
+Обычно он находится в
+```
+$JAVA_HOME/jre/lib/security
+```
+# == для Java 8
+
+# и в
+```
+$JAVA_HOME/jre/lib/security
+```
+# == для Java 11 и Java 17, при условии, что в $JAVA_HOME установлена ваша JRE или JDK.
+
+Пароль по умолчанию для этого хранилища ключей - changeit.
+
+[обновления Java 8, выпущенные до января 2017 года (версии < 8u141)]:
+  не включали сертификат "ISRG Root X1" в свое хранилище доверия по умолчанию.
+
+[Java 11]: включает корневые сертификаты обоих центров сертификации,
+[Java 17]: включает корневые сертификаты только "ISRG Root X1".
+
+
+Инструмент для работы с хранилищем ключей JRE называется keytool
+Он находится в $JAVA_HOME/bin/keytool. 
+
+Используйте следующие команды, чтобы посмотреть, находятся ли необходимые CA в соответствующих хранилищах ключей:
+
+```
+# For Java 8
+$  $JAVA_HOME/bin/keytool -list -keystore  $JAVA_HOME/jre/lib/security/cacerts -storepass changeit | grep -iE "isrg|dstx3"
+identrustdstx3, May 5, 2016, trustedCertEntry,
+ 
+# For Java 11
+$  $JAVA_HOME/bin/keytool -list -keystore  $JAVA_HOME/lib/security/cacerts -storepass changeit | grep -iE "isrg|dstx3"
+identrustdstx3 [jdk], Sep 30, 2000, trustedCertEntry,
+letsencryptisrgx1 [jdk], Jun 4, 2015, trustedCertEntry,
+ 
+# For Java 17
+$  $JAVA_HOME/bin/keytool -list -keystore  $JAVA_HOME/security/cacerts -storepass changeit | grep -iE "isrg|dstx3"
+_,cus,ointernet_security_research_group,cnisrg_root_x1 [jdk], Jun 4, 2015, trustedCertEntry,
+_,cus,ointernet_security_research_group,cnisrg_root_x2 [jdk], Sep 4, 2020, trustedCertEntry,
+```
+
+(!) Вы можете заметить, что Java 17 также включает НОВЫЙ КОРНЕВОЙ СЕРТИФИКАТ ISRG Root X2,
+    который использует шифрование ECDSA в отличие от шифрования RSA, используемого в ISRG Root X1.
+
+=> Поэтому вам нужно
+
+Решением для старой Java 8 JRE будет сделать JRE доверенным к новому CA Let's Encrypt, которым является ISRG.
+
+```
+# Download the ISRG Root X1 certificate in PEM format from the Let's Encrypt website.
+wget --no-check-certificate https://letsencrypt.org/certs/isrgrootx1.pem.txt -O /tmp/isrgrootx1.pem
+
+# Import the new trusted root certificate into JRE truststore with the keytool
+$JAVA_HOME/bin/keytool -import -alias letsencryptisrgx1 -keystore $JAVA_HOME/jre/lib/security/cacerts -file /tmp/isrgrootx1.pem
+```

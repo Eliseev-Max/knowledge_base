@@ -1,0 +1,13 @@
+Getting started with Blue Ocean
+
+#(https://www.jenkins.io/doc/book/blueocean/getting-started/)
+
+
+"""
+  В этом разделе описано, как начать работу с Blue Ocean в Jenkins.
+  Он включает инструкции
+    - по настройке Blue Ocean на вашем контроллере Jenkins,
+    - доступу к пользовательскому интерфейсу Blue Ocean
+    - и возврату к классическому пользовательскому интерфейсу Jenkins.
+"""
+

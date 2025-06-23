@@ -7,12 +7,12 @@ ARG DOCKER_COMPOSE_VERSION=3.9		# https://docs.docker.com/engine/reference/build
 USER root
 RUN apt-get update && \
    apt-get upgrade -y && \
-   apt-get -y install apt-transport-https \			# *
+   apt-get -y install apt-transport-https \			# *(1)
       ca-certificates \								# Устанавливаем пакет сертификатов распространённых центров сертификации (Certificate Authority (CA))
 													# Данные по центрам сертификации, которые распространяются с браузером Mozilla, позволяющие приложениям
 													# проверять достоверность соединений SSL. 
       curl \
-      gnupg2 \										# В официальной инструкции по установке docker устанавливается gnupg 
+      gnupg2 \										# *(2) + В официальной инструкции по установке docker устанавливается gnupg 
       git \
       software-properties-common && \
    curl -fsSL https://download.docker.com/linux/$(. /etc/os-release; echo "$ID")/gpg > /tmp/dkey; apt-key add /tmp/dkey && \	# Добавляем официальный GPG-ключ Docker 
@@ -30,14 +30,23 @@ RUN usermod -aG docker jenkins && gpasswd -a jenkins docker
 
 USER jenkins
 
-## * Этот пакет позволяет использовать строки «deb https://foo distro main» в /etc/apt/sources.list,
-##   чтобы все менеджеры пакетов, использующие библиотеку libapt-pkg, могли получить доступ к метаданным и пакетам,
-##   доступным в источниках, доступных через https
-##   gnupg2 (2.2.27-3): GNU Privacy Guard — свободная замена PGP (пустой переходный пакет)
-##   	GnuPG — инструмент GNU для безопасной коммуникации и хранения данных.
-##	 	Он может использоваться для зашифровки данных и создания цифровых подписей.
-##   	Пакет включает продвинутое средство для управления ключами и соответствует предложенному OpenPGP стандарту, описанному в RFC4880.
-##   	Пустой переходный пакет, предоставляющий символьные ссылки с gpg2 на gpg.
+
+--<*(1)*>--
+  Пакет `apt-transport-https` позволяет использовать строки «deb https://foo distro main» в /etc/apt/sources.list,
+  чтобы все менеджеры пакетов, использующие библиотеку libapt-pkg, могли получить доступ к метаданным и пакетам,
+  доступным в источниках, доступных через https
+
+
+--<*(2)*>--
+gnupg2 (2.2.27-3): GNU Privacy Guard — свободная замена PGP (пустой переходный пакет)
+  GnuPG — инструмент GNU для безопасной коммуникации и хранения данных.
+
+  Он может использоваться для зашифровки данных и создания цифровых подписей.
+
+  Пакет включает продвинутое средство для управления ключами
+  и соответствует предложенному OpenPGP стандарту, описанному в RFC4880.
+
+(*) Пустой переходный пакет, предоставляющий символьные ссылки с gpg2 на gpg.
 
 
 # Add Docker's official GPG key:

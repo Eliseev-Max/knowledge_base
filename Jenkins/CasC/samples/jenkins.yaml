@@ -1,0 +1,315 @@
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+      - group:
+          name: "authenticated"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Discover"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Read"
+
+      - user:
+          name: "belyaev"
+          permissions:
+          - "Overall/Administer"
+
+      - user:
+          name: "diordiev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "m.eliseev"
+          permissions:
+          - "Overall/Administer"
+      - user:
+          name: "n.brekhuntsov"
+          permissions:
+          - "Overall/Administer"
+      - user:
+          name: "n.mahovik"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Administer"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "o.pyhov"
+          permissions:
+          - "Overall/Administer"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: true
+  disabledAdministrativeMonitors:
+  - "hudson.util.DoubleLaunchChecker"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "ARTIFACTORY_CONAN_REPOSITORY"
+        value: "http://172.21.210.103:8081/artifactory/api/conan/buc"
+      - key: "ARTIFACTORY_URL"
+        value: "http://172.21.210.103:8081"
+      - key: "BITRIX24_URL"
+        value: "https://bitrix.prosyst.ru"
+      - key: "DOCKER_CONTAINERS_NETWORK"
+        value: "infrastructure_infrastructure"
+      - key: "DOCKER_REGISTRY"
+        value: "docker.prosyst.ru"
+      - key: "DOCKER_REGISTRY_URL"
+        value: "https://docker.prosyst.ru"
+      - key: "ESPRESSO_IP"
+        value: "172.19.25.172"
+      - key: "NEXUS_LOCAL_IP"
+        value: "127.0.0.1:8123"
+      - key: "NEXUS_REPOSITORY_LOCAL"
+        value: "http://127.0.0.1:8123"
+      - key: "S3_LUNGO_URL"
+        value: "https://s3.daes.prosyst.ru"
+      - key: "SVACE_SERVER_URL"
+        value: "svace.prosoft.ural.ru"
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    activeDirectory:
+      bindPassword: "{AQAAABAAAAAQH5Nvx5JG2sBbkuvR612dS8Bii2sPlmol5DK1a4PIPIo=}"
+      customDomain: true
+      domains:
+      - bindName: "daes-ldap@prosoft.ural.ru"
+        bindPassword: "{AQAAABAAAAAQuZPGjNjlRrjJzQpynBOq1UbIuMA36zWzlmkbOjoA4/o=}"
+        name: "PROSOFT.URAL.RU"
+        servers: "dc1.prosoft.ural.ru:3268"
+        site: "dc1.prosoft.ural.ru"
+        tlsConfiguration: JDK_TRUSTSTORE
+      groupLookupStrategy: TOKENGROUPS
+      removeIrrelevantGroups: false
+      requireTLS: false
+      startTls: true
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+appearance:
+  pipelineGraphView:
+    showGraphOnBuildPage: false
+    showGraphOnJobPage: false
+  prism:
+    theme: PRISM
+  themeManager:
+    disableUserThemes: false
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  cps:
+    hideSandbox: false
+  gitHooks:
+    allowedOnAgents: false
+    allowedOnController: false
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy: "noHostKeyVerificationStrategy"
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+  sSHD:
+    port: -1
+  scriptApproval:
+    forceSandbox: false
+unclassified:
+  bitBucketPPRPluginConfig:
+    notifyBitBucket: true
+    useJobNameAsBuildKey: false
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+  bitbucketPluginConfiguration:
+    serverList:
+    - adminCredentialsId: "Admin_PAT"
+      baseUrl: "https://bucket.prosyst.ru/"
+      id: "cfc76849-2cf4-488d-8d2d-2f02fc450b4d"
+      serverName: "Bucket.Prosyst"
+  buildDiscarders:
+    configuredBuildDiscarders:
+    - "jobBuildDiscarder"
+  buildStepOperation:
+    enabled: false
+  email-ext:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultTriggerIds:
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    throttlingEnabled: false
+    watchingEnabled: false
+  enrichedSummaryConfig:
+    enrichedSummaryEnabled: false
+    httpClientDelayBetweenRetriesInSeconds: 1
+    httpClientMaxRetries: 3
+    httpClientTimeoutInSeconds: 1
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "https://cicd.prosyst.ru/jenkins/github-webhook/"
+  globalMinioConfiguration:
+    configuration:
+      credentialsId: "minio-lungo"
+      host: "https://s3.daes.prosyst.ru:9000"
+  globalTimeOutConfiguration:
+    operations:
+    - "abortOperation"
+    overwriteable: false
+  hashicorpVault:
+    configuration:
+      disableChildPoliciesOverride: false
+      engineVersion: 2
+      timeout: 60
+  injectionConfig:
+    allowUntrusted: false
+    checkForBuildAgentErrors: false
+    enabled: false
+    enforceUrl: false
+    gradleCaptureTaskInputFiles: true
+    injectCcudExtension: false
+    injectMavenExtension: false
+    mavenCaptureGoalInputFiles: true
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "адрес еще не настроен <nobody@nowhere>"
+    url: "https://cicd.prosyst.ru/jenkins/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  mavenModuleSet:
+    localRepository: "default"
+  pipelineStepsAWS:
+    enableCredentialsFromNode: false
+  pollSCM:
+    pollingThreadCount: 10
+  scmGit:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    globalConfigEmail: "none@none"
+    globalConfigName: "jenkins"
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  sonarGlobalConfiguration:
+    buildWrapperEnabled: true
+    installations:
+    - credentialsId: "sonarqube_token"
+      name: "SonarQube Server"
+      serverUrl: "http://sonarqube:9000/sonar"
+      triggers:
+        skipScmCause: false
+        skipUpstreamCause: false
+  timestamper:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+  warningsParsers:
+    consoleLogScanningPermitted: false
+tool:
+  dependency-check:
+    installations:
+    - name: "dependency-check-9.2.0"
+      properties:
+      - installSource:
+          installers:
+          - dependencyCheckInstaller:
+              id: "9.2.0"
+  dockerTool:
+    installations:
+    - name: "Docker_Tool"
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
+  sonarRunnerInstallation:
+    installations:
+    - name: "SonarScanner"
+      properties:
+      - installSource:
+          installers:
+          - sonarRunnerInstaller:
+              id: "4.8.0.2856"

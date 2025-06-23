@@ -24,6 +24,13 @@ if (job != null) {
     println "Job ${jobName} not found."
 }
 
+/*
+[!] Для ветки master полное имя формируется так:
+```
+'[Folder_(||MultibranchPipeline)_Name]/[Job_Name]/master'
+```
+*/
+
 ---
 import hudson.model.*
 

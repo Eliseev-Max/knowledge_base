@@ -1,0 +1,199 @@
+*******************************************
+* docker container export (docker export) *
+*******************************************
+  = Экспорт файловой системы контейнера в виде tar-архива
+
+["docker container export":|https://docs.docker.com/reference/cli/docker/container/export/]
+
+```
+docker container export [OPTIONS] CONTAINER
+```
+
+Команда docker export не экспортирует содержимое томов, связанных с контейнером.
+Если том смонтирован поверх существующего каталога в контейнере, 
+docker экспортирует содержимое БАЗОВОГО КАТАЛОГА, а не содержимое тома.
+
+Примеры экспорта данных в volume см. в разделе "Резервное копирование, восстановление или миграция томов данных" в руководстве пользователя.
+#["Backup, restore, or migrate data volumes":|https://docs.docker.com/engine/storage/volumes/#back-up-restore-or-migrate-data-volumes]
+
+[OPTIONS]
+  -o, --output
+    = Write to a file, instead of STDOUT
+
+
+[Examples]
+
+```
+docker export red_panda > latest.tar
+
+docker export --output="latest.tar" red_panda
+```
+
+
+***************************************
+* docker image import (docker import) *
+***************************************
+  = Импортирует содержимое tarball для создания образа файловой системы
+
+["docker image import":|https://docs.docker.com/reference/cli/docker/image/import/]
+
+```
+docker image import [OPTIONS] file|URL|- [REPOSITORY[:TAG]]
+```
+
+Examples:
+
+```
+# This creates a new untagged image.
+docker import https://example.com/exampleimage.tgz
+
+
+#Import from a local file
+#Import to docker via pipe and STDIN.
+
+cat exampleimage.tgz | docker import - exampleimagelocal:new
+
+
+#Import with a commit message.
+cat exampleimage.tgz | docker import --message "New image imported from tarball" - exampleimagelocal:new
+
+
+#Import to docker from a local archive.
+docker import /path/to/exampleimage.tgz
+
+
+#Import from a local directory
+sudo tar -c . | docker import - exampleimagedir
+
+#Import from a local directory with new configurations
+sudo tar -c . | docker import --change "ENV DEBUG=true" - exampleimagedir
+```
+
+
+***********************************
+* docker image save (docker save) *
+***********************************
+  = Сохраняет один или несколько образов в архив tar (по умолчанию передается в STDOUT).
+
+["docker image save":|https://docs.docker.com/reference/cli/docker/image/save/]
+
+  Выдает заархивированный репозиторий в стандартный поток вывода.
+
+(!) Содержит все родительские слои и все теги + версии или указанный repo:tag для каждого указанного аргумента.
+
+[Опции:]
+  -o, --output
+    = Write to a file, instead of STDOUT
+
+[Examples]
+
+```
+docker save busybox > busybox.tar
+
+docker save --output busybox.tar busybox
+
+# Save an image ro a tar.gz file using gzip
+docker save myimage:latest | gzip > myimage_latest.tar.gz
+```
+
+
+***********************************
+* docker image load (docker load) *
+***********************************
+  = Загрузка образа из tar-архива или STDIN
+
+["docker image load":|https://docs.docker.com/reference/cli/docker/image/load/]
+
+```
+docker image load [OPTIONS]
+```
+
+  Загружает образ или репозиторий из tar-архива
+  (даже если он сжат с помощью gzip, bzip2, xz или zstd)
+  из (файла || STDIN).
+
+  Она восстанавливает как образы, так и теги.
+
+[Опции:]
+
+  -i, --input
+    = Read from tar archive file, instead of STDIN
+
+  --platform
+    = API 1.48+ Load only the given platform variant. Formatted as os[/arch[/variant]] (e.g., linux/amd64)
+
+  -q, --quiet
+    = Suppress the load output
+
+[Examples]
+
+```
+# From STDIN:
+docker load < busybox.tar.gz
+
+>>> Loaded image: busybox:latest
+
+docker images
+
+>>> REPOSITORY          TAG                 IMAGE ID            CREATED             SIZE
+>>> busybox             latest              769b9341d937        7 weeks ago         2.489 MB
+
+# Load images from a file (--input)
+
+docker load --input fedora.tar
+
+>>> Loaded image: fedora:rawhide
+>>> Loaded image: fedora:20
+```
+
+
+*******************************************
+* docker container commit (docker commit) *
+*******************************************
+  = Создание нового образа на основе изменений контейнера
+
+["docker container commit":|https://docs.docker.com/reference/cli/docker/container/commit/]
+
+```
+docker container commit [OPTIONS] CONTAINER [REPOSITORY[:TAG]]
+```
+
+  Бывает полезно зафиксировать изменения файлов или настроек контейнера в новом образе.
+  Это позволит вам:
+    -> отладить контейнер, запустив интерактивную оболочку,
+    -> или экспортировать рабочий набор данных на другой сервер.
+
+(!) Commit не включает данные, содержащиеся в смонтированных томах.
+
+[!] По умолчанию на время фиксации (docker commit) образа фиксируемый контейнер и его процессы будут ПРИОСТАНОВЛЕНЫ.
+    Это снижает вероятность повреждения данных в процессе создания фиксации.
+    (*) Если такое поведение нежелательно, установите для параметра --pause значение false.
+
+(*) Параметр --change применит инструкции Dockerfile к создаваемому образу.
+
+Поддерживаемые инструкции Dockerfile:
+  CMD
+  ENTRYPOINT
+  ENV
+  EXPOSE
+  LABEL
+  ONBUILD
+  USER
+  VOLUME
+  WORKDIR
+
+[Examples]
+
+```
+docker commit c3f279d17e0a  svendowideit/testimage:version3
+
+>>> f5283438590d
+
+docker images
+
+>>> REPOSITORY                        TAG                 ID                  CREATED             SIZE
+>>> svendowideit/testimage            version3            f5283438590d        16 seconds ago      335.7 MB
+```
+# Also:
+#> Commit a container with new configurations (--change)
+#> Commit a container with new CMD and EXPOSE instructions

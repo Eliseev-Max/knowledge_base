@@ -1,0 +1,30 @@
+Blue Ocean
+
+#(https://www.jenkins.io/doc/book/blueocean/)
+
+
+"""
+В этой главе рассматриваются все аспекты функциональности Blue Ocean, в том числе:
+  ● Начало работы с Blue Ocean.
+
+  ● Создание нового проекта Pipeline в Blue Ocean.
+    #(https://www.jenkins.io/doc/book/blueocean/creating-pipelines)
+
+  ● Использование приборной панели Blue Ocean
+    #(https://www.jenkins.io/doc/book/blueocean/dashboard)
+
+  ● использовать представление Activity,
+    #(https://www.jenkins.io/doc/book/blueocean/activity)
+    где можно получить доступ
+      + к текущим и историческим данным о выполнении (https://www.jenkins.io/doc/book/blueocean/activity#activity),
+      + ветвям вашего пайплайна (https://www.jenkins.io/doc/book/blueocean/activity#branches)
+      + и любым открытым pull request'ам (https://www.jenkins.io/doc/book/blueocean/activity#pull-requests)
+
+  ● использовать представление Pipeline run details для доступа к деталям,
+    таким как вывод консоли, для конкретного конвейера или элемента выполнения.
+    #(https://www.jenkins.io/doc/book/blueocean/pipeline-run-details)
+
+  ● использовать редактор Pipeline
+    #(https://www.jenkins.io/doc/book/blueocean/pipeline-editor)
+      для изменения конвейеров в виде кода, который затем можно зафиксировать в системе контроля исходного кода.
+"""

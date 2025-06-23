@@ -1,0 +1,158 @@
+Sandeep Rawat: "CI/CD Pipeline with Docker and Jenkins"
+[2023]
+
+****************
+* Code Quality *
+****************
+
+Adeel: “For code quality, I have a few points too. You should continue with your proposal; I will speak after.”
+Me: “Okay. Most of our requirements from here on will be covered by SonarQube. It’s just a tool at first look, but its features make it worth a lot more.”
+Adeel: “I have heard of it. Could you explain how it fits our requirements specifically?”
+Me: “Well, let us take an example of Java. One can find many static code analysis tools to put checks on all aspects of programming, like checksum, find bugs, PMD, and so on. They all give their focus areas with separate reports, which are continuous to say the most. The thing is, it is neither detailed nor regulated. By detailed, I don’t mean the reports aren’t detailed enough, as they are. Allow me to explain both detailed and regulated. SonarQube is installed on a server and has its database as well. Every time a developer commits or wants to analyze the code, they can just do it, and the code passes through a multitude of tests like duplicate code, potential bugs, architecture, and design checks, code complexity, and code smells. All these different tools can be added as plugins to SonarQube. These test results are stored in the database and are displayed with proper visualization on the dashboard. You can see the changes in code, track bugs, view activity over time, and do much more. So, we not only have tests but investigation tools as well at our disposal. Let me remind you that Java is just one language. SonarQube does this for a lot of them, including Golang and ReactJS. Continuous inspection cannot get better than this. Additionally, we have regulations. There is a quality gate, which is a set of standards a code must adhere to for it to be approved for production. It can be configured based on projects. Multiple projects can run at a time.”
+Adeel: “It is impressive, no doubt. Just one question: Is SonarQube the only choice we have?”
+Me: “Well, no alternative provides all these features, that too for free, yet. We have got an amalgamation of various test plugins, activity tracking, and regulation imposition as well as an overview of all of this.”
+Sonia: “This will help me a lot as well.”
+Me: “Yes, which is why I invited you; please share your views”
+Sonia: “As I said in the scrum as well, a lot of my time goes into finding issues that were caused by basic coding errors like unhandled conditionals and insecure dependencies. I am assuming SonarQube can take care of those as well. This will allow us to focus on other important areas and save a ton of our time. I sure do wish now that it is as you say it is.”
+Adeel: “Yeah, me too. The points that I was trying to put earlier are already covered now. One question: how many code quality checks can we expect in the case of Golang and ReactJS?”
+Me: “SonarQube goes deep. There are several rules for bug detection, vulnerability detection, and code smells, which refers to smelling something fishy based on certain factors. And of course, there is linting for both Golang and ReactJS. Code smells, though, can help lead to deeper problems that might end up wasting a lot of time at a later stage. For example, it is a common occurrence for a developer who has worked on a different language in the past to just start using libraries and modules for the tasks that can be done without external help in Golang. They will end up writing more complex code than required. SonarQube can help in such cases as well.”
+Adeel: “This looks good, Abhishek. I must say. I am excited to see this in implementation.”
+Me: “We still have a few things to discuss.”
+
+Me: “Well, there is unit testing, code coverage, and a little bit about development-side security testing.”
+Sonia: “Well, I would like to be a part of these as well. I will be here tomorrow.”
+Me: “I will include you in the invite.”
+Adeel: “Alright. Thanks guys, see you tomorrow.”
+“Well, it went exactly as I expected. How often does that happen?,” I thought.
+“In all its entirety, we are bringing DevOps to a no-DevOps project. What else could I have expected?”
+As I strolled down the hallway, I saw Vishant sipping that afternoon cappuccino by the coffee machine.
+“Hey, buddy! What’s going on?,” I inquired.
+“You see that gardener watering the plants, Abhishek?”, he asked.
+“I do, yes,” I replied, intrigued.
+He continued, “Such a simple job, isn’t it? Just water them once or twice daily, and they grow all by themselves with little to no effort.”
+I thought that was the understatement of the year. Gardening is not an easy job at all.
+We have to consider the location, soil quality, nutrients, plant type, and so on. Even watering is done through different techniques. It requires a lot of patience and care to grow a plant. But I wanted to hear what he would say next, so I nodded and let him continue, “Imagine if he was asked to go through all the plants that he planted in this garden and kill all the bugs individually that are living in each of them, eating them from inside. What would he do?” “I think they have pesticides for that,” I grinned. Vishant turned to me and paused for a second, which felt like minutes, and then we both broke into laughter. “I have been fixing bugs all day.” he finally got to the point. “I understand your frustration. It’s part of the job, what can we do, huh,” I consoled. “Hey, how is that CI/CD plan coming along? I have great hopes for that, man,” he exclaimed. “Well, that might help the whole team a lot in bug hunting. I was discussing it with Adeel in the meeting just a few minutes ago. Once it is implemented, we will be able to tell more.” I explained. He bumped my shoulder and said, “Cannot wait man. Looking forward to it.”
+People were waiting, expectations were building. Everything was exactly where I wanted. My past experience had given me some leeway. The thing was that once SonarQube is set up, most of the issues with pre-deployment checks would disappear. I knew this, and that people would find it quite convenient. Please refer to the following figure:
+
+Note: Developers spend 45% of their time fixing bugs or addressing technical debt vs building new features.
+
+Адиль:
+"""
+  По качеству кода у меня тоже есть несколько замечаний. Вы должны продолжать свое предложение, я буду говорить после.
+"""
+
+Я:
+"""
+  Хорошо. Большинство наших требований с этого момента будет покрываться SonarQube.
+  На первый взгляд, это просто инструмент, но его возможности делают его гораздо более ценным.
+"""
+
+Адиль: «Я слышал о нем. Не могли бы вы объяснить, как именно он подходит под наши требования?»
+
+Я:
+"""
+  Ну, давайте возьмем пример Java.
+    Можно найти множество инструментов статического анализа кода для проверки всех аспектов программирования, таких как контрольная сумма, поиск ошибок, PMD и так далее. Все они предоставляют свои области внимания с отдельными отчетами, которые, по большому счету, являются непрерывными. Дело в том, что они не являются ни подробными, ни регламентированными. Под подробным я не имею в виду, что отчеты недостаточно подробны, так как это так. Позвольте мне объяснить, что такое детализация и регламентация. SonarQube установлен на сервере и имеет свою базу данных. Каждый раз, когда разработчик коммитит или хочет проанализировать код, он может просто сделать это, и код проходит через множество тестов, таких как дублирование кода, потенциальные ошибки, проверка архитектуры и дизайна, сложность кода и запахи кода. Все эти инструменты могут быть добавлены в SonarQube в качестве плагинов. Результаты тестов хранятся в базе данных и отображаются на приборной панели с надлежащей визуализацией. Вы можете видеть изменения в коде, отслеживать ошибки, просматривать активность во времени и делать многое другое. Таким образом, в нашем распоряжении не только тесты, но и инструменты исследования. Напомню, что Java - это всего лишь один из языков. SonarQube делает это для многих других, включая Golang и ReactJS. Непрерывная проверка не может быть лучше, чем это. Кроме того, у нас есть регламенты. Существуют ворота качества, которые представляют собой набор стандартов, которым должен соответствовать код, чтобы быть одобренным для производства. Его можно настроить на основе проектов. Одновременно может выполняться несколько проектов».
+"""
+Адиль:
+"""
+  Это впечатляет, без сомнения. Только один вопрос: SonarQube - это единственный выбор, который у нас есть?
+"""
+
+Я:
+"""
+  Ну, пока ни одна альтернатива не предоставляет всех этих функций, да еще и бесплатно.
+  Мы получили объединение различных тестовых плагинов, отслеживание активности и наложение правил, а также обзор всего этого.
+"""
+
+Соня: «Это мне тоже очень поможет».
+
+Я:
+"""
+  Да, поэтому я и пригласил вас; пожалуйста, поделитесь своим мнением.
+"""
+
+Соня:
+"""
+  Как я уже говорила на скраме, много моего времени уходит на поиск проблем, вызванных базовыми ошибками кодирования,
+  такими как необработанные условия и небезопасные зависимости.
+  Я предполагаю, что SonarQube сможет позаботиться и об этом.
+  Это позволит нам сосредоточиться на других важных областях и сэкономит кучу нашего времени.
+  Мне бы очень хотелось, чтобы все было так, как вы говорите.
+"""
+
+Адиль:
+"""
+  Да, я тоже. Те моменты, которые я пытался донести до вас ранее, теперь уже затронуты.
+  Один вопрос: сколько проверок качества кода мы можем ожидать в случае Golang и ReactJS?
+"""
+
+Я:
+"""
+  SonarQube идет вглубь.
+  Здесь есть несколько правил для обнаружения ошибок, уязвимостей и code smells, что означает «ПОЧУЯТЬ ЧТО-ТО ПОДОЗРИТЕЛЬНОЕ» на основе определенных факторов.
+  И, конечно, есть линтинг как для Golang, так и для ReactJS.
+  Code smells, однако, могут помочь обнаружить более глубокие проблемы, которые впоследствии могут привести к потере большого количества времени.
+
+[!] Например, часто бывает, что разработчик, работавший в прошлом на другом языке, начинает использовать библиотеки и модули для задач,
+  которые в Golang можно решить без посторонней помощи.
+  В итоге они пишут более сложный код, чем требуется.
+  SonarQube может помочь и в таких случаях».
+
+Адиль:
+"""
+  Это выглядит хорошо, Абхишек. Должен сказать. Мне не терпится увидеть это в реализации.
+"""
+
+Я: «Нам еще предстоит обсудить несколько моментов».
+
+Я: «Ну, есть модульное тестирование, покрытие кода и немного о тестировании безопасности на стороне разработки».
+
+Соня: «Я бы тоже хотела принять в них участие. Я буду здесь завтра».
+
+Я: «Я включу тебя в приглашение».
+Адиль:
+"""
+  Хорошо. Спасибо, ребята, увидимся завтра.
+"""
+
+  Что ж, все прошло именно так, как я и ожидал. Как часто такое случается?» - подумал я.
+  «Во всей своей полноте мы привнесли DevOps в проект, в котором не было DevOps. Чего еще я мог ожидать?»
+
+  Прогуливаясь по коридору, я увидел Вишанта, потягивающего после обеда капучино у кофемашины.
+
+  «Привет, приятель! Что происходит?» - поинтересовался я. «Ты видишь того садовника, который поливает растения, Абхишек?» - спросил он.
+  «Да, вижу», - ответил я, заинтригованный.
+  Он продолжил: «Такая простая работа, не правда ли? Достаточно поливать их один-два раза в день, и они растут сами по себе без особых усилий».
+  Я подумал, что это было преуменьшение года.
+  Садоводство - это совсем не простая работа. Нужно учитывать местоположение, качество почвы, питательные вещества, тип растений и так далее.
+  Даже полив осуществляется с помощью различных техник.
+  Чтобы вырастить растение, требуется много терпения и заботы.
+  Но мне хотелось услышать, что он скажет дальше, поэтому я кивнул и позволил ему продолжить:
+  «Представьте, что его попросили бы пройтись по всем растениям, которые он посадил в этом саду,
+  и убить всех жуков по отдельности, которые живут в каждом из них, поедая их изнутри. Что бы он сделал?»
+
+  «Думаю, у них есть пестициды для этого», - усмехнулся я.
+
+  Вишант повернулся ко мне и сделал паузу, которая показалась мне минутой, а затем мы оба разразились хохотом.
+
+  «Я весь день исправлял ошибки», - наконец перешел он к делу.
+
+  «Я понимаю ваше разочарование. Это часть работы, что поделать», - утешил я.
+
+  «Эй, как продвигается план CI/CD? Я возлагаю на него большие надежды», - воскликнул он.
+
+  «Ну, это может сильно помочь всей команде в поиске ошибок. Я обсуждал это с Адилем на совещании всего несколько минут назад.
+  Как только это будет реализовано, мы сможем рассказать больше». Я объяснил.
+
+  Он потрепал меня по плечу и сказал: «Не могу дождаться, парень. Жду с нетерпением».
+
+  Люди ждали, ожидания росли.
+  Все было именно так, как я хотел.
+  Мой прошлый опыт давал мне некоторую свободу действий.
+  Дело было в том, что, как только SonarQube будет настроен, большинство проблем с проверками перед развертыванием исчезнет.
+  Я знал это, и что люди найдут это весьма удобным.
+  Пожалуйста, обратитесь к следующему рисунку:
+
+#Примечание:
+  Разработчики тратят 45 % своего времени на исправление ошибок или устранение технического долга по сравнению с созданием новых функций.

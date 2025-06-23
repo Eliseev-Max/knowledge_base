@@ -1,0 +1,889 @@
+credentials:
+  system:
+    domainCredentials:
+    - credentials:
+      - string:
+          description: "SonarQube Server Administrator's token (Docker microservice)"
+          id: "sonarqube_token"
+          scope: GLOBAL
+          secret: "{AQAAABAAAAAwVX2FrSfw7uqv0mCxEJCT7+H9XyJZjRWRZsa5dxAyS80higzMQSIKaQECR9KKXxJBSWnsEsv8mDsdyfUWFsivUA==}"
+      - usernamePassword:
+          description: "RO Bitbucket's token"
+          id: "Bitbucket_token"
+          password: "{AQAAABAAAAAwQcVLu10TjaAe7ee+koh3xAxyVUi0MJrDB8tqSd3yt2JmDxIoo4hVJvakiYpdMhZl7klSz4VqS77vXx4nAJawhQ==}"
+          scope: GLOBAL
+          username: "m.eliseev"
+      - bitbucketToken:
+          description: "Eliseev Max's Personal access token"
+          id: "Bitbucket_Eliseev"
+          secret: "{AQAAABAAAAAwlGa6P2dAcP86sNgkFaJq6z1+pyjCLXp3g4n1gEuwjJkHovnrYB/fVbtmA5giO5qZ64G+6UT2I+PizPc4uLvEPQ==}"
+      - basicSSHUserPrivateKey:
+          description: "SSH Private key of ci-cd-srv server's user \"devops\""
+          id: "devops_SSH_Private_key"
+          privateKeySource:
+            directEntry:
+              privateKey: "{AQAAABAAAAGggfuTFM8ng9Hp0UUPfch1+2yHHSfM1o+1gWs48FmMTSw02yWcplo1cB6ThbJWtDfJzJ7hbiF1qR62WvScSLEFZdJ9g7wUCdKnrirHuAtbYTqzdZbFXQXsW+hPY4Ln74p5X7zLIzbGJdvL+A34Yj9L+dxTqNvSr8axPQFK2Zjaz+Uigweaguj1YyR+Cgmcbm7C/sjgw5tZSQpBDQuAFiU/nebkBnJLVO7wO+c1DyVlE1i1FJ1J2BoUBoWX5Gmnj4USIH3wegEUewPggr7tsaxsI0AL3JAg0FCrdoibeu/K3pchbx8b8Jn+Lpwxs4Y8I/TOXENtksCU0PZE7AD07uG7FaR8Z6P7469o0ScLfAixrpafT9/NL5rxPwv1UF+k6Nj3cxJ92C2CPitV1/Xo77HUGQ5+UunCJns8twIkJ0Z/l2/Shj9af9t7GbbcZLeSw1Ri7SWjASxUvTJvAyWFSRZ+KjU8TosY7UxnDqLrIdws6k2WNzdXFy+1ztyK0eCocZGf1IWD41gpGVo9MHJO4gylqrBydJOlSgX8IHauZ7IPCe/ZC03SlQf7cbuDTBUu0TOi}"
+          scope: GLOBAL
+          username: "devops"
+      - bitbucketToken:
+          description: "Eliseev Max's Personal Access Token. Level:Admin"
+          id: "Admin_PAT"
+          secret: "{AQAAABAAAAAwNstyjRNAZhUcRKlchXhAyLjJrJviHhbBErn71HCs7sAwNsydo/19YYd3n/5PL+H9V9woQVOXgCowrJX6CDRYBw==}"
+      - string:
+          description: "The password of Nexus admin user"
+          id: "NEXUS_PASSWORD"
+          scope: GLOBAL
+          secret: "{AQAAABAAAAAgxyrou+EhQDuyMLKDQlvXv1GqDg7MjH5O8C5wKCdechXNZvm5wo/kdPZdhGK+9dVf}"
+      - usernamePassword:
+          description: "Username/password for Nexus Docker registry"
+          id: "nexus_credentials"
+          password: "{AQAAABAAAAAQJHgsFVQg2VObnMQB4/A2xPKjCEpOm8bjENxAc+UH5dI=}"
+          scope: GLOBAL
+          username: "jenkins"
+          usernameSecret: true
+      - usernamePassword:
+          id: "Pyhov_BitBucket_Access_Token"
+          password: "{AQAAABAAAAAwYEoBFbc1jCB26TN/O5UjOTBjnxrUUNe9+AtKUbN9B3d242MIQn4xdpJ9cE4B0ZVJ1Uko8AMH7rJsqXXn6McAYg==}"
+          scope: GLOBAL
+          username: "o.pyhov"
+      - basicSSHUserPrivateKey:
+          description: "Private RSA SSH key for Jenkins SSH agent connection"
+          id: "ssh-agent"
+          privateKeySource:
+            directEntry:
+              privateKey: "{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}"
+          scope: GLOBAL
+          username: "jenkins"
+      - usernamePassword:
+          description: "Токен доступа и имя пользователя для Conan-репозитория в Artifactory"
+          id: "ArtifactoryConan_UsernameAndToken"
+          password: "{AQAAABAAAALgGFSvRxuiMfkbW5UfSr39aHYmjQTxa7khpIPcrP34QUgEeDCT1xyeLbU20xhj5854OKWBzGwv+PTmTqOWY3299Ul60uneyMlmxyUj2Y4Q1ICb6mNVasQZ8VVonju7SHqw8YaP9uv9hiIfGAt5yq2w1nusNJiHbgEwL8ei//1THLJHK7jRG4/f0RJIHZPWsR50c8dYo2te77nZOOI5K5n5jCAq8z2FUXHmNI6WDJ+Pf0Wjwdc0/th49hm/bPPS44U+icjWpxQu1hoOkNp3pDl5YdZPGCEAGvBm9B8cPWsPPyEEFRhddXEA6U+SPe6vRd4eDhvCj5qTe+QH3myd1oB+UhyBM/swzgrd4+c/0M+YNejYNkUQyNR8N4sJSRIbvyzNqsHPvPFlNM5HP0QQ2u3TL0LjIkIwXZhG2PBJfo/mt2xqwzYc6/2hk4iFg5kFio5YKl5itH4ftNHUWj8KCi7FAplKl5XE8PSLpgfHIQp8CMzIdPOaGYGSvJGFEFwSuwn5EGCxGFZTecvmgGsfyr5mDrAV6oJE6qqkfWWwb7+bN8Kz9VgjcmV87/QXPP12Ccr/YOWF6YvXqNb95dtG00uTvd1Ewdkmq1jEIJYefXsbpLevHD8i66oZ8cPo1FiWsXCC/zUJu5BjJUsn1IEnZC4a9SZesHi+IJ8msKvl09H2anYb8+dmiqPz2lJCIGsYrbmUYVotC3qLedUeVkBiIAP9oKVdDfWLuq9CweUtEroldncUnkC2i55SWI7Vlc7yuYxAFoqtLOLrizEZT7hs56LG1cr1eeo7SvIQA2HDbx4mhRTedTDldetgzMgU6ZdG15p1nrxDpDQI3D1Y0U66hd39eDQL7BWxeQ4zHin1aiFhTD9xZiGwbYyJz+M7zguOoR47cOK8E8zarwA2Gy0DFZQll0hJOkuCcPOiEVewNP7m7iQ1xynYUfTojIljBspdClOIY+uvmFLnMr1IrZHdAawlQeIVWd7kV74/mRRFLl+P9M0=}"
+          scope: GLOBAL
+          username: "jenkins"
+          usernameSecret: true
+      - basicSSHUserPrivateKey:
+          description: "Jenkins agent RSA key (1024 bit)"
+          id: "jenkins-rsa"
+          privateKeySource:
+            directEntry:
+              privateKey: "{AQAAABAAAAQgAW52RnWc9Uc8QHqfA2bnHRR0qmAc0Y28J7K6SSPAR785Oen4r1SYSB9Yiq0V/djH+0OuXEImzFhWlq2twjJd7A7RY+qE1AQF2gPp29QRyrs3DD7fIw+iZ4RAZv/iSESmjhxQTvcmvhc/R8Bp01QPonwbbUCEVWcAP+ib1mfX9d1Sgwh6+INSB0nIvfWDw6ndqpMCjKm1Eqos6YHcUgvXhNX2c6hZn+PZpmkSht5znxr6T8Qbguq21e2U1TkQfyUebGO1uASiLVeGb2st34SFyNAMoCWJZR9j2MHiZnfRngv4drD5QyoXrlwmJP7BDqYtdRVelBEDiAd38iBapWoHIN8mc0mwjNvZv+f5YkLB6ppdNOaAQ9YbjCMGAGvgUu+9jLD3SDj/MJBtv7gUNtVziJa+3QJAYIVJC51649F3UMu0jfZZ1TIjiVJW3LWCXEwrd6Rq2lDm+9KDl84+nUCbkWYUPqAhBbNRABUXjFiOgOpFiV+VsNTXTM+8Y0o3NQxnmMBKzs4258+I4GXgdYK958SoAxU9hXtbwekM9p31Y1VJ3gMkI7Qvtm9yJZW7x5d+RAnxghfbF38awWKUwxsEB3kEMtKKMushSnfu841iTIhlPBtOm6rXaBQfZ95XDN6mUAiGkxqAxpTMWDhxYSHTL/7sIAmIgK8RnP5kUdt9jf8geZzx8U5uE0qB0R92RAeeogoorXGlgku9m4z0GkHHUXJUTYKvSwACJ3S9JcP7g0vTqKOYUyCJ7jT3Pt70x0v+siG7R6DozLaJe3nX37kVmcQmCdIyYZl7lvNNpDQbgUDGdFmr2/8UyMx/dFIYedW2cEFxmBpIn9zL5C/aH/Dq9Oo0PtxYMlpR8BFWElqfqiXcfJtUIxy49a672ioksn1hau5ErK0tq8Ik3w8IvUnMHQZvViX5Ty/Cc3DwoXNLIcRsN4W9dVXv2CwS82LM8Q1Q7bOif3oo0tVn988VTPncha1XRuAZlyCBhUMG4g7JUXYMTh3ESbNEkCjbV6GNsyxumT3AkW0MRpQEc1sZ+AdMsY/4Dv8MJlBgbQzTngnrZkaCHahr1Fks4Lc+3m6FjAZBYqrrlzROlH4K8v5YhyfDmOCyESfuVKify1dqq4EPIp0IfOiNveOaR9IY71IFIzpuYXhf7Lg4KHLQfytu/zcsGO2/TJOKwJP1NC2Nd33l+9w1h7urlYv8L47tbFQi3FnSEwC3L7e5KdQ+L5MvBhEQCdciS7cXOA19rWjTTy5aZTng7CAh/7+cQqgNVSAQ1dqXA1lMH+EePHxHFuT7Mr8UKyuV9aCA8gR3TEHUF6ajOBvm9XdI11rbzmEt+LmxMz/cqb8gYbbnNDlhwWM7JRPsznK1LlKi9fcO0KVI+adVfqvcOOYrlv0Pr77A719Af62/gAi2r/6YJ6l4OQkgDssj+g==}"
+          scope: GLOBAL
+          username: "jenkins"
+      - usernamePassword:
+          description: "Логин и пароль пользователя Docker Registry: docker.prosyst.ru\
+            \ (Nexus)"
+          id: "DockerRegistry_UsernameAndPassword"
+          password: "{AQAAABAAAAAwfDfGoLZa8cyzYc5ru/iiEOGwyH50B68ac0gQL8xhDOVOKMk+zEEMrby8xsIhMOCUi2e/AVEM24OydU1g4KSM3A==}"
+          scope: GLOBAL
+          username: "jenkins"
+          usernameSecret: true
+      - usernamePassword:
+          description: "Nexus's admin user credentials"
+          id: "nexus-admin"
+          password: "{AQAAABAAAAAgB1yp5E5akTkSRX1N9ZTpMLFAIUU9b/JniA9OSaWU5oxBW2Rx0cHoMJSycHaMh/sy}"
+          scope: GLOBAL
+          username: "admin"
+      - usernamePassword:
+          description: "Логин и пароль сервисного пользователя LDAP daes-ldap"
+          id: "DaesLDAP_UsernameAndPassword"
+          password: "{AQAAABAAAAAQ041eY005yYBs3NRYB66q7MU6QtExJaIIRIG7nzecA5I=}"
+          scope: GLOBAL
+          username: "daes-ldap"
+      - usernamePassword:
+          description: "Логин и пароль пользователя svace.prosoft.ural.ru"
+          id: "SvaceServer_UsernameAndPassword"
+          password: "{AQAAABAAAAAgCKEiDYySgJAPjfXhVsLA2YZZiY2eYurMNrffGNJGwYS7kZyEUdY79N0zzvN3xuYw}"
+          scope: GLOBAL
+          username: "daes-user"
+      - usernamePassword:
+          description: "Логин и пароль пользователя сервера разметки Svacer"
+          id: "Svacer_UsernameAndPassword"
+          password: "{AQAAABAAAAAQF9DtOag/mCTyK7JVBHwxFSonjUwWmG+oBBMN0bxOcf8=}"
+          scope: GLOBAL
+          username: "daes-importer"
+      - basicSSHUserPrivateKey:
+          description: "Приватный SSH ключ пользователя daes-user сервера svace.prosoft.ural.ru"
+          id: "SvaceServer_PrivateSSHKey"
+          privateKeySource:
+            directEntry:
+              privateKey: "{AQAAABAAAAIQR63KlIbE8Rp41VfZPFWAm9MCVECYcqrd/WxXBizy1B5os3YTkwIwwEnfgMDy7mbTcgc8Ugde8MVTaMiLeiHQQTBioBdoWMfTw3a9mzFEZbfN86M18xpPKgggKe+vMBR8igAqjdMzrDJfI2Wiea8P6kYm7scklEPM6wSr1hKtD2IEnw36To2AdXBUtVO4R7F7+gYlwbJXXwcJdmOrkF+5HvlnlSpjYk1xotxtNX5Pj5O9Z56QZPq3Y/rwtrcqI+S3Zi6ReyivuLDpRkRwAygzT+J2Wgk5l5SBKr1Cy+kKsNzjdQ+Pf7x1JFmBcMXwu/DYTQUs+1Oj3Krp9MIsiuJFKJW7bbSsRZHx66nUom6CsKaFcGtfKjgN/oEB/9szLjVh4owF0HNiDFXPSx4kL+1XfGAkwYjk7fHjKisTdY9sgj2L6KqUClYnbmypxV9LqeXA1j96d/a0aTi6EF83gecCNjlgW1jJKw7lCS6YO1lBa/MLFhb1qwN1muPz0kGg2cluyAwVLNk270adnoeywqhYbRYDbiydGno2lQAHA9cLZEz0DhsvqYB9Idb9iXUuQvNvCk2apE92GkB95lf+CuY7Smp5NGh7TDMXUkpmtP14onS5I7tLqJE0ewmfSvzx+cq92/vEz3V1OjyeFYyZuY8twL7LGhmxLk/pW4uB+zy0uqPxT5rmmcjnLYpkbkobwAFGrIRkcroYFOFBDQU3dVjPAQ==}"
+          scope: GLOBAL
+          username: "daes-user"
+      - basicSSHUserPrivateKey:
+          description: "Приватный ключ SSH для доступа к BitBucket"
+          id: "BitBucket_SSHPrivateKey"
+          privateKeySource:
+            directEntry:
+              privateKey: "{AQAAABAAAAGwdU7cvVx4yjL099nw/Ns/xBNoU1PfMNNK37SqegUXVYVicUi+af1KpkVbATS92wN7y/amj7+Wv6x140hcvuWTU/a/BjF4UpDSGH33K3UI4m1QBPPlTQ0fNa27XoILPd5OvUvKpC71A0VMdDSQVpCHe+7wZgo+cHW+ZuANO97/fkmcbOmz6XxlHr2fxvDzBTc1930FDa2d2srjRsdICObAWaa6OIz0q6/BlYp00g59/EdGwmh3nlAHZiuo+0Dz68Wi4NcG+LXgqaS0pJzYdeJGKne4NWSbfeXdzSzwNavGXd2hXY++qyWdBaNoBrlgJcO0VHGxgu21UeAfSHN+ZSWCNBuJToTaeyzF01z9S/XeMXjsrpsTmc8QL2UVqglaprACERCFyuZqHiOG9Yn8fUoGw1EUJ9j6IwPK68TWtEzbbi0Wj5GSo+a7N2Z1EI4UQMDtKZ1OK8c/7mPbRGQl1W9FOHSZGvKVqUb8UqKCF6V8YoEEcMPTlUMeXp+RpLiOCYHREQCm3RW7jAhYUOeropsHeaTAtw6P7f4L30Rye0FBgaD44tqfoHoVAMW5+3H8q8uvHVNxd0XhS1QSQCIQVyggQA==}"
+          scope: GLOBAL
+          username: "o.pyhov"
+          usernameSecret: true
+      - usernamePassword:
+          description: "Имя пользователя BitBucket и его токен доступа"
+          id: "BitBucket_UsernameAndToken"
+          password: "{AQAAABAAAAAwj5GfyV9x0QaEnEiK8dDNjIliP2J/kHufjlWNR9d55jM3qjG3wa3rC4N0ixE60owfBLJICPpT3ZAh5py9YkGulw==}"
+          scope: GLOBAL
+          username: "o.pyhov"
+          usernameSecret: true
+      - string:
+          description: "Вебхук токен Bitrix24 для взаимодействия с rest.api"
+          id: "Bitrix24_WebHookToken"
+          scope: GLOBAL
+          secret: "{AQAAABAAAAAgnnjFzQvJi2U4XunOTrhgAS94VB/FxPSTRwOM6/CryDdHvtiC7iiJTk8SmYIOE7B4}"
+      - string:
+          description: "Идентификатор канала в Bitrix24 для отправки уведомлений"
+          id: "Bitrix24_ChannelId"
+          scope: GLOBAL
+          secret: "{AQAAABAAAAAQ0M+Tch96nJJIp4gmvwtnEUtGPx9KiweOBqFhtJDjdwQ=}"
+      - usernamePassword:
+          description: "MinIO (Lungo) access key for BUC pipeline"
+          id: "buc_minio_lungo"
+          password: "{AQAAABAAAAAw3a2PY4njsatCrYruFo2Gr6ShY/8kz/jikG4cKnxWm5eASKFY4p+CfcNU6UrdSuC+wchchWZN1zNqjbvreGPacg==}"
+          scope: GLOBAL
+          username: "wyF0GXUaEXTu8jQ4h0kg"
+      - usernamePassword:
+          description: "MinIO (Lungo) access key for BUC pipeline"
+          id: "ecom_minio_lungo"
+          password: "{AQAAABAAAAAwyUCKn+bhA8z4GIQv6VicGjUc0dVIRyRFUDJRZSBExvaGVzhzF6PIR9WRw46yjRsIHiEA9tukyENBGt7K/tn5Ng==}"
+          scope: GLOBAL
+          username: "GvVKks4Y5fmtEW38PYxe"
+    - credentials:
+      - basicSSHUserPrivateKey:
+          description: "Приватный ключ SSH виртуальной машины ARIS (10.1.70.5)"
+          id: "ArisVM_SSHPrivateKey"
+          privateKeySource:
+            directEntry:
+              privateKey: "{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}"
+          scope: GLOBAL
+          username: "root"
+      - usernamePassword:
+          description: "Логин и пароль для загрузки прошивки с espresso по ftp"
+          id: "Espresso_UsernameAndPassword"
+          password: "{AQAAABAAAAAQWkIf2tGihIdToJ5Itmi8QQga7IBlxj9jeIwsoHRv250=}"
+          scope: GLOBAL
+          username: "pyhov"
+          usernameSecret: true
+      - string:
+          description: "Пароль пользователя admin виртуальной машины ARIS"
+          id: "ArisVM_Password"
+          scope: GLOBAL
+          secret: "{AQAAABAAAAAQEiHpjpyVCPBrswk9l70/wCIuo3T1nG8FKU/fK1TKua0=}"
+      domain:
+        description: "Для использования в фаззинге виртуальной машины ARIS"
+        name: "buc_fuzz"
+jenkins:
+  agentProtocols:
+  - "JNLP4-connect"
+  - "Ping"
+  authorizationStrategy:
+    globalMatrix:
+      entries:
+      - group:
+          name: "authenticated"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Discover"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Read"
+      - user:
+          name: "Chentcov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "a.belikov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "a.isanbaev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "a.knyazev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Credentials/View"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Metrics/View"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "a.popov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "a.sharapova"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "belyaev"
+          permissions:
+          - "Overall/Administer"
+      - user:
+          name: "d.bezlepkin"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Discover"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Metrics/View"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "d.soloviev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Metrics/View"
+          - "Overall/Read"
+          - "Run/Update"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "demin"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "diordiev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "l.martiushev"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "m.eliseev"
+          permissions:
+          - "Overall/Administer"
+      - user:
+          name: "n.brekhuntsov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Administer"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "n.mahovik"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Move"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Administer"
+          - "Overall/Read"
+          - "Run/Delete"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "n.sadikov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "o.pyhov"
+          permissions:
+          - "Overall/Administer"
+      - user:
+          name: "s.dehtyar"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "SCM/Tag"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "t.riazanova"
+          permissions:
+          - "Job/Read"
+          - "Overall/Read"
+          - "View/Read"
+      - user:
+          name: "ulyanov"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Job/Workspace"
+          - "Overall/Read"
+          - "Run/Update"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+      - user:
+          name: "v.savin"
+          permissions:
+          - "Job/Read"
+          - "Overall/Read"
+          - "View/Read"
+      - user:
+          name: "vershinin"
+          permissions:
+          - "Agent/Build"
+          - "Agent/Configure"
+          - "Agent/Connect"
+          - "Agent/Create"
+          - "Credentials/View"
+          - "Job/Build"
+          - "Job/Cancel"
+          - "Job/Configure"
+          - "Job/Create"
+          - "Job/Delete"
+          - "Job/Read"
+          - "Overall/Read"
+          - "Run/Update"
+          - "View/Configure"
+          - "View/Create"
+          - "View/Delete"
+          - "View/Read"
+  crumbIssuer:
+    standard:
+      excludeClientIPFromCrumb: false
+  disableRememberMe: true
+  disabledAdministrativeMonitors:
+  - "hudson.util.DoubleLaunchChecker"
+  globalNodeProperties:
+  - envVars:
+      env:
+      - key: "ARTIFACTORY_CONAN_REPOSITORY"
+        value: "http://172.21.210.103:8081/artifactory/api/conan/buc"
+      - key: "ARTIFACTORY_URL"
+        value: "http://172.21.210.103:8081"
+      - key: "BITRIX24_URL"
+        value: "https://bitrix.prosyst.ru"
+      - key: "DOCKER_CONTAINERS_NETWORK"
+        value: "infrastructure_infrastructure"
+      - key: "DOCKER_REGISTRY"
+        value: "docker.prosyst.ru"
+      - key: "DOCKER_REGISTRY_URL"
+        value: "https://docker.prosyst.ru"
+      - key: "ESPRESSO_IP"
+        value: "172.19.25.172"
+      - key: "NEXUS_LOCAL_IP"
+        value: "127.0.0.1:8123"
+      - key: "NEXUS_REPOSITORY_LOCAL"
+        value: "http://127.0.0.1:8123"
+      - key: "S3_LUNGO_URL"
+        value: "https://s3.daes.prosyst.ru"
+      - key: "SVACE_SERVER_URL"
+        value: "svace.prosoft.ural.ru"
+  labelAtoms:
+  - name: "built-in"
+  - name: "cag"
+  - name: "remote"
+  - name: "remote-agent"
+  - name: "remote-ssh-agent"
+  - name: "ssh-agent"
+  - name: "ssh-agent-cag"
+  - name: "ssh-agent-cag-1"
+  markupFormatter: "plainText"
+  mode: NORMAL
+  myViewsTabBar: "standard"
+  noUsageStatistics: true
+  nodeMonitors:
+  - "architecture"
+  - "clock"
+  - diskSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "swapSpace"
+  - tmpSpace:
+      freeSpaceThreshold: "1GiB"
+      freeSpaceWarningThreshold: "2GiB"
+  - "responseTime"
+  nodes:
+  - permanent:
+      labelString: "remote remote-agent"
+      launcher:
+        ssh:
+          credentialsId: "ssh-agent"
+          host: "172.21.240.141"
+          port: 2141
+          sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+      mode: EXCLUSIVE
+      name: "remote-ssh-agent"
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy: "always"
+  - permanent:
+      labelString: "cag ssh-agent"
+      launcher:
+        ssh:
+          credentialsId: "jenkins-rsa"
+          host: "ssh-agent-cag"
+          port: 22
+          sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+      mode: EXCLUSIVE
+      name: "ssh-agent-cag"
+      nodeDescription: "host=srv-cicd (172.21.210.131)\r\nname=ssh-agent-cag\r\npublished\
+        \ SSH port (host:container): none\r\nmemory=\"2048m\"\r\ncpus=\"1.5\""
+      numExecutors: 2
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy:
+        demand:
+          idleDelay: 360
+          inDemandDelay: 3
+  - permanent:
+      labelString: "cag ssh-agent"
+      launcher:
+        ssh:
+          credentialsId: "jenkins-rsa"
+          host: "172.21.210.131"
+          port: 2203
+          sshHostKeyVerificationStrategy: "nonVerifyingKeyVerificationStrategy"
+      mode: EXCLUSIVE
+      name: "ssh-agent-cag-1"
+      nodeDescription: |-
+        host=srv-cicd (172.21.210.131)
+        name=ssh-agent-cag
+        published SSH port (host:container) 2202:22
+        memory="1024m"
+        cpus="0.6"
+      remoteFS: "/home/jenkins/agent"
+      retentionStrategy:
+        demand:
+          idleDelay: 360
+          inDemandDelay: 3
+  numExecutors: 3
+  primaryView:
+    all:
+      name: "all"
+  projectNamingStrategy: "standard"
+  quietPeriod: 5
+  remotingSecurity:
+    enabled: true
+  scmCheckoutRetryCount: 0
+  securityRealm:
+    activeDirectory:
+      customDomain: true
+      domains:
+      - bindName: "daes-ldap@prosoft.ural.ru"
+        bindPassword: "{AQAAABAAAAAQFaXF806KyTEmQaFCmOgPr29ZxwBQWMMxnC4fywqY1Ic=}"
+        name: "PROSOFT.URAL.RU"
+        servers: "dc1.prosoft.ural.ru:3268"
+        site: "dc1.prosoft.ural.ru"
+        tlsConfiguration: JDK_TRUSTSTORE
+      groupLookupStrategy: TOKENGROUPS
+      removeIrrelevantGroups: false
+      requireTLS: false
+      startTls: true
+  slaveAgentPort: 50000
+  updateCenter:
+    sites:
+    - id: "default"
+      url: "https://updates.jenkins.io/update-center.json"
+  views:
+  - all:
+      name: "all"
+  viewsTabBar: "standard"
+globalCredentialsConfiguration:
+  configuration:
+    providerFilter: "none"
+    typeFilter: "none"
+appearance:
+  pipelineGraphView:
+    showGraphOnBuildPage: false
+    showGraphOnJobPage: false
+  prism:
+    theme: PRISM
+  themeManager:
+    disableUserThemes: false
+security:
+  apiToken:
+    creationOfLegacyTokenEnabled: false
+    tokenGenerationOnCreationEnabled: false
+    usageStatisticsEnabled: true
+  cps:
+    hideSandbox: false
+  gitHooks:
+    allowedOnAgents: false
+    allowedOnController: false
+  gitHostKeyVerificationConfiguration:
+    sshHostKeyVerificationStrategy: "noHostKeyVerificationStrategy"
+  globalJobDslSecurityConfiguration:
+    useScriptSecurity: true
+  sSHD:
+    port: -1
+  scriptApproval:
+    forceSandbox: false
+unclassified:
+  bitBucketPPRPluginConfig:
+    notifyBitBucket: true
+    useJobNameAsBuildKey: false
+  bitbucketEndpointConfiguration:
+    endpoints:
+    - bitbucketCloudEndpoint:
+        enableCache: false
+        manageHooks: false
+        repositoriesCacheDuration: 0
+        teamCacheDuration: 0
+  bitbucketPluginConfiguration:
+    serverList:
+    - adminCredentialsId: "Admin_PAT"
+      baseUrl: "https://bucket.prosyst.ru/"
+      id: "cfc76849-2cf4-488d-8d2d-2f02fc450b4d"
+      serverName: "Bucket.Prosyst"
+  buildDiscarders:
+    configuredBuildDiscarders:
+    - "jobBuildDiscarder"
+  buildStepOperation:
+    enabled: false
+  email-ext:
+    adminRequiredForTemplateTesting: false
+    allowUnregisteredEnabled: false
+    charset: "UTF-8"
+    debugMode: false
+    defaultBody: |-
+      $PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS:
+
+      Check console output at $BUILD_URL to view the results.
+    defaultContentType: "text/plain"
+    defaultSubject: "$PROJECT_NAME - Build # $BUILD_NUMBER - $BUILD_STATUS!"
+    defaultTriggerIds:
+    - "hudson.plugins.emailext.plugins.trigger.FailureTrigger"
+    maxAttachmentSize: -1
+    maxAttachmentSizeMb: -1
+    precedenceBulk: false
+    throttlingEnabled: false
+    watchingEnabled: false
+  enrichedSummaryConfig:
+    enrichedSummaryEnabled: false
+    httpClientDelayBetweenRetriesInSeconds: 1
+    httpClientMaxRetries: 3
+    httpClientTimeoutInSeconds: 1
+  fingerprints:
+    fingerprintCleanupDisabled: false
+    storage: "file"
+  gitHubConfiguration:
+    apiRateLimitChecker: ThrottleForNormalize
+  gitHubPluginConfig:
+    hookUrl: "https://cicd.prosyst.ru/jenkins/github-webhook/"
+  globalMinioConfiguration:
+    configuration:
+      credentialsId: "minio-lungo"
+      host: "https://s3.daes.prosyst.ru:9000"
+  globalTimeOutConfiguration:
+    operations:
+    - "abortOperation"
+    overwriteable: false
+  hashicorpVault:
+    configuration:
+      disableChildPoliciesOverride: false
+      engineVersion: 2
+      timeout: 60
+  injectionConfig:
+    allowUntrusted: false
+    checkForBuildAgentErrors: false
+    enabled: false
+    enforceUrl: false
+    gradleCaptureTaskInputFiles: true
+    injectCcudExtension: false
+    injectMavenExtension: false
+    mavenCaptureGoalInputFiles: true
+  junitTestResultStorage:
+    storage: "file"
+  location:
+    adminAddress: "адрес еще не настроен <nobody@nowhere>"
+    url: "https://cicd.prosyst.ru/jenkins/"
+  mailer:
+    charset: "UTF-8"
+    useSsl: false
+    useTls: false
+  mavenModuleSet:
+    localRepository: "default"
+  pipelineStepsAWS:
+    enableCredentialsFromNode: false
+  pollSCM:
+    pollingThreadCount: 10
+  scmGit:
+    addGitTagAction: false
+    allowSecondFetch: false
+    createAccountBasedOnEmail: false
+    disableGitToolChooser: false
+    globalConfigEmail: "none@none"
+    globalConfigName: "jenkins"
+    hideCredentials: false
+    showEntireCommitSummaryInChanges: false
+    useExistingAccountWithSameEmail: false
+  sonarGlobalConfiguration:
+    buildWrapperEnabled: true
+    installations:
+    - credentialsId: "sonarqube_token"
+      name: "SonarQube Server"
+      serverUrl: "http://sonarqube:9000/sonar"
+      triggers:
+        skipScmCause: false
+        skipUpstreamCause: false
+  timestamper:
+    allPipelines: false
+    elapsedTimeFormat: "'<b>'HH:mm:ss.S'</b> '"
+    systemTimeFormat: "'<b>'HH:mm:ss'</b> '"
+  warningsParsers:
+    consoleLogScanningPermitted: false
+tool:
+  dependency-check:
+    installations:
+    - name: "dependency-check-9.2.0"
+      properties:
+      - installSource:
+          installers:
+          - dependencyCheckInstaller:
+              id: "9.2.0"
+  dockerTool:
+    installations:
+    - name: "Docker_Tool"
+  git:
+    installations:
+    - home: "git"
+      name: "Default"
+  mavenGlobalConfig:
+    globalSettingsProvider: "standard"
+    settingsProvider: "standard"
+  sonarRunnerInstallation:
+    installations:
+    - name: "SonarScanner"
+      properties:
+      - installSource:
+          installers:
+          - sonarRunnerInstaller:
+              id: "4.8.0.2856"
