@@ -275,3 +275,32 @@ Jenkins Security. Матричное распределение прав
    В описаниях разрешений будет указано, когда разрешение
      -> либо подразумевается каким-либо другим разрешением, кроме Overall/Administer,
      -> либо не подразумевается никаким другим разрешением.
+
+
+--<Lockable Resources>--
+# "Lockable Resources":
+# (1): https://plugins.jenkins.io/lockable-resources/
+# (2): "Pipeline steps reference": https://www.jenkins.io/doc/pipeline/steps/lockable-resources/
+
+  Queue
+    = Это разрешение предоставляет возможность вручную управлять очередью блокируемых ресурсов (lockable resources queue).
+
+  Reserve
+    = Это разрешение предоставляет возможность вручную резервировать блокируемые ресурсы за пределами сборки.
+  
+  Steal
+    = Это разрешение дает возможность вручную "красть" ресурсы, которые были заблокированы сборками,
+      или "переназначать" ресурсы, зарезервированные пользователями.
+  
+  Unlock
+    = Это разрешение предоставляет возможность вручную разблокировать ресурсы, которые были заблокированы сборками.
+  
+  View
+    = Это разрешение предоставляет возможность просматривать заблокированные ресурсы.
+
+
+--<Plugin Usage View>--
+  PluginView
+    = This permission grants access to the Plugin Disk Usage.
+      Please be aware that potentially sensitive information, such as plugins and versions, will be exposed to a wider audience by granting this permission.
+
