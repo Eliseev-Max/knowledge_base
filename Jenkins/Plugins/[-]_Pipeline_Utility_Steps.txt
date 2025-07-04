@@ -1,0 +1,6 @@
+Jenkins Plugins. Pipeline Utility Steps
+
+[sources:]
+1) "Pipeline Utility Steps": https://plugins.jenkins.io/pipeline-utility-steps/
+2) "Pipeline Utility Steps. Pipeline step Reference": https://www.jenkins.io/doc/pipeline/steps/pipeline-utility-steps/
+3) "GitLab. Pipeline Utility Steps": https://github.com/jenkinsci/pipeline-utility-steps-plugin/blob/master/docs/STEPS.md

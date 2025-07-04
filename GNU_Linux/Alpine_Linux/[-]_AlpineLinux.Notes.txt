@@ -1,0 +1,15 @@
+Alpine Linux. Notes
+
+[sources:]
+
+1) "Alpine Linux Apk Command Examples": https://ostechnix.com/alpine-linux-apk-command-examples/
+2) "What is the difference between `ash` and `sh` shell on Linux?": https://unix.stackexchange.com/questions/692910/what-is-the-difference-between-ash-and-sh-shell-on-linux
+3) "What is the bashrc equivalent in alpine linux ash?": https://stackoverflow.com/questions/73954328/what-is-the-bashrc-equivalent-in-alpine-linux-ash
+4) "Change default shell": https://wiki.alpinelinux.org/wiki/Change_default_shell
+5) "usermod equivalent for Alpine Linux": https://superuser.com/questions/1395473/usermod-equivalent-for-alpine-linux
+6) "ash(1) - Linux man page": https://linux.die.net/man/1/ash
+7) "How to add/install man pages in Alpine Linux": https://www.cyberciti.biz/faq/howto-adding-installing-man-pages-in-alpine-linux/
+8) "Setting up a new user": https://wiki.alpinelinux.org/wiki/Setting_up_a_new_user
+9) "Alpine setup scripts.setup-user": https://wiki.alpinelinux.org/wiki/Alpine_setup_scripts#setup-user
+10) "Setting up a SSH server": https://wiki.alpinelinux.org/wiki/Setting_up_a_SSH_server
+10.1) "Dropbear SSH": https://matt.ucc.asn.au/dropbear/dropbear.html

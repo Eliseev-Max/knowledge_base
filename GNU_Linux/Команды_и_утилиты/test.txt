@@ -1,0 +1,172 @@
+Команда test. Проверка типа файла и сравнение значений
+
+[sources:]
+  1) https://linuxcommand.org/lc3_man_pages/testh.html
+  2) "Команда test и [[expr]]": https://parallel.uran.ru/book/export/html/435
+  3) "Wikipedia. test": https://ru.wikipedia.org/wiki/Test
+  4) "Библиотека Нейро. В чем разница между командами test и [ в bash": https://ya.ru/neurum/c/nauka-i-obrazovanie/q/v_chem_raznica_mezhdu_komandami_test_i__v_bash_6ee4ddcf
+  5) "Записки bash-скриптера. Листок первый. Сокращённый if": https://habr.com/ru/articles/833602/
+
+
+test [expr]
+#(1)  = Вычисляет условное выражение
+
+#(3)  = UNIX-утилита для проверки типа файла и сравнения значений.
+        Возвращает код возврата 0 (ложь) или 1 (истина) в зависимости вычисления выражения expr.
+
+#(4)  = встроенная команда Bash, которая выполняет проверки файлов и производит сравнение строк.
+
+
+***************************
+* Описание работы утилиты *
+***************************
+
+test завершает работу со статусом
+  - 0 (true)
+<или>
+  - 1 (false)
+  в зависимости от значения параметра expr.
+
+Выражения могут быть унарными или двоичными.
+
+Унарные выражения часто используются для проверки состояния файла.
+Существуют также строковые операторы и операторы числового сравнения.
+
+Поведение test зависит от количества аргументов.  
+
+
+[Файловые операторы:]
+
+  -a FILE        истина, если FILE существует
+  -b FILE        истина, если FILE существует и является специальным блочным устройством (block special).
+  -c FILE        истина, если FILE существует и символьное устройство (character special).
+  -d FILE        истина, если FILE существует и является каталогом (директорией).
+  -e FILE        истина, если file существует
+  -f FILE        истина, если file существует и является обычным файлом.
+  -g FILE        истина, если file существует и имеет установленным групповой идентификатор (set-group-id).
+  -h FILE        True if FILE exists and is a symbolic link (same as -L)
+  -L FILE        True if file is a symbolic link.
+  -k FILE        истина, если file имеет установленным "sticky" бит.
+  -p FILE        истина, если file существует и является именованным каналом (pipe).
+  -r FILE        True if FILE exists and read permission is granted.
+  -s FILE        истина, если file существует и имеет размер больше, чем ноль.
+  -S FILE        истина, если file существует и является сокетом.
+  -t FD          истина, если fd открыт на терминале. Если fd пропущен, по умолчанию 1 (стандартное устройство вывода).
+  -u FILE        истина, если file существует и имеет установленным бит пользователя (set-user-id).
+  -w FILE        True if FILE exists and write permission is granted.
+  -x FILE        True if FILE exists and execute (or search) permission is granted.
+  -O FILE        истина, если file существует и его владелец имеет эффективный идентификатор пользователя (effectively owned by you).
+  -G FILE        истина, если file существует и его владелец имеет эффективный идентификатор группы (effectively owned by your group).
+  -N FILE        True if the file has been modified since it was last read.
+
+
+[Сравнение файлов:]
+
+```newer_than
+FILE1 -nt FILE2
+# True if file1 is newer than file2 (according to modification date).
+```
+
+```    
+FILE1 -ot FILE2
+# True if file1 is older than file2.
+```
+
+```
+FILE1 -ef FILE2  True if file1 is a hard link to file2.
+```
+
+[Выражения (EXPRESSION)]
+
+```
+( EXPRESSION )
+```
+  = EXPRESSION is true
+
+```
+! EXPRESSION
+```
+  = EXPRESSION is false
+
+```
+EXPRESSION1 -a EXPRESSION2
+```
+  = both EXPRESSION1 and EXPRESSION2 are true
+
+```
+EXPRESSION1 -o EXPRESSION2
+```
+  = either EXPRESSION1 or EXPRESSION2 is true
+
+
+[Строковые операторы:]
+
+  -z STRING
+    = если длина STRING равна нулю.
+
+  -n STRING
+    = истина, если длина STRING не ноль.
+    
+  STRING1 = STRING2
+    = True if the strings are equal.
+
+  STRING1 != STRING2
+    = True if the strings are not equal.
+
+  STRING1 < STRING2
+    = True if STRING1 sorts before STRING2 lexicographically.
+
+  STRING1 > STRING2
+    = True if STRING1 sorts after STRING2 lexicographically.
+    
+    Other operators:
+    
+      -o OPTION      True if the shell option OPTION is enabled.
+      -v VAR         True if the shell variable VAR is set.
+      -R VAR         True if the shell variable VAR is set and is a name
+                     reference.
+      ! EXPR         True if expr is false.
+      EXPR1 -a EXPR2 True if both expr1 AND expr2 are true.
+      EXPR1 -o EXPR2 True if either expr1 OR expr2 is true.
+    
+      arg1 OP arg2   Arithmetic tests.  OP is one of -eq, -ne,
+                     -lt, -le, -gt, or -ge.
+    
+    Arithmetic binary operators return true if ARG1 is equal, not-equal,
+    less-than, less-than-or-equal, greater-than, or greater-than-or-equal
+    than ARG2.
+    
+    Exit Status:
+    Returns success if EXPR evaluates to true; fails if EXPR evaluates to
+    false or an invalid argument is given.
+
+[!] Команды test и [ в Bash выполняют одну и ту же функцию, но имеют немного разный синтаксис.      #[4]
+ВАЖНО: для оператора `[` должна быть закрывающая скобка! Иначе CLI выдаст ошибку.
+
+```
+test <condition> && <if true (exit code = 0)> || <if false (exit code)>
+# или "[ условие ] && действие_1 || действие_2"   #[5]
+# тождественно:
+[ <condition> ] && <if true (exit code = 0)> || <if false (exit code)>    # пробелы после '[' и перед ']' обязательны!
+# тождественно:
+if <condition>; then <if true>; else <if false>; fi
+```
+
+"""[2]
+В командном языке bash операторы if и while могут использовать в качестве условия код завершения произвольной программы. Код ответа 0 интерпретируется как "истина", любой другой - как "ложь". Вместо if можно использовать операторы условного выполнения cmd1 && cmd2 - выполнить cmd2 если cmd1 завершилась успешно и cmd1 || cmd2 - выполнить cmd2 если cmd1 завершилась неуспешно.
+
+Пример:
+
+if grep --silent aaa file; then echo file \"file\" contain \"aaa\"; fi
+grep --silent aaa file && echo file \"file\" contain \"aaa\"
+grep --silent aaa file || echo file \"file\" not contain \"aaa\"
+Для того, чтобы в качестве условия можно было бы писать традиционные выражения, была придумана команда test. Команда получает операторы и операнды в виде отдельных аргументов командной строки, вычисляет логическое условие и возвращает 0, 1 или 2 (в случае синтаксической ошибки).
+
+Пример:
+
+test "abc" = "cde" || echo "abc" not equal "cde"
+Для красоты записи программа test имеет ещё одно имя - [ и вспомогательный последний аргумент ] . Две строчки ниже эквивалентны:
+
+if test 1 -gt 0; then echo 1 \> 0;fi
+if [ 1 -gt 0 ]; then echo 1 \> 0;fi
+"""

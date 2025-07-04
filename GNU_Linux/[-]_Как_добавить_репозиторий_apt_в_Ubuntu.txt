@@ -1,0 +1,6 @@
+Работа с репозиториями. Как добавить репозиторий Apt в Ubuntu
+
+[sources:]
+1) "Как добавить репозиторий Apt в Ubuntu": https://routerus.com/how-to-add-apt-repository-in-ubuntu/
+2) "Add software repositories": https://help.ubuntu.com/stable/ubuntu-help/addremove-sources.html.en
+3) "Add my personal repo to Ubuntu main repository(s)": https://askubuntu.com/questions/1441071/add-my-personal-repo-to-ubuntu-main-repositorys

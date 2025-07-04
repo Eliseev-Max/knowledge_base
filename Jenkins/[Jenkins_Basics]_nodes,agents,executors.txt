@@ -740,7 +740,8 @@ agent {
   (**) dockerfile также опционально принимает параметры registryUrl и registryCredentialsId,
        которые помогут указать используемый реестр Docker и его учетные данные.
   Например:
-  ---<>---
+
+```
   agent {
     dockerfile {
         filename 'Dockerfile.build'
@@ -750,7 +751,7 @@ agent {
         registryCredentialsId 'myPredefinedCredentialsInJenkins'
     }
   }
-  ---
+```
 
 
   ● kubernetes

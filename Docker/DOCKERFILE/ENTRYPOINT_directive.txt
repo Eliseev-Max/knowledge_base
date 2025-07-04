@@ -1,0 +1,31 @@
+Dockerfile directives. ENTRYPOINT
+
+#> https://docs.docker.com/reference/dockerfile/#entrypoint
+
+
+ENTRYPOINT позволяет настроить контейнер, который будет запускаться как исполняемый файл.
+
+ENTRYPOINT имеет две возможные формы:
+  1. форма exec, которая является предпочтительной:
+```
+ENTRYPOINT ["executable", "param1", "param2"]
+```
+
+  2. форма shell (оболочки):
+```
+ENTRYPOINT command param1 param2
+```
+
+#Подробнее про shell и exec формы: https://docs.docker.com/reference/dockerfile/#shell-and-exec-form
+
+
+Рассмотрим команду запуска контейнера nginx, слушающего порт 80:
+```
+docker run -i -t --rm -p 80:80 nginx
+```
+
+Command line arguments to docker run <image> will be appended after all elements in an exec form ENTRYPOINT, and will override all elements specified using CMD.
+
+Это позволяет передавать аргументы в точку входа, т.е. docker run <image> -d передаст аргумент -d в точку входа. Вы можете переопределить команду ENTRYPOINT, используя флаг docker run --entrypoint.
+
+Командная форма ENTRY POINT не позволяет использовать какие-либо аргументы командной строки CMD. Она также запускает вашу ENTRY POINT как подкоманду /bin/sh -c, которая не передает сигналы. Это означает, что исполняемый файл не будет иметь PID контейнера 1 и не будет получать сигналы Unix. В этом случае ваш исполняемый файл не получит SIGTERM от docker stop <контейнер>.

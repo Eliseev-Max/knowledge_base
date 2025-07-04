@@ -1,0 +1,18 @@
+What is the point of Ctrl-S?
+
+#> https://unix.stackexchange.com/questions/137842/what-is-the-point-of-ctrl-s
+
+
+Long before there were computers, there were teleprinters (a.k.a. teletypewriters, a.k.a. teletypes). Think of them as roughly the same technology as a telegraph, but with some type of keyboard and some type of printer attached to them.
+
+Because teletypes already existed when computers were first being built, and because computers at the time were room-sized, teletypes became a convenient user interface to the first computers – type in a command, hit the send button, wait for a while, and the output of the command is printed to a sheet of paper in front of you.
+
+Software flow control originated around this era – if the printer couldn't print as fast as the teletype was receiving data, for instance, the teletype could send an XOFF flow control command (Ctrl+S) to the remote side saying "Stop transmitting for now", and then could send the XON flow control command (Ctrl+Q) to the remote side saying "I've caught up, please continue".
+
+And this usage survives in Unix because modern terminal emulators are emulating physical terminals (like the vt100) which themselves were (in some ways) emulating teletypes.
+
+
++++
+Это управляющий символ со времен терминалов VT100 и им подобных. Изначально на этих терминалах была ограничена возможность прокрутки (если таковая имелась), поскольку сочетание клавиш CTRL-S позволяло вам останавливать вывод, чтобы просмотреть то, что в данный момент находится на экране, без его списания.
+
+Почти все, что вы видите в современных терминалах, было создано для имитации более старых терминальных систем.

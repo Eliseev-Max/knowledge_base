@@ -301,6 +301,10 @@ Jenkins Security. Матричное распределение прав
 
 --<Plugin Usage View>--
   PluginView
-    = This permission grants access to the Plugin Disk Usage.
-      Please be aware that potentially sensitive information, such as plugins and versions, will be exposed to a wider audience by granting this permission.
+    = Это разрешение предоставляет доступ к Plugin Disk Usage.
+      ПОЖАЛУЙСТА, ИМЕЙТЕ В ВИДУ:
+        что после предоставления этого разрешения потенциально конфиденциальная информация, такая как плагины и версии,
+        будет доступна более широкой аудитории.
+
+
 
